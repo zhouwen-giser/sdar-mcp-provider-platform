@@ -25,6 +25,8 @@ import { commandFor, modeFor } from "./wire.js";
 import { ControlLane } from "./queue.js";
 import { journalAdvance, journalFor, type ControlRepository } from "./repository.js";
 import type { CommandTransport } from "./transport.js";
+import { emptyInspection, foldInspection, inspectionReport } from "./inspection.js";
+import { ResultIdentity, resultIdentity } from "./results.js";
 
 export interface ControlClock {
   utcMs(): number;
@@ -49,7 +51,11 @@ export interface ControlIdentity {
 /** Isolated orchestration; runtime/catalog admission stays closed until the later publication gate. */
 export class ZmqControlEngine {
   readonly events = new EventEmitter();
-  readonly #lanes = { chassis: new ControlLane(), eo: new ControlLane() };
+  readonly #lanes = {
+    chassis: new ControlLane(),
+    eo: new ControlLane(),
+    simulationEffect: new ControlLane(),
+  };
   readonly #admission = new ControlLane();
   readonly #active = new Map<ControlComponent, ZmqExecution>();
   readonly #observations = new Map<string, Observed>();
@@ -63,6 +69,9 @@ export class ZmqControlEngine {
   readonly #dirty = new Set<string>();
   readonly #commandReservations = new Map<string, string>();
   readonly #sourceInterrupted = new Map<string, SourceRef>();
+  readonly #watchedEffects = new Map<string, ZmqExecution>();
+  readonly #coverageSignatures = new Map<string, string>();
+  readonly #pendingReports = new Map<string, number>();
   readonly #stopMonoDeadlines = new Map<string, number>();
   readonly #stationary = new Map<
     string,
@@ -129,6 +138,7 @@ export class ZmqControlEngine {
         this.#recoveryFreshness.add(execution.taskId);
       }
       this.#active.set(s.component, execution);
+      if (s.component === "simulationEffect") this.#watchedEffects.set(execution.taskId, execution);
       await this.save(execution);
     }
     if (observer) {
@@ -169,6 +179,7 @@ export class ZmqControlEngine {
       this.#healthy = false;
       this.#blocked.add("chassis");
       this.#blocked.add("eo");
+      this.#blocked.add("simulationEffect");
     }
     return valid && this.#healthy;
   }
@@ -180,9 +191,10 @@ export class ZmqControlEngine {
     )
       return;
     if (event.type !== "reception") {
-      const components = event.component ? [event.component] : ["chassis", "eo"];
+      const components = event.component
+        ? [event.component]
+        : ["chassis", "eo", "simulationEffect"];
       for (const component of components) {
-        if (component === "simulationEffect") continue;
         if (event.type === "gap" || event.state !== "connected") {
           this.#blocked.add(component as ControlComponent);
           const active = this.#active.get(component as ControlComponent);
@@ -194,6 +206,9 @@ export class ZmqControlEngine {
               ))
           )
             this.#sourceInterrupted.set(active.taskId, ref);
+          if (component === "simulationEffect")
+            for (const watched of this.#watchedEffects.values())
+              this.#sourceInterrupted.set(watched.taskId, ref);
           // Clear pre-disconnect snapshots; reconnect must collect every required source anew.
           for (const key of this.#observations.keys())
             if (key.startsWith(component + "/")) this.#observations.delete(key);
@@ -202,20 +217,14 @@ export class ZmqControlEngine {
       return;
     }
     const receipt = Reception.parse(event);
-    if (
-      !receipt.valid ||
-      !receipt.projectable ||
-      !receipt.observation ||
-      receipt.component === "simulationEffect"
-    )
-      return;
+    if (!receipt.valid || !receipt.projectable || !receipt.observation) return;
     const expectedDevice =
       receipt.component === "chassis"
         ? this.scope.profile.components.chassis.systemId
-        : this.scope.profile.components.eo.deviceId;
+        : this.scope.profile.components[receipt.component].deviceId;
     if (
       receipt.component === "eo" &&
-      receipt.observation.key === "device_status" &&
+      receipt.observation.key !== "task_status" &&
       receipt.observation.reportedOrigin !== "simulated"
     ) {
       this.#blocked.add("eo");
@@ -228,11 +237,13 @@ export class ZmqControlEngine {
       return;
     const age = this.clock.monotonicMs() - Number(BigInt(receipt.monotonicNs) / 1000000n);
     if (age < 0 || age > this.scope.settings.stateFreshForMs) return;
-    this.#observations.set(receipt.component + "/" + receipt.observation.key, {
+    const observed = {
       receipt,
       ref,
       sequence: ++this.#sequence,
-    });
+    };
+    this.#observations.set(receipt.component + "/" + receipt.observation.key, observed);
+    this.queueReport(observed);
     this.wake(receipt.component);
   }
   private latest(component: ControlComponent, key: string, after = -1): Observed | undefined {
@@ -266,9 +277,15 @@ export class ZmqControlEngine {
         state.camera_online !== true ||
         state.gimbal_online !== true ||
         state.active_task_id !== null ||
-        (operation.name === "recon.area" && state.navigation_valid !== true))
+        (["recon.area", "inspection.area"].includes(operation.name) &&
+          state.navigation_valid !== true))
     )
       return { available: false, reasonCode: "ZMQ_EO_NOT_READY" };
+    if (
+      component === "simulationEffect" &&
+      (state.ready !== true || state.mode !== "idle" || state.active_task_id !== null)
+    )
+      return { available: false, reasonCode: "ZMQ_SIMULATION_EFFECT_NOT_READY" };
     if (
       component === "chassis" &&
       (state.runState !== 1 || !Array.isArray(state.errorCodes) || state.errorCodes.length > 0)
@@ -280,6 +297,21 @@ export class ZmqControlEngine {
       return { available: false, reasonCode: "ZMQ_DEPLOYMENT_LIMIT_EXCEEDED" };
     }
     return { available: true, reasonCode: "SIMULATED_ONLY_NOT_QUALIFIED" };
+  }
+  /** Full-parameter candidate admission; the synchronous method above is component health only. */
+  async checkAvailability(operation: Operation, context: ExecutionContextRecord) {
+    const current = this.availability(operation);
+    if (!current.available || operation.name !== "simulation.applyEffect") return current;
+    try {
+      await this.validateEffectObservation(operation, context);
+      return current;
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "";
+      return {
+        available: false,
+        reasonCode: /^ZMQ_[A-Z0-9_]+$/.test(code) ? code : "ZMQ_SOURCE_EVIDENCE_QUERY_UNAVAILABLE",
+      };
+    }
   }
   private validateLimits(operation: Operation): void {
     const p = operation.params,
@@ -316,6 +348,8 @@ export class ZmqControlEngine {
         throw Error("ZMQ_EXECUTION_IDENTITY_MISMATCH");
       const available = this.availability(request.operation);
       if (!available.available) throw Error(available.reasonCode);
+      if (request.operation.name === "simulation.applyEffect")
+        await this.validateEffectObservation(request.operation, request.executionContext);
       const component = componentFor(request.operation.name),
         at = this.at();
       let nativeTaskId: string | null = null;
@@ -344,6 +378,19 @@ export class ZmqControlEngine {
         createdAt: at,
         updatedAt: at,
         evidence: [],
+        ...(request.operation.name === "inspection.area"
+          ? { zmqInspection: emptyInspection() }
+          : {}),
+        ...(component === "simulationEffect"
+          ? {
+              zmqEffect: {
+                lastRevision: 0,
+                taskSignature: null,
+                executionFinished: null,
+                latest: null,
+              },
+            }
+          : {}),
         zmqControl: {
           version: 1,
           scopeHash: this.scope.hash,
@@ -395,6 +442,15 @@ export class ZmqControlEngine {
       }
       const accepted = structuredClone(e);
       this.#active.set(component, e);
+      if (component === "simulationEffect") {
+        this.#watchedEffects.set(e.taskId, e);
+        if (this.#watchedEffects.size > 128) {
+          const old = [...this.#watchedEffects.values()].find(
+            (v) => v.zmqControl.occupancy === "released",
+          );
+          if (old) this.#watchedEffects.delete(old.taskId);
+        }
+      }
       this.wake(component);
       return accepted;
     });
@@ -403,6 +459,440 @@ export class ZmqControlEngine {
     const execution = await this.repository.get(taskId);
     if (execution) assertIdentity(execution, context);
     return execution;
+  }
+  async results(
+    identityInput: ResultIdentity,
+    context: ExecutionContextRecord,
+    afterRevision = 0,
+    limit = 8,
+  ) {
+    const identity = ResultIdentity.parse(identityInput),
+      e = await this.get(identity.taskId, context);
+    if (!e || canonical(resultIdentity(e)) !== canonical(identity))
+      throw Error("ZMQ_EXECUTION_IDENTITY_MISMATCH");
+    return this.repository.resultPage(identity, afterRevision, limit);
+  }
+  async inspectionResults(
+    identity: ResultIdentity,
+    context: ExecutionContextRecord,
+    afterRevision = 0,
+    limit = 8,
+  ) {
+    const page = await this.results(identity, context, afterRevision, limit),
+      e = await this.get(identity.taskId, context);
+    if (!e?.zmqInspection) throw Error("ZMQ_INSPECTION_TASK_REQUIRED");
+    await this.reloadResultHead(e);
+    return {
+      ...inspectionReport(e.zmqInspection, (this.#pendingReports.get(e.taskId) ?? 0) > 0),
+      identity,
+      page,
+    };
+  }
+  async effectResults(
+    identity: ResultIdentity,
+    context: ExecutionContextRecord,
+    afterRevision = 0,
+    limit = 8,
+  ) {
+    const page = await this.results(identity, context, afterRevision, limit),
+      e = await this.get(identity.taskId, context);
+    if (!e?.zmqEffect) throw Error("ZMQ_SIMULATION_EFFECT_TASK_REQUIRED");
+    await this.reloadResultHead(e);
+    const missing = new Set(e.zmqControl.missingEvidence);
+    if (e.zmqEffect.executionFinished === true) {
+      missing.delete("SIMULATION_EXECUTION_NOT_CONFIRMED_FINISHED");
+      if (e.zmqControl.occupancy === "held") missing.add("SIMULATION_IDLE_STATE_UNCONFIRMED");
+    }
+    if (!e.zmqEffect.latest) missing.add("NATIVE_EFFECT_TASK_REPORT_MISSING");
+    if (object(e.zmqEffect.latest?.nativeTask).effect === "unknown")
+      missing.add("SIMULATION_EFFECT_UNKNOWN");
+    return {
+      schemaVersion: "ugv.zmq-effect-query/1",
+      identity,
+      originalTask: {
+        state: e.state,
+        reasonCode: e.reasonCode,
+        terminalAt: e.terminalAt ?? null,
+        result: e.result ?? null,
+      },
+      latestRevision: e.zmqEffect.lastRevision,
+      latest: e.zmqEffect.latest,
+      occupancy: e.zmqControl.occupancy,
+      executionFinished: e.zmqEffect.executionFinished,
+      missingEvidence: [...missing],
+      page,
+    };
+  }
+  private async reloadResultHead(e: ZmqExecution) {
+    let after = e.zmqInspection?.lastRevision ?? e.zmqEffect?.lastRevision ?? 0;
+    for (let n = 0; n < 32; n++) {
+      const page = await this.repository.resultPage(resultIdentity(e), after);
+      for (const record of page.records) {
+        if (e.zmqInspection) foldInspection(e.zmqInspection, record);
+        if (e.zmqEffect && record.kind === "effect") {
+          e.zmqEffect.lastRevision = record.revision;
+          e.zmqEffect.latest = record.content;
+          e.zmqEffect.executionFinished =
+            object(record.content.nativeTask).execution_finished === true;
+        }
+      }
+      if (!page.hasMore) return;
+      after = page.nextRevision;
+    }
+    e.zmqInspection?.missingEvidence.push("LOCAL_SUMMARY_REBUILD_LIMIT_USE_PAGES");
+    if (e.zmqEffect) throw Error("ZMQ_RESULT_SUMMARY_REBUILD_LIMIT_USE_PAGES");
+  }
+  async effectCandidates(identity: ResultIdentity, context: ExecutionContextRecord) {
+    const source = await this.get(identity.taskId, context);
+    if (!source?.zmqInspection) throw Error("ZMQ_INSPECTION_TASK_REQUIRED");
+    const page = await this.results(
+      identity,
+      context,
+      Math.max(0, source.zmqInspection.lastRevision - 8),
+    );
+    const candidates = [];
+    for (const record of page.records.reverse()) {
+      const d = object(record.content.data),
+        targets = d.targets,
+        t = Array.isArray(targets) ? object(targets[0]) : {};
+      if (
+        record.kind !== "inspection_frame" ||
+        record.content.key !== "tracklist" ||
+        t.position === null ||
+        !t.position ||
+        typeof d.target_id !== "string"
+      )
+        continue;
+      const operation = {
+        name: "simulation.applyEffect" as const,
+        params: {
+          targetId: d.target_id,
+          position: t.position as Extract<
+            Operation,
+            { name: "simulation.applyEffect" }
+          >["params"]["position"],
+          observation: {
+            taskId: source.taskId,
+            externalExecutionId: source.externalExecutionId,
+            revision: record.revision,
+          },
+        },
+      };
+      try {
+        await this.validateEffectObservation(operation, context);
+      } catch {
+        continue;
+      }
+      candidates.push({
+        ...operation.params,
+        observedAt: new Date(Number(d.observed_at_utc_ms)).toISOString(),
+      });
+    }
+    return candidates;
+  }
+  private queueReport(value: Observed) {
+    const o = value.receipt.observation;
+    if (!o) return;
+    const component = value.receipt.component;
+    let e = this.#active.get(component);
+    if (component === "simulationEffect" && o.key === "task_status") {
+      const task = object(o.data.task);
+      e = [...this.#watchedEffects.values()].find((candidate) =>
+        candidate.zmqControl.commands.some(
+          (c) => c.action === "effect" && c.requestId === task.request_id,
+        ),
+      );
+    }
+    if (
+      !e ||
+      !(
+        (e.zmqInspection && ["targetlist", "tracklist", "task_status"].includes(o.key)) ||
+        (e.zmqEffect && o.key === "task_status")
+      )
+    )
+      return;
+    const execution = e,
+      pending = this.#pendingReports.get(e.taskId) ?? 0;
+    if (pending >= 32) {
+      if (
+        e.zmqInspection &&
+        !e.zmqInspection.missingEvidence.includes("LOCAL_REPORT_PROJECTION_GAP")
+      )
+        e.zmqInspection.missingEvidence.push("LOCAL_REPORT_PROJECTION_GAP");
+      this.events.emit("fault", "ZMQ_RESULT_PROJECTION_BACKPRESSURE");
+      return;
+    }
+    this.#pendingReports.set(e.taskId, pending + 1);
+    void this.#lanes[component]
+      .enqueue(async () => {
+        if (execution.zmqInspection) await this.collectInspection(execution, value);
+        if (execution.zmqEffect) await this.collectEffect(execution, value);
+      })
+      .catch(() => {
+        this.#healthy = false;
+        execution.zmqInspection?.missingEvidence.push("LOCAL_REPORT_PERSISTENCE_UNCONFIRMED");
+        this.events.emit("fault", "ZMQ_RESULT_PERSISTENCE_UNCONFIRMED");
+      })
+      .finally(() =>
+        this.#pendingReports.set(
+          execution.taskId,
+          Math.max(0, (this.#pendingReports.get(execution.taskId) ?? 1) - 1),
+        ),
+      );
+  }
+  private async collectInspection(e: ZmqExecution, value: Observed) {
+    const s = e.zmqControl,
+      o = value.receipt.observation,
+      summary = e.zmqInspection;
+    if (!o || !summary || !s.startedAt || !s.nativeTaskId || this.#sourceInterrupted.has(e.taskId))
+      return;
+    const d = o.data,
+      isCoverage = o.key === "task_status",
+      task = object(d.task);
+    const nativeId = isCoverage ? task.task_id : d.task_id;
+    if (nativeId !== s.nativeTaskId || (isCoverage && task.task_type !== "AreaSearch")) return;
+    if (
+      Date.parse(value.receipt.receivedAt) < Date.parse(s.startedAt) ||
+      (e.terminalAt && Date.parse(value.receipt.receivedAt) > Date.parse(e.terminalAt))
+    )
+      return;
+    const published = Number(o.sourceTime.value),
+      acquired = o.acquisitionUtcMs;
+    if (
+      published < Date.parse(s.startedAt) ||
+      (acquired !== null &&
+        (acquired < Date.parse(s.startedAt) ||
+          acquired > this.clock.utcMs() + this.scope.settings.clockSkewMs))
+    )
+      return;
+    if (!isCoverage && d.data_origin !== "simulated") return;
+    if (isCoverage) {
+      const signature = canonical({
+        task_id: task.task_id,
+        task_type: task.task_type,
+        state: task.state,
+        coverage_ratio: task.coverage_ratio,
+        coverage_complete: task.coverage_complete,
+      });
+      if (this.#coverageSignatures.get(e.taskId) === signature) return;
+      this.#coverageSignatures.set(e.taskId, signature);
+    }
+    const record = await this.repository.appendResult({
+      identity: resultIdentity(e),
+      kind: isCoverage ? "coverage" : "inspection_frame",
+      sourceRef: value.ref,
+      receivedAt: value.receipt.receivedAt,
+      content: {
+        key: o.key,
+        data: d,
+        nativeTaskId: s.nativeTaskId,
+        publishedAt: new Date(published).toISOString(),
+        acquisitionUtcMs: acquired,
+        sourceProducerEpoch: null,
+        reportedOrigin: o.reportedOrigin,
+      },
+    });
+    foldInspection(summary, record);
+    await this.save(e);
+  }
+  private async validateEffectObservation(
+    operation: Extract<Operation, { name: "simulation.applyEffect" }>,
+    context: ExecutionContextRecord,
+  ) {
+    const p = operation.params,
+      source = await this.get(p.observation.taskId, context);
+    if (
+      !source?.zmqInspection ||
+      source.externalExecutionId !== p.observation.externalExecutionId ||
+      source.resourceId !== this.scope.profile.providerBinding.resourceId ||
+      source.providerId !== this.scope.profile.providerBinding.providerId
+    )
+      throw Error("ZMQ_EFFECT_SOURCE_IDENTITY_MISMATCH");
+    const page = await this.repository.resultPage(
+        resultIdentity(source),
+        p.observation.revision - 1,
+        1,
+      ),
+      record = page.records[0];
+    if (
+      record?.revision !== p.observation.revision ||
+      record.kind !== "inspection_frame" ||
+      record.content.key !== "tracklist" ||
+      record.sourceRef.sessionId !== this.scope.settings.observerSessionId ||
+      record.sourceRef.partitionHash !== this.scope.settings.observerPartitionHash ||
+      this.#sourceInterrupted.has(source.taskId)
+    )
+      throw Error("ZMQ_EFFECT_GEO_OBSERVATION_REQUIRED");
+    const d = object(record.content.data),
+      targets = d.targets,
+      t = Array.isArray(targets) ? object(targets[0]) : {},
+      observed = d.observed_at_utc_ms;
+    if (
+      d.data_origin !== "simulated" ||
+      d.track_state !== "tracking" ||
+      d.target_id !== p.targetId ||
+      typeof observed !== "number" ||
+      observed > this.clock.utcMs() ||
+      this.clock.utcMs() - observed > this.scope.settings.stateFreshForMs ||
+      canonical(t.position) !== canonical(p.position)
+    )
+      throw Error("ZMQ_EFFECT_SOURCE_STALE_OR_POSITION_MISMATCH");
+  }
+  private async collectEffect(e: ZmqExecution, value: Observed) {
+    const s = e.zmqControl,
+      facts = e.zmqEffect,
+      operation = e.arguments.operation as Operation;
+    if (
+      !facts ||
+      operation.name !== "simulation.applyEffect" ||
+      this.#sourceInterrupted.has(e.taskId) ||
+      [
+        "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE",
+        "EFFECT_CORRELATION_CONFLICT",
+        "EFFECT_RESULT_CONFLICT",
+      ].some((code) => s.missingEvidence.includes(code))
+    )
+      return;
+    const task = this.task(value),
+      command = s.commands.find((c) => c.action === "effect");
+    if (
+      !command?.dispatchAt ||
+      task.request_id !== command.requestId ||
+      typeof task.task_id !== "string" ||
+      Date.parse(value.receipt.receivedAt) < Date.parse(command.dispatchAt)
+    )
+      return;
+    if (
+      task.target_id !== operation.params.targetId ||
+      canonical(task.position) !== canonical(operation.params.position) ||
+      (s.nativeTaskId !== null && task.task_id !== s.nativeTaskId)
+    ) {
+      s.missingEvidence.push("EFFECT_CORRELATION_CONFLICT");
+      if (!e.terminalAt) {
+        e.state = "TECHNICAL_FAILED";
+        e.reasonCode = "ZMQ_EFFECT_IDENTITY_CONFLICT";
+        e.terminalAt = this.at();
+        e.result = this.effectResult(e);
+      }
+      s.stage = "uncertain";
+      await this.save(e);
+      return;
+    }
+    if (s.nativeTaskId === null) {
+      if (await this.repository.nativeTaskUsed("simulationEffect", task.task_id, e.taskId)) return;
+      s.nativeTaskId = task.task_id;
+      e.downstreamMissionIds = [task.task_id];
+    }
+    const previous = object(facts.latest?.nativeTask);
+    if (
+      facts.executionFinished === true &&
+      (task.execution_finished !== true ||
+        (previous.effect !== "unknown" && task.effect !== previous.effect))
+    ) {
+      if (!s.missingEvidence.includes("EFFECT_RESULT_CONFLICT")) {
+        s.missingEvidence.push("EFFECT_RESULT_CONFLICT");
+        await this.save(e);
+      }
+      return;
+    }
+    const signature = canonical(task);
+    if (signature === facts.taskSignature) {
+      const held = s.occupancy;
+      this.effectProgress(e);
+      if (held !== s.occupancy) await this.save(e);
+      return;
+    }
+    if (signature !== facts.taskSignature) {
+      const record = await this.repository.appendResult({
+        identity: resultIdentity(e),
+        kind: "effect",
+        sourceRef: value.ref,
+        receivedAt: value.receipt.receivedAt,
+        content: {
+          nativeTask: task,
+          nativeRequestId: command.requestId,
+          sourceBinding: "isolated_simulation_referee",
+          sourceProducerEpoch: null,
+          publishedAt: new Date(Number(value.receipt.observation?.sourceTime.value)).toISOString(),
+          late: !!e.terminalAt,
+          originalTerminalAt: e.terminalAt ?? null,
+        },
+      });
+      facts.lastRevision = record.revision;
+      facts.taskSignature = signature;
+      facts.executionFinished = task.execution_finished === true;
+      facts.latest = record.content;
+      this.evidence(e, value);
+    }
+    if (task.execution_finished === true) {
+      s.nativeOutcome = String(task.state);
+      s.nativeReason = typeof task.reason === "string" ? task.reason : null;
+      if (!e.terminalAt) {
+        e.state =
+          task.state === "succeeded"
+            ? "SUCCEEDED"
+            : task.state === "failed"
+              ? "BUSINESS_FAILED"
+              : "TECHNICAL_FAILED";
+        e.reasonCode = `ZMQ_EFFECT_${String(task.state).toUpperCase()}`;
+        e.terminalAt = this.at();
+        e.result = this.effectResult(e);
+      }
+    } else if (!e.terminalAt) {
+      e.state = "RUNNING";
+      e.reasonCode = "ZMQ_EFFECT_EXECUTING";
+      s.stage = "running";
+    }
+    this.effectProgress(e);
+    await this.save(e);
+  }
+  private effectResult(e: ZmqExecution): Record<string, unknown> {
+    const latest = e.zmqEffect?.latest,
+      task = object(latest?.nativeTask);
+    return structuredClone({
+      schemaVersion: "ugv.zmq-effect-result/1",
+      qualification: "isolated_simulator_only",
+      runtimeAdmission: "not_published",
+      requestAccepted: e.zmqControl.commands.some(
+        (c) => c.action === "effect" && c.status === "accepted",
+      ),
+      nativeTaskId: e.zmqControl.nativeTaskId,
+      executionState: task.state ?? "unknown",
+      executionFinished: task.execution_finished ?? null,
+      effect: task.effect ?? "unknown",
+      outcome:
+        task.state === "succeeded"
+          ? `execution_succeeded_effect_${String(task.effect)}`
+          : "incomplete",
+      missingEvidence: [
+        ...e.zmqControl.missingEvidence,
+        ...(task.effect === undefined || task.effect === "unknown"
+          ? ["SIMULATION_EFFECT_UNKNOWN"]
+          : []),
+      ],
+      sourceRefs: e.zmqControl.latestEvidence,
+      supplementalResultRevision: e.zmqEffect?.lastRevision ?? 0,
+      resultQuery: "simulation_get_effect_result",
+      historySource: "platform_retained_only",
+    });
+  }
+  private effectProgress(e: ZmqExecution) {
+    const s = e.zmqControl,
+      device = this.data(this.latest("simulationEffect", "device_status", s.baseline));
+    if (
+      e.zmqEffect?.executionFinished === true &&
+      device.ready === true &&
+      device.mode === "idle" &&
+      device.active_task_id === null &&
+      !s.missingEvidence.includes("EFFECT_CORRELATION_CONFLICT") &&
+      !s.missingEvidence.includes("EFFECT_RESULT_CONFLICT")
+    ) {
+      s.occupancy = "released";
+      s.stage = "terminal";
+      if (this.#active.get("simulationEffect")?.taskId === e.taskId)
+        this.#active.delete("simulationEffect");
+      this.#monoDeadlines.delete(e.taskId);
+    }
   }
   async control(
     action: "pause" | "resume" | "cancel",
@@ -419,6 +909,8 @@ export class ZmqControlEngine {
     assertIdentity(existing, identity.executionContext);
     if (existing.externalExecutionId !== identity.externalExecutionId)
       throw Error("ZMQ_EXECUTION_IDENTITY_MISMATCH");
+    if (existing.zmqControl.component === "simulationEffect")
+      throw Error("ZMQ_SIMULATION_EFFECT_CONTROL_UNSUPPORTED");
     if (this.#sourceInterrupted.has(existing.taskId))
       throw Error("ZMQ_RESTART_RECONCILIATION_REQUIRED");
     if (this.nativeTypeConflict(existing)) throw Error("ZMQ_EXECUTION_IDENTITY_UNCONFIRMED");
@@ -492,6 +984,7 @@ export class ZmqControlEngine {
     if (this.#observer && this.#observer.health.status !== "running") {
       this.#blocked.add("chassis");
       this.#blocked.add("eo");
+      this.#blocked.add("simulationEffect");
     }
     if (!this.clockHealthy())
       for (const e of this.#active.values())
@@ -636,13 +1129,44 @@ export class ZmqControlEngine {
           ? "mode_send"
           : operation.name.startsWith("camera.")
             ? "active_wait"
-            : "configure";
+            : s.component === "simulationEffect"
+              ? "active_wait"
+              : "configure";
       e.state = "STARTING";
       e.reasonCode = "ZMQ_PREPARING";
       await this.save(e);
     }
     if (this.expired(e) && s.stage !== "stopping") {
       await this.requestStop(e, "DEADLINE_EXCEEDED");
+      return;
+    }
+    if (s.component === "simulationEffect") {
+      const problem = this.channelProblem(e);
+      if (problem && !e.terminalAt) {
+        await this.requestStop(e, problem);
+        return;
+      }
+      if (s.stage === "active_wait" && !s.commands.some((c) => c.action === "effect")) {
+        try {
+          await this.validateEffectObservation(
+            operation as Extract<Operation, { name: "simulation.applyEffect" }>,
+            e.executionContext,
+          );
+        } catch {
+          await this.finish(
+            e,
+            "BUSINESS_FAILED",
+            "ZMQ_EFFECT_SOURCE_EXPIRED_BEFORE_DISPATCH",
+            true,
+          );
+          return;
+        }
+        await this.send(e, "effect");
+      } else {
+        const held = s.occupancy;
+        this.effectProgress(e);
+        if (held !== s.occupancy || this.#dirty.has(e.taskId)) await this.save(e);
+      }
       return;
     }
     const channelProblem = this.channelProblem(e);
@@ -866,8 +1390,12 @@ export class ZmqControlEngine {
     };
     if (!(await this.repository.store.advanceMutationJournal(completed, "DISPATCHING")))
       throw Error("ZMQ_DISPATCH_RECEIPT_UNCONFIRMED");
-    if (action === "configure" && result.outcome === "accepted" && typeof nativeId === "string") {
-      if (await this.repository.nativeTaskUsed("eo", nativeId, e.taskId)) {
+    if (
+      (action === "configure" || action === "effect") &&
+      result.outcome === "accepted" &&
+      typeof nativeId === "string"
+    ) {
+      if (await this.repository.nativeTaskUsed(s.component, nativeId, e.taskId)) {
         s.stage = "uncertain";
         s.missingEvidence.push("NATIVE_TASK_ID_REUSED");
       } else {
@@ -878,7 +1406,10 @@ export class ZmqControlEngine {
     if (result.outcome === "rejected") {
       const error = result.response?.error as Record<string, unknown> | undefined;
       s.nativeReason = typeof error?.code === "string" ? error.code : "ZMQ_COMMAND_REJECTED";
-      if ((action === "configure" || action === "camera") && s.nativeTaskId === null) {
+      if (
+        (action === "configure" || action === "camera" || action === "effect") &&
+        s.nativeTaskId === null
+      ) {
         await this.finish(e, "BUSINESS_FAILED", s.nativeReason, true);
         return;
       }
@@ -901,7 +1432,12 @@ export class ZmqControlEngine {
   private nativeTypeConflict(e: ZmqExecution): Observed | undefined {
     const s = e.zmqControl,
       operation = e.arguments.operation as Operation;
-    if (s.nativeTaskId === null || operation.name.startsWith("camera.")) return undefined;
+    if (
+      s.component === "simulationEffect" ||
+      s.nativeTaskId === null ||
+      operation.name.startsWith("camera.")
+    )
+      return undefined;
     const current = this.latest(
       s.component,
       s.component === "chassis" ? "missionState" : "task_status",
@@ -919,7 +1455,7 @@ export class ZmqControlEngine {
           : operation.name === "navigation.route"
             ? 2
             : 4
-        : operation.name === "recon.area"
+        : ["recon.area", "inspection.area"].includes(operation.name)
           ? "AreaSearch"
           : "CircularSearch";
     return (s.component === "chassis" ? task.missionType : task.task_type) === expected
@@ -943,6 +1479,12 @@ export class ZmqControlEngine {
       return d.runState === 1 && Array.isArray(d.errorCodes) && d.errorCodes.length === 0
         ? null
         : "ZMQ_CHASSIS_FAULT";
+    }
+    if (component === "simulationEffect") {
+      if (d.mode === "fault") return "ZMQ_SIMULATION_EFFECT_FAULT";
+      if (d.active_task_id !== null && d.active_task_id !== e.zmqControl.nativeTaskId)
+        return "ZMQ_EXTERNAL_EFFECT_OWNER";
+      return null;
     }
     if (d.mode === "fault" || d.gimbal_online !== true || d.camera_online !== true)
       return "ZMQ_EO_FAULT";
@@ -1118,6 +1660,30 @@ export class ZmqControlEngine {
   }
   private async requestStop(e: ZmqExecution, reason: string): Promise<void> {
     const s = e.zmqControl;
+    if (s.component === "simulationEffect") {
+      const attempted = s.commands.some(
+        (c) => c.action === "effect" && !["intent", "superseded", "rejected"].includes(c.status),
+      );
+      if (!attempted) {
+        await this.finish(e, "BUSINESS_FAILED", reason, true);
+        return;
+      }
+      if (!e.terminalAt) {
+        s.stage = "uncertain";
+        s.occupancy = "held";
+        e.state = "TECHNICAL_FAILED";
+        e.reasonCode = reason;
+        e.terminalAt = this.at();
+        s.missingEvidence.push("SIMULATION_EXECUTION_NOT_CONFIRMED_FINISHED");
+        e.result = this.effectResult(e);
+        await this.save(e);
+      } else {
+        const held = s.occupancy;
+        this.effectProgress(e);
+        if (held !== s.occupancy || this.#dirty.has(e.taskId)) await this.save(e);
+      }
+      return;
+    }
     if (s.stage === "stopping") return;
     s.generation = Math.max(s.generation + 1, this.#invalidated.get(e.taskId) ?? 0);
     this.#invalidated.set(e.taskId, s.generation);
@@ -1293,6 +1859,7 @@ export class ZmqControlEngine {
   }
   private result(e: ZmqExecution): Record<string, unknown> {
     const s = e.zmqControl;
+    if (e.zmqEffect) return this.effectResult(e);
     return structuredClone({
       schemaVersion: "ugv.zmq-control-result/1",
       qualification: "isolated_simulator_only",
@@ -1304,6 +1871,15 @@ export class ZmqControlEngine {
       occupancy: s.occupancy,
       missingEvidence: s.missingEvidence,
       sourceRefs: s.latestEvidence,
+      ...(e.zmqInspection
+        ? inspectionReport(
+            {
+              ...e.zmqInspection,
+              missingEvidence: [...s.missingEvidence, ...e.zmqInspection.missingEvidence],
+            },
+            (this.#pendingReports.get(e.taskId) ?? 0) > 0,
+          )
+        : {}),
     });
   }
   private async fallbackStop(e: ZmqExecution): Promise<void> {
@@ -1368,7 +1944,7 @@ export class ZmqControlEngine {
   }
   async idle() {
     await this.#admission.idle();
-    await Promise.all([this.#lanes.chassis.idle(), this.#lanes.eo.idle()]);
+    await Promise.all(Object.values(this.#lanes).map((lane) => lane.idle()));
   }
   async close(): Promise<void> {
     this.#closed = true;

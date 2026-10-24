@@ -62,3 +62,7 @@ Phase 2 implementation and evidence are recorded in `docs/execplans/ugv-zmq-obse
 Continuation implements the isolated foundation task loop in `packages/vehicle-zmq-control`: existing Provider JSONB/journal persistence, native command transports, component queues, bounded timing, pause/resume/cancel, physical checks, endpoint writer ownership, restart uncertainty and prearmed stopping under write failure. No running Runtime/console deployment is switched. Details: `docs/execplans/ugv-zmq-control-phase3-20261024.md`, `deploy/ugv-zmq/CONTROL.md` and `reports/ugv-zmq-phase3/REPORT.md`.
 
 Phase 4 remains inspection/source-evidence degradation, simulation effect execution/results and operator-facing integration. Phase 5 must assemble the formal MCP/TaskBusiness/catalog/SDAR and storage routes and pass deployment/handoff gates. Isolated completion does not clear G0, G1 or the field parts of G2–G6.
+
+## Phase 4 — 2026-10-24
+
+Continued on `codex/ugv-zmq-phase4-20261024`: bounded inspection observations and coverage/source degradation, identity-scoped immutable result revisions, one-shot simulation effect lifecycle and late supplemental results, candidate console forms/query/export and native browser integration. See `docs/execplans/ugv-zmq-results-phase4-20261024.md` and `deploy/ugv-zmq/RESULTS.md`. Formal publication, storage routing, source qualification and real service deployment remain gated for phase 5.

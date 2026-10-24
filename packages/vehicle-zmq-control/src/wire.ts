@@ -1,5 +1,9 @@
 import { randomUUID } from "node:crypto";
-import { EoRequest, encodeChassisFrame } from "../../vehicle-zmq-contract/src/index.js";
+import {
+  EoRequest,
+  SimulationEffectRequest,
+  encodeChassisFrame,
+} from "../../vehicle-zmq-contract/src/index.js";
 import type { ControlScope, Operation, WireCommand, ZmqExecution } from "./model.js";
 
 const integer = (value: number) => {
@@ -85,15 +89,33 @@ export function commandFor(
       }),
     ];
     method = `chassis.${action}`;
+  } else if (
+    state.component === "simulationEffect" &&
+    operation.name === "simulation.applyEffect" &&
+    action === "effect"
+  ) {
+    requestId = `req-${randomUUID()}`;
+    method = "AttackTarget";
+    const request = SimulationEffectRequest.parse({
+      protocol: "1.0",
+      kind: "request",
+      device_id: scope.profile.components.simulationEffect.deviceId,
+      request_id: requestId,
+      method,
+      params: { target_id: operation.params.targetId, position: operation.params.position },
+    });
+    frames = [Buffer.from(JSON.stringify(request))];
   } else {
     requestId = `req-${randomUUID()}`;
     let params: unknown;
     if (
       action === "configure" &&
-      (operation.name === "recon.area" || operation.name === "recon.circular")
+      (operation.name === "recon.area" ||
+        operation.name === "inspection.area" ||
+        operation.name === "recon.circular")
     ) {
       if (remaining < 1000) throw Error("ZMQ_EXECUTION_BUDGET_EXHAUSTED");
-      method = operation.name === "recon.area" ? "AreaSearch" : "CircularSearch";
+      method = operation.name === "recon.circular" ? "CircularSearch" : "AreaSearch";
       params = {
         ...operation.params,
         task_timeout_ms: Math.min(

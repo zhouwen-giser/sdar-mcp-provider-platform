@@ -9,7 +9,8 @@
     "build": "pnpm typecheck && vite build && tsc -p tsconfig.server.json",
     "start": "node build/server/main.js",
     "test": "vitest run --config vitest.config.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:zmq": "playwright test --config playwright.zmq.config.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.5",

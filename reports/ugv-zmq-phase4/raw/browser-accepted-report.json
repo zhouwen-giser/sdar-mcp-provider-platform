@@ -1,0 +1,261 @@
+{
+  "schemaVersion": "smpp.ugv-console-report/1",
+  "exportedAt": "2026-10-24T08:24:31.559Z",
+  "task": {
+    "taskId": "4787c7cc-5c95-4864-8a95-ab0b1a945bcb",
+    "status": "failed",
+    "lastUpdatedAt": "2026-10-24T08:24:29.454Z",
+    "statusMessage": "DEADLINE_EXCEEDED",
+    "result": {
+      "isError": true,
+      "structuredContent": {
+        "effect": "unknown",
+        "outcome": "incomplete",
+        "sourceRefs": [
+          {
+            "ordinal": "641",
+            "entryHash": "a61b47d4c2b1c88f6ad9b6fb5b20c82a29bf230a88c5cfafbe160ecde03a46a4",
+            "sessionId": "dabf0479-0790-40fe-9da7-8e2ebe541c77",
+            "partitionHash": "3eb54b08cd3316a830ea2db7833e704760bbd39c74ed82f8b184e62954260bb9"
+          }
+        ],
+        "resultQuery": "simulation_get_effect_result",
+        "nativeTaskId": "effect-cf87ccb7-c9db-4b94-9d35-48321eec3abd",
+        "historySource": "platform_retained_only",
+        "qualification": "isolated_simulator_only",
+        "schemaVersion": "ugv.zmq-effect-result/1",
+        "executionState": "executing",
+        "missingEvidence": [
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "SIMULATION_EXECUTION_NOT_CONFIRMED_FINISHED",
+          "SIMULATION_EFFECT_UNKNOWN"
+        ],
+        "requestAccepted": true,
+        "runtimeAdmission": "not_published",
+        "executionFinished": false,
+        "supplementalResultRevision": 1
+      }
+    },
+    "_meta": {
+      "io.sdar/taskExecution": {
+        "operationName": "simulation_apply_effect",
+        "executionId": "9cdd7039-8476-498d-b2de-5a25a0dcd517",
+        "substate": "terminal"
+      }
+    }
+  },
+  "business": {
+    "context": {
+      "identity": {
+        "taskId": "4787c7cc-5c95-4864-8a95-ab0b1a945bcb",
+        "executionId": "9cdd7039-8476-498d-b2de-5a25a0dcd517",
+        "providerId": "SIMULATED-provider",
+        "resourceId": "vehicle:SIMULATED",
+        "operationName": "simulation_apply_effect",
+        "simulationId": "SIMULATED-run"
+      },
+      "contextRevision": 1,
+      "effectivePlanRevision": 1,
+      "activeRefs": {}
+    },
+    "objects": [],
+    "resumeFrom": {
+      "streamId": "SIMULATED-stream",
+      "afterSequence": "1"
+    },
+    "complete": true,
+    "missingRefs": []
+  },
+  "artifacts": [],
+  "supplementalResults": {
+    "historySource": "platform_retained_only",
+    "pages": [
+      {
+        "schemaVersion": "ugv.zmq-effect-query/1",
+        "identity": {
+          "scopeHash": "1c9136481d3717c94f69b4481fce2790f7c7ce94c53b94b0da614c65111d4580",
+          "providerId": "SIMULATED-provider",
+          "resourceId": "vehicle:SIMULATED",
+          "taskId": "4787c7cc-5c95-4864-8a95-ab0b1a945bcb",
+          "externalExecutionId": "9cdd7039-8476-498d-b2de-5a25a0dcd517",
+          "operationName": "simulation.applyEffect",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "executionMode": "simulation",
+          "simulationId": "SIMULATED-run"
+        },
+        "originalTask": {
+          "state": "TECHNICAL_FAILED",
+          "reasonCode": "DEADLINE_EXCEEDED",
+          "terminalAt": "2026-10-24T08:24:28.937Z",
+          "result": {
+            "effect": "unknown",
+            "outcome": "incomplete",
+            "sourceRefs": [
+              {
+                "ordinal": "641",
+                "entryHash": "a61b47d4c2b1c88f6ad9b6fb5b20c82a29bf230a88c5cfafbe160ecde03a46a4",
+                "sessionId": "dabf0479-0790-40fe-9da7-8e2ebe541c77",
+                "partitionHash": "3eb54b08cd3316a830ea2db7833e704760bbd39c74ed82f8b184e62954260bb9"
+              }
+            ],
+            "resultQuery": "simulation_get_effect_result",
+            "nativeTaskId": "effect-cf87ccb7-c9db-4b94-9d35-48321eec3abd",
+            "historySource": "platform_retained_only",
+            "qualification": "isolated_simulator_only",
+            "schemaVersion": "ugv.zmq-effect-result/1",
+            "executionState": "executing",
+            "missingEvidence": [
+              "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+              "SIMULATION_EXECUTION_NOT_CONFIRMED_FINISHED",
+              "SIMULATION_EFFECT_UNKNOWN"
+            ],
+            "requestAccepted": true,
+            "runtimeAdmission": "not_published",
+            "executionFinished": false,
+            "supplementalResultRevision": 1
+          }
+        },
+        "latestRevision": 2,
+        "latest": {
+          "late": true,
+          "nativeTask": {
+            "state": "succeeded",
+            "effect": "miss",
+            "reason": null,
+            "task_id": "effect-cf87ccb7-c9db-4b94-9d35-48321eec3abd",
+            "position": {
+              "latitude_deg": 29,
+              "longitude_deg": 106.001,
+              "ellipsoid_height_m": 10
+            },
+            "target_id": "object-1",
+            "request_id": "req-ef844d7a-6c18-48c8-bade-8d1e854d50f4",
+            "execution_finished": true
+          },
+          "publishedAt": "2026-10-24T08:24:29.447Z",
+          "sourceBinding": "isolated_simulation_referee",
+          "nativeRequestId": "req-ef844d7a-6c18-48c8-bade-8d1e854d50f4",
+          "originalTerminalAt": "2026-10-24T08:24:28.937Z",
+          "sourceProducerEpoch": null
+        },
+        "occupancy": "released",
+        "executionFinished": true,
+        "missingEvidence": [
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+        ],
+        "page": {
+          "schemaVersion": "ugv.zmq-result-page/1",
+          "identity": {
+            "scopeHash": "1c9136481d3717c94f69b4481fce2790f7c7ce94c53b94b0da614c65111d4580",
+            "providerId": "SIMULATED-provider",
+            "resourceId": "vehicle:SIMULATED",
+            "taskId": "4787c7cc-5c95-4864-8a95-ab0b1a945bcb",
+            "externalExecutionId": "9cdd7039-8476-498d-b2de-5a25a0dcd517",
+            "operationName": "simulation.applyEffect",
+            "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            "executionMode": "simulation",
+            "simulationId": "SIMULATED-run"
+          },
+          "records": [
+            {
+              "kind": "effect",
+              "content": {
+                "late": false,
+                "nativeTask": {
+                  "state": "executing",
+                  "effect": "unknown",
+                  "reason": null,
+                  "task_id": "effect-cf87ccb7-c9db-4b94-9d35-48321eec3abd",
+                  "position": {
+                    "latitude_deg": 29,
+                    "longitude_deg": 106.001,
+                    "ellipsoid_height_m": 10
+                  },
+                  "target_id": "object-1",
+                  "request_id": "req-ef844d7a-6c18-48c8-bade-8d1e854d50f4",
+                  "execution_finished": false
+                },
+                "publishedAt": "2026-10-24T08:24:27.947Z",
+                "sourceBinding": "isolated_simulation_referee",
+                "nativeRequestId": "req-ef844d7a-6c18-48c8-bade-8d1e854d50f4",
+                "originalTerminalAt": null,
+                "sourceProducerEpoch": null
+              },
+              "identity": {
+                "taskId": "4787c7cc-5c95-4864-8a95-ab0b1a945bcb",
+                "scopeHash": "1c9136481d3717c94f69b4481fce2790f7c7ce94c53b94b0da614c65111d4580",
+                "providerId": "SIMULATED-provider",
+                "resourceId": "vehicle:SIMULATED",
+                "simulationId": "SIMULATED-run",
+                "executionMode": "simulation",
+                "operationName": "simulation.applyEffect",
+                "externalExecutionId": "9cdd7039-8476-498d-b2de-5a25a0dcd517",
+                "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+              },
+              "revision": 1,
+              "sourceRef": {
+                "ordinal": "641",
+                "entryHash": "a61b47d4c2b1c88f6ad9b6fb5b20c82a29bf230a88c5cfafbe160ecde03a46a4",
+                "sessionId": "dabf0479-0790-40fe-9da7-8e2ebe541c77",
+                "partitionHash": "3eb54b08cd3316a830ea2db7833e704760bbd39c74ed82f8b184e62954260bb9"
+              },
+              "receivedAt": "2026-10-24T08:24:27.948Z",
+              "contentHash": "f6be39f8271d8c1047520aa83b8b03f7d7c4d4d30910def69d17633f062b6f4a",
+              "schemaVersion": "ugv.zmq-result-record/1"
+            },
+            {
+              "kind": "effect",
+              "content": {
+                "late": true,
+                "nativeTask": {
+                  "state": "succeeded",
+                  "effect": "miss",
+                  "reason": null,
+                  "task_id": "effect-cf87ccb7-c9db-4b94-9d35-48321eec3abd",
+                  "position": {
+                    "latitude_deg": 29,
+                    "longitude_deg": 106.001,
+                    "ellipsoid_height_m": 10
+                  },
+                  "target_id": "object-1",
+                  "request_id": "req-ef844d7a-6c18-48c8-bade-8d1e854d50f4",
+                  "execution_finished": true
+                },
+                "publishedAt": "2026-10-24T08:24:29.447Z",
+                "sourceBinding": "isolated_simulation_referee",
+                "nativeRequestId": "req-ef844d7a-6c18-48c8-bade-8d1e854d50f4",
+                "originalTerminalAt": "2026-10-24T08:24:28.937Z",
+                "sourceProducerEpoch": null
+              },
+              "identity": {
+                "taskId": "4787c7cc-5c95-4864-8a95-ab0b1a945bcb",
+                "scopeHash": "1c9136481d3717c94f69b4481fce2790f7c7ce94c53b94b0da614c65111d4580",
+                "providerId": "SIMULATED-provider",
+                "resourceId": "vehicle:SIMULATED",
+                "simulationId": "SIMULATED-run",
+                "executionMode": "simulation",
+                "operationName": "simulation.applyEffect",
+                "externalExecutionId": "9cdd7039-8476-498d-b2de-5a25a0dcd517",
+                "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+              },
+              "revision": 2,
+              "sourceRef": {
+                "ordinal": "944",
+                "entryHash": "489c5e5ac5a3d36ee461a25bc8d8977e49bcff7a2903fc587dd77596851e1776",
+                "sessionId": "dabf0479-0790-40fe-9da7-8e2ebe541c77",
+                "partitionHash": "3eb54b08cd3316a830ea2db7833e704760bbd39c74ed82f8b184e62954260bb9"
+              },
+              "receivedAt": "2026-10-24T08:24:29.446Z",
+              "contentHash": "c657c3b8ac4042d8949e377e4bd2405ef61b891247fcf04662e466929f0e6a81",
+              "schemaVersion": "ugv.zmq-result-record/1"
+            }
+          ],
+          "nextRevision": 2,
+          "hasMore": false,
+          "historySource": "platform_retained_only"
+        }
+      }
+    ]
+  },
+  "note": "任务状态、业务完整性与证据分别保留；导出成功不代表任务成功。"
+}

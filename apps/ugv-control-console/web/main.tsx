@@ -5,6 +5,8 @@ import { api, ApiError, describe, download } from "./api.js";
 import { newCommandId } from "./command-id.js";
 import { AvailabilityNotice } from "./AvailabilityNotice.js";
 import { Diagram, visibleGeometryObjects } from "./Diagram.js";
+import { ZmqResults } from "./ZmqResults.js";
+import { ZMQ_INSPECT, EFFECT_APPLY, inspectionArguments, zmqToolReason } from "../shared/zmq.js";
 import { parseCoordinates, regionArguments, type Point } from "../shared/coordinates.js";
 import {
   array,
@@ -29,6 +31,8 @@ const labels: Record<string, string> = {
   vehicle_control_gimbal: "云台",
   vehicle_track_target: "目标跟踪",
   vehicle_emergency_stop: "紧急停止",
+  [ZMQ_INSPECT]: "ZMQ 区域检查",
+  [EFFECT_APPLY]: "仿真效果",
 };
 const num = (v: unknown, digits = 2) =>
   typeof v === "number" && Number.isFinite(v) ? v.toFixed(digits) : "—";
@@ -168,7 +172,18 @@ function Console() {
   const d = record(device.data),
     data = record(d.data),
     state = record(data.vehicle_get_state),
-    chassis = record(state.chassis),
+    zmqState = state.schemaVersion === "ugv.vehicle-observation-state/2.0",
+    location = array(state.observations)
+      .map(record)
+      .find(
+        (o) =>
+          o.component === "chassis" &&
+          record(o.observation).key === "localization" &&
+          o.receiptFresh === true,
+      ),
+    chassis: Json = zmqState
+      ? { position: record(record(location?.observation).position) }
+      : record(state.chassis),
     connectivity = record(state.connectivity),
     freshness = record(state.freshness);
   const tools = array(d.tools) as Tool[],
@@ -194,6 +209,9 @@ function Console() {
     [pitch, setPitch] = useState("0"),
     [zoom, setZoom] = useState(""),
     [targetId, setTargetId] = useState("");
+  const [ellipsoidHeight, setEllipsoidHeight] = useState(""),
+    [searchStrategy, setSearchStrategy] = useState("recognize"),
+    [effectIndex, setEffectIndex] = useState("");
   const [previewRequest, setPreviewRequest] = useState<{ request: Json; generation: number }>();
   const previewGeneration = useRef(0);
   const preview = useQuery({
@@ -206,6 +224,7 @@ function Console() {
     previewBusy = preview.isFetching;
   const targetData = record(data.vehicle_get_targets),
     targets = array(targetData.targets).map(record);
+  const effectCandidates = array(targetData.effectCandidates).map(record);
   const position = record(chassis.position);
   const point =
     typeof position.longitude === "number" && typeof position.latitude === "number"
@@ -215,7 +234,9 @@ function Console() {
   try {
     if (
       coordinates.trim() &&
-      ["vehicle_navigate", "vehicle_area_recon", "vehicle_inspect_area"].includes(toolName)
+      ["vehicle_navigate", "vehicle_area_recon", "vehicle_inspect_area", ZMQ_INSPECT].includes(
+        toolName,
+      )
     )
       draft = parseCoordinates(coordinates);
   } catch {
@@ -251,6 +272,20 @@ function Console() {
         ...(scanSpeed !== "" ? { scanSpeed: Number(scanSpeed) } : {}),
       };
     if (toolName === "vehicle_inspect_area") return regionArguments(resourceId, coordinates, true);
+    if (toolName === ZMQ_INSPECT)
+      return inspectionArguments(resourceId, coordinates, ellipsoidHeight, searchStrategy);
+    if (toolName === EFFECT_APPLY) {
+      const candidate = effectCandidates.find(
+        (v) => JSON.stringify({ targetId: v.targetId, observation: v.observation }) === effectIndex,
+      );
+      if (!effectIndex || !candidate) throw Error("请选择带有效地理位置及执行来源的当前仿真观测");
+      return {
+        resourceId,
+        targetId: candidate.targetId,
+        position: candidate.position,
+        observation: candidate.observation,
+      };
+    }
     if (toolName === "vehicle_control_gimbal")
       return {
         resourceId,
@@ -305,6 +340,9 @@ function Console() {
       pitch,
       zoom,
       targetId,
+      ellipsoidHeight,
+      searchStrategy,
+      effectIndex,
       catalogHash,
     ],
   );
@@ -366,7 +404,10 @@ function Console() {
     !!currentTool &&
     taskProfile(currentTool).taskBehavior === "task_required" &&
     taskProfile(currentTool).profileVersion === "1.0" &&
-    taskProfile(currentTool).idempotency === "server_managed";
+    taskProfile(currentTool).idempotency === "server_managed" &&
+    !zmqToolReason(currentTool, resourceId) &&
+    (![ZMQ_INSPECT, EFFECT_APPLY].includes(toolName) ||
+      session.data?.executionMode === "simulation");
   return (
     <div className="console">
       <header className="topbar">
@@ -442,6 +483,12 @@ function Console() {
         </div>
         <ErrorNote error={device.error} />
         <ErrorNote error={notice} />
+        {zmqState && (
+          <div className="notice warning">
+            ZMQ 观测视图 · {text(state.deploymentBinding)} ·
+            来源启动身份和完整性未验证。仅显示可关联的新鲜位置；没有来源的速度、航向及覆盖足迹保持未知。
+          </div>
+        )}
         {Object.keys(record(d.errors)).length > 0 && (
           <div className="notice warning">
             部分设备数据不可用：
@@ -459,9 +506,30 @@ function Console() {
           />
           <Metric
             title="设备链路"
-            value={connectivity.deviceAvailable === true ? "设备在线" : "状态未知 / 离线"}
-            detail={`MQTT ${connectivity.mqttConnected === true ? "在线" : "未确认"} · 设备 MCP ${connectivity.deviceMcpConnected === true ? "在线" : "未确认"}`}
-            ok={connectivity.deviceAvailable === true}
+            value={
+              zmqState
+                ? "ZMQ 观测"
+                : connectivity.deviceAvailable === true
+                  ? "设备在线"
+                  : "状态未知 / 离线"
+            }
+            detail={
+              zmqState
+                ? Object.entries(record(state.channels))
+                    .map(
+                      ([name, channel]) =>
+                        `${name} ${text(record(channel).state)} / ${record(channel).receiptFresh === true ? "接收新鲜" : "陈旧或缺失"}`,
+                    )
+                    .join(" · ")
+                : `MQTT ${connectivity.mqttConnected === true ? "在线" : "未确认"} · 设备 MCP ${connectivity.deviceMcpConnected === true ? "在线" : "未确认"}`
+            }
+            ok={
+              zmqState
+                ? Object.values(record(state.channels)).every(
+                    (v) => record(v).receiptFresh === true,
+                  )
+                : connectivity.deviceAvailable === true
+            }
           />
           <Metric
             title="上报位置 · WGS84"
@@ -505,7 +573,9 @@ function Console() {
             <div className="control-body">
               {!compatible && (
                 <div className="notice warning">
-                  {currentTool ? "当前任务合同不兼容" : "当前目录未发布此能力"}
+                  {currentTool
+                    ? (zmqToolReason(currentTool, resourceId) ?? "当前任务合同或执行域不兼容")
+                    : "当前目录未发布此能力"}
                   ，请查看能力目录与连接诊断。
                 </div>
               )}
@@ -630,7 +700,8 @@ function Console() {
               )}
               {((toolName === "vehicle_navigate" && ["point", "route"].includes(mode)) ||
                 (toolName === "vehicle_area_recon" && scanMode === "area") ||
-                toolName === "vehicle_inspect_area") && (
+                toolName === "vehicle_inspect_area" ||
+                toolName === ZMQ_INSPECT) && (
                 <>
                   <label>
                     WGS84 坐标 · 经度在前，纬度在后
@@ -666,6 +737,71 @@ function Console() {
                 <p className="field-help">
                   执行一次区域检查，最长 300 秒。报告将分别列出发现、覆盖情况与缺失证据。
                 </p>
+              )}
+              {toolName === ZMQ_INSPECT && (
+                <>
+                  <div className="form-row">
+                    <label>
+                      已确认的 WGS84 椭球高 m
+                      <input
+                        aria-label="WGS84 椭球高"
+                        type="number"
+                        step="any"
+                        value={ellipsoidHeight}
+                        onChange={(e) => setEllipsoidHeight(e.target.value)}
+                      />
+                    </label>
+                    <label>
+                      搜索策略
+                      <select
+                        value={searchStrategy}
+                        onChange={(e) => setSearchStrategy(e.target.value)}
+                      >
+                        <option value="recognize">识别</option>
+                        <option value="track">识别与自动跟踪</option>
+                      </select>
+                    </label>
+                  </div>
+                  <p className="field-help">
+                    光电 2.2
+                    仅接收四个严格凸顶点和明确的椭球高；不接受排除区。一次扫描，平台期限不超过 300
+                    秒。检查成果按来源、覆盖与轨迹证据分别降级。
+                  </p>
+                </>
+              )}
+              {toolName === EFFECT_APPLY && (
+                <>
+                  <label>
+                    当前可关联的仿真地理观测
+                    <select
+                      aria-label="仿真观测"
+                      value={effectIndex}
+                      onChange={(e) => setEffectIndex(e.target.value)}
+                    >
+                      <option value="">请选择观测</option>
+                      {effectCandidates.map((v, i) => (
+                        <option
+                          key={i}
+                          value={JSON.stringify({
+                            targetId: v.targetId,
+                            observation: v.observation,
+                          })}
+                        >
+                          {text(v.targetId)} · {text(v.observedAt) || "采集时间待核实"} · rev{" "}
+                          {text(record(v.observation).revision)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {!effectCandidates.length && (
+                    <p className="notice warning">
+                      没有带有效地理位置、采集时间与执行来源的当前观测。像素检测项不能直接用于仿真交互。
+                    </p>
+                  )}
+                  <p className="field-help">
+                    位置快照和来源版本随请求固定。此动作一经受理无法暂停或撤销；超时后继续显示未结束占用及迟到结果。
+                  </p>
+                </>
               )}
               {toolName === "vehicle_control_gimbal" && (
                 <>
@@ -743,7 +879,11 @@ function Console() {
                     <input
                       type="number"
                       min="1"
-                      max={toolName === "vehicle_inspect_area" ? 300 : 31536000}
+                      max={
+                        ["vehicle_inspect_area", ZMQ_INSPECT, EFFECT_APPLY].includes(toolName)
+                          ? 300
+                          : 31536000
+                      }
                       value={budget}
                       onChange={(e) => setBudget(e.target.value)}
                     />
@@ -1143,6 +1283,9 @@ function TaskDetail({
         </div>
       </div>
       <ErrorNote error={task.error ?? error} />
+      {[ZMQ_INSPECT, EFFECT_APPLY].includes(operation) && (
+        <ZmqResults taskId={taskId} operation={operation} />
+      )}
       <div className="detail-meta">
         <div>
           <small>操作</small>
@@ -1208,7 +1351,9 @@ function TaskDetail({
             objects={visibleGeometryObjects(objects, context)}
           />
           <div className="evidence-summary">
-            <h3>结果与证据</h3>
+            <h3>
+              {[ZMQ_INSPECT, EFFECT_APPLY].includes(operation) ? "原任务结果与证据" : "结果与证据"}
+            </h3>
             {Object.keys(content).length ? (
               <>
                 <div className="evidence-cards">

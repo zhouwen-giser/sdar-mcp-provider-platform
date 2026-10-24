@@ -1,0 +1,1727 @@
+{
+  "classification": "SIMULATED_ONLY",
+  "evidence": [
+    {
+      "case": "native-browser",
+      "final": {
+        "state": "TECHNICAL_FAILED",
+        "result": {
+          "effect": "unknown",
+          "outcome": "incomplete",
+          "sourceRefs": [
+            {
+              "ordinal": "691",
+              "entryHash": "fda71ec714fc2757070cb429da2e498ecc7ecfaab919d9b8a0218832bfd3e328",
+              "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+              "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+            }
+          ],
+          "resultQuery": "simulation_get_effect_result",
+          "nativeTaskId": "effect-a7c170cb-f36b-46ec-b38a-d5b6412b559f",
+          "historySource": "platform_retained_only",
+          "qualification": "isolated_simulator_only",
+          "schemaVersion": "ugv.zmq-effect-result/1",
+          "executionState": "executing",
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "SIMULATION_EXECUTION_NOT_CONFIRMED_FINISHED",
+            "SIMULATION_EFFECT_UNKNOWN"
+          ],
+          "requestAccepted": true,
+          "runtimeAdmission": "not_published",
+          "executionFinished": false,
+          "supplementalResultRevision": 1
+        },
+        "taskId": "3d5ab548-4407-4b84-8f69-036691dc2dde",
+        "tracks": [
+          "simulationEffect"
+        ],
+        "evidence": [],
+        "revision": 7,
+        "arguments": {
+          "operation": {
+            "name": "simulation.applyEffect",
+            "params": {
+              "position": {
+                "latitude_deg": 29,
+                "longitude_deg": 106.001,
+                "ellipsoid_height_m": 10
+              },
+              "targetId": "object-1",
+              "observation": {
+                "taskId": "1104d1f9-486f-4b5a-84db-0721b1762a12",
+                "revision": 8,
+                "externalExecutionId": "0ae8313d-584e-4930-be0f-808f2e7410d8"
+              }
+            }
+          }
+        },
+        "createdAt": "2026-10-24T08:18:13.244Z",
+        "updatedAt": "2026-10-24T08:18:14.796Z",
+        "zmqEffect": {
+          "latest": {
+            "late": true,
+            "nativeTask": {
+              "state": "succeeded",
+              "effect": "miss",
+              "reason": null,
+              "task_id": "effect-a7c170cb-f36b-46ec-b38a-d5b6412b559f",
+              "position": {
+                "latitude_deg": 29,
+                "longitude_deg": 106.001,
+                "ellipsoid_height_m": 10
+              },
+              "target_id": "object-1",
+              "request_id": "req-eaee43b3-d040-46ec-bcee-8d5a6f4aba9b",
+              "execution_finished": true
+            },
+            "publishedAt": "2026-10-24T08:18:14.784Z",
+            "sourceBinding": "isolated_simulation_referee",
+            "nativeRequestId": "req-eaee43b3-d040-46ec-bcee-8d5a6f4aba9b",
+            "originalTerminalAt": "2026-10-24T08:18:14.257Z",
+            "sourceProducerEpoch": null
+          },
+          "lastRevision": 2,
+          "taskSignature": "{\"effect\":\"miss\",\"execution_finished\":true,\"position\":{\"ellipsoid_height_m\":10,\"latitude_deg\":29,\"longitude_deg\":106.001},\"reason\":null,\"request_id\":\"req-eaee43b3-d040-46ec-bcee-8d5a6f4aba9b\",\"state\":\"succeeded\",\"target_id\":\"object-1\",\"task_id\":\"effect-a7c170cb-f36b-46ec-b38a-d5b6412b559f\"}",
+          "executionFinished": true
+        },
+        "providerId": "SIMULATED-provider",
+        "reasonCode": "DEADLINE_EXCEEDED",
+        "resourceId": "vehicle:SIMULATED",
+        "terminalAt": "2026-10-24T08:18:14.257Z",
+        "zmqControl": {
+          "stage": "terminal",
+          "timing": {
+            "startAt": "2026-10-24T08:18:13.239Z",
+            "maxElapsedMs": 1000,
+            "parentDeadlineAt": null,
+            "startToleranceMs": 60000
+          },
+          "version": 1,
+          "baseline": 668,
+          "commands": [
+            {
+              "action": "effect",
+              "frames": [
+                "eyJwcm90b2NvbCI6IjEuMCIsImtpbmQiOiJyZXF1ZXN0IiwiZGV2aWNlX2lkIjoiYXJ0aWxsZXJ5LTAxIiwicmVxdWVzdF9pZCI6InJlcS1lYWVlNDNiMy1kMDQwLTQ2ZWMtYmNlZS04ZDVhNmY0YWJhOWIiLCJtZXRob2QiOiJBdHRhY2tUYXJnZXQiLCJwYXJhbXMiOnsidGFyZ2V0X2lkIjoib2JqZWN0LTEiLCJwb3NpdGlvbiI6eyJsYXRpdHVkZV9kZWciOjI5LCJsb25naXR1ZGVfZGVnIjoxMDYuMDAxLCJlbGxpcHNvaWRfaGVpZ2h0X20iOjEwfX19"
+              ],
+              "method": "AttackTarget",
+              "status": "accepted",
+              "stepId": "zmq-effect-c27dad84-9789-42a4-a2af-7e3a0ca6ea73",
+              "response": {
+                "ok": true,
+                "kind": "response",
+                "error": null,
+                "method": "AttackTarget",
+                "command": {
+                  "state": "accepted",
+                  "method": "AttackTarget",
+                  "reason": null,
+                  "task_id": "effect-a7c170cb-f36b-46ec-b38a-d5b6412b559f",
+                  "request_id": "req-eaee43b3-d040-46ec-bcee-8d5a6f4aba9b"
+                },
+                "protocol": "1.0",
+                "device_id": "artillery-01",
+                "response_id": "req-eaee43b3-d040-46ec-bcee-8d5a6f4aba9b"
+              },
+              "component": "simulationEffect",
+              "createdAt": "2026-10-24T08:18:13.253Z",
+              "requestId": "req-eaee43b3-d040-46ec-bcee-8d5a6f4aba9b",
+              "dispatchAt": "2026-10-24T08:18:13.266Z",
+              "generation": 0,
+              "completedAt": "2026-10-24T08:18:13.284Z"
+            }
+          ],
+          "controls": [],
+          "commandId": "3d5ab548-4407-4b84-8f69-036691dc2dde",
+          "component": "simulationEffect",
+          "occupancy": "released",
+          "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+          "startedAt": "2026-10-24T08:18:13.246Z",
+          "deadlineAt": "2026-10-24T08:18:14.246Z",
+          "generation": 0,
+          "modeSentAt": null,
+          "stopReason": null,
+          "stopSentAt": null,
+          "writerKeys": [
+            "2b3e00656912cbcd04f2f7f931230fd1148ecdf74fffe0dabcbbd1be6f204bd3",
+            "713f397a0352d50a264c51d321a591ce9ae60ab5bb4a64113fea2e85f76b067b",
+            "90e4dab6401fc4eaf86b5ee40d4f0737996d96dac70e3717287dc45f3ed9613f"
+          ],
+          "lastCommand": "zmq-effect-c27dad84-9789-42a4-a2af-7e3a0ca6ea73",
+          "modeAttempt": 0,
+          "requestHash": "b4687f8b4cbfae994a5e0ee93868785239a92a288c661ac4c3df07dbfedf914b",
+          "fallbackStop": null,
+          "modeBaseline": 661,
+          "nativeReason": null,
+          "nativeTaskId": "effect-a7c170cb-f36b-46ec-b38a-d5b6412b559f",
+          "stopBaseline": 661,
+          "taskBaseline": 661,
+          "nativeOutcome": "succeeded",
+          "stopConfirmed": false,
+          "latestEvidence": [
+            {
+              "ordinal": "691",
+              "entryHash": "fda71ec714fc2757070cb429da2e498ecc7ecfaab919d9b8a0218832bfd3e328",
+              "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+              "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+            },
+            {
+              "ordinal": "994",
+              "entryHash": "fb28ea52c13ddaa3bb2d9573a62c54793a56c4788f3188ccb5574529669e518f",
+              "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+              "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+            }
+          ],
+          "stopDeadlineAt": null,
+          "missingEvidence": [
+            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            "SIMULATION_EXECUTION_NOT_CONFIRMED_FINISHED"
+          ],
+          "stopRequestedAt": null
+        },
+        "argumentHash": "b4687f8b4cbfae994a5e0ee93868785239a92a288c661ac4c3df07dbfedf914b",
+        "operationName": "simulation.applyEffect",
+        "executionContext": {
+          "simulationId": "SIMULATED-run",
+          "correlationId": "SIMULATED-browser",
+          "executionMode": "simulation",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "externalExecutionId": "41008251-dfef-4dd9-922f-c772ecb35634",
+        "downstreamMissionIds": [
+          "effect-a7c170cb-f36b-46ec-b38a-d5b6412b559f"
+        ]
+      },
+      "resultPages": [
+        {
+          "schemaVersion": "ugv.zmq-result-page/1",
+          "identity": {
+            "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+            "providerId": "SIMULATED-provider",
+            "resourceId": "vehicle:SIMULATED",
+            "taskId": "3d5ab548-4407-4b84-8f69-036691dc2dde",
+            "externalExecutionId": "41008251-dfef-4dd9-922f-c772ecb35634",
+            "operationName": "simulation.applyEffect",
+            "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            "executionMode": "simulation",
+            "simulationId": "SIMULATED-run"
+          },
+          "records": [
+            {
+              "kind": "effect",
+              "content": {
+                "late": false,
+                "nativeTask": {
+                  "state": "executing",
+                  "effect": "unknown",
+                  "reason": null,
+                  "task_id": "effect-a7c170cb-f36b-46ec-b38a-d5b6412b559f",
+                  "position": {
+                    "latitude_deg": 29,
+                    "longitude_deg": 106.001,
+                    "ellipsoid_height_m": 10
+                  },
+                  "target_id": "object-1",
+                  "request_id": "req-eaee43b3-d040-46ec-bcee-8d5a6f4aba9b",
+                  "execution_finished": false
+                },
+                "publishedAt": "2026-10-24T08:18:13.283Z",
+                "sourceBinding": "isolated_simulation_referee",
+                "nativeRequestId": "req-eaee43b3-d040-46ec-bcee-8d5a6f4aba9b",
+                "originalTerminalAt": null,
+                "sourceProducerEpoch": null
+              },
+              "identity": {
+                "taskId": "3d5ab548-4407-4b84-8f69-036691dc2dde",
+                "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+                "providerId": "SIMULATED-provider",
+                "resourceId": "vehicle:SIMULATED",
+                "simulationId": "SIMULATED-run",
+                "executionMode": "simulation",
+                "operationName": "simulation.applyEffect",
+                "externalExecutionId": "41008251-dfef-4dd9-922f-c772ecb35634",
+                "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+              },
+              "revision": 1,
+              "sourceRef": {
+                "ordinal": "691",
+                "entryHash": "fda71ec714fc2757070cb429da2e498ecc7ecfaab919d9b8a0218832bfd3e328",
+                "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+                "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+              },
+              "receivedAt": "2026-10-24T08:18:13.284Z",
+              "contentHash": "01e4e9518c752fe482eec0596ca5afc28d4c4b963afb4d0d04ac7f6c8031a28d",
+              "schemaVersion": "ugv.zmq-result-record/1"
+            },
+            {
+              "kind": "effect",
+              "content": {
+                "late": true,
+                "nativeTask": {
+                  "state": "succeeded",
+                  "effect": "miss",
+                  "reason": null,
+                  "task_id": "effect-a7c170cb-f36b-46ec-b38a-d5b6412b559f",
+                  "position": {
+                    "latitude_deg": 29,
+                    "longitude_deg": 106.001,
+                    "ellipsoid_height_m": 10
+                  },
+                  "target_id": "object-1",
+                  "request_id": "req-eaee43b3-d040-46ec-bcee-8d5a6f4aba9b",
+                  "execution_finished": true
+                },
+                "publishedAt": "2026-10-24T08:18:14.784Z",
+                "sourceBinding": "isolated_simulation_referee",
+                "nativeRequestId": "req-eaee43b3-d040-46ec-bcee-8d5a6f4aba9b",
+                "originalTerminalAt": "2026-10-24T08:18:14.257Z",
+                "sourceProducerEpoch": null
+              },
+              "identity": {
+                "taskId": "3d5ab548-4407-4b84-8f69-036691dc2dde",
+                "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+                "providerId": "SIMULATED-provider",
+                "resourceId": "vehicle:SIMULATED",
+                "simulationId": "SIMULATED-run",
+                "executionMode": "simulation",
+                "operationName": "simulation.applyEffect",
+                "externalExecutionId": "41008251-dfef-4dd9-922f-c772ecb35634",
+                "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+              },
+              "revision": 2,
+              "sourceRef": {
+                "ordinal": "994",
+                "entryHash": "fb28ea52c13ddaa3bb2d9573a62c54793a56c4788f3188ccb5574529669e518f",
+                "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+                "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+              },
+              "receivedAt": "2026-10-24T08:18:14.784Z",
+              "contentHash": "49ad4183f874f1c0e013f3ab7e48a98460600b6b6e49a78085bb7384bb764303",
+              "schemaVersion": "ugv.zmq-result-record/1"
+            }
+          ],
+          "nextRevision": 2,
+          "hasMore": false,
+          "historySource": "platform_retained_only"
+        }
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "taskId": "3d5ab548-4407-4b84-8f69-036691dc2dde",
+      "operation": "simulation_apply_effect",
+      "snapshot": {
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "substate": "terminal",
+            "executionId": "41008251-dfef-4dd9-922f-c772ecb35634",
+            "operationName": "simulation_apply_effect"
+          }
+        },
+        "result": {
+          "isError": true,
+          "structuredContent": {
+            "effect": "unknown",
+            "outcome": "incomplete",
+            "sourceRefs": [
+              {
+                "ordinal": "691",
+                "entryHash": "fda71ec714fc2757070cb429da2e498ecc7ecfaab919d9b8a0218832bfd3e328",
+                "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+                "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+              }
+            ],
+            "resultQuery": "simulation_get_effect_result",
+            "nativeTaskId": "effect-a7c170cb-f36b-46ec-b38a-d5b6412b559f",
+            "historySource": "platform_retained_only",
+            "qualification": "isolated_simulator_only",
+            "schemaVersion": "ugv.zmq-effect-result/1",
+            "executionState": "executing",
+            "missingEvidence": [
+              "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+              "SIMULATION_EXECUTION_NOT_CONFIRMED_FINISHED",
+              "SIMULATION_EFFECT_UNKNOWN"
+            ],
+            "requestAccepted": true,
+            "runtimeAdmission": "not_published",
+            "executionFinished": false,
+            "supplementalResultRevision": 1
+          }
+        },
+        "status": "failed",
+        "taskId": "3d5ab548-4407-4b84-8f69-036691dc2dde",
+        "lastUpdatedAt": "2026-10-24T08:18:14.796Z",
+        "statusMessage": "DEADLINE_EXCEEDED"
+      },
+      "createdAt": "2026-10-24T08:18:13.251Z",
+      "updatedAt": "2026-10-24T08:18:16.852Z"
+    }
+  ],
+  "commands": [
+    {
+      "commandId": "3d5ab548-4407-4b84-8f69-036691dc2dde",
+      "status": "accepted",
+      "request": {
+        "kind": "tool",
+        "tool": "simulation_apply_effect",
+        "timing": {
+          "start": {
+            "mode": "immediate",
+            "startToleranceMs": 60000
+          },
+          "maxElapsedMs": 1000
+        },
+        "arguments": {
+          "position": {
+            "latitude_deg": 29,
+            "longitude_deg": 106.001,
+            "ellipsoid_height_m": 10
+          },
+          "targetId": "object-1",
+          "resourceId": "vehicle:SIMULATED",
+          "observation": {
+            "taskId": "1104d1f9-486f-4b5a-84db-0721b1762a12",
+            "revision": 8,
+            "externalExecutionId": "0ae8313d-584e-4930-be0f-808f2e7410d8"
+          }
+        },
+        "commandId": "3d5ab548-4407-4b84-8f69-036691dc2dde",
+        "catalogHash": "SIMULATED-zmq-browser-candidate"
+      },
+      "taskId": "3d5ab548-4407-4b84-8f69-036691dc2dde",
+      "response": {
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "substate": "scheduled",
+            "executionId": "41008251-dfef-4dd9-922f-c772ecb35634",
+            "operationName": "simulation_apply_effect"
+          }
+        },
+        "status": "working",
+        "taskId": "3d5ab548-4407-4b84-8f69-036691dc2dde",
+        "lastUpdatedAt": "2026-10-24T08:18:13.244Z",
+        "statusMessage": "ZMQ_SCHEDULED"
+      },
+      "createdAt": "2026-10-24T08:18:13.223Z",
+      "updatedAt": "2026-10-24T08:18:13.248Z"
+    }
+  ],
+  "records": [
+    {
+      "snapshot": {
+        "kind": "coverage",
+        "content": {
+          "key": "task_status",
+          "data": {
+            "task": {
+              "state": "ready",
+              "reason": null,
+              "task_id": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+              "task_type": "AreaSearch",
+              "remaining_ms": 50000,
+              "total_cycles": null,
+              "coverage_ratio": null,
+              "progress_ratio": 0.2,
+              "completed_cycles": null,
+              "coverage_complete": null
+            },
+            "command": {
+              "state": "accepted",
+              "method": "AreaSearch",
+              "reason": null,
+              "task_id": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+              "request_id": "req-65ed11d3-c849-4145-94b5-ee5d4fdfa385"
+            }
+          },
+          "publishedAt": "2026-10-24T08:18:09.762Z",
+          "nativeTaskId": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+          "reportedOrigin": "unattested",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "identity": {
+          "taskId": "1104d1f9-486f-4b5a-84db-0721b1762a12",
+          "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+          "providerId": "SIMULATED-provider",
+          "resourceId": "vehicle:SIMULATED",
+          "simulationId": "SIMULATED-run",
+          "executionMode": "simulation",
+          "operationName": "inspection.area",
+          "externalExecutionId": "0ae8313d-584e-4930-be0f-808f2e7410d8",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "revision": 1,
+        "sourceRef": {
+          "ordinal": "29",
+          "entryHash": "0136406c168d338fbc51776609bab1aed29bdb64f3826a1e878d35c9a4717452",
+          "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+          "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+        },
+        "receivedAt": "2026-10-24T08:18:09.762Z",
+        "contentHash": "124e9e3e6bd3e6e718186e036c8ddc448700391da429513c5a4064efd0dfa31e",
+        "schemaVersion": "ugv.zmq-result-record/1"
+      }
+    },
+    {
+      "snapshot": {
+        "kind": "coverage",
+        "content": {
+          "key": "task_status",
+          "data": {
+            "task": {
+              "state": "searching",
+              "reason": null,
+              "task_id": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+              "task_type": "AreaSearch",
+              "remaining_ms": 50000,
+              "total_cycles": null,
+              "coverage_ratio": null,
+              "progress_ratio": 0.2,
+              "completed_cycles": null,
+              "coverage_complete": null
+            },
+            "command": {
+              "state": "accepted",
+              "method": "TaskControl",
+              "reason": null,
+              "task_id": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+              "request_id": "req-e0654fc7-11b3-4627-8636-1116e2d4466c"
+            }
+          },
+          "publishedAt": "2026-10-24T08:18:09.810Z",
+          "nativeTaskId": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+          "reportedOrigin": "unattested",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "identity": {
+          "taskId": "1104d1f9-486f-4b5a-84db-0721b1762a12",
+          "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+          "providerId": "SIMULATED-provider",
+          "resourceId": "vehicle:SIMULATED",
+          "simulationId": "SIMULATED-run",
+          "executionMode": "simulation",
+          "operationName": "inspection.area",
+          "externalExecutionId": "0ae8313d-584e-4930-be0f-808f2e7410d8",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "revision": 2,
+        "sourceRef": {
+          "ordinal": "43",
+          "entryHash": "36300a2294ad256e217995334f19569bca696a5ddfaa0e6ec7a5d78960961b19",
+          "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+          "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+        },
+        "receivedAt": "2026-10-24T08:18:09.810Z",
+        "contentHash": "15d3196e8aa2f474af884b7a08e71d19e28f4d194312eeb7f1e97d64a8d1aa05",
+        "schemaVersion": "ugv.zmq-result-record/1"
+      }
+    },
+    {
+      "snapshot": {
+        "kind": "inspection_frame",
+        "content": {
+          "key": "tracklist",
+          "data": {
+            "targets": [
+              {
+                "image": {
+                  "frame_id": "4973adc7-4dc0-49d2-85f9-3ff8858de109",
+                  "width_px": 100,
+                  "camera_id": "camera-1",
+                  "height_px": 100
+                },
+                "pixel": {
+                  "x_px": 1,
+                  "y_px": 1
+                },
+                "reason": null,
+                "range_m": 20,
+                "position": {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                "range_source": "simulated_radial_depth"
+              }
+            ],
+            "task_id": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+            "track_id": "track-1",
+            "target_id": "object-1",
+            "data_origin": "simulated",
+            "track_state": "tracking",
+            "observed_at_utc_ms": 1792829889835
+          },
+          "publishedAt": "2026-10-24T08:18:09.835Z",
+          "nativeTaskId": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+          "reportedOrigin": "simulated",
+          "acquisitionUtcMs": 1792829889835,
+          "sourceProducerEpoch": null
+        },
+        "identity": {
+          "taskId": "1104d1f9-486f-4b5a-84db-0721b1762a12",
+          "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+          "providerId": "SIMULATED-provider",
+          "resourceId": "vehicle:SIMULATED",
+          "simulationId": "SIMULATED-run",
+          "executionMode": "simulation",
+          "operationName": "inspection.area",
+          "externalExecutionId": "0ae8313d-584e-4930-be0f-808f2e7410d8",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "revision": 3,
+        "sourceRef": {
+          "ordinal": "54",
+          "entryHash": "bb19de74b3663e5c6b3ec98da3f6e746560260d10dcf298056cabad73ae19024",
+          "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+          "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+        },
+        "receivedAt": "2026-10-24T08:18:09.837Z",
+        "contentHash": "adade717f143f5b4c05df5d2c28d560a3dbfe145e7507664f64118aa801b60d1",
+        "schemaVersion": "ugv.zmq-result-record/1"
+      }
+    },
+    {
+      "snapshot": {
+        "kind": "inspection_frame",
+        "content": {
+          "key": "tracklist",
+          "data": {
+            "targets": [
+              {
+                "image": {
+                  "frame_id": "9e066b01-49a0-4a03-80f5-b00368b03c77",
+                  "width_px": 100,
+                  "camera_id": "camera-1",
+                  "height_px": 100
+                },
+                "pixel": {
+                  "x_px": 1,
+                  "y_px": 1
+                },
+                "reason": null,
+                "range_m": 20,
+                "position": {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                "range_source": "simulated_radial_depth"
+              }
+            ],
+            "task_id": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+            "track_id": "track-1",
+            "target_id": "object-1",
+            "data_origin": "simulated",
+            "track_state": "tracking",
+            "observed_at_utc_ms": 1792829890337
+          },
+          "publishedAt": "2026-10-24T08:18:10.337Z",
+          "nativeTaskId": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+          "reportedOrigin": "simulated",
+          "acquisitionUtcMs": 1792829890337,
+          "sourceProducerEpoch": null
+        },
+        "identity": {
+          "taskId": "1104d1f9-486f-4b5a-84db-0721b1762a12",
+          "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+          "providerId": "SIMULATED-provider",
+          "resourceId": "vehicle:SIMULATED",
+          "simulationId": "SIMULATED-run",
+          "executionMode": "simulation",
+          "operationName": "inspection.area",
+          "externalExecutionId": "0ae8313d-584e-4930-be0f-808f2e7410d8",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "revision": 4,
+        "sourceRef": {
+          "ordinal": "125",
+          "entryHash": "a8329c37c34355cdfd09ea2295b401209e6f788040cf0fec3790927394804df6",
+          "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+          "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+        },
+        "receivedAt": "2026-10-24T08:18:10.337Z",
+        "contentHash": "813d1484047d92422a3a12e076c0ec7c97476dbed0b73825dbd8fce20e5529e7",
+        "schemaVersion": "ugv.zmq-result-record/1"
+      }
+    },
+    {
+      "snapshot": {
+        "kind": "inspection_frame",
+        "content": {
+          "key": "tracklist",
+          "data": {
+            "targets": [
+              {
+                "image": {
+                  "frame_id": "ab1837c3-7d83-47b9-82b5-1338646228c2",
+                  "width_px": 100,
+                  "camera_id": "camera-1",
+                  "height_px": 100
+                },
+                "pixel": {
+                  "x_px": 1,
+                  "y_px": 1
+                },
+                "reason": null,
+                "range_m": 20,
+                "position": {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                "range_source": "simulated_radial_depth"
+              }
+            ],
+            "task_id": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+            "track_id": "track-1",
+            "target_id": "object-1",
+            "data_origin": "simulated",
+            "track_state": "tracking",
+            "observed_at_utc_ms": 1792829890836
+          },
+          "publishedAt": "2026-10-24T08:18:10.836Z",
+          "nativeTaskId": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+          "reportedOrigin": "simulated",
+          "acquisitionUtcMs": 1792829890836,
+          "sourceProducerEpoch": null
+        },
+        "identity": {
+          "taskId": "1104d1f9-486f-4b5a-84db-0721b1762a12",
+          "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+          "providerId": "SIMULATED-provider",
+          "resourceId": "vehicle:SIMULATED",
+          "simulationId": "SIMULATED-run",
+          "executionMode": "simulation",
+          "operationName": "inspection.area",
+          "externalExecutionId": "0ae8313d-584e-4930-be0f-808f2e7410d8",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "revision": 5,
+        "sourceRef": {
+          "ordinal": "226",
+          "entryHash": "d9f677fdf60befc97c0faa8c2d40c2f0252225447514a95f56916980051a8dc1",
+          "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+          "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+        },
+        "receivedAt": "2026-10-24T08:18:10.837Z",
+        "contentHash": "d843a7ce632f1ff7fc7e2c03e504b227e2bae66c6498203317be76143ab3ae39",
+        "schemaVersion": "ugv.zmq-result-record/1"
+      }
+    },
+    {
+      "snapshot": {
+        "kind": "inspection_frame",
+        "content": {
+          "key": "tracklist",
+          "data": {
+            "targets": [
+              {
+                "image": {
+                  "frame_id": "29d72ad3-7ee7-4eaf-8f1a-e397eca2f344",
+                  "width_px": 100,
+                  "camera_id": "camera-1",
+                  "height_px": 100
+                },
+                "pixel": {
+                  "x_px": 1,
+                  "y_px": 1
+                },
+                "reason": null,
+                "range_m": 20,
+                "position": {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                "range_source": "simulated_radial_depth"
+              }
+            ],
+            "task_id": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+            "track_id": "track-1",
+            "target_id": "object-1",
+            "data_origin": "simulated",
+            "track_state": "tracking",
+            "observed_at_utc_ms": 1792829891336
+          },
+          "publishedAt": "2026-10-24T08:18:11.336Z",
+          "nativeTaskId": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+          "reportedOrigin": "simulated",
+          "acquisitionUtcMs": 1792829891336,
+          "sourceProducerEpoch": null
+        },
+        "identity": {
+          "taskId": "1104d1f9-486f-4b5a-84db-0721b1762a12",
+          "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+          "providerId": "SIMULATED-provider",
+          "resourceId": "vehicle:SIMULATED",
+          "simulationId": "SIMULATED-run",
+          "executionMode": "simulation",
+          "operationName": "inspection.area",
+          "externalExecutionId": "0ae8313d-584e-4930-be0f-808f2e7410d8",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "revision": 6,
+        "sourceRef": {
+          "ordinal": "327",
+          "entryHash": "f3504e079c6ce537731d0d1ba82a6e01eaa732a553254984e49e9923f342dbae",
+          "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+          "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+        },
+        "receivedAt": "2026-10-24T08:18:11.336Z",
+        "contentHash": "9eb2523850e174e09bddc9f5d338f8f53544e4a3e2460c4566fb0399c5c3add6",
+        "schemaVersion": "ugv.zmq-result-record/1"
+      }
+    },
+    {
+      "snapshot": {
+        "kind": "inspection_frame",
+        "content": {
+          "key": "tracklist",
+          "data": {
+            "targets": [
+              {
+                "image": {
+                  "frame_id": "03b91d45-a3c8-49dd-93e1-447e3106816b",
+                  "width_px": 100,
+                  "camera_id": "camera-1",
+                  "height_px": 100
+                },
+                "pixel": {
+                  "x_px": 1,
+                  "y_px": 1
+                },
+                "reason": null,
+                "range_m": 20,
+                "position": {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                "range_source": "simulated_radial_depth"
+              }
+            ],
+            "task_id": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+            "track_id": "track-1",
+            "target_id": "object-1",
+            "data_origin": "simulated",
+            "track_state": "tracking",
+            "observed_at_utc_ms": 1792829891837
+          },
+          "publishedAt": "2026-10-24T08:18:11.837Z",
+          "nativeTaskId": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+          "reportedOrigin": "simulated",
+          "acquisitionUtcMs": 1792829891837,
+          "sourceProducerEpoch": null
+        },
+        "identity": {
+          "taskId": "1104d1f9-486f-4b5a-84db-0721b1762a12",
+          "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+          "providerId": "SIMULATED-provider",
+          "resourceId": "vehicle:SIMULATED",
+          "simulationId": "SIMULATED-run",
+          "executionMode": "simulation",
+          "operationName": "inspection.area",
+          "externalExecutionId": "0ae8313d-584e-4930-be0f-808f2e7410d8",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "revision": 7,
+        "sourceRef": {
+          "ordinal": "428",
+          "entryHash": "ac8bcbf061906d48655b161935237ee3f3598c6a54018ccfa4f45cc7801c2f53",
+          "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+          "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+        },
+        "receivedAt": "2026-10-24T08:18:11.837Z",
+        "contentHash": "4022cdeae7e60bf67634b89d79e536bf1f742ba7269fdb047acdff2c653cf6dc",
+        "schemaVersion": "ugv.zmq-result-record/1"
+      }
+    },
+    {
+      "snapshot": {
+        "kind": "inspection_frame",
+        "content": {
+          "key": "tracklist",
+          "data": {
+            "targets": [
+              {
+                "image": {
+                  "frame_id": "919fa572-0b35-4389-8ee8-8abdb35644c8",
+                  "width_px": 100,
+                  "camera_id": "camera-1",
+                  "height_px": 100
+                },
+                "pixel": {
+                  "x_px": 1,
+                  "y_px": 1
+                },
+                "reason": null,
+                "range_m": 20,
+                "position": {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                "range_source": "simulated_radial_depth"
+              }
+            ],
+            "task_id": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+            "track_id": "track-1",
+            "target_id": "object-1",
+            "data_origin": "simulated",
+            "track_state": "tracking",
+            "observed_at_utc_ms": 1792829892337
+          },
+          "publishedAt": "2026-10-24T08:18:12.337Z",
+          "nativeTaskId": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+          "reportedOrigin": "simulated",
+          "acquisitionUtcMs": 1792829892337,
+          "sourceProducerEpoch": null
+        },
+        "identity": {
+          "taskId": "1104d1f9-486f-4b5a-84db-0721b1762a12",
+          "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+          "providerId": "SIMULATED-provider",
+          "resourceId": "vehicle:SIMULATED",
+          "simulationId": "SIMULATED-run",
+          "executionMode": "simulation",
+          "operationName": "inspection.area",
+          "externalExecutionId": "0ae8313d-584e-4930-be0f-808f2e7410d8",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "revision": 8,
+        "sourceRef": {
+          "ordinal": "528",
+          "entryHash": "642093938bd45214b933d38deae4f87150ba2b89cdc2c0d7453861bef2925028",
+          "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+          "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+        },
+        "receivedAt": "2026-10-24T08:18:12.338Z",
+        "contentHash": "02295fdbc9682eb7e39f54472e10ea81da27c9c6631ae19847cac1c5b9950662",
+        "schemaVersion": "ugv.zmq-result-record/1"
+      }
+    },
+    {
+      "snapshot": {
+        "kind": "inspection_frame",
+        "content": {
+          "key": "tracklist",
+          "data": {
+            "targets": [
+              {
+                "image": {
+                  "frame_id": "9dd6c772-3cb9-4291-97e2-5984aca4c385",
+                  "width_px": 100,
+                  "camera_id": "camera-1",
+                  "height_px": 100
+                },
+                "pixel": {
+                  "x_px": 1,
+                  "y_px": 1
+                },
+                "reason": null,
+                "range_m": 20,
+                "position": {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                "range_source": "simulated_radial_depth"
+              }
+            ],
+            "task_id": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+            "track_id": "track-1",
+            "target_id": "object-1",
+            "data_origin": "simulated",
+            "track_state": "tracking",
+            "observed_at_utc_ms": 1792829892838
+          },
+          "publishedAt": "2026-10-24T08:18:12.838Z",
+          "nativeTaskId": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+          "reportedOrigin": "simulated",
+          "acquisitionUtcMs": 1792829892838,
+          "sourceProducerEpoch": null
+        },
+        "identity": {
+          "taskId": "1104d1f9-486f-4b5a-84db-0721b1762a12",
+          "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+          "providerId": "SIMULATED-provider",
+          "resourceId": "vehicle:SIMULATED",
+          "simulationId": "SIMULATED-run",
+          "executionMode": "simulation",
+          "operationName": "inspection.area",
+          "externalExecutionId": "0ae8313d-584e-4930-be0f-808f2e7410d8",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "revision": 9,
+        "sourceRef": {
+          "ordinal": "615",
+          "entryHash": "9558b40deebbf3690713acbadd8d665974d610519b617321c7f1064368d397b7",
+          "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+          "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+        },
+        "receivedAt": "2026-10-24T08:18:12.838Z",
+        "contentHash": "936b3e07c3c9684c24adcc6cd07f5450b141d4f4272cc96dbe05fd984dd3777a",
+        "schemaVersion": "ugv.zmq-result-record/1"
+      }
+    },
+    {
+      "snapshot": {
+        "kind": "effect",
+        "content": {
+          "late": false,
+          "nativeTask": {
+            "state": "executing",
+            "effect": "unknown",
+            "reason": null,
+            "task_id": "effect-a7c170cb-f36b-46ec-b38a-d5b6412b559f",
+            "position": {
+              "latitude_deg": 29,
+              "longitude_deg": 106.001,
+              "ellipsoid_height_m": 10
+            },
+            "target_id": "object-1",
+            "request_id": "req-eaee43b3-d040-46ec-bcee-8d5a6f4aba9b",
+            "execution_finished": false
+          },
+          "publishedAt": "2026-10-24T08:18:13.283Z",
+          "sourceBinding": "isolated_simulation_referee",
+          "nativeRequestId": "req-eaee43b3-d040-46ec-bcee-8d5a6f4aba9b",
+          "originalTerminalAt": null,
+          "sourceProducerEpoch": null
+        },
+        "identity": {
+          "taskId": "3d5ab548-4407-4b84-8f69-036691dc2dde",
+          "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+          "providerId": "SIMULATED-provider",
+          "resourceId": "vehicle:SIMULATED",
+          "simulationId": "SIMULATED-run",
+          "executionMode": "simulation",
+          "operationName": "simulation.applyEffect",
+          "externalExecutionId": "41008251-dfef-4dd9-922f-c772ecb35634",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "revision": 1,
+        "sourceRef": {
+          "ordinal": "691",
+          "entryHash": "fda71ec714fc2757070cb429da2e498ecc7ecfaab919d9b8a0218832bfd3e328",
+          "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+          "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+        },
+        "receivedAt": "2026-10-24T08:18:13.284Z",
+        "contentHash": "01e4e9518c752fe482eec0596ca5afc28d4c4b963afb4d0d04ac7f6c8031a28d",
+        "schemaVersion": "ugv.zmq-result-record/1"
+      }
+    },
+    {
+      "snapshot": {
+        "kind": "inspection_frame",
+        "content": {
+          "key": "tracklist",
+          "data": {
+            "targets": [
+              {
+                "image": {
+                  "frame_id": "385f6ab6-419b-47e1-8da0-a40810479765",
+                  "width_px": 100,
+                  "camera_id": "camera-1",
+                  "height_px": 100
+                },
+                "pixel": {
+                  "x_px": 1,
+                  "y_px": 1
+                },
+                "reason": null,
+                "range_m": 20,
+                "position": {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                "range_source": "simulated_radial_depth"
+              }
+            ],
+            "task_id": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+            "track_id": "track-1",
+            "target_id": "object-1",
+            "data_origin": "simulated",
+            "track_state": "tracking",
+            "observed_at_utc_ms": 1792829893339
+          },
+          "publishedAt": "2026-10-24T08:18:13.339Z",
+          "nativeTaskId": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+          "reportedOrigin": "simulated",
+          "acquisitionUtcMs": 1792829893339,
+          "sourceProducerEpoch": null
+        },
+        "identity": {
+          "taskId": "1104d1f9-486f-4b5a-84db-0721b1762a12",
+          "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+          "providerId": "SIMULATED-provider",
+          "resourceId": "vehicle:SIMULATED",
+          "simulationId": "SIMULATED-run",
+          "executionMode": "simulation",
+          "operationName": "inspection.area",
+          "externalExecutionId": "0ae8313d-584e-4930-be0f-808f2e7410d8",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "revision": 10,
+        "sourceRef": {
+          "ordinal": "702",
+          "entryHash": "d090e7d2b7f0e4b7b3c6c35a21a9a7b957fd3714cb963ff6a345d8d876c8036d",
+          "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+          "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+        },
+        "receivedAt": "2026-10-24T08:18:13.339Z",
+        "contentHash": "c309916494c502b1b1238016fc26cfb77e0cdc41e1914dc547d60a6a04c66fea",
+        "schemaVersion": "ugv.zmq-result-record/1"
+      }
+    },
+    {
+      "snapshot": {
+        "kind": "inspection_frame",
+        "content": {
+          "key": "tracklist",
+          "data": {
+            "targets": [
+              {
+                "image": {
+                  "frame_id": "7be8d5fc-b1f7-4db0-ab6f-a435fb3d38a0",
+                  "width_px": 100,
+                  "camera_id": "camera-1",
+                  "height_px": 100
+                },
+                "pixel": {
+                  "x_px": 1,
+                  "y_px": 1
+                },
+                "reason": null,
+                "range_m": 20,
+                "position": {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                "range_source": "simulated_radial_depth"
+              }
+            ],
+            "task_id": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+            "track_id": "track-1",
+            "target_id": "object-1",
+            "data_origin": "simulated",
+            "track_state": "tracking",
+            "observed_at_utc_ms": 1792829893838
+          },
+          "publishedAt": "2026-10-24T08:18:13.838Z",
+          "nativeTaskId": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+          "reportedOrigin": "simulated",
+          "acquisitionUtcMs": 1792829893838,
+          "sourceProducerEpoch": null
+        },
+        "identity": {
+          "taskId": "1104d1f9-486f-4b5a-84db-0721b1762a12",
+          "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+          "providerId": "SIMULATED-provider",
+          "resourceId": "vehicle:SIMULATED",
+          "simulationId": "SIMULATED-run",
+          "executionMode": "simulation",
+          "operationName": "inspection.area",
+          "externalExecutionId": "0ae8313d-584e-4930-be0f-808f2e7410d8",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "revision": 11,
+        "sourceRef": {
+          "ordinal": "802",
+          "entryHash": "158b450671b24d9668048b0c538e0e4f1ae86299c323ecf900d188807735b813",
+          "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+          "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+        },
+        "receivedAt": "2026-10-24T08:18:13.838Z",
+        "contentHash": "b51445795704eb7c13963191f8244f3db8eb50a6863cf9ea47e618947e785d08",
+        "schemaVersion": "ugv.zmq-result-record/1"
+      }
+    },
+    {
+      "snapshot": {
+        "kind": "inspection_frame",
+        "content": {
+          "key": "tracklist",
+          "data": {
+            "targets": [
+              {
+                "image": {
+                  "frame_id": "bc4ad0d9-e80c-4e0a-a556-f9af0d960da1",
+                  "width_px": 100,
+                  "camera_id": "camera-1",
+                  "height_px": 100
+                },
+                "pixel": {
+                  "x_px": 1,
+                  "y_px": 1
+                },
+                "reason": null,
+                "range_m": 20,
+                "position": {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                "range_source": "simulated_radial_depth"
+              }
+            ],
+            "task_id": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+            "track_id": "track-1",
+            "target_id": "object-1",
+            "data_origin": "simulated",
+            "track_state": "tracking",
+            "observed_at_utc_ms": 1792829894338
+          },
+          "publishedAt": "2026-10-24T08:18:14.338Z",
+          "nativeTaskId": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+          "reportedOrigin": "simulated",
+          "acquisitionUtcMs": 1792829894338,
+          "sourceProducerEpoch": null
+        },
+        "identity": {
+          "taskId": "1104d1f9-486f-4b5a-84db-0721b1762a12",
+          "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+          "providerId": "SIMULATED-provider",
+          "resourceId": "vehicle:SIMULATED",
+          "simulationId": "SIMULATED-run",
+          "executionMode": "simulation",
+          "operationName": "inspection.area",
+          "externalExecutionId": "0ae8313d-584e-4930-be0f-808f2e7410d8",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "revision": 12,
+        "sourceRef": {
+          "ordinal": "903",
+          "entryHash": "a6bec163c0b25467133b70b90c47a4ad5a40ab11f8b2522e67e226509ffe87c8",
+          "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+          "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+        },
+        "receivedAt": "2026-10-24T08:18:14.338Z",
+        "contentHash": "c94342bc2b1e38a00ff6951a86c29baeb74d44c70d12ed765933369854931e22",
+        "schemaVersion": "ugv.zmq-result-record/1"
+      }
+    },
+    {
+      "snapshot": {
+        "kind": "inspection_frame",
+        "content": {
+          "key": "tracklist",
+          "data": {
+            "targets": [
+              {
+                "image": {
+                  "frame_id": "d878a5af-27a0-4bc9-96a3-b028bc653dc2",
+                  "width_px": 100,
+                  "camera_id": "camera-1",
+                  "height_px": 100
+                },
+                "pixel": {
+                  "x_px": 1,
+                  "y_px": 1
+                },
+                "reason": null,
+                "range_m": 20,
+                "position": {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                "range_source": "simulated_radial_depth"
+              }
+            ],
+            "task_id": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+            "track_id": "track-1",
+            "target_id": "object-1",
+            "data_origin": "simulated",
+            "track_state": "tracking",
+            "observed_at_utc_ms": 1792829897340
+          },
+          "publishedAt": "2026-10-24T08:18:17.340Z",
+          "nativeTaskId": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+          "reportedOrigin": "simulated",
+          "acquisitionUtcMs": 1792829897340,
+          "sourceProducerEpoch": null
+        },
+        "identity": {
+          "taskId": "1104d1f9-486f-4b5a-84db-0721b1762a12",
+          "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+          "providerId": "SIMULATED-provider",
+          "resourceId": "vehicle:SIMULATED",
+          "simulationId": "SIMULATED-run",
+          "executionMode": "simulation",
+          "operationName": "inspection.area",
+          "externalExecutionId": "0ae8313d-584e-4930-be0f-808f2e7410d8",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "revision": 18,
+        "sourceRef": {
+          "ordinal": "1508",
+          "entryHash": "c491edff111aa9ed69cdbce8b415f731fc569ebf07b7c828ea241d80c40406a2",
+          "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+          "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+        },
+        "receivedAt": "2026-10-24T08:18:17.341Z",
+        "contentHash": "18b2966edd3a91017d04b2862257b2e67b0edf21dfeb4d9b6aa1b996476f90f3",
+        "schemaVersion": "ugv.zmq-result-record/1"
+      }
+    },
+    {
+      "snapshot": {
+        "kind": "effect",
+        "content": {
+          "late": true,
+          "nativeTask": {
+            "state": "succeeded",
+            "effect": "miss",
+            "reason": null,
+            "task_id": "effect-a7c170cb-f36b-46ec-b38a-d5b6412b559f",
+            "position": {
+              "latitude_deg": 29,
+              "longitude_deg": 106.001,
+              "ellipsoid_height_m": 10
+            },
+            "target_id": "object-1",
+            "request_id": "req-eaee43b3-d040-46ec-bcee-8d5a6f4aba9b",
+            "execution_finished": true
+          },
+          "publishedAt": "2026-10-24T08:18:14.784Z",
+          "sourceBinding": "isolated_simulation_referee",
+          "nativeRequestId": "req-eaee43b3-d040-46ec-bcee-8d5a6f4aba9b",
+          "originalTerminalAt": "2026-10-24T08:18:14.257Z",
+          "sourceProducerEpoch": null
+        },
+        "identity": {
+          "taskId": "3d5ab548-4407-4b84-8f69-036691dc2dde",
+          "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+          "providerId": "SIMULATED-provider",
+          "resourceId": "vehicle:SIMULATED",
+          "simulationId": "SIMULATED-run",
+          "executionMode": "simulation",
+          "operationName": "simulation.applyEffect",
+          "externalExecutionId": "41008251-dfef-4dd9-922f-c772ecb35634",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "revision": 2,
+        "sourceRef": {
+          "ordinal": "994",
+          "entryHash": "fb28ea52c13ddaa3bb2d9573a62c54793a56c4788f3188ccb5574529669e518f",
+          "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+          "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+        },
+        "receivedAt": "2026-10-24T08:18:14.784Z",
+        "contentHash": "49ad4183f874f1c0e013f3ab7e48a98460600b6b6e49a78085bb7384bb764303",
+        "schemaVersion": "ugv.zmq-result-record/1"
+      }
+    },
+    {
+      "snapshot": {
+        "kind": "inspection_frame",
+        "content": {
+          "key": "tracklist",
+          "data": {
+            "targets": [
+              {
+                "image": {
+                  "frame_id": "d227efdb-a0ec-42a5-971f-f8f8b5784938",
+                  "width_px": 100,
+                  "camera_id": "camera-1",
+                  "height_px": 100
+                },
+                "pixel": {
+                  "x_px": 1,
+                  "y_px": 1
+                },
+                "reason": null,
+                "range_m": 20,
+                "position": {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                "range_source": "simulated_radial_depth"
+              }
+            ],
+            "task_id": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+            "track_id": "track-1",
+            "target_id": "object-1",
+            "data_origin": "simulated",
+            "track_state": "tracking",
+            "observed_at_utc_ms": 1792829894839
+          },
+          "publishedAt": "2026-10-24T08:18:14.839Z",
+          "nativeTaskId": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+          "reportedOrigin": "simulated",
+          "acquisitionUtcMs": 1792829894839,
+          "sourceProducerEpoch": null
+        },
+        "identity": {
+          "taskId": "1104d1f9-486f-4b5a-84db-0721b1762a12",
+          "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+          "providerId": "SIMULATED-provider",
+          "resourceId": "vehicle:SIMULATED",
+          "simulationId": "SIMULATED-run",
+          "executionMode": "simulation",
+          "operationName": "inspection.area",
+          "externalExecutionId": "0ae8313d-584e-4930-be0f-808f2e7410d8",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "revision": 13,
+        "sourceRef": {
+          "ordinal": "1006",
+          "entryHash": "ffd7ab08b3fc1fb4946ad0a79e7b4f890b9bf2e6e0cbddd87a21137efc06726e",
+          "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+          "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+        },
+        "receivedAt": "2026-10-24T08:18:14.839Z",
+        "contentHash": "5fd1378197792e388d2af8680d61a5fc877315013564eadd36f091928d4e6b93",
+        "schemaVersion": "ugv.zmq-result-record/1"
+      }
+    },
+    {
+      "snapshot": {
+        "kind": "inspection_frame",
+        "content": {
+          "key": "tracklist",
+          "data": {
+            "targets": [
+              {
+                "image": {
+                  "frame_id": "c2b34e54-1139-4ebe-aabc-115cf2a2ff64",
+                  "width_px": 100,
+                  "camera_id": "camera-1",
+                  "height_px": 100
+                },
+                "pixel": {
+                  "x_px": 1,
+                  "y_px": 1
+                },
+                "reason": null,
+                "range_m": 20,
+                "position": {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                "range_source": "simulated_radial_depth"
+              }
+            ],
+            "task_id": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+            "track_id": "track-1",
+            "target_id": "object-1",
+            "data_origin": "simulated",
+            "track_state": "tracking",
+            "observed_at_utc_ms": 1792829895338
+          },
+          "publishedAt": "2026-10-24T08:18:15.338Z",
+          "nativeTaskId": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+          "reportedOrigin": "simulated",
+          "acquisitionUtcMs": 1792829895338,
+          "sourceProducerEpoch": null
+        },
+        "identity": {
+          "taskId": "1104d1f9-486f-4b5a-84db-0721b1762a12",
+          "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+          "providerId": "SIMULATED-provider",
+          "resourceId": "vehicle:SIMULATED",
+          "simulationId": "SIMULATED-run",
+          "executionMode": "simulation",
+          "operationName": "inspection.area",
+          "externalExecutionId": "0ae8313d-584e-4930-be0f-808f2e7410d8",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "revision": 14,
+        "sourceRef": {
+          "ordinal": "1106",
+          "entryHash": "4485c87269fb55996b1f985e5111d0f3b2879ba50f94592bacf2c2e0cf6ce498",
+          "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+          "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+        },
+        "receivedAt": "2026-10-24T08:18:15.338Z",
+        "contentHash": "6b9c454260691c64590002c11d2bcc6b3b97d19a28efa9b71090e3b61948bfb1",
+        "schemaVersion": "ugv.zmq-result-record/1"
+      }
+    },
+    {
+      "snapshot": {
+        "kind": "inspection_frame",
+        "content": {
+          "key": "tracklist",
+          "data": {
+            "targets": [
+              {
+                "image": {
+                  "frame_id": "e2f4a8b7-4451-411f-87ca-5c4c8a10da92",
+                  "width_px": 100,
+                  "camera_id": "camera-1",
+                  "height_px": 100
+                },
+                "pixel": {
+                  "x_px": 1,
+                  "y_px": 1
+                },
+                "reason": null,
+                "range_m": 20,
+                "position": {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                "range_source": "simulated_radial_depth"
+              }
+            ],
+            "task_id": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+            "track_id": "track-1",
+            "target_id": "object-1",
+            "data_origin": "simulated",
+            "track_state": "tracking",
+            "observed_at_utc_ms": 1792829895839
+          },
+          "publishedAt": "2026-10-24T08:18:15.839Z",
+          "nativeTaskId": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+          "reportedOrigin": "simulated",
+          "acquisitionUtcMs": 1792829895839,
+          "sourceProducerEpoch": null
+        },
+        "identity": {
+          "taskId": "1104d1f9-486f-4b5a-84db-0721b1762a12",
+          "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+          "providerId": "SIMULATED-provider",
+          "resourceId": "vehicle:SIMULATED",
+          "simulationId": "SIMULATED-run",
+          "executionMode": "simulation",
+          "operationName": "inspection.area",
+          "externalExecutionId": "0ae8313d-584e-4930-be0f-808f2e7410d8",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "revision": 15,
+        "sourceRef": {
+          "ordinal": "1207",
+          "entryHash": "f7ff8a7779976b64a110d2636c780902860571ee74a5ed94f793c59080911e09",
+          "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+          "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+        },
+        "receivedAt": "2026-10-24T08:18:15.839Z",
+        "contentHash": "6cb44c0b729988c3120597bbfa5b5320bcaab69aef97018d87bea8b06b98c065",
+        "schemaVersion": "ugv.zmq-result-record/1"
+      }
+    },
+    {
+      "snapshot": {
+        "kind": "inspection_frame",
+        "content": {
+          "key": "tracklist",
+          "data": {
+            "targets": [
+              {
+                "image": {
+                  "frame_id": "d95da6a4-b232-44a2-a31b-87bcff7ceb8e",
+                  "width_px": 100,
+                  "camera_id": "camera-1",
+                  "height_px": 100
+                },
+                "pixel": {
+                  "x_px": 1,
+                  "y_px": 1
+                },
+                "reason": null,
+                "range_m": 20,
+                "position": {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                "range_source": "simulated_radial_depth"
+              }
+            ],
+            "task_id": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+            "track_id": "track-1",
+            "target_id": "object-1",
+            "data_origin": "simulated",
+            "track_state": "tracking",
+            "observed_at_utc_ms": 1792829896342
+          },
+          "publishedAt": "2026-10-24T08:18:16.342Z",
+          "nativeTaskId": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+          "reportedOrigin": "simulated",
+          "acquisitionUtcMs": 1792829896342,
+          "sourceProducerEpoch": null
+        },
+        "identity": {
+          "taskId": "1104d1f9-486f-4b5a-84db-0721b1762a12",
+          "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+          "providerId": "SIMULATED-provider",
+          "resourceId": "vehicle:SIMULATED",
+          "simulationId": "SIMULATED-run",
+          "executionMode": "simulation",
+          "operationName": "inspection.area",
+          "externalExecutionId": "0ae8313d-584e-4930-be0f-808f2e7410d8",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "revision": 16,
+        "sourceRef": {
+          "ordinal": "1307",
+          "entryHash": "39bb559e27e9bc48780f0ae4d5750cf600f54b017b77c122a908ec5b048029cf",
+          "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+          "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+        },
+        "receivedAt": "2026-10-24T08:18:16.342Z",
+        "contentHash": "139a8f2e63f61ed4693b65d1cb44be288f49dbb360f8e8b1a75f9be77af19760",
+        "schemaVersion": "ugv.zmq-result-record/1"
+      }
+    },
+    {
+      "snapshot": {
+        "kind": "inspection_frame",
+        "content": {
+          "key": "tracklist",
+          "data": {
+            "targets": [
+              {
+                "image": {
+                  "frame_id": "bb66f9a1-e571-440c-9295-2a1634c822c3",
+                  "width_px": 100,
+                  "camera_id": "camera-1",
+                  "height_px": 100
+                },
+                "pixel": {
+                  "x_px": 1,
+                  "y_px": 1
+                },
+                "reason": null,
+                "range_m": 20,
+                "position": {
+                  "latitude_deg": 29,
+                  "longitude_deg": 106.001,
+                  "ellipsoid_height_m": 10
+                },
+                "range_source": "simulated_radial_depth"
+              }
+            ],
+            "task_id": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+            "track_id": "track-1",
+            "target_id": "object-1",
+            "data_origin": "simulated",
+            "track_state": "tracking",
+            "observed_at_utc_ms": 1792829896841
+          },
+          "publishedAt": "2026-10-24T08:18:16.841Z",
+          "nativeTaskId": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+          "reportedOrigin": "simulated",
+          "acquisitionUtcMs": 1792829896841,
+          "sourceProducerEpoch": null
+        },
+        "identity": {
+          "taskId": "1104d1f9-486f-4b5a-84db-0721b1762a12",
+          "scopeHash": "8c6ce551ad666dd969af9d091300caa12fda4ec0449a962232c0aad3a4bd855c",
+          "providerId": "SIMULATED-provider",
+          "resourceId": "vehicle:SIMULATED",
+          "simulationId": "SIMULATED-run",
+          "executionMode": "simulation",
+          "operationName": "inspection.area",
+          "externalExecutionId": "0ae8313d-584e-4930-be0f-808f2e7410d8",
+          "authorizationContextHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "revision": 17,
+        "sourceRef": {
+          "ordinal": "1408",
+          "entryHash": "1769e8437bbf9f1fe85623bf15c0111fdd11a38b7061f43e72ee1e5ae828c04d",
+          "sessionId": "9b1e8d49-d53a-4754-bbea-0b607f6b0e04",
+          "partitionHash": "d08f03f52284e084ac41a9ca5b0b697e47a3beeed6b7eaccecf7a8dedefbb468"
+        },
+        "receivedAt": "2026-10-24T08:18:16.842Z",
+        "contentHash": "8f982bda8afa56ff707db9d076cf59119b52127d2d61c81cf5cd77a8498dfd7c",
+        "schemaVersion": "ugv.zmq-result-record/1"
+      }
+    }
+  ],
+  "nativeCommands": [
+    {
+      "component": "eo",
+      "at": 1792829889761,
+      "request": {
+        "protocol": "2.2",
+        "kind": "request",
+        "device_id": "isr-01",
+        "request_id": "req-65ed11d3-c849-4145-94b5-ee5d4fdfa385",
+        "method": "AreaSearch",
+        "params": {
+          "region_wgs84": [
+            {
+              "latitude_deg": 29,
+              "longitude_deg": 106,
+              "ellipsoid_height_m": 10
+            },
+            {
+              "latitude_deg": 29,
+              "longitude_deg": 106.001,
+              "ellipsoid_height_m": 10
+            },
+            {
+              "latitude_deg": 29.001,
+              "longitude_deg": 106.001,
+              "ellipsoid_height_m": 10
+            },
+            {
+              "latitude_deg": 29.001,
+              "longitude_deg": 106,
+              "ellipsoid_height_m": 10
+            }
+          ],
+          "task_timeout_ms": 299996,
+          "search_strategy": "recognize"
+        }
+      }
+    },
+    {
+      "component": "eo",
+      "at": 1792829889809,
+      "request": {
+        "protocol": "2.2",
+        "kind": "request",
+        "device_id": "isr-01",
+        "request_id": "req-e0654fc7-11b3-4627-8636-1116e2d4466c",
+        "method": "TaskControl",
+        "params": {
+          "task_id": "native-d08c394b-3ffe-473e-b2bb-9b66997a9549",
+          "action": "start"
+        }
+      }
+    },
+    {
+      "component": "simulationEffect",
+      "at": 1792829893282,
+      "request": {
+        "protocol": "1.0",
+        "kind": "request",
+        "device_id": "artillery-01",
+        "request_id": "req-eaee43b3-d040-46ec-bcee-8d5a6f4aba9b",
+        "method": "AttackTarget",
+        "params": {
+          "target_id": "object-1",
+          "position": {
+            "latitude_deg": 29,
+            "longitude_deg": 106.001,
+            "ellipsoid_height_m": 10
+          }
+        }
+      }
+    }
+  ],
+  "simulatedWorld": [
+    [
+      "object-1",
+      {
+        "longitude": 107.001,
+        "latitude": 29,
+        "health": 1,
+        "radiusM": 10
+      }
+    ]
+  ]
+}

@@ -1,4 +1,5 @@
 import { Ajv2020 } from "ajv/dist/2020.js";
+import { createHash } from "node:crypto";
 import addFormatsImport from "ajv-formats";
 import {
   array,
@@ -12,6 +13,14 @@ import {
   type Command,
 } from "../shared/model.js";
 import { validatePolygon } from "../shared/coordinates.js";
+import {
+  ZMQ_INSPECT,
+  EFFECT_APPLY,
+  INSPECTION_RESULT,
+  EFFECT_RESULT,
+  zmqToolReason,
+  validateZmqGeometry,
+} from "../shared/zmq.js";
 import { businessSnapshot, readArtifact } from "./business.js";
 import type { Mcp } from "./mcp.js";
 import { toolContent, UpstreamError } from "./mcp.js";
@@ -19,6 +28,20 @@ import type { Store } from "./store.js";
 const ajv = new Ajv2020({ strict: false, allErrors: true, validateFormats: true });
 const addFormats = addFormatsImport as unknown as (instance: Ajv2020) => void;
 addFormats(ajv);
+const sorted = (value: unknown): unknown =>
+  Array.isArray(value)
+    ? value.map(sorted)
+    : value !== null && typeof value === "object"
+      ? Object.fromEntries(
+          Object.keys(record(value))
+            .sort()
+            .map((key) => [key, sorted(record(value)[key])]),
+        )
+      : value;
+const wireHash = (value: unknown) =>
+  createHash("sha256")
+    .update(JSON.stringify(sorted(value)))
+    .digest("hex");
 export function validateSchema(schema: Json, value: unknown) {
   const validate = ajv.compile(schema);
   if (!validate(value)) throw Error("TOOL_ARGUMENTS_SCHEMA_MISMATCH");
@@ -102,7 +125,16 @@ export class Service {
     if (![...CONTROL_TOOLS, ...READ_TOOLS].includes(name as (typeof CONTROL_TOOLS)[number]))
       throw Error("TOOL_NOT_SUPPORTED_BY_CONSOLE");
     if (args.resourceId !== c.resourceId) throw Error("UGV_RESOURCE_BINDING_MISMATCH");
+    const reason = zmqToolReason(tool, c.resourceId);
+    if (reason) throw Error(reason);
+    if (
+      [ZMQ_INSPECT, EFFECT_APPLY, INSPECTION_RESULT, EFFECT_RESULT].includes(name) &&
+      (this.mcp.headers["x-sdar-execution-mode"] !== "simulation" ||
+        !this.mcp.headers["x-sdar-simulation-id"])
+    )
+      throw Error("ZMQ_SIMULATION_DOMAIN_REQUIRED");
     validateSchema(tool.inputSchema, args);
+    if (name === ZMQ_INSPECT) validateZmqGeometry(args);
     const isControl = (CONTROL_TOOLS as readonly string[]).includes(name);
     if (
       isControl &&
@@ -137,6 +169,14 @@ export class Service {
   ): Promise<Json & { catalogHash: string }> {
     const catalog = await this.catalog();
     this.validateTool(catalog, toolName, args);
+    if (
+      [ZMQ_INSPECT, EFFECT_APPLY].includes(toolName) &&
+      (!timing ||
+        timing.maxElapsedMs < 1000 ||
+        timing.maxElapsedMs > 300000 ||
+        timing.start.startToleranceMs > 60000)
+    )
+      throw Error("ZMQ_TIMING_CONTRACT_MISMATCH");
     const result = await this.mcp.rpc("io.sdar/taskExecution/checkAvailability", {
       profileVersion: "1.0",
       checks: [
@@ -154,6 +194,8 @@ export class Service {
     return { ...check, catalogHash: catalog.catalogHash };
   }
   async readTool(name: string, args: Json) {
+    if ([INSPECTION_RESULT, EFFECT_RESULT].includes(name))
+      throw Error("USE_IMPORTED_TASK_RESULT_ROUTE");
     const c = await this.catalog();
     if (!(READ_TOOLS as readonly string[]).includes(name)) throw Error("READ_TOOL_REQUIRED");
     this.validateTool(c, name, args);
@@ -205,6 +247,85 @@ export class Service {
   async artifact(taskId: string, id: string, revision: number) {
     const business = await this.business(taskId);
     return readArtifact(this.mcp, taskId, id, revision, record(business.context.identity));
+  }
+  async supplement(taskId: string, afterRevision = 0): Promise<Json> {
+    const saved = await this.store.task(taskId);
+    if (!saved) throw Error("TASK_NOT_IMPORTED");
+    const name =
+      saved.operation === EFFECT_APPLY
+        ? EFFECT_RESULT
+        : saved.operation === ZMQ_INSPECT
+          ? INSPECTION_RESULT
+          : "";
+    if (!name) throw Error("TASK_RESULT_QUERY_UNSUPPORTED");
+    const b = await this.business(taskId),
+      identity = record(b.context.identity),
+      catalog = await this.catalog();
+    if (
+      identity.taskId !== taskId ||
+      !text(identity.executionId) ||
+      identity.simulationId !== this.mcp.headers["x-sdar-simulation-id"]
+    )
+      throw Error("TASK_IDENTITY_UNCONFIRMED");
+    const args = {
+      resourceId: catalog.resourceId,
+      taskId,
+      executionId: text(identity.executionId),
+      afterRevision,
+      limit: 8,
+    };
+    this.validateTool(catalog, name, args);
+    const result = toolContent(await this.mcp.tool(name, args)),
+      page = record(result.page),
+      resultIdentity = record(page.identity),
+      rows = array(page.records).map(record);
+    if (
+      result.schemaVersion !==
+        (name === EFFECT_RESULT ? "ugv.zmq-effect-query/1" : "ugv.zmq-inspection-result/1") ||
+      page.schemaVersion !== "ugv.zmq-result-page/1" ||
+      page.historySource !== "platform_retained_only" ||
+      resultIdentity.taskId !== taskId ||
+      resultIdentity.externalExecutionId !== identity.executionId ||
+      resultIdentity.resourceId !== catalog.resourceId ||
+      resultIdentity.providerId !== catalog.provider.providerId ||
+      resultIdentity.executionMode !== "simulation" ||
+      resultIdentity.simulationId !== this.mcp.headers["x-sdar-simulation-id"] ||
+      rows.length > 8 ||
+      typeof page.hasMore !== "boolean"
+    )
+      throw Error("TASK_RESULT_IDENTITY_MISMATCH");
+    let previous = afterRevision;
+    for (const row of rows) {
+      const { schemaVersion, revision, contentHash, ...draft } = row;
+      if (
+        schemaVersion !== "ugv.zmq-result-record/1" ||
+        typeof revision !== "number" ||
+        !Number.isSafeInteger(revision) ||
+        revision <= previous ||
+        wireHash(row.identity) !== wireHash(resultIdentity) ||
+        contentHash !== wireHash(draft)
+      )
+        throw Error("TASK_RESULT_INTEGRITY_FAILED");
+      previous = revision;
+    }
+    if (page.nextRevision !== previous || (page.hasMore === true && !rows.length))
+      throw Error("TASK_RESULT_CURSOR_INVALID");
+    return result;
+  }
+  async exportSupplement(taskId: string) {
+    const pages: Json[] = [];
+    let after = 0,
+      bytes = 0;
+    for (let count = 0; count < 512; count++) {
+      const value = await this.supplement(taskId, after),
+        page = record(value.page);
+      bytes += Buffer.byteLength(JSON.stringify(value));
+      if (bytes > 24 * 1024 * 1024) throw Error("TASK_RESULT_EXPORT_LIMIT_USE_PAGES");
+      pages.push(value);
+      if (page.hasMore !== true) return { historySource: "platform_retained_only", pages };
+      after = Number(page.nextRevision);
+    }
+    throw Error("TASK_RESULT_EXPORT_LIMIT_USE_PAGES");
   }
   async execute(request: Command) {
     const reserved = await this.store.reserve(request);

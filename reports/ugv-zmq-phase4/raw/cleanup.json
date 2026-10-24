@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "ugv.zmq-phase4-cleanup/1",
+  "completedAt": "2026-10-24T08:28:33.142829+00:00",
+  "removedOwnedContainers": [
+    "ugv-zmq-phase4-20261024",
+    "ugv-zmq-phase4-mqtt-20261024"
+  ],
+  "privateCredentialsRemoved": true,
+  "liveContainers": [
+    {
+      "name": "/gowm-analysis-dev-f3dc6f4b8e-smpp-runtime-1",
+      "beforeImageId": "sha256:82c1e79f6c56587b6b090cf144e6e0e0fa6f48c413ec8ccd33a7b115997cb632",
+      "afterImageId": "sha256:82c1e79f6c56587b6b090cf144e6e0e0fa6f48c413ec8ccd33a7b115997cb632",
+      "imageUnchanged": true,
+      "status": "running",
+      "beforeStartedAt": "2026-10-22T09:04:27.309025934Z",
+      "afterStartedAt": "2026-10-22T09:04:27.309025934Z",
+      "startTimeUnchanged": true,
+      "restartCount": 0
+    },
+    {
+      "name": "/gowm-analysis-dev-f3dc6f4b8e-smpp-adapter-1",
+      "beforeImageId": "sha256:f4f798e4b72bc4e18699bdb041ee6a9c3223de8f077b6c4cdcf1cafa34ebfb55",
+      "afterImageId": "sha256:f4f798e4b72bc4e18699bdb041ee6a9c3223de8f077b6c4cdcf1cafa34ebfb55",
+      "imageUnchanged": true,
+      "status": "running",
+      "beforeStartedAt": "2026-10-24T08:06:42.167657579Z",
+      "afterStartedAt": "2026-10-24T08:26:58.738692779Z",
+      "startTimeUnchanged": false,
+      "restartCount": 672
+    },
+    {
+      "name": "/smpp-ugv-control-console",
+      "beforeImageId": "sha256:a93c5883f5868a89f28d2da8d43c2bc9a18fa7fa852bff5f0e2e9e7d1d4a923b",
+      "afterImageId": "sha256:a93c5883f5868a89f28d2da8d43c2bc9a18fa7fa852bff5f0e2e9e7d1d4a923b",
+      "imageUnchanged": true,
+      "status": "running",
+      "beforeStartedAt": "2026-10-23T06:41:42.153465084Z",
+      "afterStartedAt": "2026-10-23T06:41:42.153465084Z",
+      "startTimeUnchanged": true,
+      "restartCount": 0
+    }
+  ],
+  "liveObservation": "Adapter start time changed during observation; cause unverified. No live restart/update command was issued by this phase. All three live image IDs are unchanged.",
+  "storage": "only task-owned temporary/anonymous storage removed; live database volumes not targeted",
+  "cleanupExitCode": 0
+}

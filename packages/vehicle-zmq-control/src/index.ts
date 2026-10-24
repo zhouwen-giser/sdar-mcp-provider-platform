@@ -3,3 +3,6 @@ export * from "./wire.js";
 export * from "./transport.js";
 export * from "./repository.js";
 export * from "./engine.js";
+export * from "./results.js";
+export * from "./inspection.js";
+export * from "./console-candidate.js";

@@ -5,6 +5,7 @@ import {
   decodeChassisFrame,
   encodeChassisFrame,
   EoRequest,
+  SimulationEffectRequest,
   type DeploymentProfile,
 } from "../../packages/vehicle-zmq-contract/src/index.js";
 import {
@@ -31,7 +32,7 @@ export class SimulatedZmqDevices {
   readonly chassisPub = new Publisher({ linger: 0 });
   readonly eoRep = new Reply({ receiveTimeout: 100, sendTimeout: 100, linger: 0 });
   readonly eoPub = new Publisher({ linger: 0 });
-  readonly effectRep = new Reply({ linger: 0 });
+  readonly effectRep = new Reply({ receiveTimeout: 100, sendTimeout: 100, linger: 0 });
   readonly effectPub = new Publisher({ linger: 0 });
   readonly commands: { component: string; at: number; request: Record<string, unknown> }[] = [];
   readonly seen = new Map<string, Record<string, unknown>>();
@@ -52,6 +53,21 @@ export class SimulatedZmqDevices {
   stopConfirmed = true;
   completeCamera = true;
   replyDelayMs = 0;
+  effectReplyDelayMs = 0;
+  effectDelayMs = 100;
+  effectPolicy: "geometry" | "fail" | "unknown" = "geometry";
+  effectTask: Record<string, unknown> | null = null;
+  effectDevice: Record<string, unknown> = {
+    mode: "idle",
+    ready: true,
+    active_task_id: null,
+    fault_code: null,
+    fault_message: null,
+  };
+  readonly simulatedWorld = new Map([
+    ["object-1", { longitude: 106.001, latitude: 29, health: 1, radiusM: 10 }],
+  ]);
+  #effectUtc = 0;
   #stopped = false;
   #timers: ReturnType<typeof setInterval>[] = [];
   #tasks: Promise<void>[] = [];
@@ -75,7 +91,7 @@ export class SimulatedZmqDevices {
     profile.components.eo.publicationEndpoint = this.eoPub.lastEndpoint ?? "";
     profile.components.simulationEffect.commandEndpoint = this.effectRep.lastEndpoint ?? "";
     profile.components.simulationEffect.publicationEndpoint = this.effectPub.lastEndpoint ?? "";
-    this.#tasks.push(this.chassisLoop(), this.eoLoop());
+    this.#tasks.push(this.chassisLoop(), this.eoLoop(), this.effectLoop());
     this.#timers.push(
       setInterval(() => {
         void this.publish().catch((e: unknown) => this.errors.push(e));
@@ -87,6 +103,135 @@ export class SimulatedZmqDevices {
       }, 10),
     );
     return profile;
+  }
+  private async effectLoop() {
+    while (!this.#stopped) {
+      try {
+        const frames = await this.effectRep.receive();
+        const r = SimulationEffectRequest.parse(
+          JSON.parse(frames[0]?.toString() ?? "{}") as unknown,
+        );
+        this.commands.push({ component: "simulationEffect", at: Date.now(), request: r });
+        let response = this.seen.get(r.request_id);
+        if (!response) {
+          const id = `effect-${randomUUID()}`;
+          response = {
+            protocol: "1.0",
+            kind: "response",
+            device_id: r.device_id,
+            response_id: r.request_id,
+            method: r.method,
+            ok: true,
+            error: null,
+            command: {
+              request_id: r.request_id,
+              task_id: id,
+              method: r.method,
+              state: "accepted",
+              reason: null,
+            },
+          };
+          this.seen.set(r.request_id, response);
+          const task = {
+            task_id: id,
+            request_id: r.request_id,
+            ...r.params,
+            state: "accepted",
+            execution_finished: false,
+            effect: "unknown",
+            reason: null as string | null,
+          };
+          this.effectTask = task;
+          this.effectDevice = {
+            mode: "busy",
+            ready: false,
+            active_task_id: id,
+            fault_code: null,
+            fault_message: null,
+          };
+          const work = (async () => {
+            task.state = "executing";
+            await this.publishEffect();
+            await delay(this.effectDelayMs);
+            if (this.#stopped) return;
+            if (this.effectPolicy === "unknown") {
+              task.state = "unknown";
+              task.reason = "SIMULATED_RESULT_PENDING";
+            } else if (this.effectPolicy === "fail") {
+              task.state = "failed";
+              task.execution_finished = true;
+              task.reason = "SIMULATED_REFEREE_FAILURE";
+            } else {
+              const entity = this.simulatedWorld.get(r.params.target_id);
+              if (!entity || entity.health <= 0) {
+                task.state = "failed";
+                task.execution_finished = true;
+                task.reason = "SIMULATED_ENTITY_UNAVAILABLE";
+              } else {
+                const radians = Math.PI / 180,
+                  latA = entity.latitude * radians,
+                  latB = r.params.position.latitude_deg * radians;
+                const h =
+                  Math.sin((latA - latB) / 2) ** 2 +
+                  Math.cos(latA) *
+                    Math.cos(latB) *
+                    Math.sin(
+                      ((entity.longitude - r.params.position.longitude_deg) * radians) / 2,
+                    ) **
+                      2;
+                const distance = 6371008.8 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+                if (distance <= entity.radiusM) {
+                  entity.health -= 0.6;
+                  task.effect = entity.health <= 0 ? "destroyed" : "hit";
+                } else task.effect = "miss";
+                task.state = "succeeded";
+                task.execution_finished = true;
+              }
+            }
+            if (task.execution_finished)
+              this.effectDevice = {
+                mode: "idle",
+                ready: true,
+                active_task_id: null,
+                fault_code: null,
+                fault_message: null,
+              };
+            await this.publishEffect();
+          })();
+          this.#tasks.push(work);
+        }
+        if (this.effectReplyDelayMs) await delay(this.effectReplyDelayMs);
+        await this.effectRep.send(JSON.stringify(response));
+      } catch (error) {
+        if (!this.#stopped && !again(error)) this.errors.push(error);
+      }
+    }
+  }
+  async publishEffect() {
+    if (this.#stopped) return;
+    const utc = Math.max(Date.now(), this.#effectUtc + 2);
+    this.#effectUtc = utc;
+    for (const [topic, data] of [
+      ["device_status", this.effectDevice],
+      ["task_status", { task: this.effectTask }],
+    ] as const)
+      await this.effectPub.send([
+        Buffer.from(`artillery/artillery-01/${topic}`),
+        Buffer.from(
+          JSON.stringify({
+            protocol: "1.0",
+            kind: "event",
+            device_id: "artillery-01",
+            topic,
+            published_at_utc_ms: utc + (topic === "task_status" ? 1 : 0),
+            data,
+          }),
+        ),
+      ]);
+  }
+  async publishReport(topic: "targetlist" | "tracklist", data: unknown) {
+    this.#lastUtc = Math.max(Date.now(), this.#lastUtc + 2);
+    await this.eoPub.send(eoFrames(topic, data, this.#lastUtc));
   }
   private async chassisLoop() {
     while (!this.#stopped) {
@@ -244,6 +389,7 @@ export class SimulatedZmqDevices {
       }
     }
     await this.eoPub.send(eoFrames("task_status", data, utc + 1));
+    await this.publishEffect();
   }
   async position() {
     if (this.#stopped) return;

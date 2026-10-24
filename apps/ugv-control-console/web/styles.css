@@ -235,6 +235,9 @@ h1 span {
   grid-template-columns: minmax(360px, 0.82fr) minmax(480px, 1.3fr);
   gap: 20px;
 }
+.main-grid > * {
+  min-width: 0;
+}
 .section-head {
   display: flex;
   align-items: center;

@@ -7,6 +7,11 @@ import {
   reconstructFrames,
   sha256,
 } from "../../packages/vehicle-zmq-observer/src/index.js";
+import {
+  resultPage,
+  ResultIdentity,
+  type ResultRecord,
+} from "../../packages/vehicle-zmq-control/src/results.js";
 
 const path = process.argv[2],
   results = process.argv[3];
@@ -97,8 +102,34 @@ const outcome = z
 for (const head of heads.values())
   if (head.head !== head.expectedHead || head.ordinal.toString() !== head.expectedOrdinal)
     throw Error("CONTROL_EVIDENCE_SESSION_TAIL_MISSING");
-let referencedReceipts = 0;
+let referencedReceipts = 0,
+  resultRecords = 0;
 for (const item of outcome.evidence) {
+  if (Array.isArray(item.resultPages)) {
+    let cursor = 0;
+    for (const input of item.resultPages) {
+      const page = z
+        .object({
+          identity: ResultIdentity,
+          records: z.array(z.record(z.string(), z.unknown())),
+          nextRevision: z.number(),
+        })
+        .parse(input);
+      const checked = resultPage(page.identity, page.records as unknown as ResultRecord[], cursor);
+      if (checked.nextRevision !== page.nextRevision)
+        throw Error("CONTROL_RESULT_REVISION_INVALID");
+      for (const record of checked.records) {
+        const ref = record.sourceRef;
+        if (
+          !refs.has(JSON.stringify([ref.partitionHash, ref.sessionId, ref.ordinal, ref.entryHash]))
+        )
+          throw Error("CONTROL_RESULT_SOURCE_UNRESOLVED");
+        if (record.revision <= cursor) throw Error("CONTROL_RESULT_REVISION_INVALID");
+        cursor = record.revision;
+        resultRecords++;
+      }
+    }
+  }
   if (!item.final) continue;
   const final = z
     .object({ zmqControl: z.object({ latestEvidence: z.array(source) }) })
@@ -117,6 +148,7 @@ process.stdout.write(
       entries,
       receptions,
       referencedEntries: referencedReceipts,
+      resultRecords,
       rawSha256: sha256(raw),
       storedSha256: sha256(bytes),
     },

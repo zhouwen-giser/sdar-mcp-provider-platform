@@ -13,9 +13,9 @@ export interface CommandTransport {
 /** One bounded exchange per REQ socket. There is no action retry or relaxed REQ mode. */
 export class NativeControlTransport implements CommandTransport {
   #publisher: Publisher | undefined;
-  #request: Request | undefined;
+  readonly #requests = new Map<string, Request>();
   #closed = false;
-  #eoBusy = false;
+  readonly #busy = new Set<string>();
   #publisherConnected = false;
   readonly scope: ControlScope;
   constructor(scope: ControlScope) {
@@ -56,8 +56,8 @@ export class NativeControlTransport implements CommandTransport {
         return { outcome: "uncertain", response: null };
       }
     }
-    if (this.#eoBusy) throw Error("ZMQ_REQ_EXCHANGE_ALREADY_ACTIVE");
-    this.#eoBusy = true;
+    if (this.#busy.has(command.component)) throw Error("ZMQ_REQ_EXCHANGE_ALREADY_ACTIVE");
+    this.#busy.add(command.component);
     const socket = new Request({
       linger: 0,
       immediate: true,
@@ -69,13 +69,13 @@ export class NativeControlTransport implements CommandTransport {
       reconnectInterval: 100,
       reconnectMaxInterval: 1000,
     });
-    this.#request = socket;
+    this.#requests.set(command.component, socket);
     try {
-      socket.connect(this.scope.profile.components.eo.commandEndpoint);
+      socket.connect(this.scope.profile.components[command.component].commandEndpoint);
       permit();
       await socket.send(frames);
-      const response = parseResponse("eo", await socket.receive(), {
-        deviceId: this.scope.profile.components.eo.deviceId,
+      const response = parseResponse(command.component, await socket.receive(), {
+        deviceId: this.scope.profile.components[command.component].deviceId,
         requestId: command.requestId ?? "",
         method: command.method,
       });
@@ -84,14 +84,14 @@ export class NativeControlTransport implements CommandTransport {
       return { outcome: "uncertain", response: null };
     } finally {
       socket.close();
-      this.#request = undefined;
-      this.#eoBusy = false;
+      this.#requests.delete(command.component);
+      this.#busy.delete(command.component);
     }
   }
   close(): void {
     if (this.#closed) return;
     this.#closed = true;
     this.#publisher?.close();
-    this.#request?.close();
+    for (const request of this.#requests.values()) request.close();
   }
 }

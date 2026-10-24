@@ -1,0 +1,135 @@
+{
+  "schemaVersion": "ugv.zmq-phase4-source-manifest/1",
+  "baselineCommit": "9b870691e6a26eb6ee0193a1b10a5ab40b95bc6e",
+  "branch": "codex/ugv-zmq-phase4-20261024",
+  "files": [
+    {
+      "path": ".prettierignore",
+      "sha256": "b2ac6bfb34c080013cc7f4e8408244319c5799741d63da3d09ebd2758059676e"
+    },
+    {
+      "path": "apps/ugv-control-console/e2e/zmq-server.ts",
+      "sha256": "6cd279afbf996d1de88ed5a8b293ddcd97146c50c869fc0fa020082214d2a2c5"
+    },
+    {
+      "path": "apps/ugv-control-console/e2e/zmq.spec.ts",
+      "sha256": "cf042e4bfb57d12d70203e04bf6adfec588e3e73188e073ffda1589ed1f91e0c"
+    },
+    {
+      "path": "apps/ugv-control-console/package.json",
+      "sha256": "a1a17a14911f1c0c54fdb1e473ee7c5bad27a3465c5062c8bd86342580b3f29c"
+    },
+    {
+      "path": "apps/ugv-control-console/playwright.config.ts",
+      "sha256": "58e55b314a996835391d072dd69b0c28ec0e7daa5b7ac3a9ec26e90c0ddfd355"
+    },
+    {
+      "path": "apps/ugv-control-console/playwright.zmq.config.ts",
+      "sha256": "f5b5969635b2de6e35487061f4fd130e8d5acd41a7cd69813a4110a929bdfc15"
+    },
+    {
+      "path": "apps/ugv-control-console/server/app.ts",
+      "sha256": "86729d836bf15fc5229d36a94666a437fdc55dc7ffe18a1516906a55a015b57a"
+    },
+    {
+      "path": "apps/ugv-control-console/server/service.ts",
+      "sha256": "9f2221efe05919e2d1bae22beedfebf430325fca0c686c86197ca198ad869fd9"
+    },
+    {
+      "path": "apps/ugv-control-console/shared/model.ts",
+      "sha256": "7179be39f1d8783a14b24792f487443ebeffc4a76a13f9a96fb9ad34469d744b"
+    },
+    {
+      "path": "apps/ugv-control-console/shared/zmq.ts",
+      "sha256": "fb6a9df87324945735ffd9ebb2dba7b98b8411c3ffb9ee367f8e085d1a5142fc"
+    },
+    {
+      "path": "apps/ugv-control-console/test/zmq.test.ts",
+      "sha256": "cce2310f491f19e71080ef20ba7dda2f14053ec5c05ccb88e4b643779667488d"
+    },
+    {
+      "path": "apps/ugv-control-console/web/ZmqResults.tsx",
+      "sha256": "b2ed9b16b251c140131836fd06ccf3f6626de75ff50ba301367b41d8874cfc3c"
+    },
+    {
+      "path": "apps/ugv-control-console/web/main.tsx",
+      "sha256": "9b12087e5e0237c2e0a2cc4dd331e2416fa3a4fa8b8707ce7aca160010c038d9"
+    },
+    {
+      "path": "apps/ugv-control-console/web/styles.css",
+      "sha256": "d7dc9572afeeea0d778d84055b15804cc9aa5139c12cb6bb269791d8e63954e9"
+    },
+    {
+      "path": "deploy/ugv-zmq/RESULTS.md",
+      "sha256": "b33d5dd5368cb035816695d9b2456716c0379574b326d2ca904d208ff4beedf4"
+    },
+    {
+      "path": "docs/execplans/ugv-zmq-migration-20261023.md",
+      "sha256": "92b8f99ef924c87bab4724d153ce965d6ef5a5fd7456576c271606d6e44d7b99"
+    },
+    {
+      "path": "docs/execplans/ugv-zmq-results-phase4-20261024.md",
+      "sha256": "1ddcf5f4a2939fea0cc2f47c218d77596ba9afbec04ae6a749eed41fb4690dbc"
+    },
+    {
+      "path": "package.json",
+      "sha256": "2b007d1ffbd9aad1302f352919b6fa92bcf95e393cb6bf5925cb23ecd54b70a9"
+    },
+    {
+      "path": "packages/vehicle-zmq-control/src/console-candidate.ts",
+      "sha256": "7880716d071a7762802cdebdcbb5f8275a78f47a2acd765381903959cf85bc43"
+    },
+    {
+      "path": "packages/vehicle-zmq-control/src/engine.ts",
+      "sha256": "486680c74c74ef41f52d0c7fb3ac70a991e275a7f81c95c70660426ff0ffd90b"
+    },
+    {
+      "path": "packages/vehicle-zmq-control/src/index.ts",
+      "sha256": "43c4ff0179022fe21ea4adb488bae025bdcc08570cfbcf3f0186297dee1cef29"
+    },
+    {
+      "path": "packages/vehicle-zmq-control/src/inspection.ts",
+      "sha256": "631b9fba660db714d1f233bf9522df8269752ccd8a4e276c22fbf7411f923a4e"
+    },
+    {
+      "path": "packages/vehicle-zmq-control/src/model.ts",
+      "sha256": "9ce3566dd1b5c6b4027b14f12d3f25ffe7e13e4eb2051c146d136d81b0b606d2"
+    },
+    {
+      "path": "packages/vehicle-zmq-control/src/repository.ts",
+      "sha256": "0d47f2630fef925f70cbd205ce2002e5d64bb23d9c4f7bdabb6cca57d1095119"
+    },
+    {
+      "path": "packages/vehicle-zmq-control/src/results.ts",
+      "sha256": "7dbedc9155d039080b40ad6594ad789fd659d42fb507fcbeda5d686a49d870aa"
+    },
+    {
+      "path": "packages/vehicle-zmq-control/src/transport.ts",
+      "sha256": "87083f1a05144501ae2c6d81619a3989304e0ca1b92b6e66e3f3d1d6192eeedf"
+    },
+    {
+      "path": "packages/vehicle-zmq-control/src/wire.ts",
+      "sha256": "19d8e599f0a6784f76f668ac3027ac294d0da3ce3e1a9ec0d758afdde206c59c"
+    },
+    {
+      "path": "scripts/ugv-zmq/verify-control-evidence.ts",
+      "sha256": "086fe8e2f4407836cd975556081f51c026954e16bb97dc76bb5150dad8550045"
+    },
+    {
+      "path": "tests/ugv-zmq-control-postgres/results.test.ts",
+      "sha256": "1f5889d7b69025e7dbd5a4d0df9edf634fad41038bbc6e7fccb447086d8897ec"
+    },
+    {
+      "path": "tests/ugv-zmq-control-postgres/simulator.ts",
+      "sha256": "5c9ffb3d33aae4502849a63f791aa5e01ca15e13f75a63842136181364485b51"
+    },
+    {
+      "path": "tests/ugv-zmq-control/helpers.ts",
+      "sha256": "663ab05198a59d4454ed3740418cf7ef5eb347874c7ba2539489dcdd111da670"
+    },
+    {
+      "path": "tests/ugv-zmq-control/results.test.ts",
+      "sha256": "4f7c1bcf379a1c4b6fec89c9484a9ee17fd06d5420bf49ca7f7760fceb6080b7"
+    }
+  ]
+}

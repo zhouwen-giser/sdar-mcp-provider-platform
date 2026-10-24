@@ -169,6 +169,14 @@ export function createApp(config: Config, service: Service) {
   app.get("/api/tasks/:taskId/business", async (request) =>
     service.business(taskParams.parse(request.params).taskId),
   );
+  app.get("/api/tasks/:taskId/supplement", async (request) => {
+    const { taskId } = taskParams.parse(request.params);
+    const { afterRevision } = z
+      .object({ afterRevision: z.coerce.number().int().nonnegative().default(0) })
+      .strict()
+      .parse(request.query);
+    return service.supplement(taskId, afterRevision);
+  });
   app.get("/api/tasks/:taskId/artifacts/:artifactId", async (request) => {
     const { taskId, artifactId } = taskParams
       .extend({ artifactId: z.string().min(1).max(256) })
@@ -200,7 +208,7 @@ export function createApp(config: Config, service: Service) {
   app.get("/api/tasks/:taskId/report", async (request, reply) => {
     const { taskId } = taskParams.parse(request.params);
     const task = await service.task(taskId);
-    let business: unknown, reasonCode: string | undefined;
+    let business: unknown, reasonCode: string | undefined, supplementalResults: unknown;
     const artifacts: unknown[] = [];
     try {
       const snapshot = await service.business(taskId);
@@ -223,6 +231,18 @@ export function createApp(config: Config, service: Service) {
     } catch (e) {
       reasonCode = safeCode(e);
     }
+    const saved = await service.store.task(taskId);
+    if (["vehicle_zmq_inspect_area", "simulation_apply_effect"].includes(saved?.operation ?? "")) {
+      try {
+        supplementalResults = await service.exportSupplement(taskId);
+      } catch (e) {
+        supplementalResults = {
+          complete: false,
+          reasonCode: safeCode(e),
+          query: `/api/tasks/${encodeURIComponent(taskId)}/supplement`,
+        };
+      }
+    }
     reply.header(
       "content-disposition",
       `attachment; filename="ugv-report-${taskId.replace(/[^a-zA-Z0-9-]/g, "_")}.json"`,
@@ -233,6 +253,7 @@ export function createApp(config: Config, service: Service) {
       task,
       business,
       artifacts,
+      supplementalResults,
       ...(reasonCode ? { reasonCode } : {}),
       note: "任务状态、业务完整性与证据分别保留；导出成功不代表任务成功。",
     };

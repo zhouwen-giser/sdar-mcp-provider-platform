@@ -1,0 +1,45 @@
+{
+  "containers": [
+    {
+      "name": "/ugv-zmq-phase4-20261024",
+      "imageId": "sha256:8189a1f6e40904781fc9e2612687877791d21679866db58b1de996b31fc312e4",
+      "status": "running",
+      "startedAt": "2026-10-24T07:40:44.325669374Z"
+    },
+    {
+      "name": "/ugv-zmq-phase4-mqtt-20261024",
+      "imageId": "sha256:38c0da4f2ef84284d47b3b3eeea1cb3bdeabe81ee10caf0cd5c5ff61ee3ea408",
+      "status": "running",
+      "startedAt": "2026-10-24T08:01:14.95549153Z"
+    },
+    {
+      "name": "/gowm-analysis-dev-f3dc6f4b8e-smpp-runtime-1",
+      "imageId": "sha256:82c1e79f6c56587b6b090cf144e6e0e0fa6f48c413ec8ccd33a7b115997cb632",
+      "status": "running",
+      "startedAt": "2026-10-22T09:04:27.309025934Z"
+    },
+    {
+      "name": "/gowm-analysis-dev-f3dc6f4b8e-smpp-adapter-1",
+      "imageId": "sha256:f4f798e4b72bc4e18699bdb041ee6a9c3223de8f077b6c4cdcf1cafa34ebfb55",
+      "status": "running",
+      "startedAt": "2026-10-24T08:06:42.167657579Z"
+    },
+    {
+      "name": "/smpp-ugv-control-console",
+      "imageId": "sha256:a93c5883f5868a89f28d2da8d43c2bc9a18fa7fa852bff5f0e2e9e7d1d4a923b",
+      "status": "running",
+      "startedAt": "2026-10-23T06:41:42.153465084Z"
+    }
+  ],
+  "runtime": {
+    "node": "v22.23.2",
+    "platform": "linux",
+    "arch": "x64",
+    "libzmq": "4.3.5",
+    "zeromqJs": "6.8.0"
+  },
+  "mcpPublication": "not_published",
+  "endpoints": "isolated loopback only",
+  "liveDeviceCommands": 0,
+  "postgresVersion": "17.10"
+}

@@ -44,3 +44,6 @@ contracts/ugv-zmq/v1/fixtures/**
 reports/ugv-zmq-phase1/raw/**
 reports/ugv-zmq-phase2/raw/**
 reports/ugv-zmq-phase3/raw/**
+
+# Immutable phase 4 native reception and command evidence.
+reports/ugv-zmq-phase4/raw/**

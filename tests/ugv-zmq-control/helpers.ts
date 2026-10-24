@@ -4,6 +4,7 @@ import {
   DeploymentProfile,
   encodeChassisFrame,
   EoRequest,
+  SimulationEffectRequest,
 } from "../../packages/vehicle-zmq-contract/src/index.js";
 import {
   ObservationNormalizer,
@@ -24,6 +25,19 @@ import {
   type Operation,
 } from "../../packages/vehicle-zmq-control/src/index.js";
 import { profile, settings, eoFrames, localization } from "../ugv-zmq-observer/helpers.js";
+import {
+  identityHash,
+  resultHash,
+  resultKey,
+  resultPage,
+  type ResultDraft,
+  type ResultIdentity,
+  type ResultRecord,
+} from "../../packages/vehicle-zmq-control/src/results.js";
+export function present<T>(value: T | undefined | null): T {
+  if (value === undefined || value === null) throw Error("SIMULATED_EXPECTED_VALUE_MISSING");
+  return value;
+}
 
 export class TestClock implements ControlClock {
   utc = 1792800000000;
@@ -72,6 +86,7 @@ export function testScope() {
 export class TestRepository implements ControlRepository {
   store = new MemoryProviderStore();
   records = new Map<string, ZmqExecution>();
+  results = new Map<string, ResultRecord>();
   writer = true;
   constructor(readonly scope: ControlScope) {}
   async start() {
@@ -110,6 +125,39 @@ export class TestRepository implements ControlRepository {
     this.records.set(e.taskId, structuredClone(e));
     await this.store.putExecution(e);
   }
+  appendResult(draft: ResultDraft) {
+    const key = resultKey(draft),
+      contentHash = resultHash(draft),
+      existing = this.results.get(key);
+    if (existing && existing.contentHash !== contentHash)
+      throw Error("ZMQ_RESULT_IDENTITY_CONFLICT");
+    const revision =
+      [...this.results.values()].filter(
+        (r) => identityHash(r.identity) === identityHash(draft.identity),
+      ).length + 1;
+    const record: ResultRecord = existing ?? {
+      ...structuredClone(draft),
+      schemaVersion: "ugv.zmq-result-record/1",
+      revision,
+      contentHash,
+    };
+    this.results.set(key, record);
+    return Promise.resolve(structuredClone(record));
+  }
+  resultPage(identity: ResultIdentity, after = 0, limit = 8) {
+    return Promise.resolve(
+      resultPage(
+        identity,
+        structuredClone(
+          [...this.results.values()].filter(
+            (r) => identityHash(r.identity) === identityHash(identity) && r.revision > after,
+          ),
+        ),
+        after,
+        limit,
+      ),
+    );
+  }
   close() {
     return Promise.resolve();
   }
@@ -125,6 +173,30 @@ export class TestTransport implements CommandTransport {
     this.commands.push(structuredClone(command));
     if (this.outcome) return { outcome: this.outcome, response: null };
     if (command.component === "chassis") return { outcome: "sent_unconfirmed", response: null };
+    if (command.component === "simulationEffect") {
+      const r = SimulationEffectRequest.parse(
+        JSON.parse(Buffer.from(command.frames[0] ?? "", "base64").toString()) as unknown,
+      );
+      return {
+        outcome: "accepted",
+        response: {
+          protocol: "1.0",
+          kind: "response",
+          device_id: r.device_id,
+          response_id: r.request_id,
+          method: r.method,
+          ok: true,
+          error: null,
+          command: {
+            request_id: r.request_id,
+            task_id: `effect-${++this.taskNumber}`,
+            method: r.method,
+            state: "accepted",
+            reason: null,
+          },
+        },
+      };
+    }
     const request = EoRequest.parse(
       JSON.parse(Buffer.from(command.frames[0] ?? "", "base64").toString()) as unknown,
     );
@@ -300,7 +372,7 @@ export async function rig() {
   const normalizer = new ObservationNormalizer(scope.profile, settings()),
     sessionId = scope.settings.observerSessionId;
   let ordinal = 0;
-  const receive = async (component: "eo" | "chassis", frames: Buffer[]) => {
+  const receive = async (component: "eo" | "chassis" | "simulationEffect", frames: Buffer[]) => {
     const receipt = normalizer.receive(component, frames, {
       receivedAt: new Date(clock.utc).toISOString(),
       monotonicNs: String(clock.mono * 1000000),
@@ -320,6 +392,22 @@ export async function rig() {
     clock.advance(1);
     await receive("eo", eoFrames(topic, data, clock.utc));
   };
+  const effect = async (topic: string, data: unknown) => {
+    clock.advance(1);
+    await receive("simulationEffect", [
+      Buffer.from(`artillery/artillery-01/${topic}`),
+      Buffer.from(
+        JSON.stringify({
+          protocol: "1.0",
+          kind: "event",
+          device_id: "artillery-01",
+          topic,
+          published_at_utc_ms: clock.utc,
+          data,
+        }),
+      ),
+    ]);
+  };
   const seed = async () => {
     await receive("chassis", systemFrame());
     await eo("device_status", device());
@@ -338,6 +426,7 @@ export async function rig() {
     normalizer,
     receive,
     eo,
+    effect,
     seed,
     pulse,
     localization,

@@ -225,7 +225,8 @@
     "test:ugv-console": "pnpm --filter @sdar/ugv-control-console test",
     "test:ugv-console:e2e": "pnpm --filter @sdar/ugv-control-console test:e2e",
     "test:ugv-zmq-control": "vitest run tests/ugv-zmq-control/",
-    "test:ugv-zmq-control:postgres": "node scripts/require-env.mjs SMPP_ZMQ_TEST_CONFIG_FILE && vitest run tests/ugv-zmq-control-postgres/"
+    "test:ugv-zmq-control:postgres": "node scripts/require-env.mjs SMPP_ZMQ_TEST_CONFIG_FILE && vitest run tests/ugv-zmq-control-postgres/",
+    "test:ugv-console:zmq": "node scripts/require-env.mjs SMPP_ZMQ_TEST_CONFIG_FILE && pnpm --filter @sdar/ugv-control-console test:e2e:zmq"
   },
   "dependencies": {
     "@grpc/grpc-js": "1.14.5",

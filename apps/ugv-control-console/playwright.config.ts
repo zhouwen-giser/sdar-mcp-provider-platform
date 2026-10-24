@@ -5,7 +5,7 @@ const chromium =
   "/home/sz/.cache/ms-playwright/chromium-1194/chrome-linux/chrome";
 export default defineConfig({
   testDir: "e2e",
-  testMatch: "*.spec.ts",
+  testMatch: "console.spec.ts",
   workers: 1,
   timeout: 45000,
   reporter: "line",

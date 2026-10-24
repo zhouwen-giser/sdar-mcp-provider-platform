@@ -6,8 +6,18 @@ import type {
   MutationJournalState,
 } from "../../provider-adapter-kit/src/types.js";
 import { isZmqExecution, type ControlScope, type ZmqExecution } from "./model.js";
+import {
+  identityHash,
+  resultHash,
+  resultKey,
+  resultPage,
+  type ResultIdentity,
+  type ResultDraft,
+  type ResultRecord,
+  type ResultRepository,
+} from "./results.js";
 
-export interface ControlRepository {
+export interface ControlRepository extends ResultRepository {
   readonly store: ProviderStore;
   start(): Promise<void>;
   assertWriter(): Promise<void>;
@@ -117,6 +127,63 @@ export class PostgresControlRepository implements ControlRepository {
       throw Error("ZMQ_TASK_ID_CONFLICT");
     await this.store.putExecution(e);
   }
+  async appendResult(draft: ResultDraft): Promise<ResultRecord> {
+    await this.assertWriter();
+    if (draft.identity.scopeHash !== this.scope.hash) throw Error("ZMQ_EXECUTION_SCOPE_MISMATCH");
+    const hash = resultHash(draft),
+      key = resultKey(draft),
+      binding = identityHash(draft.identity);
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,790026))", [binding]);
+      const existing = await client.query<{ snapshot: ResultRecord }>(
+        "SELECT snapshot FROM ugv_state_snapshot WHERE revision=$1",
+        [key],
+      );
+      if (existing.rows[0]) {
+        if (existing.rows[0].snapshot.contentHash !== hash)
+          throw Error("ZMQ_RESULT_IDENTITY_CONFLICT");
+        await client.query("COMMIT");
+        return existing.rows[0].snapshot;
+      }
+      const latest = await client.query<{ revision: number }>(
+        "SELECT COALESCE(MAX((snapshot->>'revision')::bigint),0)::int revision FROM ugv_state_snapshot WHERE snapshot->>'schemaVersion'='ugv.zmq-result-record/1' AND snapshot->'identity'=$1::jsonb",
+        [JSON.stringify(draft.identity)],
+      );
+      const record: ResultRecord = {
+        ...draft,
+        schemaVersion: "ugv.zmq-result-record/1",
+        revision: (latest.rows[0]?.revision ?? 0) + 1,
+        contentHash: hash,
+      };
+      await client.query(
+        "INSERT INTO ugv_state_snapshot(revision,observed_at,snapshot) VALUES($1,$2,$3)",
+        [key, draft.receivedAt, record],
+      );
+      await client.query("COMMIT");
+      return record;
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+  async resultPage(identity: ResultIdentity, afterRevision = 0, limit = 8) {
+    resultPage(identity, [], afterRevision, limit);
+    if (identity.scopeHash !== this.scope.hash) throw Error("ZMQ_EXECUTION_SCOPE_MISMATCH");
+    const rows = await this.pool.query<{ snapshot: ResultRecord }>(
+      "SELECT snapshot FROM ugv_state_snapshot WHERE snapshot->>'schemaVersion'='ugv.zmq-result-record/1' AND snapshot->'identity'=$1::jsonb AND (snapshot->>'revision')::bigint>$2 ORDER BY (snapshot->>'revision')::bigint LIMIT $3",
+      [JSON.stringify(identity), afterRevision, limit + 1],
+    );
+    return resultPage(
+      identity,
+      rows.rows.map((r) => r.snapshot),
+      afterRevision,
+      limit,
+    );
+  }
   private lost(): boolean {
     return this.#lost;
   }
@@ -145,7 +212,7 @@ export function journalFor(
           ? "PAUSE"
           : step.action === "resume"
             ? "RESUME"
-            : step.action === "configure" || step.action === "camera"
+            : step.action === "configure" || step.action === "camera" || step.action === "effect"
               ? "PRIMARY"
               : "FOLLOWUP",
     toolName: step.method,

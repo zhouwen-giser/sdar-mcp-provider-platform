@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { DeploymentProfile, EoRequest } from "../../vehicle-zmq-contract/src/index.js";
+import {
+  DeploymentProfile,
+  EoRequest,
+  SimulationEffectRequest,
+} from "../../vehicle-zmq-contract/src/index.js";
+import type { InspectionSummary } from "./inspection.js";
 import { canonical, sha256 } from "../../vehicle-zmq-observer/src/config.js";
 import type {
   ProviderExecution,
@@ -56,6 +61,33 @@ export const Operation = z.discriminatedUnion("name", [
           return z.NEVER;
         }
       }),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal("inspection.area"),
+      params: z.unknown().transform((v, ctx) => {
+        try {
+          return eoParams("AreaSearch", v);
+        } catch {
+          ctx.addIssue({ code: "custom", message: "ZMQ_AREA_PARAMETERS_INVALID" });
+          return z.NEVER;
+        }
+      }),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal("simulation.applyEffect"),
+      params: z
+        .object({
+          targetId: SimulationEffectRequest.shape.params.shape.target_id,
+          position: SimulationEffectRequest.shape.params.shape.position,
+          observation: z
+            .object({ taskId: id, externalExecutionId: id, revision: z.number().int().positive() })
+            .strict(),
+        })
+        .strict(),
     })
     .strict(),
   z
@@ -171,9 +203,13 @@ export const ControlSettings = z
     (s) => s.minZoom <= s.maxZoom && s.minYawRad <= s.maxYawRad && s.minPitchRad <= s.maxPitchRad,
   );
 export type ControlSettings = z.infer<typeof ControlSettings>;
-export type ControlComponent = "chassis" | "eo";
+export type ControlComponent = "chassis" | "eo" | "simulationEffect";
 export const componentFor = (operation: Operation["name"]): ControlComponent =>
-  operation.startsWith("navigation.") ? "chassis" : "eo";
+  operation.startsWith("navigation.")
+    ? "chassis"
+    : operation === "simulation.applyEffect"
+      ? "simulationEffect"
+      : "eo";
 export interface ControlScope {
   hash: string;
   writerKey: string;
@@ -233,7 +269,16 @@ export interface WireCommand {
   generation: number;
   component: ControlComponent;
   action:
-    "mode" | "speed" | "obstacle" | "configure" | "start" | "pause" | "resume" | "stop" | "camera";
+    | "mode"
+    | "speed"
+    | "obstacle"
+    | "configure"
+    | "start"
+    | "pause"
+    | "resume"
+    | "stop"
+    | "camera"
+    | "effect";
   requestId: string | null;
   method: string;
   frames: string[];
@@ -293,6 +338,14 @@ export interface ZmqControlState {
 }
 export interface ZmqExecution extends ProviderExecution {
   zmqControl: ZmqControlState;
+  zmqInspection?: InspectionSummary;
+  /** Supplemental facts are independent of the immutable terminal tool result/Context. */
+  zmqEffect?: {
+    lastRevision: number;
+    taskSignature: string | null;
+    executionFinished: boolean | null;
+    latest: Record<string, unknown> | null;
+  };
 }
 export const isZmqExecution = (e: ProviderExecution | undefined): e is ZmqExecution =>
   !!e && "zmqControl" in e;

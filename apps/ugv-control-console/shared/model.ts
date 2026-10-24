@@ -18,6 +18,8 @@ export const CONTROL_TOOLS = [
   "vehicle_control_gimbal",
   "vehicle_track_target",
   "vehicle_emergency_stop",
+  "vehicle_zmq_inspect_area",
+  "simulation_apply_effect",
 ] as const;
 export const READ_TOOLS = [
   "vehicle_get_state",
@@ -27,6 +29,8 @@ export const READ_TOOLS = [
   "vehicle_laser_range",
   "vehicle_get_trajectory_history",
   "vehicle_get_trajectory_evidence",
+  "vehicle_get_inspection_result",
+  "simulation_get_effect_result",
 ] as const;
 export const CommandSchema = z
   .object({
@@ -93,6 +97,19 @@ export function classifyTask(task: Json): { label: string; tone: string } {
       data = record(result.structuredContent);
     const evidence = record(data.inspectionReport ?? data.completeness ?? data.reportCompleteness);
     const outcome = text(data.outcome ?? data.status);
+    if (data.schemaVersion === "ugv.zmq-effect-result/1") {
+      if (data.executionState === "failed") return { label: "仿真执行失败", tone: "error" };
+      if (
+        data.executionState !== "succeeded" ||
+        data.executionFinished !== true ||
+        !["hit", "miss", "destroyed"].includes(text(data.effect))
+      )
+        return { label: "仿真效果未确认", tone: "warning" };
+      return {
+        label: `仿真执行完成 · ${{ hit: "虚拟命中", miss: "虚拟未命中", destroyed: "虚拟实体移除" }[text(data.effect)] ?? "查看效果"}`,
+        tone: "success",
+      };
+    }
     if (result.isError === true || /fail|reject|error/.test(outcome))
       return { label: "业务失败", tone: "error" };
     if (
