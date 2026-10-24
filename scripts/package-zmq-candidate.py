@@ -88,9 +88,10 @@ with tarfile.open(args.output, 'r:gz') as archive:
             raise SystemExit('ZMQ_PACKAGE_INTEGRITY_FAILED')
 if expected:
     raise SystemExit('ZMQ_PACKAGE_MEMBER_MISSING')
-receipt = {'schemaVersion': manifest['schemaVersion'], 'package': str(args.output.resolve()), 'sha256': sha(args.output.read_bytes()), 'bytes': args.output.stat().st_size, 'inputSha256': manifest['inputSha256'], 'fileCount': len(entries), 'fieldQualified': False}
+receipt = {'schemaVersion': manifest['schemaVersion'], 'package': str(args.output.resolve()), 'sha256': sha(args.output.read_bytes()), 'bytes': args.output.stat().st_size, 'inputSha256': manifest['inputSha256'], 'fileCount': len(entries), 'sources': manifest['sources'], 'fieldQualified': False}
 if args.image:
     image_id = subprocess.check_output(['docker', 'image', 'inspect', '--format', '{{.Id}}', args.image]).decode().strip()
+    image_source = subprocess.check_output(['docker', 'image', 'inspect', '--format', '{{index .Config.Labels "org.opencontainers.image.revision"}}', args.image]).decode().strip()
     image_file = args.output.with_name(args.output.name.removesuffix('.tar.gz') + '.image.tar')
     if image_file.exists():
         raise SystemExit('ZMQ_IMAGE_EXPORT_ALREADY_EXISTS')
@@ -99,7 +100,7 @@ if args.image:
     with image_file.open('rb') as stream:
         for block in iter(lambda: stream.read(1024 * 1024), b''):
             digest.update(block)
-    receipt['image'] = {'tag': args.image, 'id': image_id, 'path': str(image_file.resolve()), 'sha256': digest.hexdigest(), 'bytes': image_file.stat().st_size}
+    receipt['image'] = {'tag': args.image, 'id': image_id, 'sourceCommit': image_source, 'path': str(image_file.resolve()), 'sha256': digest.hexdigest(), 'bytes': image_file.stat().st_size}
 receipt_path = args.output.with_name(args.output.name + '.receipt.json')
 receipt_path.write_text(json.dumps(receipt, ensure_ascii=False, indent=2) + '\n')
 print(json.dumps(receipt, ensure_ascii=False, indent=2))

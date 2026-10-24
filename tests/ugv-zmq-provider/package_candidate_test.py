@@ -80,6 +80,9 @@ class CandidatePackageTest(unittest.TestCase):
             manifest = json.load(archive.extractfile('MANIFEST.json'))
             self.assertFalse(manifest['fieldQualified'])
             self.assertFalse(manifest['automaticDeployment'])
+            receipt = json.loads(Path(str(first) + '.receipt.json').read_text())
+            self.assertEqual(receipt['sources'], manifest['sources'])
+            self.assertEqual(receipt['sha256'], hashlib.sha256(first.read_bytes()).hexdigest())
             self.assertEqual(set(names), {'MANIFEST.json'} | {f['path'] for f in manifest['files']})
             for entry in manifest['files']:
                 data = archive.extractfile(entry['path']).read()
