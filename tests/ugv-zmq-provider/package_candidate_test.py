@@ -39,6 +39,10 @@ class CandidatePackageTest(unittest.TestCase):
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text('MUST-NOT-SHIP\n')
         (self.smpp / '.env.example').write_text('PUBLIC_CONFIGURATION=example\n')
+        for name in ('reports/frozen/contract.json', 'reports/verification/generated.json'):
+            path = self.sdar / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text('FROZEN-OR-GENERATED\n')
         executable = self.smpp / 'start.sh'
         executable.write_text('#!/bin/sh\nexit 0\n')
         executable.chmod(0o755)
@@ -68,6 +72,8 @@ class CandidatePackageTest(unittest.TestCase):
         with tarfile.open(first) as archive:
             names = archive.getnames()
             self.assertIn('smpp/.env.example', names)
+            self.assertIn('sdar/reports/frozen/contract.json', names)
+            self.assertNotIn('sdar/reports/verification/generated.json', names)
             self.assertEqual(archive.getmember('smpp/start.sh').mode, 0o755)
             self.assertFalse(any(n.endswith(('.env', '.env.local', 'private.json', 'key.pem',
                                               'external-link', 'untracked.txt')) for n in names))

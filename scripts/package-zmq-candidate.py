@@ -30,12 +30,15 @@ def source_files(root):
     paths = subprocess.check_output(['git', 'ls-files', '--cached', '-z'], cwd=root).decode().split('\0')
     for name in sorted(set(filter(None, paths))):
         path = Path(name)
-        if path.is_absolute() or '..' in path.parts or path.parts[0] in {'reports', 'artifacts', 'dist', 'coverage', 'node_modules', '.codex', '.git'}:
+        if path.is_absolute() or '..' in path.parts or path.parts[0] in {'artifacts', 'dist', 'coverage', 'node_modules', '.codex', '.git'}:
+            continue
+        historical_report = path.parts[0] == 'reports'
+        if name.startswith(('reports/runtime-semantic-closure/', 'reports/verification/', 'reports/ugv-zmq-phase5/')):
             continue
         if any(part in {'node_modules', 'secrets', '.local', '__pycache__'} for part in path.parts):
             continue
         env_template = path.name.startswith('.env.') and path.name.endswith(('.example', '.sample', '.template'))
-        if (path.name.startswith('.env') and not env_template) or path.suffix in {'.pem', '.key', '.p12', '.pfx', '.log', '.tsbuildinfo'}:
+        if (path.name.startswith('.env') and not env_template) or path.suffix in {'.pem', '.key', '.p12', '.pfx', '.tsbuildinfo'} or (path.suffix == '.log' and not historical_report):
             continue
         full = root / path
         if not full.is_file() or full.is_symlink():
@@ -43,7 +46,7 @@ def source_files(root):
         yield name, full.read_bytes(), 0o755 if full.stat().st_mode & 0o111 else 0o644
 
 
-manifest = {'schemaVersion': 'ugv.zmq-source-candidate-bundle/1', 'releaseKind': 'qualification_candidate', 'fieldQualified': False, 'automaticDeployment': False, 'sources': {}, 'files': []}
+manifest = {'schemaVersion': 'ugv.zmq-source-candidate-bundle/1', 'releaseKind': 'qualification_candidate', 'fieldQualified': False, 'automaticDeployment': False, 'historicalTrackedReportsIncluded': True, 'currentGeneratedReportsIncluded': False, 'sources': {}, 'files': []}
 entries = []
 for label, root in [('smpp', smpp), ('sdar', sdar)]:
     commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root).decode().strip()
