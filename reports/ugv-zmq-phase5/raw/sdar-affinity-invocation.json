@@ -1,0 +1,38 @@
+{
+  "argv": [
+    "taskset",
+    "--cpu-list",
+    "3,4,8,29,30,31,33,34",
+    "node",
+    "scripts/verify-isolated.mjs",
+    "--docker-default-bridge"
+  ],
+  "cwd": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5",
+  "environment": {
+    "PATH": "/home/sz/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin:/home/sz/.nvm/versions/node/v22.23.2/lib/node_modules/corepack/shims:/home/sz/.nvm/versions/node/v22.23.2/bin:/home/sz/.codex/tmp/arg0/codex-arg0Lb3zto:/home/sz/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/home/sz/.nvm/versions/node/v22.23.2/bin:/home/sz/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin:/home/sz/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/usr/lib/chatgpt/resources",
+    "HOME": "/home/sz",
+    "LANG": "C.UTF-8",
+    "npm_execpath": "/home/sz/.cache/node/corepack/v1/pnpm/11.7.0/bin/pnpm.mjs"
+  },
+  "startedAt": "2026-10-24T17:40:13.984937+00:00",
+  "cpuProfile": {
+    "mode": "inherited_test_process_cpu_affinity",
+    "socket": 0,
+    "cpus": [
+      3,
+      4,
+      8,
+      29,
+      30,
+      31,
+      33,
+      34
+    ],
+    "exclusive": false,
+    "otherProcessesChanged": false,
+    "thresholdsChanged": false,
+    "sampleWindowSeconds": 1
+  },
+  "exitCode": 0,
+  "finishedAt": "2026-10-24T18:08:04.919308+00:00"
+}

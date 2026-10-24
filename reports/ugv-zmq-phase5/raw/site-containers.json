@@ -1,0 +1,24 @@
+{
+  "action": "read_only_inspection",
+  "updatedByThisTask": false,
+  "containers": [
+    {
+      "name": "/gowm-analysis-dev-f3dc6f4b8e-smpp-runtime-1",
+      "tag": "smpp-recovery/runtime:20261022-66b90521",
+      "imageId": "sha256:82c1e79f6c56587b6b090cf144e6e0e0fa6f48c413ec8ccd33a7b115997cb632",
+      "status": "running"
+    },
+    {
+      "name": "/gowm-analysis-dev-f3dc6f4b8e-smpp-adapter-1",
+      "tag": "smpp-recovery/adapter:20261022-f67fd0a",
+      "imageId": "sha256:f4f798e4b72bc4e18699bdb041ee6a9c3223de8f077b6c4cdcf1cafa34ebfb55",
+      "status": "running"
+    },
+    {
+      "name": "/smpp-ugv-control-console",
+      "tag": "smpp/ugv-control-console:20261023-availability-18d6754",
+      "imageId": "sha256:a93c5883f5868a89f28d2da8d43c2bc9a18fa7fa852bff5f0e2e9e7d1d4a923b",
+      "status": "running"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "mode": "inherited_test_process_cpu_affinity",
+  "socket": 0,
+  "cpus": [
+    3,
+    4,
+    8,
+    29,
+    30,
+    31,
+    33,
+    34
+  ],
+  "exclusive": false,
+  "otherProcessesChanged": false,
+  "thresholdsChanged": false,
+  "sampleWindowSeconds": 1
+}

@@ -1,0 +1,15 @@
+{
+  "networkMode": "default_bridge",
+  "overrides": [
+    {
+      "path": "/tmp/sdar-verify-d392206e-dc0d-4ad9-ad43-f58fb94f85c2-KzHaa3/runtime.compose.yaml",
+      "sha256": "b2d011a6dfff468b33dca6c25eaeec1069659aba648b5cfc24ded2410701e431"
+    },
+    {
+      "path": "/tmp/sdar-verify-d392206e-dc0d-4ad9-ad43-f58fb94f85c2-KzHaa3/control.compose.yaml",
+      "sha256": "ab15452a10cba0541833bbbf20d08af8227cf7f27b8db31e4770fe2cd5c0f95d"
+    }
+  ],
+  "hostReadinessRequired": true,
+  "thresholdsChanged": false
+}

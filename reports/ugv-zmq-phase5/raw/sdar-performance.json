@@ -1,0 +1,15 @@
+{
+  "observed": {
+    "baselineP95RawMs": 398.7899059999909,
+    "evidenceEnabledP95RawMs": 397.169367999988,
+    "regressionRawPercent": -0.4063638461307718,
+    "baselineMedianDriftRawPercent": 4.8724413079532125,
+    "appendP95RawMs": 2.4228950000015175
+  },
+  "limits": {
+    "baselineMedianDriftRawPercent": 15,
+    "regressionRawPercent": 10,
+    "appendP95RawMs": 20
+  },
+  "thresholdsChanged": false
+}

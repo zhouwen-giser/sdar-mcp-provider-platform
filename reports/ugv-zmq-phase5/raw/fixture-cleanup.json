@@ -1,0 +1,15 @@
+{
+  "observedAt": "2026-10-24T17:21:12.189999+00:00",
+  "containersRemoved": [
+    "ugv-zmq-phase5-20261024",
+    "ugv-zmq-phase5-mqtt-20261024"
+  ],
+  "privateFilesRemoved": [
+    "postgres.env",
+    "postgres-test.json",
+    "console-test.json",
+    "sdar-infra.env",
+    "sdar-infra-test.json"
+  ],
+  "siteContainersUpdated": false
+}

@@ -1,0 +1,48 @@
+{
+  "records": [
+    {
+      "stage": "smoke:server",
+      "argv": [
+        "node",
+        "/home/sz/.cache/node/corepack/v1/pnpm/11.7.0/bin/pnpm.mjs",
+        "smoke:server"
+      ],
+      "cwd": "/tmp/sdar-verify-56ba1b94-8dae-4d6c-99b1-901989b8a882-6ONbSy/source",
+      "sourceCommit": "9cd615b4da06f91386067dec92d0116a5f77dd95",
+      "exitCode": 0
+    },
+    {
+      "stage": "smoke:node-control",
+      "argv": [
+        "node",
+        "/home/sz/.cache/node/corepack/v1/pnpm/11.7.0/bin/pnpm.mjs",
+        "smoke:node-control"
+      ],
+      "cwd": "/tmp/sdar-verify-56ba1b94-8dae-4d6c-99b1-901989b8a882-6ONbSy/source",
+      "sourceCommit": "9cd615b4da06f91386067dec92d0116a5f77dd95",
+      "exitCode": 0
+    },
+    {
+      "cleanupProject": "sdar-verify-zmq-tail-20261025",
+      "exitCode": 0
+    },
+    {
+      "cleanupProject": "sdar-verify-zmq-tail-20261025-control-smoke",
+      "exitCode": 0
+    },
+    {
+      "cleanupProject": "sdar-verify-zmq-tail-20261025-runtime-smoke",
+      "exitCode": 0
+    },
+    {
+      "cleanupProject": "sdar-verify-zmq-tail-20261025-e2e-performance",
+      "exitCode": 0
+    }
+  ],
+  "ports": [
+    54195,
+    46139
+  ],
+  "thresholdsChanged": false,
+  "qualification": "diagnostic_not_full_gate"
+}

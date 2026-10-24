@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "ugv.zmq-source-candidate-bundle/1",
+  "package": "/mnt/data/ugv-zmq-phase5-20261024/source-integrity-trial.tar.gz",
+  "sha256": "37f8546749bf487503fc50cc91d6fb80b68c5070f1be790f4064b2b824976c9f",
+  "bytes": 80468004,
+  "inputSha256": "dbedaf480559f58c1f2d3a57b2a182591f39b0f15593a1bd18f9f2d2641101b3",
+  "fileCount": 11454,
+  "fieldQualified": false
+}

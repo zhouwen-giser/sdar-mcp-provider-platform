@@ -1,0 +1,10 @@
+{
+  "postgres": {
+    "ready": true
+  },
+  "redis": {
+    "ready": true
+  },
+  "network": "default bridge",
+  "hostFirewallChanged": false
+}

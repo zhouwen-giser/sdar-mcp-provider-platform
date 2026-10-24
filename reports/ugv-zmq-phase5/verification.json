@@ -1,0 +1,998 @@
+{
+  "schemaVersion": "ugv.zmq-phase5-verification/1",
+  "classification": "ISOLATED_FORMAL_RUNTIME_SIMULATED_ONLY",
+  "generatedAt": "2026-10-24T18:11:04.517808+00:00",
+  "smppSourceCommit": "2f4eeb1f57343742bec3886847e8a4892cc185ed",
+  "sdarSourceCommit": "9cd615b4da06f91386067dec92d0116a5f77dd95",
+  "phase5Complete": false,
+  "fieldQualified": false,
+  "sdarGovernancePublished": false,
+  "realDeviceCommands": 0,
+  "siteContainersUpdated": false,
+  "g0Missing": 12,
+  "configFilesShipped": false,
+  "commands": [
+    {
+      "name": "root-types",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": ["node", "node_modules/typescript/bin/tsc", "--noEmit", "-p", "tsconfig.json"],
+      "environment": {},
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/root-types.log.gz",
+      "encoding": "gzip",
+      "sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "uncompressedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "root-build",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": ["node", "node_modules/typescript/bin/tsc", "-p", "tsconfig.build.json"],
+      "environment": {},
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/root-build.log.gz",
+      "encoding": "gzip",
+      "sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "uncompressedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "root-format",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "node",
+        "node_modules/prettier/bin/prettier.cjs",
+        "--check",
+        "apps/ugv-control-console/e2e/zmq-server.ts",
+        "apps/ugv-control-console/e2e/zmq.spec.ts",
+        "apps/ugv-control-console/server/service.ts",
+        "apps/ugv-control-console/shared/model.ts",
+        "apps/ugv-control-console/shared/zmq-native-catalog.json",
+        "apps/ugv-control-console/shared/zmq-native.ts",
+        "apps/ugv-control-console/shared/zmq.ts",
+        "apps/ugv-control-console/test/zmq.test.ts",
+        "apps/ugv-control-console/web/main.tsx",
+        "apps/ugv-provider-adapter/src/task-business-service.ts",
+        "apps/ugv-zmq-provider-adapter/src/bootstrap.ts",
+        "apps/ugv-zmq-provider-adapter/src/business.ts",
+        "apps/ugv-zmq-provider-adapter/src/main.ts",
+        "apps/ugv-zmq-provider-adapter/src/runtime.ts",
+        "apps/ugv-zmq-provider-adapter/src/server.ts",
+        "contracts/ugv-zmq/provider-v1/catalog.json",
+        "deploy/ugv-zmq/FORMAL.md",
+        "deploy/ugv-zmq/compose.formal-candidate.yaml",
+        "docs/execplans/ugv-zmq-formal-phase5-20261024.md",
+        "docs/execplans/ugv-zmq-migration-20261023.md",
+        "packages/gowm-shared-storage-adapter/src/scope.ts",
+        "packages/operation-registry/src/registry.ts",
+        "packages/provider-adapter-kit/src/vehicle-grpc-server.ts",
+        "packages/vehicle-zmq-contract/src/console-contract.ts",
+        "packages/vehicle-zmq-control/src/catalog.ts",
+        "packages/vehicle-zmq-control/src/engine.ts",
+        "packages/vehicle-zmq-control/src/handoff.ts",
+        "packages/vehicle-zmq-control/src/model.ts",
+        "packages/vehicle-zmq-control/src/repository.ts",
+        "packages/vehicle-zmq-control/src/result-schemas.ts",
+        "scripts/ugv-zmq/check-contracts.ts",
+        "scripts/ugv-zmq/handoff-check.ts",
+        "scripts/ugv-zmq/preflight.ts",
+        "scripts/ugv-zmq/verify-control-evidence.ts",
+        "tests/ugv-zmq-provider/contract.test.ts",
+        "tests/ugv-zmq-provider/formal.postgres.test.ts",
+        "tests/ugv-zmq-provider/owner-route.postgres.test.ts"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/root-format.log.gz",
+      "encoding": "gzip",
+      "sha256": "6cd316ae8e81df0ff79776205007450fac3d62e1ba8e884e169e326d7955ebe5",
+      "uncompressedSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    {
+      "name": "root-lint",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "node",
+        "node_modules/eslint/bin/eslint.js",
+        "apps/ugv-control-console/e2e/zmq-server.ts",
+        "apps/ugv-control-console/e2e/zmq.spec.ts",
+        "apps/ugv-control-console/server/service.ts",
+        "apps/ugv-control-console/shared/model.ts",
+        "apps/ugv-control-console/shared/zmq-native.ts",
+        "apps/ugv-control-console/shared/zmq.ts",
+        "apps/ugv-control-console/test/zmq.test.ts",
+        "apps/ugv-control-console/web/main.tsx",
+        "apps/ugv-provider-adapter/src/task-business-service.ts",
+        "apps/ugv-zmq-provider-adapter/src/bootstrap.ts",
+        "apps/ugv-zmq-provider-adapter/src/business.ts",
+        "apps/ugv-zmq-provider-adapter/src/main.ts",
+        "apps/ugv-zmq-provider-adapter/src/runtime.ts",
+        "apps/ugv-zmq-provider-adapter/src/server.ts",
+        "packages/gowm-shared-storage-adapter/src/scope.ts",
+        "packages/operation-registry/src/registry.ts",
+        "packages/provider-adapter-kit/src/vehicle-grpc-server.ts",
+        "packages/vehicle-zmq-contract/src/console-contract.ts",
+        "packages/vehicle-zmq-control/src/catalog.ts",
+        "packages/vehicle-zmq-control/src/engine.ts",
+        "packages/vehicle-zmq-control/src/handoff.ts",
+        "packages/vehicle-zmq-control/src/model.ts",
+        "packages/vehicle-zmq-control/src/repository.ts",
+        "packages/vehicle-zmq-control/src/result-schemas.ts",
+        "scripts/ugv-zmq/check-contracts.ts",
+        "scripts/ugv-zmq/handoff-check.ts",
+        "scripts/ugv-zmq/preflight.ts",
+        "scripts/ugv-zmq/verify-control-evidence.ts",
+        "tests/ugv-zmq-provider/contract.test.ts",
+        "tests/ugv-zmq-provider/formal.postgres.test.ts",
+        "tests/ugv-zmq-provider/owner-route.postgres.test.ts"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/root-lint.log.gz",
+      "encoding": "gzip",
+      "sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "uncompressedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "regression",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "tests/ugv-zmq/",
+        "tests/ugv-zmq-observer/",
+        "tests/ugv-zmq-control/",
+        "tests/unit/vehicle-grpc-stream-lifecycle.test.ts",
+        "tests/contract/task-business-operation-profile.test.ts",
+        "tests/integration/manifest-drift.test.ts",
+        "tests/ugv-zmq-provider/contract.test.ts"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/regression.log.gz",
+      "encoding": "gzip",
+      "sha256": "a0d32fc9316e2540352df950c90725624422a30d26c2490803a4ebe6346f368f",
+      "uncompressedSha256": "9ab557395631d8145ac289f52d8294314d43a7969046b393bdb919ec46403e53"
+    },
+    {
+      "name": "native-postgres-regression",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": ["node", "node_modules/vitest/vitest.mjs", "run", "tests/ugv-zmq-control-postgres/"],
+      "environment": {
+        "SMPP_ZMQ_TEST_CONFIG_FILE": "/mnt/data/ugv-zmq-phase5-20261024/postgres-test.json"
+      },
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/native-postgres-regression.log.gz",
+      "encoding": "gzip",
+      "sha256": "f491309cd1f9ccb104b282955464af5dac7bc02ca91b3b6cc5472a1f38306e57",
+      "uncompressedSha256": "b41af1e83319796e4b35cbaf42cd0eae7e7a1e29ffe296332c8d405bb52b9d44"
+    },
+    {
+      "name": "formal-frozen",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": ["node", "node_modules/vitest/vitest.mjs", "run", "tests/ugv-zmq-provider/"],
+      "environment": {
+        "SMPP_ZMQ_TEST_CONFIG_FILE": "/mnt/data/ugv-zmq-phase5-20261024/postgres-test.json",
+        "SMPP_ZMQ_SDAR_ROOT": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5",
+        "SMPP_ZMQ_FORMAL_RAW_FILE": "/mnt/data/ugv-zmq-phase5-20261024/formal-raw-frozen.ndjson",
+        "SMPP_ZMQ_FORMAL_EVIDENCE_FILE": "/mnt/data/ugv-zmq-phase5-20261024/formal-evidence-frozen.json"
+      },
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/formal-frozen.log.gz",
+      "encoding": "gzip",
+      "sha256": "dde56bcd512a5a28092931c009e04153024df53c0f261046082b4ea8964631f9",
+      "uncompressedSha256": "fd1d2635b2da790e341414ca06ef9d3f1f8515ccfb45055519672f1acf4ef723"
+    },
+    {
+      "name": "console-tests",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-control-console",
+      "argv": [
+        "node",
+        "../../node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.config.ts"
+      ],
+      "environment": {
+        "SMPP_ZMQ_TEST_CONFIG_FILE": "/mnt/data/ugv-zmq-phase5-20261024/postgres-test.json",
+        "SMPP_INSPECTION_TEST_CONFIG_FILE": "/mnt/data/ugv-zmq-phase5-20261024/console-test.json"
+      },
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/console-tests.log.gz",
+      "encoding": "gzip",
+      "sha256": "98c2b35efc64c58482b2e562ff7233c16eb5e4c85681458ba88f011c7f6880f3",
+      "uncompressedSha256": "04408958c5bd0a25a286e4c437103c61ed3fb4fa4289e5f6a4b098780e542fcc"
+    },
+    {
+      "name": "console-zmq-tests",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-control-console",
+      "argv": [
+        "node",
+        "../../node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "test/zmq.test.ts"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/console-zmq-tests.log.gz",
+      "encoding": "gzip",
+      "sha256": "381e3b95cb571b6267d1af16e17ce57e766756faf726b8b048241d2f0051eeea",
+      "uncompressedSha256": "47825de2c5d4c020cd93fd842caa80d5911a2c6ade15187401d597338adefb93"
+    },
+    {
+      "name": "console-types",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-control-console",
+      "argv": ["node", "../../node_modules/typescript/bin/tsc", "--noEmit", "-p", "tsconfig.json"],
+      "environment": {},
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/console-types.log.gz",
+      "encoding": "gzip",
+      "sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "uncompressedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "console-web-build",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-control-console",
+      "argv": ["node", "node_modules/vite/bin/vite.js", "build"],
+      "environment": {},
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/console-web-build.log.gz",
+      "encoding": "gzip",
+      "sha256": "e7718d9dfa38a592002226ced17ad5cdee2cdd8e548952688653ef2aa2f1617e",
+      "uncompressedSha256": "9f91743705412a59b5d3dadac15c12b4f3cb81f1d89e674b2b6b75568075ec7a"
+    },
+    {
+      "name": "console-server-build",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-control-console",
+      "argv": ["node", "../../node_modules/typescript/bin/tsc", "-p", "tsconfig.server.json"],
+      "environment": {},
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/console-server-build.log.gz",
+      "encoding": "gzip",
+      "sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "uncompressedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "legacy-browser",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-control-console",
+      "argv": ["node", "node_modules/@playwright/test/cli.js", "test"],
+      "environment": {
+        "SMPP_INSPECTION_TEST_CONFIG_FILE": "/mnt/data/ugv-zmq-phase5-20261024/console-test.json"
+      },
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/legacy-browser.log.gz",
+      "encoding": "gzip",
+      "sha256": "0228c38d7aa7eef9ff9707c34df86d9ebd4e71d9158aff0001d5724f94e3a68d",
+      "uncompressedSha256": "c8013df51a657cf04622a76cd17267dfbd883282421c5f57e8f267e8e9a21d82"
+    },
+    {
+      "name": "native-browser",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-control-console",
+      "argv": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "playwright.zmq.config.ts"
+      ],
+      "environment": {
+        "SMPP_ZMQ_TEST_CONFIG_FILE": "/mnt/data/ugv-zmq-phase5-20261024/postgres-test.json",
+        "SMPP_ZMQ_BROWSER_RAW_FILE": "/mnt/data/ugv-zmq-phase5-20261024/browser-raw-final.ndjson",
+        "SMPP_ZMQ_BROWSER_EVIDENCE_FILE": "/mnt/data/ugv-zmq-phase5-20261024/browser-evidence-final.json",
+        "SMPP_ZMQ_BROWSER_REPORT_FILE": "/mnt/data/ugv-zmq-phase5-20261024/browser-report-final.json",
+        "UGV_ZMQ_BROWSER_SCREENSHOT": "/mnt/data/ugv-zmq-phase5-20261024/browser-desktop-final.png"
+      },
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/native-browser.log.gz",
+      "encoding": "gzip",
+      "sha256": "fa21afd8951b80b2f42de79094704ee2e8b94a6fd2764d6df0032ac99eb216de",
+      "uncompressedSha256": "087eda33d311b4ca838fb380dabb35df66e34c6b1fc013d2f4be4dacc109f333"
+    },
+    {
+      "name": "package-tests",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/ugv-zmq-provider",
+        "-p",
+        "*_test.py"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/package-tests.log.gz",
+      "encoding": "gzip",
+      "sha256": "61660ee8acbd3001b0092a0b71174c663e9c65aa18c323c70e40da8e5be83b16",
+      "uncompressedSha256": "63a9e3e5bd1d5f3a08776dea8e41de5e3b99d0ff4e497243376ee4c62546a4d1"
+    },
+    {
+      "name": "locked-contracts",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": ["node", "--import", "tsx", "scripts/ugv-zmq/check-contracts.ts"],
+      "environment": {},
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/locked-contracts.log.gz",
+      "encoding": "gzip",
+      "sha256": "e3e844c141da68a5ccb567078bb2e867c5b9684d6e88c2667bb2bc57213ef4bb",
+      "uncompressedSha256": "c5eb8a606eef0a5bbf8deb4e71efbe2bdb0f573b6b87834d1c77b2c6a09eae35"
+    },
+    {
+      "name": "protocol-full",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "bash",
+        "-c",
+        "node scripts/protocol/check-frozen-contract.mjs && node scripts/protocol/fetch-pinned-mcp-schema.mjs --check && node scripts/protocol/validate-protocol-schemas.mjs && node scripts/protocol/verify-protocol-lock.mjs"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/protocol-full.log.gz",
+      "encoding": "gzip",
+      "sha256": "717810243bd0cf726c6022da6b7a3473da1ac4b1912352df8d800c9260b839f0",
+      "uncompressedSha256": "dcbecab74ccba3c03fe789ea486bdbc545f7923f3a305c1b4449436b3a6539d7"
+    },
+    {
+      "name": "source-g0",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "node",
+        "dist/scripts/ugv-zmq/preflight.js",
+        "--report",
+        "/mnt/data/ugv-zmq-phase5-20261024/g0-release.json"
+      ],
+      "environment": {},
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/source-g0.log.gz",
+      "encoding": "gzip",
+      "sha256": "c7b353dfa81e9c8c69a2d442736118f45affdffcde3ae37dd60aa911e45ee431",
+      "uncompressedSha256": "66273dd990119e253f3e6420de60889c556c9ac543153d5562ddae244810bdcb"
+    },
+    {
+      "name": "docker-build",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "docker",
+        "build",
+        "--target",
+        "ugv-zmq-candidate",
+        "--build-arg",
+        "VCS_REF=655a0b725845426d2ec01216b48e3361455d9842",
+        "--tag",
+        "smpp/ugv-zmq-candidate:20261025-phase5",
+        "."
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/docker-build.log.gz",
+      "encoding": "gzip",
+      "sha256": "a0a50afa0dab5c0724ec0ef449b7ed96bb42bf7d3be1313f877cad6059afccbd",
+      "uncompressedSha256": "0d049afe0d09a3d80e316dde906d131dc7319a7031d03542be7d5e60e05428de"
+    },
+    {
+      "name": "docker-native-module",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--entrypoint",
+        "node",
+        "smpp/ugv-zmq-candidate:20261025-phase5",
+        "--input-type=module",
+        "-e",
+        "import {createRequire} from \"node:module\";const require=createRequire(import.meta.url);const z=require(\"zeromq\");const s=new z.Pair();s.close();await import(\"./dist/apps/ugv-zmq-provider-adapter/src/bootstrap.js\");console.log(JSON.stringify({node:process.version,zeromq:require(\"zeromq/package.json\").version,libzmq:z.version,providerModule:\"loaded\",socket:\"constructed_closed\",network:\"none\"}));"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/docker-native-module.log.gz",
+      "encoding": "gzip",
+      "sha256": "e8bf769c5f753a90766d3f063200176e435bc84dba1a13c8abc243a3113e5b76",
+      "uncompressedSha256": "534a29a156568ccac456984d7ba86081395d0674ca03d17d526d1ef795a62ed8"
+    },
+    {
+      "name": "docker-g0",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--entrypoint",
+        "node",
+        "smpp/ugv-zmq-candidate:20261025-phase5",
+        "dist/scripts/ugv-zmq/preflight.js"
+      ],
+      "environment": {},
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/docker-g0.log.gz",
+      "encoding": "gzip",
+      "sha256": "3731a6e1bc53683c98d5bf00a3d0d2574edd97ac739b13becb8cfe5313aac522",
+      "uncompressedSha256": "8d614b7072b66eda39e7d627da5012c3e010b473d10381ceb52dc3a0c247ac13"
+    },
+    {
+      "name": "docker-default-start-rejection",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--entrypoint",
+        "node",
+        "smpp/ugv-zmq-candidate:20261025-phase5",
+        "dist/apps/ugv-zmq-provider-adapter/src/main.js"
+      ],
+      "environment": {},
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/docker-default-start-rejection.log.gz",
+      "encoding": "gzip",
+      "sha256": "52e06a7dc4e4f0f14a6f09f6d4dd790d850812daa7ea90b3dd9e113aa4188186",
+      "uncompressedSha256": "4879a13a3f1001be34d393365e4480b0c4ad1dae3e15f1c1a4b2148fdc26813f"
+    },
+    {
+      "name": "sdar-full",
+      "cwd": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5",
+      "argv": [
+        "taskset",
+        "--cpu-list",
+        "3,4,8,29,30,31,33,34",
+        "node",
+        "scripts/verify-isolated.mjs",
+        "--docker-default-bridge"
+      ],
+      "environment": {
+        "PATH": "/home/sz/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin:/home/sz/.nvm/versions/node/v22.23.2/lib/node_modules/corepack/shims:/home/sz/.nvm/versions/node/v22.23.2/bin:/home/sz/.codex/tmp/arg0/codex-arg0Lb3zto:/home/sz/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/home/sz/.nvm/versions/node/v22.23.2/bin:/home/sz/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin:/home/sz/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/usr/lib/chatgpt/resources",
+        "HOME": "/home/sz",
+        "LANG": "C.UTF-8",
+        "npm_execpath": "/home/sz/.cache/node/corepack/v1/pnpm/11.7.0/bin/pnpm.mjs"
+      },
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/sdar-full.log.gz",
+      "encoding": "gzip",
+      "sha256": "afc1f0637f0f5f92168bc0dbd7557b191ba83de74d05049ee63dce23ce28355e",
+      "uncompressedSha256": "4547229367ab3e2537b5c61681ec2610d932675775acc3afab1807e2061e54ab",
+      "startedAt": "2026-10-24T17:40:13.984937+00:00",
+      "finishedAt": "2026-10-24T18:08:04.919308+00:00"
+    },
+    {
+      "name": "sdar-isolation",
+      "cwd": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5",
+      "argv": ["node", "scripts/test-verification-isolation.mjs"],
+      "environment": {},
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/sdar-isolation.log.gz",
+      "encoding": "gzip",
+      "sha256": "db7684f7b81939eb0c26599633576c73cf1ba31b1c4f6d38831c1be6fa5377b3",
+      "uncompressedSha256": "f5580cc400d1cee9fdcac2600db584c304230453ae99f2a62f14309ef93a340d"
+    },
+    {
+      "name": "sdar-runner",
+      "cwd": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5",
+      "argv": ["node", "scripts/test-verification-runner.mjs"],
+      "environment": {},
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/sdar-runner.log.gz",
+      "encoding": "gzip",
+      "sha256": "5132b27c8c7a01afd2b6ab87f69a141442047b5cec9947763ce21162e3f44497",
+      "uncompressedSha256": "6f6bb9b67751ce29a3afad31af374c6cb1e1486aa0e36e91d783b1ba0447f4d4"
+    },
+    {
+      "name": "formal-source-proof",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/ugv-zmq/verify-control-evidence.ts",
+        "/mnt/data/ugv-zmq-phase5-20261024/formal-raw-frozen.ndjson",
+        "/mnt/data/ugv-zmq-phase5-20261024/formal-evidence-frozen.json"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/formal-source-proof.log.gz",
+      "encoding": "gzip",
+      "sha256": "473319ab96f5dd39b8042f4b19a17aa0e355c579576d0375b7a99b7c6e331e78",
+      "uncompressedSha256": "536d5bde0a0ea86530bd30d1bbc93f7bf23c8218a54aeb2c613ce57d390723e7"
+    },
+    {
+      "name": "browser-source-proof",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/ugv-zmq/verify-control-evidence.ts",
+        "/mnt/data/ugv-zmq-phase5-20261024/browser-raw-final.ndjson",
+        "/mnt/data/ugv-zmq-phase5-20261024/browser-evidence-final.json"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "log": "reports/ugv-zmq-phase5/raw/logs/browser-source-proof.log.gz",
+      "encoding": "gzip",
+      "sha256": "3ad2f317331a6d1b32e3a5e53de1efd9fb3ed409a4e1663b26f8f059dc335588",
+      "uncompressedSha256": "de677c8904b737eb99ca6a991496492fb341f008d326b9440d45c4dff7a98166"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "reports/ugv-zmq-phase5/raw/formal-raw-frozen.ndjson.gz",
+      "bytes": 813735,
+      "sha256": "b0672184782f7ca265eea1902966d78e42cf9f7cea917f0b594603e0633584a2",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/formal-evidence-frozen.json.gz",
+      "bytes": 88064,
+      "sha256": "ac7e73e28bce8c31596237e2684bc71fc82c2f696c443db8ba23afafdca805bc",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/browser-raw-final.ndjson.gz",
+      "bytes": 449502,
+      "sha256": "21b2507cf5ecc2943da91dd2e3c0fba97a4c6c5666ef05a8da17c5d10590a552",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/browser-evidence-final.json.gz",
+      "bytes": 10256,
+      "sha256": "5f9c1422ae0a8832bd0fcb493a31fbf1c5b5afe6c4246b604158b2cce05561be",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/browser-report-final.json.gz",
+      "bytes": 2141,
+      "sha256": "d5c1c1bf961c7fd0a80d6845502483e98bb29b6fb21d7a5fe2accd0b6952fb33",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/formal-proof-frozen.json",
+      "bytes": 342,
+      "sha256": "536d5bde0a0ea86530bd30d1bbc93f7bf23c8218a54aeb2c613ce57d390723e7",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/browser-proof-final.json",
+      "bytes": 316,
+      "sha256": "de677c8904b737eb99ca6a991496492fb341f008d326b9440d45c4dff7a98166",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/g0-release.json",
+      "bytes": 9439,
+      "sha256": "66273dd990119e253f3e6420de60889c556c9ac543153d5562ddae244810bdcb",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/docker-source-proof-qualified.json",
+      "bytes": 5248,
+      "sha256": "2025e5099631e53154f3428430a3c5b8d8d97096b516d164d4cc57647bc2f76b",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/docker-native-qualified.json",
+      "bytes": 127,
+      "sha256": "534a29a156568ccac456984d7ba86081395d0674ca03d17d526d1ef795a62ed8",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/site-containers.json",
+      "bytes": 833,
+      "sha256": "fecfa8faab9021abfba1d673b0207af8ac7f826328f248fdf8ebf2d9e5019056",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/cpu-profile.json",
+      "bytes": 258,
+      "sha256": "df294f069e8be11ce3bffdcdbaf1860f9c32d5adf5bb309a9a7068a39822a8c4",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-affinity-invocation.json",
+      "bytes": 1401,
+      "sha256": "69376c1dc9d165ef0a135918474c2b2ef447038e0a4ee770e6197cb8f07a3b34",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-tail-valid-diagnostic.json",
+      "bytes": 1248,
+      "sha256": "5cdc5df8b82f2a8fc1cd5b64ccf40cd8936c875296e048edad3f68353e58efd1",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/fixture-cleanup.json",
+      "bytes": 337,
+      "sha256": "6a3eb770aeaf67f50f15a49148b4d64c592fdda808c04c08b083d316ed7da0d2",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/source-integrity-trial.tar.gz.receipt.json",
+      "bytes": 374,
+      "sha256": "a6f66a82adf25c26dc6b5edb046c4e08d0cb56e7770ea280367087d073f88b7f",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-infra-default-bridge-probe.json",
+      "bytes": 140,
+      "sha256": "cc35ec97a95ab8918cda45473d21f6ddf2627972442639aca8b718449617cb49",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/browser-desktop-final.png",
+      "bytes": 345368,
+      "sha256": "c8aa661e5d69614cd50857baa653e9fb13528c5c20bd83ebe731b064e7caaf16",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/record-evidence.py",
+      "bytes": 13124,
+      "sha256": "7779efd683730fe2848592445c24de21faea88902a8d90a4af8977fb54e0dc2b",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-run.json",
+      "bytes": 2685,
+      "sha256": "5b98a1f23c3059e710c7971c8784d2da079dec57b904b99f6227a8088032137d",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-inputs.json.gz",
+      "bytes": 387308,
+      "sha256": "bc0e94ed1dfc4a615a1fb1f478f94f196f25e23ae4c30e0bcb9ebdae39c585fc",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-network.json",
+      "bytes": 511,
+      "sha256": "0243738919910ebb6f6750eafce570b7ad27f4ae22b366ccd3c473812f785c4e",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/format.log.gz",
+      "bytes": 199,
+      "sha256": "66c02c5835a2bc3d8f0a9a00d778ec83ea242e13ef1877274d83400e21fe69d5",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/verification-runner-contract.log.gz",
+      "bytes": 1462,
+      "sha256": "db8f3a6ca120e72d22154ee15c3d017fac931ad1f7284fd0d1513d55b2596c1f",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/lint.log.gz",
+      "bytes": 31,
+      "sha256": "a3fc63b15eb42f707fa9d63b0a9a9628dd72eaec4b6f4cd626a9cf98d67ebe19",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/typecheck.log.gz",
+      "bytes": 49,
+      "sha256": "5b091cfa84f153e454772c0c86ea561333701b98e8aa9ac99687a1b460087dea",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/unit.log.gz",
+      "bytes": 5701,
+      "sha256": "360169fa3a0850734837140afb7c8eb56583a1746cb99b4cea003a417748baa8",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/contract.log.gz",
+      "bytes": 1703,
+      "sha256": "ace98fe3ed4bf69f1ea733a777deb26ad93fb1f3f7fbdf56999fa149bc0db846",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/evidence-contract.log.gz",
+      "bytes": 320,
+      "sha256": "3f98314b8e357cc368fa974576a3845f440556645f66f3cf62e65063ad547bd2",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/evidence-coverage.log.gz",
+      "bytes": 157,
+      "sha256": "e895c431e920f8bcc73684df3172437626cc9f091ae922e56a92a781d775bd9a",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/architecture.log.gz",
+      "bytes": 311,
+      "sha256": "325c50e5613fd30fed36195ad3ebf676fb0d95b383006e664a63c31f9332ed84",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/a2a-baseline.log.gz",
+      "bytes": 243,
+      "sha256": "4f1379b5e1996a18ce75bcf4cea6c43e6bdc0babf4da9bae27fc24801248754a",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/management-openapi.log.gz",
+      "bytes": 105,
+      "sha256": "341fb6c1232c6e65869f73efb7d85afb3f34b9a82443978118d9cd45f71e7db8",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/node-control-contract.log.gz",
+      "bytes": 134,
+      "sha256": "dadf517cfae4e3905e31e5ec2cc2d5ee61e2d80ed71472ef114d048c891b9510",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/node-control-implementation-conformance.log.gz",
+      "bytes": 187,
+      "sha256": "dbdf4b3b3c7fb3f62c6324d13918c293281ad9c0ddd8c2319e7a425f4f2180b8",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/smpp-registry-projection.log.gz",
+      "bytes": 427,
+      "sha256": "a68d9c1c8dba59c9f2b270298465f6d59cfca3ba8694ac78f2d37af91b783fdf",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/acceptance.log.gz",
+      "bytes": 149,
+      "sha256": "a242dce08b09fc93c2ec48dd18ad7ff6a153b68560bc363a70d0a6aefd1c95ca",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/sources.log.gz",
+      "bytes": 103,
+      "sha256": "6ac4e8c737717a7704e709d7cbd8ba9bb1b99bd6e2aacd2ad6f3118d1235a2f4",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/protocol.log.gz",
+      "bytes": 143,
+      "sha256": "08d928ef6ad4b24404bd2c85cd8d5e24bbeda58602dee0ccc11b7c09a21ed10e",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/infra.log.gz",
+      "bytes": 119,
+      "sha256": "e1692692cd991aaf2ef61a6f7d2295e65f15a9b0a98370d726dc50d34ba29df9",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/project-license.log.gz",
+      "bytes": 117,
+      "sha256": "d8c8fb372f50aa866b81d1026031cac3b1e8291f5c8885ef1d8da77e26927f0f",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/licenses.log.gz",
+      "bytes": 145,
+      "sha256": "0fd55b6fb1e1063d256cd5f349cdc9380a90704a2a21b05cdcbf6a275e11cef7",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/build.log.gz",
+      "bytes": 304,
+      "sha256": "ff8a2dfe9a46c241b67bb399c94a1f4c23b0a14396061f45e9177d89f5c0cede",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/cognitive-replay-no-physical-provider.log.gz",
+      "bytes": 129,
+      "sha256": "e41245fe39381ca0b9589f72a8b557b0247e26be4024632649b6af5eeb14c3ae",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/clean-baseline-reset-seed.log.gz",
+      "bytes": 1486,
+      "sha256": "71e74e065a19d3f3cd230f034dfc116492d2cb6f346af96ddd5bfd88add60147",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/postgres-redis-integration.log.gz",
+      "bytes": 8953,
+      "sha256": "08494396af235c1602fc77f9d12c0b2890aa50fb3890fe4b0b792374aadba36a",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/postgres-redis-model-mcp-e2e.log.gz",
+      "bytes": 7532,
+      "sha256": "3aea356c75fbf1bbff434692e14c3eb6bff5480a1b79884cd7cccf26ad9ab9c9",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/official-a2a-tck.log.gz",
+      "bytes": 1384,
+      "sha256": "c4e3b18b6b68f44305282479a47664730b23d2bacf2c22a7859f92005d20a8f8",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/canonical-evidence-demo.log.gz",
+      "bytes": 2051,
+      "sha256": "209770e494754278703430c7b7d23e40518d02bdd443763cba4800feb83c4de8",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/infrastructure-smoke.log.gz",
+      "bytes": 1430,
+      "sha256": "b3e9ff7b0656d91a5a4a3c381d80f69a3acb10808d77887f083e733b99ebd20b",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/server-console-smoke.log.gz",
+      "bytes": 1799,
+      "sha256": "851f8d99580e39a6122b0fe249ce8e7d4c81d8c99dff60f1e9ea3c7957b90f2b",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-steps/node-control-api-worker-smoke.log.gz",
+      "bytes": 2240,
+      "sha256": "f8b49f76c173e88577de8f6ec95ef2e5861b8c4575deff83446a349957b7b918",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-performance.json",
+      "bytes": 410,
+      "sha256": "9f2d895dc3ccb4d61f07f55d613986c017fae5df21dee8f4a1f15bcad49d909a",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-full-summary.json",
+      "bytes": 21373,
+      "sha256": "073332af5008e0cc9e7e41b5d460b0791fbae159dcf80f3a06080705df3391d4",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-full-summary.md",
+      "bytes": 2409,
+      "sha256": "c7ae34752bf2cfbc0e93062ceb6e6ce0ad519ac1198511feb49eb1e74eb00177",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-failed-network-run.json",
+      "bytes": 2649,
+      "sha256": "10dc851fc08bb15e0304ac770572230a41ffd87d0d70a02d57119c690d773c07",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-failed-toolchain-run.json",
+      "bytes": 2687,
+      "sha256": "aad9ffa936562346129a1aa48ba36122a374ed6b0f91b7fd8e79ef2a4c2cb13e",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/sdar-failed-baseline-drift-run.json",
+      "bytes": 2687,
+      "sha256": "ebe806ea030d6d61d404f7c489ab8192e41295220a08b72a30069cbf01553609",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/attempts/sdar-full-gate-boundary.log.gz",
+      "bytes": 13032,
+      "sha256": "9601612f76d052a4ab22dacbc8f4edec9a802a88f8f3bac3485ab5ded71cf642",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/attempts/sdar-full-gate-network.log.gz",
+      "bytes": 25885,
+      "sha256": "1eefaf3d3c12276195e4c18df833e77f883a901e2562bc1f7b4944029864ffb3",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/attempts/sdar-full-gate-toolchain.log.gz",
+      "bytes": 26913,
+      "sha256": "2b55739f20813a4313fd2876fced33f7b5be58fe2e821894f49fdb9564d18cd5",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/attempts/sdar-full-gate-verified.log.gz",
+      "bytes": 9380,
+      "sha256": "9a04fbcbd539a943156642c2d427a7aea60cb4925bbc91c8ae7713bad88c5c10",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/attempts/sdar-infra-helper-proof.log.gz",
+      "bytes": 1379,
+      "sha256": "262915dfdf4c85fa5e9b4a622f2fcc1c3df81a8a5b0f9a2e767c3b31e3ceb23d",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/attempts/docker-g0-final.log.gz",
+      "bytes": 416,
+      "sha256": "58c9635aac266dbe429d77b1b472496e8de4fa0feaf8db377ee3d8ebef7636a9",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/attempts/root-lint-native-module.log.gz",
+      "bytes": 623,
+      "sha256": "3c49e1a19b10e751a93173dc51c96cdca45017cfa78c1825fd1b08e8d9d0e706",
+      "encoding": "gzip"
+    },
+    {
+      "path": "reports/ugv-zmq-phase5/raw/attempts/catalog-final.log.gz",
+      "bytes": 2245,
+      "sha256": "fa48b7d2284b29b24110e1800ae7deb0aa9cfed391d5db60973f2bc7a2529d1c",
+      "encoding": "gzip"
+    }
+  ],
+  "sdarFullGate": {
+    "runId": "sdar-verify-d392206e-dc0d-4ad9-ad43-f58fb94f85c2",
+    "exitCode": 0,
+    "inputSha256": "c55c9427a82490990217dc69e4949ffcd8d50a1979341ae6477ea644ab4a12ec",
+    "baselineSha256": "e0e9c246b2c40bf26d27f2a604361035d333cf15161ebeb717a97e2f2bb39cbf",
+    "inputUnchanged": true,
+    "baselineUnchanged": true,
+    "networkMode": "default_bridge",
+    "testProcessCpuAffinity": {
+      "mode": "inherited_test_process_cpu_affinity",
+      "socket": 0,
+      "cpus": [3, 4, 8, 29, 30, 31, 33, 34],
+      "exclusive": false,
+      "otherProcessesChanged": false,
+      "thresholdsChanged": false,
+      "sampleWindowSeconds": 1
+    },
+    "cleanupExitCode": 0
+  }
+}

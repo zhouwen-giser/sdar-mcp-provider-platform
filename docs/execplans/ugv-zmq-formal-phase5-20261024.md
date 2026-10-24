@@ -38,8 +38,10 @@ united packaging changes and both older SDAR checkouts' evidence remain untouche
       discovery against the actual isolated formal MCP Runtime.
 - [x] Verify formal MCP -> native ZMQ -> durable Task/Context/results, including late effects,
       acknowledged pause/resume and unchanged finalized Context.
-- [ ] Package deployment, admission/handoff/rollback checks; run required gates, fix regressions.
-- [ ] Record source/commands/exit codes/evidence hashes; commit and push both repositories.
+- [x] Package candidate tooling/image, admission/handoff/rollback checks; run required gates and
+      fix regressions. Archive tests cover reproducibility, executable modes and required inputs.
+- [x] Record source/commands/exit codes/evidence hashes and prepare both source/evidence deliveries;
+      final commit, remote and package identities are fixed by the external delivery receipt.
 - [ ] Accept actual SDAR CAS publication and the native Skill task chain/patrol successor.
 - [ ] Qualify GOWM owner deployment, G0 source facts and an idle fenced handoff before cutover.
 
@@ -78,3 +80,20 @@ No existing runtime/container is replaced before qualification and a concrete id
 Stopping the new candidate does not clear unresolved device occupancy. Withdraw new catalog
 publication and retain history on rollback; old controls require their original dependencies.
 Implementation and field acceptance are recorded separately in the final evidence report.
+
+## Isolated increment closeout — 2026-10-25
+
+Formal acceptance: 12 tests; relevant native/legacy regressions: 134 tests (including the same four
+catalog tests); native PostgreSQL regressions: 29; console: 57 plus 6 browser cases; archive: 2.
+Native module loading and 39 compiled-file hashes match the image. Its preflight validates all
+17 frozen inputs and correctly rejects field admission with 12 G0 gaps (exit 2).
+
+SDAR run `sdar-verify-d392206e-dc0d-4ad9-ad43-f58fb94f85c2` passed all 30 required stages with
+unchanged runtime/baseline inputs and cleanup exit 0. It uses the explicit fixture-only default
+bridge, an ensurepip-capable Python toolchain and inherited eight-core test-process affinity.
+The original failing bridge, missing ensurepip and 19.064% unstable-baseline attempts are retained.
+The final baseline drift is 4.872%, relative P95 regression -0.406%, append P95 2.423ms; thresholds
+remain 15%, 10% and 20ms. No other service/process resource configuration was changed.
+
+This closes the first formal isolated increment. Phase 5 remains open for the acceptance items
+above. No 19100/19101 cutover, real control or SDAR governance publication is claimed.
