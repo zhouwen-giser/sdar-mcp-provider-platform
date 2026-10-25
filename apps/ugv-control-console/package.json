@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "build": "pnpm typecheck && vite build && tsc -p tsconfig.server.json",
+    "build": "tsc --noEmit -p tsconfig.build.json && vite build && tsc -p tsconfig.server.json",
     "start": "node build/server/main.js",
     "test": "vitest run --config vitest.config.ts",
     "test:e2e": "playwright test",

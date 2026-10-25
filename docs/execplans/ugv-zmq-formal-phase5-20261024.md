@@ -112,3 +112,9 @@ Startup cancellation follow-up: scheduled future tasks cancel locally without di
 Start cancellation retains the claim, defers unbound commands, and preserves STOPPING after ACK.
 A proven absent admission never retries after cancellation. Focused real tests 3/3 and shared Task
 lifecycle 151/151 pass; full final-source gates are pending.
+
+The standalone console image exposed that production build typechecking also included repository
+test fixtures outside the image context. Add a strict production tsconfig for web/server/shared
+and Vite configuration. The existing full typecheck still includes all tests and e2e fixtures and
+is independently required before delivery; no test assertions, input validation or compiler
+strictness are relaxed. Preserve the initial failed image receipt and rebuild from the repair commit.
