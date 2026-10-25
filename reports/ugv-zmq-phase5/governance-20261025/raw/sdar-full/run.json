@@ -1,0 +1,96 @@
+{
+  "runId": "sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a",
+  "dependencyMode": "reuse",
+  "networkMode": "default_bridge",
+  "inputSha256": "07c960b0ae139ffa7753e8268c0a72f176f61e7c521db18456ecf90f2bf25106",
+  "baselineSha256": "a903e686927bd1002629c6dab024ae2f20f62ee5253f8f965b09b3e72a79eb5d",
+  "inputUnchanged": true,
+  "baselineUnchanged": true,
+  "snapshot": "/tmp/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a-jvXXUH/source",
+  "exitCode": 0,
+  "cleanupExitCode": 0,
+  "cleanupResults": [
+    {
+      "name": "sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a",
+      "file": "compose.yaml",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 167,
+      "resources": {
+        "source": "linux-proc-process-group-sampling",
+        "samples": 1,
+        "peakRssBytes": 28680192,
+        "peakProcesses": 1
+      },
+      "cleanupErrors": []
+    },
+    {
+      "name": "sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a-control-smoke",
+      "file": "compose.node-control.yaml",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 94,
+      "resources": {
+        "source": "linux-proc-process-group-sampling",
+        "samples": 1,
+        "peakRssBytes": 28323840,
+        "peakProcesses": 1
+      },
+      "cleanupErrors": []
+    },
+    {
+      "name": "sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a-runtime-smoke",
+      "file": "compose.yaml",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 99,
+      "resources": {
+        "source": "linux-proc-process-group-sampling",
+        "samples": 1,
+        "peakRssBytes": 28372992,
+        "peakProcesses": 1
+      },
+      "cleanupErrors": []
+    },
+    {
+      "name": "sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a-e2e-performance",
+      "file": "compose.verification-performance.yaml",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 107,
+      "resources": {
+        "source": "linux-proc-process-group-sampling",
+        "samples": 1,
+        "peakRssBytes": 28557312,
+        "peakProcesses": 1
+      },
+      "cleanupErrors": []
+    },
+    {
+      "resource": "migration-container-inventory",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 26,
+      "resources": {
+        "source": "linux-proc-process-group-sampling",
+        "samples": 1,
+        "peakRssBytes": 0,
+        "peakProcesses": 0
+      },
+      "cleanupErrors": []
+    },
+    {
+      "resource": "migration-volume-inventory",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 25,
+      "resources": {
+        "source": "linux-proc-process-group-sampling",
+        "samples": 1,
+        "peakRssBytes": 0,
+        "peakProcesses": 0
+      },
+      "cleanupErrors": []
+    }
+  ]
+}

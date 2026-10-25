@@ -1,0 +1,21 @@
+{
+  "name": "project-license",
+  "command": "pnpm verify:project-license",
+  "status": "passed",
+  "startedAt": "2026-10-25T09:19:59.880Z",
+  "finishedAt": "2026-10-25T09:20:00.606Z",
+  "timeoutMs": 600000,
+  "logPath": "reports/verification/raw/project-license.log",
+  "outputSha256": "11054109617d351d51b769f4e2056b1de2c82f26806ad3ad3aed6d5b4db71861",
+  "metrics": {},
+  "exitCode": 0,
+  "signal": null,
+  "durationMs": 725,
+  "resources": {
+    "source": "linux-proc-process-group-sampling",
+    "samples": 1,
+    "peakRssBytes": 58073088,
+    "peakProcesses": 1
+  },
+  "cleanupErrors": []
+}

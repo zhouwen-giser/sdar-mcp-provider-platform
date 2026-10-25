@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "ugv.zmq-command-receipt/1",
+  "id": "format-smpp-build-repaired",
+  "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+  "argv": [
+    "/home/sz/.nvm/versions/node/v22.23.2/bin/node",
+    "node_modules/prettier/bin/prettier.cjs",
+    "--check",
+    "apps/ugv-zmq-provider-adapter",
+    "packages/vehicle-zmq-control/src/result-schemas.ts",
+    "packages/vehicle-zmq-control/src/catalog.ts",
+    "packages/persistence-postgres/src/tasks.ts",
+    "packages/task-engine/src/engine.ts",
+    "packages/task-engine/src/command-dispatcher.ts",
+    "tests/ugv-zmq-provider",
+    "contracts/ugv-zmq/provider-v1.0.1",
+    "apps/ugv-control-console/package.json",
+    "apps/ugv-control-console/tsconfig.build.json"
+  ],
+  "explicitEnvironmentPathsAndTooling": {},
+  "startedAt": "2026-10-25T09:20:55.969482+00:00",
+  "completedAt": "2026-10-25T09:20:58.170153+00:00",
+  "elapsedSeconds": 2.201,
+  "exitCode": 0,
+  "log": "format-smpp-build-repaired.log",
+  "logSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+  "sourceBefore": {
+    "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+    "branch": "codex/ugv-zmq-phase5-20261024",
+    "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+    "trackedCodeFileCount": 2290,
+    "codeInputExclusions": [
+      "reports/**"
+    ],
+    "status": []
+  },
+  "sourceAfter": {
+    "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+    "branch": "codex/ugv-zmq-phase5-20261024",
+    "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+    "trackedCodeFileCount": 2290,
+    "codeInputExclusions": [
+      "reports/**"
+    ],
+    "status": []
+  },
+  "codeInputsUnchanged": true
+}

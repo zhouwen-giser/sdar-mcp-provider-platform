@@ -1,0 +1,140 @@
+{
+  "classification": "EXPLORATORY_NOT_FINAL_ACCEPTANCE",
+  "privateArtifacts": [
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-attempt-1.log",
+      "bytes": 422,
+      "sha256": "701c09724bb156abbff067925f8a018ae248c9bd6bab7fe36af63e7a1f125f40"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-attempt-10.log",
+      "bytes": 18548,
+      "sha256": "a490c8b6e794846d5dd0a0b29adcb4692dea1f91c8a9a1d2c594de0da7723ae7"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-attempt-11.log",
+      "bytes": 15619,
+      "sha256": "4eafb6568a59f5212bdffcb596a9e91e04407c559f50ea4ff98f372bcfd03b1d"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-attempt-12.log",
+      "bytes": 10224,
+      "sha256": "781d69fa5cdd125e370ac9385e32b11a8207e60b647c0bf692c8e009f58191e3"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-attempt-13.log",
+      "bytes": 10442,
+      "sha256": "376650fecdaba17ba7db09a81e5944c16dc57a455ec21a7fce966455bba2cff3"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-attempt-14.log",
+      "bytes": 10340,
+      "sha256": "3da088d9e5bf8accd9457e864e3e610c85d3aeffe17a223e551030a630bb0bf5"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-attempt-15.log",
+      "bytes": 10348,
+      "sha256": "23fadd668080e3827de5d770068b030995ce0d235a274c692eb11ec679242937"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-attempt-16.log",
+      "bytes": 14541,
+      "sha256": "297618ef8d575edeb8cecdb82e6f0cfa970e9b0466027bde0299ea1eaabbcfdb"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-attempt-17.log",
+      "bytes": 14527,
+      "sha256": "7fbfec0cf58340e1ff0c9f374f00e4d15a370b4dcb5e030c70b3cdbdfbea11ca"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-attempt-18.log",
+      "bytes": 10288,
+      "sha256": "c2425eee59b165efae4de810164810dc30c189c0a11f11bbaf0f9f8ad590a4ec"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-attempt-19.log",
+      "bytes": 287100,
+      "sha256": "af0e099e30bde41ba27416fb876d7d487c95bd485fbe86b7d1eafc75e631c307"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-attempt-2.log",
+      "bytes": 1961,
+      "sha256": "18d861801333f48c337ac3b4767d227fb1bd7236a350a6dbf5f4e149a55e3c87"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-attempt-20.log",
+      "bytes": 10412,
+      "sha256": "81286335af98f2f674e98e2e6b44bd3daf154713077d3d692c8a53e46da0fe99"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-attempt-3.log",
+      "bytes": 1251,
+      "sha256": "265c6ce4624f8846c39c52121ff83ea7e4d6e8a6ca638316e713484710f2d21b"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-attempt-4.log",
+      "bytes": 1218,
+      "sha256": "36d60e28ba082b59adb0ba5fb9d8913efb76208d4a2115c8460996aa14fb54af"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-attempt-5.log",
+      "bytes": 2090,
+      "sha256": "332403934b5879f8dbe63b4873a3ff0ae90a5e8c9cf21f1575e89c8544075dd9"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-attempt-6.log",
+      "bytes": 2120,
+      "sha256": "45fb31177d248f7a8a48e5f6a306eb7fb49c094e5e1ac6eb0af4043fea4e59af"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-attempt-7.log",
+      "bytes": 9079,
+      "sha256": "acdc15baaa20a49aca84b30980b9870e8f1dc6c9919dc5f12a98376f8b028b66"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-attempt-8.log",
+      "bytes": 16131,
+      "sha256": "9caffa5fe9e090d563cc151d69735a6d3c3dfb5837b75b5e3962f585578281df"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-attempt-9.log",
+      "bytes": 17753,
+      "sha256": "a31863ed2f7daea1ecfe05115eed3d1578535ccd0bf436b00cde0938a3501c1b"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/scheduled-regression-binding.log",
+      "bytes": 2068,
+      "sha256": "7afee02f203ffc0b6011a36cef806d63818813b954fff4c84e9ca87aef652450"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/scheduled-regression-blockers.log",
+      "bytes": 3013,
+      "sha256": "4910d50987a9c5e40a61f5112b08d1bce3a446b29eea7f71374efd6e726e7bc2"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/scheduled-regression-diag.log",
+      "bytes": 1605,
+      "sha256": "0c5d28e91152873de6ffd5dc35cd204c1720b7f2fdd71e4df46f83f6148e24f9"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/scheduled-regression-fixed.log",
+      "bytes": 278,
+      "sha256": "cf90ebc2f1967fd2035ba17546abd3de924a2082c30508ac63e57b67bccc9006"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/scheduled-regression-initial.log",
+      "bytes": 1400,
+      "sha256": "27fef25a6bff6c3defbb3a92594121f12b0a1912a6919f8340c7103cbf5e0dec"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/scheduled-regression-trace.log",
+      "bytes": 2592,
+      "sha256": "f05b22640d4624d8c0f4ac380ea52e68e638c630c6ede4d33cf5e25055d41460"
+    },
+    {
+      "path": "/mnt/data/ugv-zmq-phase5-governance-20261025/scheduled-regression-trace2.log",
+      "bytes": 2797,
+      "sha256": "1cbd5957bdb199abefaa8f0162f22c7aedf55d80e04898c84fca4c589347a290"
+    }
+  ]
+}

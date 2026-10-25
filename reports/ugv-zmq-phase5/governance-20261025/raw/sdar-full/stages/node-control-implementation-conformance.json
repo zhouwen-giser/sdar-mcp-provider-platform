@@ -1,0 +1,21 @@
+{
+  "name": "node-control-implementation-conformance",
+  "command": "pnpm verify:node-control-implementation-conformance",
+  "status": "passed",
+  "startedAt": "2026-10-25T09:19:52.181Z",
+  "finishedAt": "2026-10-25T09:19:55.716Z",
+  "timeoutMs": 600000,
+  "logPath": "reports/verification/raw/node-control-implementation-conformance.log",
+  "outputSha256": "6ba8a7328603451b474fe61d9b56dacc4c1e169a173e787f4c344f5363edd29b",
+  "metrics": {},
+  "exitCode": 0,
+  "signal": null,
+  "durationMs": 3535,
+  "resources": {
+    "source": "linux-proc-process-group-sampling",
+    "samples": 4,
+    "peakRssBytes": 459341824,
+    "peakProcesses": 5
+  },
+  "cleanupErrors": []
+}

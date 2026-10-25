@@ -1,0 +1,21 @@
+{
+  "name": "cognitive-replay-no-physical-provider",
+  "command": "pnpm verify:cognitive-replay",
+  "status": "passed",
+  "startedAt": "2026-10-25T09:20:43.409Z",
+  "finishedAt": "2026-10-25T09:20:44.564Z",
+  "timeoutMs": 60000,
+  "logPath": "reports/verification/raw/cognitive-replay-no-physical-provider.log",
+  "outputSha256": "0919bdd9413b3a39e5a8b46f8e6a4a41dff307ddef5269fa00ea04bb5c90a1b2",
+  "metrics": {},
+  "exitCode": 0,
+  "signal": null,
+  "durationMs": 1155,
+  "resources": {
+    "source": "linux-proc-process-group-sampling",
+    "samples": 1,
+    "peakRssBytes": 58081280,
+    "peakProcesses": 1
+  },
+  "cleanupErrors": []
+}

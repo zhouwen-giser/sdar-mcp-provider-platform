@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "ugv.zmq-command-receipt/1",
+  "id": "package-regressions-build-repaired",
+  "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+  "argv": [
+    "python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests/ugv-zmq-provider",
+    "-p",
+    "package_candidate_test.py"
+  ],
+  "explicitEnvironmentPathsAndTooling": {},
+  "startedAt": "2026-10-25T09:22:31.935717+00:00",
+  "completedAt": "2026-10-25T09:22:32.524040+00:00",
+  "elapsedSeconds": 0.588,
+  "exitCode": 0,
+  "log": "package-regressions-build-repaired.log",
+  "logSha256": "6dfdb603bd6f2c6cd4b8f74475fe6e9714c2c01b8abdf0b4834ebb85968370a3",
+  "sourceBefore": {
+    "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+    "branch": "codex/ugv-zmq-phase5-20261024",
+    "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+    "trackedCodeFileCount": 2290,
+    "codeInputExclusions": [
+      "reports/**"
+    ],
+    "status": []
+  },
+  "sourceAfter": {
+    "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+    "branch": "codex/ugv-zmq-phase5-20261024",
+    "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+    "trackedCodeFileCount": 2290,
+    "codeInputExclusions": [
+      "reports/**"
+    ],
+    "status": []
+  },
+  "codeInputsUnchanged": true
+}

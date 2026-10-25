@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "ugv.zmq-command-receipt/1",
+  "id": "image-provider-frozen",
+  "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+  "argv": [
+    "docker",
+    "build",
+    "--target",
+    "ugv-zmq-candidate",
+    "--build-arg",
+    "NODE_BASE_IMAGE=node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c",
+    "--build-arg",
+    "VCS_REF=0e4b25a8f97d6d590554bd33a457f081ebf7e531",
+    "-t",
+    "smpp/ugv-zmq-candidate:20261025-governance-0e4b25a",
+    "."
+  ],
+  "explicitEnvironmentPathsAndTooling": {},
+  "startedAt": "2026-10-25T08:55:18.472099+00:00",
+  "completedAt": "2026-10-25T08:57:33.827127+00:00",
+  "elapsedSeconds": 135.355,
+  "exitCode": 0,
+  "log": "image-provider-frozen.log",
+  "logSha256": "f571c23eddf726012df3eb32d522c036506d598a56cf58714ba2af628fea9ebb",
+  "sourceBefore": {
+    "commit": "0e4b25a8f97d6d590554bd33a457f081ebf7e531",
+    "branch": "codex/ugv-zmq-phase5-20261024",
+    "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "codeInputSha256": "9cc1d1ed7df663918c9b206d506573fb0c158ea51a78e6b9e31111cb346f748b",
+    "trackedCodeFileCount": 2289,
+    "codeInputExclusions": [
+      "reports/**"
+    ],
+    "status": []
+  },
+  "sourceAfter": {
+    "commit": "0e4b25a8f97d6d590554bd33a457f081ebf7e531",
+    "branch": "codex/ugv-zmq-phase5-20261024",
+    "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "codeInputSha256": "9cc1d1ed7df663918c9b206d506573fb0c158ea51a78e6b9e31111cb346f748b",
+    "trackedCodeFileCount": 2289,
+    "codeInputExclusions": [
+      "reports/**"
+    ],
+    "status": []
+  },
+  "codeInputsUnchanged": true
+}

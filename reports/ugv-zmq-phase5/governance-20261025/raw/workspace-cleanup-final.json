@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "ugv.zmq-private-workspace-cleanup/1",
+  "completedAt": "2026-10-25T09:48:43.454529+00:00",
+  "exitCode": 0,
+  "removedPaths": [
+    "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/node_modules",
+    "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/apps/console/node_modules",
+    "/mnt/data/ugv-zmq-phase5-governance-20261025/fixture-config.json",
+    "/mnt/data/ugv-zmq-phase5-governance-20261025/zmqgov-1eccc345ef7f-postgres.env",
+    "/mnt/data/ugv-zmq-phase5-governance-20261025/mosquitto-fixture.conf"
+  ],
+  "removedVerifiedOwnedTemporaryDirectories": [],
+  "unverifiedTemporaryDirectoriesPreserved": [],
+  "dependencyTargetsModified": false,
+  "productionServicesUpdated": false
+}

@@ -1,0 +1,21 @@
+{
+  "name": "canonical-evidence-demo",
+  "command": "pnpm demo:evidence-e2e",
+  "status": "passed",
+  "startedAt": "2026-10-25T09:34:08.520Z",
+  "finishedAt": "2026-10-25T09:38:55.953Z",
+  "timeoutMs": 600000,
+  "logPath": "reports/verification/raw/canonical-evidence-demo.log",
+  "outputSha256": "74f42334e9e3a33834854aa6133e42f8523a83d72338f7268b841d3678f0c97c",
+  "metrics": {},
+  "exitCode": 0,
+  "signal": null,
+  "durationMs": 287433,
+  "resources": {
+    "source": "linux-proc-process-group-sampling",
+    "samples": 288,
+    "peakRssBytes": 1117089792,
+    "peakProcesses": 7
+  },
+  "cleanupErrors": []
+}

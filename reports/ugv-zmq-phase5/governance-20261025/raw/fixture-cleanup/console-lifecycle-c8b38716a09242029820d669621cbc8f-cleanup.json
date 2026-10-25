@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "ugv.zmq-console-isolated/1",
+  "mode": "lifecycle",
+  "id": "c8b38716a09242029820d669621cbc8f",
+  "database": "zmqgov_console_c8b38716a09242029820d669621cbc8f",
+  "exitCode": 0,
+  "cleanupErrors": []
+}

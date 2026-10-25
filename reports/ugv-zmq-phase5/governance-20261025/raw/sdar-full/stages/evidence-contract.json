@@ -1,0 +1,21 @@
+{
+  "name": "evidence-contract",
+  "command": "pnpm verify:evidence-contract",
+  "status": "passed",
+  "startedAt": "2026-10-25T09:19:46.268Z",
+  "finishedAt": "2026-10-25T09:19:47.541Z",
+  "timeoutMs": 600000,
+  "logPath": "reports/verification/raw/evidence-contract.log",
+  "outputSha256": "033e01bff17562106c488c2118ed95434204705c32ea5de67dc81eac9722cbb4",
+  "metrics": {},
+  "exitCode": 0,
+  "signal": null,
+  "durationMs": 1273,
+  "resources": {
+    "source": "linux-proc-process-group-sampling",
+    "samples": 2,
+    "peakRssBytes": 294551552,
+    "peakProcesses": 4
+  },
+  "cleanupErrors": []
+}

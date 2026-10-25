@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "ugv.zmq-command-receipt/1",
+  "id": "console-legacy-browser-build-repaired",
+  "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+  "argv": [
+    "/home/sz/.nvm/versions/node/v22.23.2/bin/node",
+    "/mnt/data/ugv-zmq-phase5-governance-20261025/console-validation.mjs",
+    "legacy-browser"
+  ],
+  "explicitEnvironmentPathsAndTooling": {
+    "PATH": "/home/sz/.nvm/versions/node/v22.23.2/lib/node_modules/corepack/shims:/home/sz/.nvm/versions/node/v22.23.2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+  },
+  "startedAt": "2026-10-25T09:16:30.228550+00:00",
+  "completedAt": "2026-10-25T09:16:40.814166+00:00",
+  "elapsedSeconds": 10.586,
+  "exitCode": 0,
+  "log": "console-legacy-browser-build-repaired.log",
+  "logSha256": "194adb50ede38247c4ba09a4cf67ee3d299479793d7830dc9bc58c021807d9de",
+  "sourceBefore": {
+    "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+    "branch": "codex/ugv-zmq-phase5-20261024",
+    "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+    "trackedCodeFileCount": 2290,
+    "codeInputExclusions": [
+      "reports/**"
+    ],
+    "status": []
+  },
+  "sourceAfter": {
+    "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+    "branch": "codex/ugv-zmq-phase5-20261024",
+    "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+    "trackedCodeFileCount": 2290,
+    "codeInputExclusions": [
+      "reports/**"
+    ],
+    "status": []
+  },
+  "codeInputsUnchanged": true
+}

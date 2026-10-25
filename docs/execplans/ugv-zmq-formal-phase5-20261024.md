@@ -42,7 +42,7 @@ united packaging changes and both older SDAR checkouts' evidence remain untouche
       fix regressions. Archive tests cover reproducibility, executable modes and required inputs.
 - [x] Record source/commands/exit codes/evidence hashes and prepare both source/evidence deliveries;
       final commit, remote and package identities are fixed by the external delivery receipt.
-- [x] 2026-10-25 Implement and exercise actual isolated SDAR CAS publication and the native Skill task chain; final frozen receipts pending.
+- [x] 2026-10-25 Implement and exercise actual isolated SDAR CAS publication and the native Skill task chain; frozen receipts, four images and second-increment evidence archived.
 - [ ] Accept a separate native patrol successor; legacy patrol substitution remains rejected.
 - [ ] Qualify GOWM owner deployment, G0 source facts and an idle fenced handoff before cutover.
 
@@ -118,3 +118,13 @@ test fixtures outside the image context. Add a strict production tsconfig for we
 and Vite configuration. The existing full typecheck still includes all tests and e2e fixtures and
 is independently required before delivery; no test assertions, input validation or compiler
 strictness are relaxed. Preserve the initial failed image receipt and rebuild from the repair commit.
+
+Second increment closeout: SMPP `8b8f44c6` and SDAR `93cada52` pass the exact joint chain,
+10 formal native MCP tests, 134 native/legacy regressions, 151 real Task lifecycle cases,
+57 console cases, 2 native plus 4 legacy browser cases, and 2 archive cases. SDAR's frozen
+30-stage run `sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a` and cleanup pass with
+unchanged source/baseline. Four images build, load offline and round-trip; 2327 packaged files
+match local compiled authority. Provider preflight verifies 17 inputs and rejects the 12 G0 gaps
+with expected exit 2. Commands, source/evidence hashes and retained failures are in
+reports/ugv-zmq-phase5/governance-20261025. Later closeout edits are documentation/evidence only.
+The native patrol successor, complete owner/site qualification and fenced field handoff remain open.

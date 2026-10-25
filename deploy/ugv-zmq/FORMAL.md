@@ -64,5 +64,5 @@ GOWM 模式必须通过既有 owner 合同及 TaskBusiness 开启路径，不能
 ## 验收范围
 
 本地正式 MCP/native ZMQ/PostgreSQL 隔离测试与只读跨仓库目录验证有独立证据。
-SDAR 实际隔离治理及正式原生 Skill 任务链正在第二增量验收；精确结果见当前报告。原生巡逻后继、完整 GOWM 站点资格和现场动作仍未验收。
+SDAR 实际隔离治理及正式原生 Skill 任务链、当前源码 30 项完整门禁和四个候选镜像均通过第二增量隔离验收；精确结果见 `reports/ugv-zmq-phase5/governance-20261025/REPORT.md`。原生巡逻后继、G0、完整 GOWM 站点资格和现场动作仍未验收。
 参见第五阶段 ExecPlan，不能以本候选包声称已完成现场迁移。

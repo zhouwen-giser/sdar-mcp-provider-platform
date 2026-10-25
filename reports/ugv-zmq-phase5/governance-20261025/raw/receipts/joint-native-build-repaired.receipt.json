@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "ugv.zmq-command-receipt/1",
+  "id": "joint-native-build-repaired",
+  "cwd": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5",
+  "argv": [
+    "/home/sz/.nvm/versions/node/v22.23.2/bin/node",
+    "--import",
+    "tsx",
+    "scripts/ugv-zmq/governance-joint.mts"
+  ],
+  "explicitEnvironmentPathsAndTooling": {
+    "SMPP_ZMQ_GOVERNANCE_CONFIG_FILE": "/mnt/data/ugv-zmq-phase5-governance-20261025/fixture-config.json",
+    "SMPP_ZMQ_SOURCE_ROOT": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+    "SMPP_ZMQ_GOVERNANCE_EVIDENCE_ROOT": "/mnt/data/ugv-zmq-phase5-governance-20261025"
+  },
+  "startedAt": "2026-10-25T09:14:14.514224+00:00",
+  "completedAt": "2026-10-25T09:14:47.719128+00:00",
+  "elapsedSeconds": 33.205,
+  "exitCode": 0,
+  "log": "joint-native-build-repaired.log",
+  "logSha256": "fde5cb7705d16e1695c7eac2bac1fae3a412129a1a241bdca7d6e66c3d72a5e6",
+  "sourceBefore": {
+    "commit": "93cada52ef1ec2e60d232a36064d4823d5524b86",
+    "branch": "codex/ugv-zmq-phase5-20261024",
+    "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "codeInputSha256": "d2a421125feaee8a1c3e1cfa6236196866685aac6fac926d4164d0769a2e0058",
+    "trackedCodeFileCount": 2990,
+    "codeInputExclusions": [
+      "reports/**"
+    ],
+    "status": [
+      "?? apps/console/node_modules",
+      "?? node_modules",
+      "?? reports/runtime-semantic-closure/sdar-verify-67f3e13a-e768-4d0b-adbb-3c150c8fa5fc/",
+      "?? reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/",
+      "?? reports/runtime-semantic-closure/sdar-verify-a01df1c2-266c-48b7-a5a4-20d63ca1a294/"
+    ]
+  },
+  "sourceAfter": {
+    "commit": "93cada52ef1ec2e60d232a36064d4823d5524b86",
+    "branch": "codex/ugv-zmq-phase5-20261024",
+    "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "codeInputSha256": "d2a421125feaee8a1c3e1cfa6236196866685aac6fac926d4164d0769a2e0058",
+    "trackedCodeFileCount": 2990,
+    "codeInputExclusions": [
+      "reports/**"
+    ],
+    "status": [
+      "?? apps/console/node_modules",
+      "?? node_modules",
+      "?? reports/runtime-semantic-closure/sdar-verify-67f3e13a-e768-4d0b-adbb-3c150c8fa5fc/",
+      "?? reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/",
+      "?? reports/runtime-semantic-closure/sdar-verify-a01df1c2-266c-48b7-a5a4-20d63ca1a294/"
+    ]
+  },
+  "codeInputsUnchanged": true
+}

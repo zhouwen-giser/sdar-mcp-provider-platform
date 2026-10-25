@@ -71,11 +71,14 @@ Continued on `codex/ugv-zmq-phase4-20261024`: bounded inspection observations an
 
 Branch `codex/ugv-zmq-phase5-20261024` connects the native Provider through the existing gRPC and
 formal MCP Runtime, preserves public Task identity/timing and frozen TaskBusiness, and adds the
-strict `zmq_v1_12` catalog, owner SQL routing, readonly handoff diagnostics, exact SDAR consumer
+strict native catalog (current `zmq_v1_0_1_12`, historical pin retained), owner SQL routing, readonly handoff diagnostics, exact SDAR consumer
 candidate and console native forms. Details and current verification state are maintained in
 `docs/execplans/ugv-zmq-formal-phase5-20261024.md` and `reports/ugv-zmq-phase5/REPORT.md`.
 
-Phase 5 remains in progress: actual SDAR governance/native Skill execution and patrol successor,
-complete GOWM deployment qualification, G0 source acceptance and fenced site handoff are open.
+The second isolated increment verifies actual SDAR CAS governance and native Skill execution,
+all 30 frozen SDAR stages, formal MCP/PostgreSQL regressions and four candidate images. Current
+evidence is in `reports/ugv-zmq-phase5/governance-20261025/REPORT.md`.
+Phase 5 remains in progress: native patrol successor, complete GOWM deployment qualification,
+G0 source acceptance and fenced site handoff are open.
 The delivery package is an isolated qualification candidate. Current 19100/19101 services are
 outside this cutover; real source bindings and implementation/golden-frame evidence are still needed.

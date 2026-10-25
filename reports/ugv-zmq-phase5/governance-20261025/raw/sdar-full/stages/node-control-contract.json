@@ -1,0 +1,21 @@
+{
+  "name": "node-control-contract",
+  "command": "pnpm verify:node-control-contract",
+  "status": "passed",
+  "startedAt": "2026-10-25T09:19:51.422Z",
+  "finishedAt": "2026-10-25T09:19:52.180Z",
+  "timeoutMs": 600000,
+  "logPath": "reports/verification/raw/node-control-contract.log",
+  "outputSha256": "b308fc64632fbf19d874b19f63fe850752fed2cbdce625258333905238ea3dab",
+  "metrics": {},
+  "exitCode": 0,
+  "signal": null,
+  "durationMs": 758,
+  "resources": {
+    "source": "linux-proc-process-group-sampling",
+    "samples": 1,
+    "peakRssBytes": 57368576,
+    "peakProcesses": 1
+  },
+  "cleanupErrors": []
+}

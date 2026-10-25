@@ -1,0 +1,3567 @@
+{
+  "schemaVersion": "ugv.zmq-governed-increment-verification/1",
+  "generatedAt": "2026-10-25T09:42:29.957632+00:00",
+  "classification": "ISOLATED_FORMAL_RUNTIME_SIMULATED_ONLY",
+  "status": "passed",
+  "sources": {
+    "smpp": {
+      "validatedCommit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+      "previousIncrement": "74e63cf",
+      "changedTrackedInputs": [
+        {
+          "path": "apps/ugv-control-console/package.json",
+          "bytes": 1096,
+          "sha256": "1ea43209902558c2fee8dc7f91a0b3e88f5056db9f6a2173f5b31e34e065df24"
+        },
+        {
+          "path": "apps/ugv-control-console/shared/zmq-native-catalog.json",
+          "bytes": 182555,
+          "sha256": "eef64a78eb8a5ffad63a1efe30c0bc15f711cfb6602eff3ebe5e8e84d1369e13"
+        },
+        {
+          "path": "apps/ugv-control-console/tsconfig.build.json",
+          "bytes": 95,
+          "sha256": "19608d73fe6c5fb3021436e242591c4bba1e33cbacede4a95a59c1ae67f6c86b"
+        },
+        {
+          "path": "apps/ugv-zmq-provider-adapter/src/runtime.ts",
+          "bytes": 14905,
+          "sha256": "8026dc39cf628690c1c4fb3868542dc1af898bf5948801a9ffeba6b18a931803"
+        },
+        {
+          "path": "apps/ugv-zmq-provider-adapter/src/server.ts",
+          "bytes": 1448,
+          "sha256": "78e0959ce09b68ce011d2ae52b77c993f0d85c6c377f2e4b4e21a7946182b832"
+        },
+        {
+          "path": "contracts/ugv-zmq/provider-v1.0.1/README.md",
+          "bytes": 1101,
+          "sha256": "d8de99a1bad6594c21d6c9c165df166481238cf498468c311124a81acd6a0a6e"
+        },
+        {
+          "path": "contracts/ugv-zmq/provider-v1.0.1/catalog.json",
+          "bytes": 182555,
+          "sha256": "eef64a78eb8a5ffad63a1efe30c0bc15f711cfb6602eff3ebe5e8e84d1369e13"
+        },
+        {
+          "path": "deploy/ugv-zmq/FORMAL.md",
+          "bytes": 5621,
+          "sha256": "038bddbdc7bbce870d03c5ef8db7a22a16a9a63b47435191870b49c80ea68491"
+        },
+        {
+          "path": "docs/decisions/ADR-014-zmq-public-result-and-initial-binding.md",
+          "bytes": 1900,
+          "sha256": "1ed482f806d4d2d97eee04dd2ca65ddcee49ae04de6018c31320198db5fa0649"
+        },
+        {
+          "path": "docs/execplans/ugv-zmq-formal-phase5-20261024.md",
+          "bytes": 8466,
+          "sha256": "cceaef6036520ba238629fc7061e4171ac53f61093e23b89f97f9655e4d2939e"
+        },
+        {
+          "path": "packages/persistence-postgres/src/tasks.ts",
+          "bytes": 228382,
+          "sha256": "c791a2a294cc4b9cb72988280418aa981974a7af92064bcccd326b3f604ac2b6"
+        },
+        {
+          "path": "packages/task-engine/src/command-dispatcher.ts",
+          "bytes": 27193,
+          "sha256": "0da5d440c3e2d584f867115726f39f6e92ba9051c27ac165eace5b8543c92989"
+        },
+        {
+          "path": "packages/task-engine/src/engine.ts",
+          "bytes": 66642,
+          "sha256": "f87d7c2dff3ea6265bc905962e503fd122acaebbf8a041640cfbc4902f27de95"
+        },
+        {
+          "path": "packages/vehicle-zmq-control/src/catalog.ts",
+          "bytes": 9126,
+          "sha256": "abcee7f1c17d3b619649e4e17e97605bcdee712e2a344d63631a838788dece21"
+        },
+        {
+          "path": "packages/vehicle-zmq-control/src/result-schemas.ts",
+          "bytes": 6458,
+          "sha256": "94116eb3b0f9a252839b6e015af93307ff92ac0017d839741853b6da2da71c24"
+        },
+        {
+          "path": "scripts/package-zmq-candidate.py",
+          "bytes": 6547,
+          "sha256": "bbc3e2da7035e971a81dfaff326b7024183aa5b5d77a0640cee50b62e2baa169"
+        },
+        {
+          "path": "tests/integration/task-lifecycle-postgres.test.ts",
+          "bytes": 243303,
+          "sha256": "9832f0637a5d862449cad81821ddf8af0606b5502a0e7303be5d3e4c6628e255"
+        },
+        {
+          "path": "tests/ugv-zmq-provider/contract.test.ts",
+          "bytes": 5978,
+          "sha256": "17d14934349aede27e67e57c5c35f3d3950adfcd10e187207115af3c2af114f7"
+        },
+        {
+          "path": "tests/ugv-zmq-provider/formal.postgres.test.ts",
+          "bytes": 28486,
+          "sha256": "f03cf2680e39d353cd9a96989391c98738730a9460a44b4ac7a21853307c60f5"
+        },
+        {
+          "path": "tests/ugv-zmq-provider/governance-fixture.ts",
+          "bytes": 9365,
+          "sha256": "f01a6e511478663187946d7de4aa1030549cf4bafc7cff3371c09070e830e92a"
+        },
+        {
+          "path": "tests/ugv-zmq-provider/package_candidate_test.py",
+          "bytes": 5870,
+          "sha256": "4f24c1a59bdc7fe19f9bab68e32349c18d8598aa1ca12e85d3a95ee060c8e2b0"
+        }
+      ]
+    },
+    "sdar": {
+      "validatedCommit": "93cada52ef1ec2e60d232a36064d4823d5524b86",
+      "previousIncrement": "f796fee",
+      "changedTrackedInputs": [
+        {
+          "path": "CHANGELOG.md",
+          "bytes": 229678,
+          "sha256": "e20ebf95cedeb06267535c7a903762d5ae23a0616389af03932f5fb628b9dcd9"
+        },
+        {
+          "path": "PROJECT_STATUS.md",
+          "bytes": 257125,
+          "sha256": "b880a1e1b9854236c5b041427de393ed943e71ee24af19d0e0e8dede7e2d693e"
+        },
+        {
+          "path": "adr/ADR-167-zmq-governed-native-skills.md",
+          "bytes": 3888,
+          "sha256": "24e234353a9389fb95b25e5a0cec2a3c73c4991bf5b78a7b47bd0750cc0e6d35"
+        },
+        {
+          "path": "apps/node-control-acceptance/src/provider-json-schema.ts",
+          "bytes": 2402,
+          "sha256": "e11a401c57e6adb4d643a03eba5f301b4078af2823e13e4f433478c982117c23"
+        },
+        {
+          "path": "apps/node-control-acceptance/src/smpp-provider-materializer.ts",
+          "bytes": 43008,
+          "sha256": "9aace3f81d6ad7bd32589e8b1b4f31c5dfe5dc508b34cef8658e50ce017e3dc8"
+        },
+        {
+          "path": "apps/node-control-acceptance/src/zmq-provider-materialization.ts",
+          "bytes": 5408,
+          "sha256": "0062bd4ab8ade0b3b9bb60674e30b57941fbe72af2a4e2fa8db2d5ee0952dbab"
+        },
+        {
+          "path": "apps/node-control-acceptance/src/zmq-skill-governance.ts",
+          "bytes": 22387,
+          "sha256": "d1ea310f9327ef50e9610db9efbe608978cfedf7c841a1f2442cd62a3b78d9ef"
+        },
+        {
+          "path": "apps/node-control-acceptance/test/provider-json-schema.unit.test.ts",
+          "bytes": 2909,
+          "sha256": "232f8a4d51f99daccec02dbe9d5dc7bce4c390a89e4c657e6ddb84ebe6ad1b71"
+        },
+        {
+          "path": "apps/node-control-api/src/http-endpoint.ts",
+          "bytes": 111918,
+          "sha256": "ab5ee7235160a526d4c606b1356bfee598221af73d80656243e12229d57856a9"
+        },
+        {
+          "path": "apps/node-control-api/test/http-endpoint.contract.test.ts",
+          "bytes": 56832,
+          "sha256": "32451c300adb8462597072f8d30cb7433318e9526c5a407aef5bfa9be59528b8"
+        },
+        {
+          "path": "apps/server/src/area-report-initial-admission.ts",
+          "bytes": 6338,
+          "sha256": "226036f6e57576e942149103f399affdd9167b0b18f622a13dd9782aa24e4509"
+        },
+        {
+          "path": "apps/server/src/area-report-terminal.ts",
+          "bytes": 7127,
+          "sha256": "8b9b6635038840a6411b2a29276f87e8b5b3383239d51dfd189f50c55338aa52"
+        },
+        {
+          "path": "apps/server/src/composition/execution.ts",
+          "bytes": 76160,
+          "sha256": "7383ea07b7589e76ff3c8673047a90e9d141445bfdd435a6048967bb38d27c9e"
+        },
+        {
+          "path": "apps/server/src/composition/knowledge.ts",
+          "bytes": 63537,
+          "sha256": "84c18c4e27e2e4ae46b9c226234872269e8f5ed68c1fc245958c8257e679b148"
+        },
+        {
+          "path": "apps/server/src/composition/preparation.ts",
+          "bytes": 24352,
+          "sha256": "2f1afee0d900d0164dbe876f69481da82b73b4663be06c8af43bf871ffa022e4"
+        },
+        {
+          "path": "apps/server/src/composition/task-planning-candidate-generator.ts",
+          "bytes": 10171,
+          "sha256": "5af4d9b01ecce84fda9223a1a214880c045cd24b01e3a6b47bf7ecfc77d2e9fb"
+        },
+        {
+          "path": "apps/server/src/runtime.ts",
+          "bytes": 28723,
+          "sha256": "920e566c614c56b3af8c8bb8a55305d3e8d787947d57364799f4b4998e442efb"
+        },
+        {
+          "path": "docs/17_TRACEABILITY_MATRIX.md",
+          "bytes": 666783,
+          "sha256": "d462183fecbde1d11ac8a2cbbb8cdac111dcd0b0bb6960abb9d89c3c6b938a4d"
+        },
+        {
+          "path": "docs/18_KNOWN_ASSUMPTIONS_AND_GAPS.md",
+          "bytes": 71528,
+          "sha256": "845b925e732d0fea4a817cb3de146748aac5f8c2eae8d415f99443386c94ca95"
+        },
+        {
+          "path": "docs/zmq-native-skills.md",
+          "bytes": 3320,
+          "sha256": "71b24c962a44028ee00fd07e1f663ab7e7a0415279f82f4c4d61d0f2006734d7"
+        },
+        {
+          "path": "execplans/ugv-zmq-phase5-20261024.md",
+          "bytes": 8171,
+          "sha256": "d413144006b79d0c596dbea12c42ee6d5176cc0f50b96dbc249301afc6477a5c"
+        },
+        {
+          "path": "packages/application/src/task-capability.ts",
+          "bytes": 78118,
+          "sha256": "116a8d4e62e179b701bcd08708d42257ee2222be04bd70cbf42710c9743678c3"
+        },
+        {
+          "path": "packages/application/src/workflow-controller.ts",
+          "bytes": 51688,
+          "sha256": "7487166c8c67487eec02eabece0ee9b043fccf80e05ef3c3559eb42dc9f1d9a1"
+        },
+        {
+          "path": "packages/application/test/workflow-controller.unit.test.ts",
+          "bytes": 40384,
+          "sha256": "e5698c0f052c23c157d7c66393745b530c0d7abf04fa42affa5b478159322e9a"
+        },
+        {
+          "path": "packages/domain/src/area-inspection.ts",
+          "bytes": 14157,
+          "sha256": "30dba3c2d7f8d8be820ea7443cfec84a395c4c4b356e66e5795eb9a9d3240fe3"
+        },
+        {
+          "path": "packages/domain/src/evidence/canonical-evidence.ts",
+          "bytes": 17442,
+          "sha256": "36f6c17a45ca824507e9d345b991baad954a77372fcda6560a9587ac8d0078db"
+        },
+        {
+          "path": "packages/domain/src/evidence/index.ts",
+          "bytes": 203,
+          "sha256": "82e6c828baabaca4da85a0e2e42baa7d94ee6ac8a044dbb2491ece64387381b9"
+        },
+        {
+          "path": "packages/domain/src/evidence/node-control-card-artifact.ts",
+          "bytes": 3062,
+          "sha256": "ce3aabd09af5fc3123e7622b2f035fe3ba5cebf1a693ff8749f8be7e56fede9a"
+        },
+        {
+          "path": "packages/domain/src/index.ts",
+          "bytes": 5929,
+          "sha256": "adc2e22942ac5f3b95ad5cffc9634cd856a9b371f3c087eabde195a1271c94e0"
+        },
+        {
+          "path": "packages/domain/src/zmq-capability.ts",
+          "bytes": 5964,
+          "sha256": "25208b1cb089bda8d90d6471d4f88a0c5d6a34fe9417ee4c95c9965426ddfac0"
+        },
+        {
+          "path": "packages/domain/test/evidence-domain.unit.test.ts",
+          "bytes": 26595,
+          "sha256": "dc41dd06b9c9a4f2883471bcc9ffb16860675a8db03750d342e57e392b96acd2"
+        },
+        {
+          "path": "packages/domain/test/node-control-card-artifact.unit.test.ts",
+          "bytes": 1892,
+          "sha256": "9402bcee6cc53968574ef4eca87a5cb5f4c4802efb49dd3b7d020791c932028f"
+        },
+        {
+          "path": "packages/node-control-application/src/a2a-exposure-service.ts",
+          "bytes": 18530,
+          "sha256": "ecec642359bd8f8f2c4837e60d0fbfcec238fce24af53147c35345be3d33e9e3"
+        },
+        {
+          "path": "packages/node-control-persistence-postgres/src/a2a-exposure-repository.ts",
+          "bytes": 17529,
+          "sha256": "f0fe0bf41e1cdb8763f9a509f03d496056ba51344a38494969578c931f8cd2d0"
+        },
+        {
+          "path": "packages/node-control-persistence-postgres/src/node-control-evidence-source.ts",
+          "bytes": 56601,
+          "sha256": "f810c7d50cecddc544979094c2ae3c88de09761ced8a0d8e083f3dc616ce6e81"
+        },
+        {
+          "path": "packages/node-control-persistence-postgres/test/foundation.integration.test.ts",
+          "bytes": 53372,
+          "sha256": "fd030f311fe02b39e8059c28855dcb30cdc51e3216172d6adbf0f2bb10a259ee"
+        },
+        {
+          "path": "packages/ugv-profile/src/index.ts",
+          "bytes": 1148,
+          "sha256": "4bcd67b825954bafde9554d2218e0a41f7f569e3684a423335bb326bd8294214"
+        },
+        {
+          "path": "packages/ugv-profile/src/ugv-agent-profile-catalog.ts",
+          "bytes": 8011,
+          "sha256": "47e2428e6e5b58dacd36484d94d0359113c9702ef8273ca57ff7fc47669895f0"
+        },
+        {
+          "path": "packages/ugv-profile/src/ugv-initial-workflow-planning.ts",
+          "bytes": 6478,
+          "sha256": "02ec326052c1fc62c53d13d0dc1680c290e21cb76c3b1750eda9564f46d35ba0"
+        },
+        {
+          "path": "packages/ugv-profile/src/zmq-catalog-contract-v1.0.0.json",
+          "bytes": 182929,
+          "sha256": "0a4a1ffbe6e03a779ea219f911057f61693d3bbd130c02151d82b1412c708334"
+        },
+        {
+          "path": "packages/ugv-profile/src/zmq-catalog-contract.json",
+          "bytes": 182555,
+          "sha256": "eef64a78eb8a5ffad63a1efe30c0bc15f711cfb6602eff3ebe5e8e84d1369e13"
+        },
+        {
+          "path": "packages/ugv-profile/src/zmq-provider-profile.ts",
+          "bytes": 9632,
+          "sha256": "e7a5165e49c89476f8f53c75e804d1a986c04e0b16346e632a8e53b8734771cb"
+        },
+        {
+          "path": "packages/ugv-profile/src/zmq-skill.ts",
+          "bytes": 8047,
+          "sha256": "675b6574b6fb735be21491f32de66e2d013d17dbca12657aa5b50ca8dc6b894c"
+        },
+        {
+          "path": "packages/ugv-profile/src/zmq-workflow.ts",
+          "bytes": 2580,
+          "sha256": "f2a79568b6903df4379a532b749899e45f3169f81f53b15646f5bd54144fca29"
+        },
+        {
+          "path": "packages/ugv-profile/test-support/zmq.ts",
+          "bytes": 2376,
+          "sha256": "6df504e4103ae4c759f40549489204f3c9ee26f5756b178c0e535f13e9be9568"
+        },
+        {
+          "path": "packages/ugv-profile/test/zmq-skill.unit.test.ts",
+          "bytes": 7901,
+          "sha256": "7593768f83af9d681105a1d764522c23dd7d61c7af2c604fd9231f2c9b5e68f3"
+        },
+        {
+          "path": "scripts/ugv-zmq/governance-joint.mts",
+          "bytes": 33721,
+          "sha256": "c1f665dde91f55d19b0415fc680e6126b3d6b61228fa71c915e0dce7dc8651b6"
+        }
+      ]
+    }
+  },
+  "phase5Complete": false,
+  "fieldQualified": false,
+  "siteContainersUpdated": false,
+  "realDeviceCommands": 0,
+  "privateConfigurationShipped": false,
+  "commands": [
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "sdar-full-30-build-repaired",
+      "cwd": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5",
+      "argv": [
+        "taskset",
+        "--cpu-list",
+        "3,4,8,29,30,31,33,34",
+        "/home/sz/.nvm/versions/node/v22.23.2/bin/node",
+        "scripts/verify-isolated.mjs",
+        "--docker-default-bridge"
+      ],
+      "explicitEnvironmentPathsAndTooling": {
+        "npm_execpath": "/home/sz/.cache/node/corepack/v1/pnpm/11.7.0/bin/pnpm.mjs",
+        "PATH": "/home/sz/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin:/home/sz/.nvm/versions/node/v22.23.2/lib/node_modules/corepack/shims:/home/sz/.nvm/versions/node/v22.23.2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      },
+      "startedAt": "2026-10-25T09:13:01.060734+00:00",
+      "completedAt": "2026-10-25T09:41:26.485439+00:00",
+      "elapsedSeconds": 1705.425,
+      "exitCode": 0,
+      "log": "sdar-full-30-build-repaired.log",
+      "logSha256": "66e910b6146dfb713d6dd40766b858d0acde4c7b239a7c909f0464100bbbfaf8",
+      "sourceBefore": {
+        "commit": "93cada52ef1ec2e60d232a36064d4823d5524b86",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "d2a421125feaee8a1c3e1cfa6236196866685aac6fac926d4164d0769a2e0058",
+        "trackedCodeFileCount": 2990,
+        "codeInputExclusions": ["reports/**"],
+        "status": [
+          "?? apps/console/node_modules",
+          "?? node_modules",
+          "?? reports/runtime-semantic-closure/sdar-verify-67f3e13a-e768-4d0b-adbb-3c150c8fa5fc/",
+          "?? reports/runtime-semantic-closure/sdar-verify-a01df1c2-266c-48b7-a5a4-20d63ca1a294/"
+        ]
+      },
+      "sourceAfter": {
+        "commit": "93cada52ef1ec2e60d232a36064d4823d5524b86",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "d2a421125feaee8a1c3e1cfa6236196866685aac6fac926d4164d0769a2e0058",
+        "trackedCodeFileCount": 2990,
+        "codeInputExclusions": ["reports/**"],
+        "status": [
+          "?? apps/console/node_modules",
+          "?? node_modules",
+          "?? reports/runtime-semantic-closure/sdar-verify-67f3e13a-e768-4d0b-adbb-3c150c8fa5fc/",
+          "?? reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/",
+          "?? reports/runtime-semantic-closure/sdar-verify-a01df1c2-266c-48b7-a5a4-20d63ca1a294/"
+        ]
+      },
+      "codeInputsUnchanged": true
+    },
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "joint-native-build-repaired",
+      "cwd": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5",
+      "argv": [
+        "/home/sz/.nvm/versions/node/v22.23.2/bin/node",
+        "--import",
+        "tsx",
+        "scripts/ugv-zmq/governance-joint.mts"
+      ],
+      "explicitEnvironmentPathsAndTooling": {
+        "SMPP_ZMQ_GOVERNANCE_CONFIG_FILE": "/mnt/data/ugv-zmq-phase5-governance-20261025/fixture-config.json",
+        "SMPP_ZMQ_SOURCE_ROOT": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+        "SMPP_ZMQ_GOVERNANCE_EVIDENCE_ROOT": "/mnt/data/ugv-zmq-phase5-governance-20261025"
+      },
+      "startedAt": "2026-10-25T09:14:14.514224+00:00",
+      "completedAt": "2026-10-25T09:14:47.719128+00:00",
+      "elapsedSeconds": 33.205,
+      "exitCode": 0,
+      "log": "joint-native-build-repaired.log",
+      "logSha256": "fde5cb7705d16e1695c7eac2bac1fae3a412129a1a241bdca7d6e66c3d72a5e6",
+      "sourceBefore": {
+        "commit": "93cada52ef1ec2e60d232a36064d4823d5524b86",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "d2a421125feaee8a1c3e1cfa6236196866685aac6fac926d4164d0769a2e0058",
+        "trackedCodeFileCount": 2990,
+        "codeInputExclusions": ["reports/**"],
+        "status": [
+          "?? apps/console/node_modules",
+          "?? node_modules",
+          "?? reports/runtime-semantic-closure/sdar-verify-67f3e13a-e768-4d0b-adbb-3c150c8fa5fc/",
+          "?? reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/",
+          "?? reports/runtime-semantic-closure/sdar-verify-a01df1c2-266c-48b7-a5a4-20d63ca1a294/"
+        ]
+      },
+      "sourceAfter": {
+        "commit": "93cada52ef1ec2e60d232a36064d4823d5524b86",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "d2a421125feaee8a1c3e1cfa6236196866685aac6fac926d4164d0769a2e0058",
+        "trackedCodeFileCount": 2990,
+        "codeInputExclusions": ["reports/**"],
+        "status": [
+          "?? apps/console/node_modules",
+          "?? node_modules",
+          "?? reports/runtime-semantic-closure/sdar-verify-67f3e13a-e768-4d0b-adbb-3c150c8fa5fc/",
+          "?? reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/",
+          "?? reports/runtime-semantic-closure/sdar-verify-a01df1c2-266c-48b7-a5a4-20d63ca1a294/"
+        ]
+      },
+      "codeInputsUnchanged": true
+    },
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "formal-10-build-repaired",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "/home/sz/.nvm/versions/node/v22.23.2/bin/node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "tests/ugv-zmq-provider/formal.postgres.test.ts"
+      ],
+      "explicitEnvironmentPathsAndTooling": {
+        "SMPP_ZMQ_TEST_CONFIG_FILE": "/mnt/data/ugv-zmq-phase5-governance-20261025/fixture-config.json",
+        "SMPP_ZMQ_SDAR_ROOT": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5",
+        "SMPP_ZMQ_FORMAL_EVIDENCE_FILE": "/mnt/data/ugv-zmq-phase5-governance-20261025/formal-build-repaired.json",
+        "SMPP_ZMQ_FORMAL_RAW_FILE": "/mnt/data/ugv-zmq-phase5-governance-20261025/formal-build-repaired.ndjson"
+      },
+      "startedAt": "2026-10-25T09:14:14.353269+00:00",
+      "completedAt": "2026-10-25T09:14:50.957687+00:00",
+      "elapsedSeconds": 36.604,
+      "exitCode": 0,
+      "log": "formal-10-build-repaired.log",
+      "logSha256": "eeffa9e29326b617e0432b25e7deca8cebb48347795f9ce43cbd8a2d18efa0e9",
+      "sourceBefore": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "sourceAfter": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "codeInputsUnchanged": true
+    },
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "console-unit-build-repaired2",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "/home/sz/.nvm/versions/node/v22.23.2/bin/node",
+        "/mnt/data/ugv-zmq-phase5-governance-20261025/console-validation.mjs",
+        "unit"
+      ],
+      "explicitEnvironmentPathsAndTooling": {
+        "PATH": "/home/sz/.nvm/versions/node/v22.23.2/lib/node_modules/corepack/shims:/home/sz/.nvm/versions/node/v22.23.2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      },
+      "startedAt": "2026-10-25T09:14:14.355811+00:00",
+      "completedAt": "2026-10-25T09:14:57.663396+00:00",
+      "elapsedSeconds": 43.308,
+      "exitCode": 0,
+      "log": "console-unit-build-repaired2.log",
+      "logSha256": "69e134466b596e7306adca5fb65acb913a12d2f8613d9be0b0c2d144ee8d6d07",
+      "sourceBefore": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "sourceAfter": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "codeInputsUnchanged": true
+    },
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "console-browser-build-repaired",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "/home/sz/.nvm/versions/node/v22.23.2/bin/node",
+        "/mnt/data/ugv-zmq-phase5-governance-20261025/console-validation.mjs",
+        "browser"
+      ],
+      "explicitEnvironmentPathsAndTooling": {
+        "PATH": "/home/sz/.nvm/versions/node/v22.23.2/lib/node_modules/corepack/shims:/home/sz/.nvm/versions/node/v22.23.2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      },
+      "startedAt": "2026-10-25T09:14:14.388404+00:00",
+      "completedAt": "2026-10-25T09:14:29.279070+00:00",
+      "elapsedSeconds": 14.891,
+      "exitCode": 0,
+      "log": "console-browser-build-repaired.log",
+      "logSha256": "f1c358558d0c9c3c7cb168a2b73b8e617b8b07c71b3ef716809b8ecc1c5c8969",
+      "sourceBefore": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "sourceAfter": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "codeInputsUnchanged": true
+    },
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "console-legacy-browser-build-repaired",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "/home/sz/.nvm/versions/node/v22.23.2/bin/node",
+        "/mnt/data/ugv-zmq-phase5-governance-20261025/console-validation.mjs",
+        "legacy-browser"
+      ],
+      "explicitEnvironmentPathsAndTooling": {
+        "PATH": "/home/sz/.nvm/versions/node/v22.23.2/lib/node_modules/corepack/shims:/home/sz/.nvm/versions/node/v22.23.2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      },
+      "startedAt": "2026-10-25T09:16:30.228550+00:00",
+      "completedAt": "2026-10-25T09:16:40.814166+00:00",
+      "elapsedSeconds": 10.586,
+      "exitCode": 0,
+      "log": "console-legacy-browser-build-repaired.log",
+      "logSha256": "194adb50ede38247c4ba09a4cf67ee3d299479793d7830dc9bc58c021807d9de",
+      "sourceBefore": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "sourceAfter": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "codeInputsUnchanged": true
+    },
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "image-provider-frozen",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "docker",
+        "build",
+        "--target",
+        "ugv-zmq-candidate",
+        "--build-arg",
+        "NODE_BASE_IMAGE=node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c",
+        "--build-arg",
+        "VCS_REF=0e4b25a8f97d6d590554bd33a457f081ebf7e531",
+        "-t",
+        "smpp/ugv-zmq-candidate:20261025-governance-0e4b25a",
+        "."
+      ],
+      "explicitEnvironmentPathsAndTooling": {},
+      "startedAt": "2026-10-25T08:55:18.472099+00:00",
+      "completedAt": "2026-10-25T08:57:33.827127+00:00",
+      "elapsedSeconds": 135.355,
+      "exitCode": 0,
+      "log": "image-provider-frozen.log",
+      "logSha256": "f571c23eddf726012df3eb32d522c036506d598a56cf58714ba2af628fea9ebb",
+      "sourceBefore": {
+        "commit": "0e4b25a8f97d6d590554bd33a457f081ebf7e531",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "9cc1d1ed7df663918c9b206d506573fb0c158ea51a78e6b9e31111cb346f748b",
+        "trackedCodeFileCount": 2289,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "sourceAfter": {
+        "commit": "0e4b25a8f97d6d590554bd33a457f081ebf7e531",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "9cc1d1ed7df663918c9b206d506573fb0c158ea51a78e6b9e31111cb346f748b",
+        "trackedCodeFileCount": 2289,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "codeInputsUnchanged": true
+    },
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "image-smpp-runtime-frozen",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "docker",
+        "build",
+        "--target",
+        "ugv-real-runtime",
+        "--build-arg",
+        "NODE_BASE_IMAGE=node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c",
+        "--build-arg",
+        "VCS_REF=0e4b25a8f97d6d590554bd33a457f081ebf7e531",
+        "-t",
+        "smpp/runtime:zmq-candidate-20261025-0e4b25a",
+        "."
+      ],
+      "explicitEnvironmentPathsAndTooling": {},
+      "startedAt": "2026-10-25T09:02:57.705908+00:00",
+      "completedAt": "2026-10-25T09:03:01.509104+00:00",
+      "elapsedSeconds": 3.803,
+      "exitCode": 0,
+      "log": "image-smpp-runtime-frozen.log",
+      "logSha256": "5f185c63d29e8e482ded4c8584bc754bbed6b3c4d0692dfaae53f2f16d6fe8f1",
+      "sourceBefore": {
+        "commit": "0e4b25a8f97d6d590554bd33a457f081ebf7e531",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "9cc1d1ed7df663918c9b206d506573fb0c158ea51a78e6b9e31111cb346f748b",
+        "trackedCodeFileCount": 2289,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "sourceAfter": {
+        "commit": "0e4b25a8f97d6d590554bd33a457f081ebf7e531",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "9cc1d1ed7df663918c9b206d506573fb0c158ea51a78e6b9e31111cb346f748b",
+        "trackedCodeFileCount": 2289,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "codeInputsUnchanged": true
+    },
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "image-console-build-repaired",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "docker",
+        "build",
+        "--file",
+        "deploy/ugv-control-console/Dockerfile",
+        "--build-arg",
+        "NODE_BASE_IMAGE=node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c",
+        "--build-arg",
+        "VCS_REF=8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "--tag",
+        "smpp/ugv-control-console:zmq-candidate-20261025-8b8f44c",
+        "."
+      ],
+      "explicitEnvironmentPathsAndTooling": {},
+      "startedAt": "2026-10-25T09:13:00.909674+00:00",
+      "completedAt": "2026-10-25T09:14:43.498391+00:00",
+      "elapsedSeconds": 102.589,
+      "exitCode": 0,
+      "log": "image-console-build-repaired.log",
+      "logSha256": "02bd6a7191f3c40f0efdbf73dbeb931668e75652514a835ca96b39bd2b600145",
+      "sourceBefore": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "sourceAfter": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "codeInputsUnchanged": true
+    },
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "image-sdar-runtime-build-repaired",
+      "cwd": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5",
+      "argv": [
+        "docker",
+        "build",
+        "--file",
+        "deploy/development/Dockerfile",
+        "--build-arg",
+        "NODE_IMAGE=node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c",
+        "--build-arg",
+        "SDAR_SOURCE_REVISION=93cada52ef1ec2e60d232a36064d4823d5524b86",
+        "--tag",
+        "sdar/runtime:zmq-candidate-20261025-93cada52",
+        "."
+      ],
+      "explicitEnvironmentPathsAndTooling": {},
+      "startedAt": "2026-10-25T09:13:01.069972+00:00",
+      "completedAt": "2026-10-25T09:14:20.230844+00:00",
+      "elapsedSeconds": 79.161,
+      "exitCode": 0,
+      "log": "image-sdar-runtime-build-repaired.log",
+      "logSha256": "27cf21ae84fea306e8896399ff9bb84a9ac2869cedd307371d20ee9ada65b8e5",
+      "sourceBefore": {
+        "commit": "93cada52ef1ec2e60d232a36064d4823d5524b86",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "d2a421125feaee8a1c3e1cfa6236196866685aac6fac926d4164d0769a2e0058",
+        "trackedCodeFileCount": 2990,
+        "codeInputExclusions": ["reports/**"],
+        "status": [
+          "?? apps/console/node_modules",
+          "?? node_modules",
+          "?? reports/runtime-semantic-closure/sdar-verify-67f3e13a-e768-4d0b-adbb-3c150c8fa5fc/",
+          "?? reports/runtime-semantic-closure/sdar-verify-a01df1c2-266c-48b7-a5a4-20d63ca1a294/"
+        ]
+      },
+      "sourceAfter": {
+        "commit": "93cada52ef1ec2e60d232a36064d4823d5524b86",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "d2a421125feaee8a1c3e1cfa6236196866685aac6fac926d4164d0769a2e0058",
+        "trackedCodeFileCount": 2990,
+        "codeInputExclusions": ["reports/**"],
+        "status": [
+          "?? apps/console/node_modules",
+          "?? node_modules",
+          "?? reports/runtime-semantic-closure/sdar-verify-67f3e13a-e768-4d0b-adbb-3c150c8fa5fc/",
+          "?? reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/",
+          "?? reports/runtime-semantic-closure/sdar-verify-a01df1c2-266c-48b7-a5a4-20d63ca1a294/"
+        ]
+      },
+      "codeInputsUnchanged": true
+    },
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "image-proof-build-repaired",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": ["python3", "/mnt/data/ugv-zmq-phase5-governance-20261025/image-proof.py"],
+      "explicitEnvironmentPathsAndTooling": {},
+      "startedAt": "2026-10-25T09:18:49.484554+00:00",
+      "completedAt": "2026-10-25T09:18:57.439186+00:00",
+      "elapsedSeconds": 7.955,
+      "exitCode": 0,
+      "log": "image-proof-build-repaired.log",
+      "logSha256": "284aabbcf69e109438fe217eab95594ed7f91fcc941e22eed0aef63930acbf51",
+      "sourceBefore": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "sourceAfter": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "codeInputsUnchanged": true
+    },
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "image-export-build-repaired",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "docker",
+        "save",
+        "--output",
+        "/mnt/data/ugv-zmq-phase5-governance-20261025/candidate-images-build-repaired.tar",
+        "smpp/ugv-zmq-candidate:20261025-governance-0e4b25a",
+        "smpp/runtime:zmq-candidate-20261025-0e4b25a",
+        "smpp/ugv-control-console:zmq-candidate-20261025-8b8f44c",
+        "sdar/runtime:zmq-candidate-20261025-93cada52"
+      ],
+      "explicitEnvironmentPathsAndTooling": {},
+      "startedAt": "2026-10-25T09:33:01.226644+00:00",
+      "completedAt": "2026-10-25T09:33:07.229316+00:00",
+      "elapsedSeconds": 6.003,
+      "exitCode": 0,
+      "log": "image-export-build-repaired.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourceBefore": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "sourceAfter": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "codeInputsUnchanged": true
+    },
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "image-import-roundtrip-build-repaired",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "docker",
+        "load",
+        "--input",
+        "/mnt/data/ugv-zmq-phase5-governance-20261025/candidate-images-build-repaired.tar"
+      ],
+      "explicitEnvironmentPathsAndTooling": {},
+      "startedAt": "2026-10-25T09:34:59.746154+00:00",
+      "completedAt": "2026-10-25T09:35:05.780021+00:00",
+      "elapsedSeconds": 6.034,
+      "exitCode": 0,
+      "log": "image-import-roundtrip-build-repaired.log",
+      "logSha256": "50ab4662b86b7dbff52a9680e7f6350ef4d00934800be3bbf3ae47d7922d5be6",
+      "sourceBefore": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "sourceAfter": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "codeInputsUnchanged": true
+    },
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "task-lifecycle-build-repaired",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "/home/sz/.nvm/versions/node/v22.23.2/bin/node",
+        "/mnt/data/ugv-zmq-phase5-governance-20261025/console-validation.mjs",
+        "lifecycle"
+      ],
+      "explicitEnvironmentPathsAndTooling": {
+        "PATH": "/home/sz/.nvm/versions/node/v22.23.2/lib/node_modules/corepack/shims:/home/sz/.nvm/versions/node/v22.23.2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      },
+      "startedAt": "2026-10-25T09:20:55.969264+00:00",
+      "completedAt": "2026-10-25T09:21:15.067588+00:00",
+      "elapsedSeconds": 19.098,
+      "exitCode": 0,
+      "log": "task-lifecycle-build-repaired.log",
+      "logSha256": "24908e7b8f79533d9e49c141868e01d6538a2658fdbe463357385bbc8932c2b2",
+      "sourceBefore": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "sourceAfter": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "codeInputsUnchanged": true
+    },
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "smpp-native-regressions-build-repaired",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "/home/sz/.nvm/versions/node/v22.23.2/bin/node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "tests/ugv-zmq/",
+        "tests/ugv-zmq-observer/",
+        "tests/ugv-zmq-control/",
+        "tests/ugv-zmq-provider/contract.test.ts",
+        "tests/unit/vehicle-grpc-stream-lifecycle.test.ts",
+        "tests/contract/task-business-operation-profile.test.ts",
+        "tests/integration/manifest-drift.test.ts"
+      ],
+      "explicitEnvironmentPathsAndTooling": {},
+      "startedAt": "2026-10-25T09:20:55.944240+00:00",
+      "completedAt": "2026-10-25T09:21:06.662321+00:00",
+      "elapsedSeconds": 10.718,
+      "exitCode": 0,
+      "log": "smpp-native-regressions-build-repaired.log",
+      "logSha256": "6614316efa6eae39871ea9ee10c6e1ee3ef56e19840e23d9031c85f81b38d293",
+      "sourceBefore": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "sourceAfter": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "codeInputsUnchanged": true
+    },
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "lint-smpp-source-build-repaired",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "/home/sz/.nvm/versions/node/v22.23.2/bin/node",
+        "node_modules/eslint/bin/eslint.js",
+        ".",
+        "--ignore-pattern",
+        "artifacts/**"
+      ],
+      "explicitEnvironmentPathsAndTooling": {},
+      "startedAt": "2026-10-25T09:16:30.225956+00:00",
+      "completedAt": "2026-10-25T09:18:03.343709+00:00",
+      "elapsedSeconds": 93.118,
+      "exitCode": 0,
+      "log": "lint-smpp-source-build-repaired.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourceBefore": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "sourceAfter": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "codeInputsUnchanged": true
+    },
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "format-smpp-build-repaired",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "/home/sz/.nvm/versions/node/v22.23.2/bin/node",
+        "node_modules/prettier/bin/prettier.cjs",
+        "--check",
+        "apps/ugv-zmq-provider-adapter",
+        "packages/vehicle-zmq-control/src/result-schemas.ts",
+        "packages/vehicle-zmq-control/src/catalog.ts",
+        "packages/persistence-postgres/src/tasks.ts",
+        "packages/task-engine/src/engine.ts",
+        "packages/task-engine/src/command-dispatcher.ts",
+        "tests/ugv-zmq-provider",
+        "contracts/ugv-zmq/provider-v1.0.1",
+        "apps/ugv-control-console/package.json",
+        "apps/ugv-control-console/tsconfig.build.json"
+      ],
+      "explicitEnvironmentPathsAndTooling": {},
+      "startedAt": "2026-10-25T09:20:55.969482+00:00",
+      "completedAt": "2026-10-25T09:20:58.170153+00:00",
+      "elapsedSeconds": 2.201,
+      "exitCode": 0,
+      "log": "format-smpp-build-repaired.log",
+      "logSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "sourceBefore": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "sourceAfter": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "codeInputsUnchanged": true
+    },
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "types-smpp-build-repaired",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "/home/sz/.nvm/versions/node/v22.23.2/bin/node",
+        "/home/sz/.cache/node/corepack/v1/pnpm/11.13.1/bin/pnpm.mjs",
+        "run",
+        "typecheck"
+      ],
+      "explicitEnvironmentPathsAndTooling": {
+        "PATH": "/home/sz/.nvm/versions/node/v22.23.2/lib/node_modules/corepack/shims:/home/sz/.nvm/versions/node/v22.23.2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      },
+      "startedAt": "2026-10-25T09:16:30.225967+00:00",
+      "completedAt": "2026-10-25T09:16:53.238654+00:00",
+      "elapsedSeconds": 23.013,
+      "exitCode": 0,
+      "log": "types-smpp-build-repaired.log",
+      "logSha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39",
+      "sourceBefore": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "sourceAfter": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "codeInputsUnchanged": true
+    },
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "build-smpp-build-repaired",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "/home/sz/.nvm/versions/node/v22.23.2/bin/node",
+        "/home/sz/.cache/node/corepack/v1/pnpm/11.13.1/bin/pnpm.mjs",
+        "run",
+        "build"
+      ],
+      "explicitEnvironmentPathsAndTooling": {
+        "PATH": "/home/sz/.nvm/versions/node/v22.23.2/lib/node_modules/corepack/shims:/home/sz/.nvm/versions/node/v22.23.2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      },
+      "startedAt": "2026-10-25T09:16:30.228547+00:00",
+      "completedAt": "2026-10-25T09:16:52.432534+00:00",
+      "elapsedSeconds": 22.204,
+      "exitCode": 0,
+      "log": "build-smpp-build-repaired.log",
+      "logSha256": "536cc4f74bc927dcd4e9e023fc52b0871374c6ac34ebbfec8258499cfd7b634f",
+      "sourceBefore": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "sourceAfter": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "codeInputsUnchanged": true
+    },
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "types-console-full-frozen",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "/home/sz/.nvm/versions/node/v22.23.2/bin/node",
+        "/home/sz/.cache/node/corepack/v1/pnpm/11.13.1/bin/pnpm.mjs",
+        "--filter",
+        "@sdar/ugv-control-console",
+        "typecheck"
+      ],
+      "explicitEnvironmentPathsAndTooling": {
+        "PATH": "/home/sz/.nvm/versions/node/v22.23.2/lib/node_modules/corepack/shims:/home/sz/.nvm/versions/node/v22.23.2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      },
+      "startedAt": "2026-10-25T09:29:05.627613+00:00",
+      "completedAt": "2026-10-25T09:29:14.444800+00:00",
+      "elapsedSeconds": 8.817,
+      "exitCode": 0,
+      "log": "types-console-full-frozen.log",
+      "logSha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39",
+      "sourceBefore": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "sourceAfter": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "codeInputsUnchanged": true
+    },
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "package-regressions-build-repaired",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/ugv-zmq-provider",
+        "-p",
+        "package_candidate_test.py"
+      ],
+      "explicitEnvironmentPathsAndTooling": {},
+      "startedAt": "2026-10-25T09:22:31.935717+00:00",
+      "completedAt": "2026-10-25T09:22:32.524040+00:00",
+      "elapsedSeconds": 0.588,
+      "exitCode": 0,
+      "log": "package-regressions-build-repaired.log",
+      "logSha256": "6dfdb603bd6f2c6cd4b8f74475fe6e9714c2c01b8abdf0b4834ebb85968370a3",
+      "sourceBefore": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "sourceAfter": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "codeInputsUnchanged": true
+    },
+    {
+      "schemaVersion": "ugv.zmq-command-receipt/1",
+      "id": "owned-fixture-cleanup-final",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": ["python3", "/mnt/data/ugv-zmq-phase5-governance-20261025/cleanup-owned.py"],
+      "explicitEnvironmentPathsAndTooling": {},
+      "startedAt": "2026-10-25T09:42:02.051016+00:00",
+      "completedAt": "2026-10-25T09:42:04.852246+00:00",
+      "elapsedSeconds": 2.801,
+      "exitCode": 0,
+      "log": "owned-fixture-cleanup-final.log",
+      "logSha256": "5f2f731354aae302733627adced0b8e940dd0d506ead95f3f002a17f26ceae4a",
+      "sourceBefore": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "sourceAfter": {
+        "commit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+        "branch": "codex/ugv-zmq-phase5-20261024",
+        "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "codeInputSha256": "325ce79e69a64fe8e2962c4b3f2ff388c3792648a6f0c9002733bc47858d7ea7",
+        "trackedCodeFileCount": 2290,
+        "codeInputExclusions": ["reports/**"],
+        "status": []
+      },
+      "codeInputsUnchanged": true
+    }
+  ],
+  "sdarFullGate": {
+    "run": {
+      "runId": "sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a",
+      "dependencyMode": "reuse",
+      "networkMode": "default_bridge",
+      "inputSha256": "07c960b0ae139ffa7753e8268c0a72f176f61e7c521db18456ecf90f2bf25106",
+      "baselineSha256": "a903e686927bd1002629c6dab024ae2f20f62ee5253f8f965b09b3e72a79eb5d",
+      "inputUnchanged": true,
+      "baselineUnchanged": true,
+      "snapshot": "/tmp/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a-jvXXUH/source",
+      "exitCode": 0,
+      "cleanupExitCode": 0,
+      "cleanupResults": [
+        {
+          "name": "sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a",
+          "file": "compose.yaml",
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 167,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 1,
+            "peakRssBytes": 28680192,
+            "peakProcesses": 1
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a-control-smoke",
+          "file": "compose.node-control.yaml",
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 94,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 1,
+            "peakRssBytes": 28323840,
+            "peakProcesses": 1
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a-runtime-smoke",
+          "file": "compose.yaml",
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 99,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 1,
+            "peakRssBytes": 28372992,
+            "peakProcesses": 1
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a-e2e-performance",
+          "file": "compose.verification-performance.yaml",
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 107,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 1,
+            "peakRssBytes": 28557312,
+            "peakProcesses": 1
+          },
+          "cleanupErrors": []
+        },
+        {
+          "resource": "migration-container-inventory",
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 26,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 1,
+            "peakRssBytes": 0,
+            "peakProcesses": 0
+          },
+          "cleanupErrors": []
+        },
+        {
+          "resource": "migration-volume-inventory",
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 25,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 1,
+            "peakRssBytes": 0,
+            "peakProcesses": 0
+          },
+          "cleanupErrors": []
+        }
+      ]
+    },
+    "summary": {
+      "schemaVersion": 2,
+      "scope": "full",
+      "dependencyMode": "reuse",
+      "baselineSha256": "a903e686927bd1002629c6dab024ae2f20f62ee5253f8f965b09b3e72a79eb5d",
+      "status": "passed",
+      "commit": "93cada52ef1ec2e60d232a36064d4823d5524b86",
+      "dirty": true,
+      "inputSha256": "07c960b0ae139ffa7753e8268c0a72f176f61e7c521db18456ecf90f2bf25106",
+      "environment": {
+        "node": "v22.23.2",
+        "platform": "linux",
+        "architecture": "x64",
+        "infrastructureMode": "self-managed-compose"
+      },
+      "startedAt": "2026-10-25T09:13:04.632Z",
+      "finishedAt": "2026-10-25T09:41:23.772Z",
+      "durationMs": 1699140,
+      "steps": [
+        {
+          "name": "format",
+          "command": "pnpm format:check",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:13:04.637Z",
+          "finishedAt": "2026-10-25T09:13:39.559Z",
+          "timeoutMs": 300000,
+          "logPath": "reports/verification/raw/format.log",
+          "outputSha256": "f13c710a152b72dd3daf30145799daf04e4627cc1313e3c7a47b2bd72474c641",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 34920,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 35,
+            "peakRssBytes": 510902272,
+            "peakProcesses": 3
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "verification-runner-contract",
+          "command": "pnpm test:verification",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:13:39.560Z",
+          "finishedAt": "2026-10-25T09:13:43.004Z",
+          "timeoutMs": 60000,
+          "logPath": "reports/verification/raw/verification-runner-contract.log",
+          "outputSha256": "ea44af4bbfe28b16840eaeddef26748e7610691c7d9bfd2ce0aaf4aaef7fe65a",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 3437,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 4,
+            "peakRssBytes": 237740032,
+            "peakProcesses": 4
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "lint",
+          "command": "pnpm lint",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:13:43.005Z",
+          "finishedAt": "2026-10-25T09:16:08.385Z",
+          "timeoutMs": 1200000,
+          "logPath": "reports/verification/raw/lint.log",
+          "outputSha256": "050c69da23536758722729aeda55a8d0fb9d557495ef6d33d70873a3b64a71c1",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 145380,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 146,
+            "peakRssBytes": 3797348352,
+            "peakProcesses": 3
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "typecheck",
+          "command": "pnpm typecheck",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:16:08.386Z",
+          "finishedAt": "2026-10-25T09:16:53.872Z",
+          "timeoutMs": 1200000,
+          "logPath": "reports/verification/raw/typecheck.log",
+          "outputSha256": "38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 45486,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 46,
+            "peakRssBytes": 2226233344,
+            "peakProcesses": 3
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "unit",
+          "command": "pnpm test:unit",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:16:53.873Z",
+          "finishedAt": "2026-10-25T09:19:09.432Z",
+          "timeoutMs": 1200000,
+          "logPath": "reports/verification/raw/unit.log",
+          "outputSha256": "e913c2f37db07d27d18cc02bd92eb765c6d5a2c03f5febf19bc8356f15d40483",
+          "metrics": {
+            "testFiles": 317,
+            "tests": 2777
+          },
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 135559,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 136,
+            "peakRssBytes": 1263452160,
+            "peakProcesses": 7
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "contract",
+          "command": "pnpm test:contract",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:19:09.434Z",
+          "finishedAt": "2026-10-25T09:19:46.267Z",
+          "timeoutMs": 600000,
+          "logPath": "reports/verification/raw/contract.log",
+          "outputSha256": "157e453b0998f60a6938cc47ac69b1018a3af89c17d6f155d79399b4a95d59e7",
+          "metrics": {
+            "testFiles": 63,
+            "tests": 556
+          },
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 36833,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 37,
+            "peakRssBytes": 1132953600,
+            "peakProcesses": 6
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "evidence-contract",
+          "command": "pnpm verify:evidence-contract",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:19:46.268Z",
+          "finishedAt": "2026-10-25T09:19:47.541Z",
+          "timeoutMs": 600000,
+          "logPath": "reports/verification/raw/evidence-contract.log",
+          "outputSha256": "033e01bff17562106c488c2118ed95434204705c32ea5de67dc81eac9722cbb4",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 1273,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 2,
+            "peakRssBytes": 294551552,
+            "peakProcesses": 4
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "evidence-coverage",
+          "command": "pnpm verify:evidence-coverage",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:19:47.542Z",
+          "finishedAt": "2026-10-25T09:19:48.285Z",
+          "timeoutMs": 600000,
+          "logPath": "reports/verification/raw/evidence-coverage.log",
+          "outputSha256": "27d2d19da39a975aad08c9c8fbff6e43c7b1edf1a7889d27175d946b08163634",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 743,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 1,
+            "peakRssBytes": 58101760,
+            "peakProcesses": 1
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "architecture",
+          "command": "pnpm verify:architecture",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:19:48.286Z",
+          "finishedAt": "2026-10-25T09:19:49.939Z",
+          "timeoutMs": 600000,
+          "logPath": "reports/verification/raw/architecture.log",
+          "outputSha256": "8fc1cb770fc8558746bac7a5510008c30d1723067d4b2b032c0c5a0097055c79",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 1653,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 2,
+            "peakRssBytes": 199049216,
+            "peakProcesses": 3
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "a2a-baseline",
+          "command": "pnpm verify:a2a-baseline",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:19:49.940Z",
+          "finishedAt": "2026-10-25T09:19:50.676Z",
+          "timeoutMs": 600000,
+          "logPath": "reports/verification/raw/a2a-baseline.log",
+          "outputSha256": "13523a659a4afec0736384a0de0216aed3ff191c1479d5767dc235c79f05901f",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 736,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 1,
+            "peakRssBytes": 58056704,
+            "peakProcesses": 1
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "management-openapi",
+          "command": "pnpm verify:management-openapi",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:19:50.677Z",
+          "finishedAt": "2026-10-25T09:19:51.421Z",
+          "timeoutMs": 600000,
+          "logPath": "reports/verification/raw/management-openapi.log",
+          "outputSha256": "d51f3467f4d2c8dfafbb1e892734ede51b02d440d1f2227c1a1d5337f237888a",
+          "metrics": {
+            "openapiOperations": 186
+          },
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 744,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 1,
+            "peakRssBytes": 58097664,
+            "peakProcesses": 1
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "node-control-contract",
+          "command": "pnpm verify:node-control-contract",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:19:51.422Z",
+          "finishedAt": "2026-10-25T09:19:52.180Z",
+          "timeoutMs": 600000,
+          "logPath": "reports/verification/raw/node-control-contract.log",
+          "outputSha256": "b308fc64632fbf19d874b19f63fe850752fed2cbdce625258333905238ea3dab",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 758,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 1,
+            "peakRssBytes": 57368576,
+            "peakProcesses": 1
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "node-control-implementation-conformance",
+          "command": "pnpm verify:node-control-implementation-conformance",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:19:52.181Z",
+          "finishedAt": "2026-10-25T09:19:55.716Z",
+          "timeoutMs": 600000,
+          "logPath": "reports/verification/raw/node-control-implementation-conformance.log",
+          "outputSha256": "6ba8a7328603451b474fe61d9b56dacc4c1e169a173e787f4c344f5363edd29b",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 3535,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 4,
+            "peakRssBytes": 459341824,
+            "peakProcesses": 5
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "smpp-registry-projection",
+          "command": "pnpm verify:smpp-registry-projection",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:19:55.717Z",
+          "finishedAt": "2026-10-25T09:19:56.606Z",
+          "timeoutMs": 600000,
+          "logPath": "reports/verification/raw/smpp-registry-projection.log",
+          "outputSha256": "f879a101de0cbded93d5a34cf6a315f29f9b59e4a1195c6e8931ab7efb3cbcab",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 889,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 1,
+            "peakRssBytes": 58101760,
+            "peakProcesses": 1
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "acceptance",
+          "command": "pnpm verify:acceptance",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:19:56.607Z",
+          "finishedAt": "2026-10-25T09:19:57.339Z",
+          "timeoutMs": 600000,
+          "logPath": "reports/verification/raw/acceptance.log",
+          "outputSha256": "d94263c612588fa3c74b93d5d877079f05bbc5a3538e68e19dcb3725ecdab788",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 732,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 1,
+            "peakRssBytes": 58044416,
+            "peakProcesses": 1
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "sources",
+          "command": "pnpm verify:sources",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:19:57.340Z",
+          "finishedAt": "2026-10-25T09:19:58.086Z",
+          "timeoutMs": 600000,
+          "logPath": "reports/verification/raw/sources.log",
+          "outputSha256": "a382d8438c8da8d0e65f5155682361a1be32937cfef504dc8228567d4b4e49cc",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 745,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 1,
+            "peakRssBytes": 58064896,
+            "peakProcesses": 1
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "protocol",
+          "command": "pnpm verify:protocol",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:19:58.086Z",
+          "finishedAt": "2026-10-25T09:19:59.013Z",
+          "timeoutMs": 600000,
+          "logPath": "reports/verification/raw/protocol.log",
+          "outputSha256": "58603e97baca9e3264e4334e177b35057bbbe8c95353d8789e44f50eec698a27",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 927,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 1,
+            "peakRssBytes": 58032128,
+            "peakProcesses": 1
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "infra",
+          "command": "pnpm verify:infra",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:19:59.014Z",
+          "finishedAt": "2026-10-25T09:19:59.879Z",
+          "timeoutMs": 600000,
+          "logPath": "reports/verification/raw/infra.log",
+          "outputSha256": "49842141f43fb1d5757f0fa45eea88f83e3d412fcf80f11f8b3b389e0673894d",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 865,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 1,
+            "peakRssBytes": 58032128,
+            "peakProcesses": 1
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "project-license",
+          "command": "pnpm verify:project-license",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:19:59.880Z",
+          "finishedAt": "2026-10-25T09:20:00.606Z",
+          "timeoutMs": 600000,
+          "logPath": "reports/verification/raw/project-license.log",
+          "outputSha256": "11054109617d351d51b769f4e2056b1de2c82f26806ad3ad3aed6d5b4db71861",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 725,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 1,
+            "peakRssBytes": 58073088,
+            "peakProcesses": 1
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "licenses",
+          "command": "pnpm verify:licenses",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:20:00.606Z",
+          "finishedAt": "2026-10-25T09:20:01.422Z",
+          "timeoutMs": 600000,
+          "logPath": "reports/verification/raw/licenses.log",
+          "outputSha256": "95ab9975c1ad5ebecff93c57cd63695f568e622c389b142d3fb171160046a16c",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 815,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 1,
+            "peakRssBytes": 58036224,
+            "peakProcesses": 1
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "build",
+          "command": "pnpm build",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:20:01.422Z",
+          "finishedAt": "2026-10-25T09:20:43.409Z",
+          "timeoutMs": 600000,
+          "logPath": "reports/verification/raw/build.log",
+          "outputSha256": "93507034a1ca22fadac8930b92e7235b5e94cacc68e7edb0b3321947ad3154d3",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 41986,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 42,
+            "peakRssBytes": 1560530944,
+            "peakProcesses": 5
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "cognitive-replay-no-physical-provider",
+          "command": "pnpm verify:cognitive-replay",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:20:43.409Z",
+          "finishedAt": "2026-10-25T09:20:44.564Z",
+          "timeoutMs": 60000,
+          "logPath": "reports/verification/raw/cognitive-replay-no-physical-provider.log",
+          "outputSha256": "0919bdd9413b3a39e5a8b46f8e6a4a41dff307ddef5269fa00ea04bb5c90a1b2",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 1155,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 2,
+            "peakRssBytes": 227254272,
+            "peakProcesses": 3
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "clean-baseline-reset-seed",
+          "command": "pnpm verify:migrations",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:20:44.565Z",
+          "finishedAt": "2026-10-25T09:21:26.279Z",
+          "timeoutMs": 300000,
+          "logPath": "reports/verification/raw/clean-baseline-reset-seed.log",
+          "outputSha256": "7c037b6c473816b3cdd815ed9e8ed4c21fdd3241e28835fc236712a46fa50d23",
+          "metrics": {
+            "migrationCount": 77
+          },
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 41714,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 42,
+            "peakRssBytes": 438153216,
+            "peakProcesses": 6
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "postgres-redis-integration",
+          "command": "pnpm test:integration",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:21:26.280Z",
+          "finishedAt": "2026-10-25T09:27:57.997Z",
+          "timeoutMs": 660000,
+          "logPath": "reports/verification/raw/postgres-redis-integration.log",
+          "outputSha256": "541a45844dc5355c9a87c26a922bdb972fb2c8303abecb26c06c92ea81189a8b",
+          "metrics": {
+            "testFiles": 44,
+            "tests": 275
+          },
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 391716,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 392,
+            "peakRssBytes": 1744658432,
+            "peakProcesses": 9
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "postgres-redis-model-mcp-e2e",
+          "command": "pnpm test:e2e",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:27:57.999Z",
+          "finishedAt": "2026-10-25T09:32:42.968Z",
+          "timeoutMs": 360000,
+          "logPath": "reports/verification/raw/postgres-redis-model-mcp-e2e.log",
+          "outputSha256": "c42868e5b20fe27b4480ea6651affa5d9a36e7a4cf8f119af4446d0a7b6848cc",
+          "metrics": {
+            "testFiles": 8,
+            "tests": 77
+          },
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 284969,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 285,
+            "peakRssBytes": 2184744960,
+            "peakProcesses": 6
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "official-a2a-tck",
+          "command": "pnpm test:a2a-tck",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:32:42.970Z",
+          "finishedAt": "2026-10-25T09:34:08.519Z",
+          "timeoutMs": 300000,
+          "logPath": "reports/verification/raw/official-a2a-tck.log",
+          "outputSha256": "f40822bdc86cc3cc30991da790dffef964ada242a2834a18eeea910abf280515",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 85549,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 86,
+            "peakRssBytes": 1616596992,
+            "peakProcesses": 7
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "canonical-evidence-demo",
+          "command": "pnpm demo:evidence-e2e",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:34:08.520Z",
+          "finishedAt": "2026-10-25T09:38:55.953Z",
+          "timeoutMs": 600000,
+          "logPath": "reports/verification/raw/canonical-evidence-demo.log",
+          "outputSha256": "74f42334e9e3a33834854aa6133e42f8523a83d72338f7268b841d3678f0c97c",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 287433,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 288,
+            "peakRssBytes": 1117089792,
+            "peakProcesses": 7
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "infrastructure-smoke",
+          "command": "pnpm smoke:infra",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:38:55.955Z",
+          "finishedAt": "2026-10-25T09:39:10.225Z",
+          "timeoutMs": 240000,
+          "logPath": "reports/verification/raw/infrastructure-smoke.log",
+          "outputSha256": "7020defdbf7a6f337558780af6dc454e64e0cdd4b651c71c913ecfb139094612",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 14270,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 15,
+            "peakRssBytes": 405045248,
+            "peakProcesses": 6
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "server-console-smoke",
+          "command": "pnpm smoke:server",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:39:10.226Z",
+          "finishedAt": "2026-10-25T09:40:06.576Z",
+          "timeoutMs": 300000,
+          "logPath": "reports/verification/raw/server-console-smoke.log",
+          "outputSha256": "94b401a4ca6b6ae7685e34faa564e665b7f610b48fabc269642c2372b7b112ed",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 56350,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 57,
+            "peakRssBytes": 1746386944,
+            "peakProcesses": 8
+          },
+          "cleanupErrors": []
+        },
+        {
+          "name": "node-control-api-worker-smoke",
+          "command": "pnpm smoke:node-control",
+          "status": "passed",
+          "startedAt": "2026-10-25T09:40:06.578Z",
+          "finishedAt": "2026-10-25T09:41:23.771Z",
+          "timeoutMs": 300000,
+          "logPath": "reports/verification/raw/node-control-api-worker-smoke.log",
+          "outputSha256": "255bbc8610499f77d6a816e9e43f48bd7ab68f7d69fd38cb7d8b00c62e7f82b0",
+          "metrics": {},
+          "exitCode": 0,
+          "signal": null,
+          "durationMs": 77193,
+          "resources": {
+            "source": "linux-proc-process-group-sampling",
+            "samples": 77,
+            "peakRssBytes": 1944547328,
+            "peakProcesses": 11
+          },
+          "cleanupErrors": []
+        }
+      ],
+      "pendingSteps": []
+    }
+  },
+  "joint": {
+    "runId": "zmqgov-1eccc345ef7f-4f66ec72",
+    "status": "passed",
+    "cases": [
+      "schema-drift-before-binding",
+      "readonly-native-task",
+      "native-inspection-empty",
+      "native-inspection-missing",
+      "native-inspection-cancel",
+      "native-inspection-failed",
+      "no-model-generation-or-control-decision",
+      "canonical-evidence-projection",
+      "complete-agent-card-artifact"
+    ],
+    "governancePublishedCount": 12,
+    "optionalModelRequestsRejected": 48,
+    "controlGenerationStages": [],
+    "cleanupErrors": [],
+    "providerCommandCount": 9,
+    "nativeExecutionCount": 5,
+    "providerErrors": []
+  },
+  "testCounts": {
+    "formalMcp": 10,
+    "smppNativeAndLegacyRegressions": 134,
+    "taskLifecycleRealPostgres": 151,
+    "consoleTests": 57,
+    "nativeBrowser": 2,
+    "legacyBrowser": 4,
+    "sourceArchiveRegressions": 2
+  },
+  "images": [
+    {
+      "component": "provider",
+      "tag": "smpp/ugv-zmq-candidate:20261025-governance-0e4b25a",
+      "imageId": "sha256:df9a2e0f3c7c442dbcc3440d6afb1b9aa3078dd989e8110565e1f6eabdb2eb14",
+      "sourceRevision": "0e4b25a8f97d6d590554bd33a457f081ebf7e531",
+      "compiledFileCount": 78,
+      "modulesLoaded": 4
+    },
+    {
+      "component": "smpp-runtime",
+      "tag": "smpp/runtime:zmq-candidate-20261025-0e4b25a",
+      "imageId": "sha256:d44285a4a2bb08e2f069e8641e81f69543f612af1611eb605bbc491aa34ac195",
+      "sourceRevision": "0e4b25a8f97d6d590554bd33a457f081ebf7e531",
+      "compiledFileCount": 764,
+      "modulesLoaded": 1
+    },
+    {
+      "component": "console",
+      "tag": "smpp/ugv-control-console:zmq-candidate-20261025-8b8f44c",
+      "imageId": "sha256:d71b05fa23bc18f6fbab2cb6b50c12526f1f3d0eab0ede131a3afac3abb426a9",
+      "sourceRevision": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+      "compiledFileCount": 16,
+      "modulesLoaded": 3
+    },
+    {
+      "component": "sdar-runtime",
+      "tag": "sdar/runtime:zmq-candidate-20261025-93cada52",
+      "imageId": "sha256:385958ccb23a15d72d11c4e2d6def606b2a33b67b1ce45d5fb31f9a9b956d196",
+      "sourceRevision": "93cada52ef1ec2e60d232a36064d4823d5524b86",
+      "compiledFileCount": 1469,
+      "modulesLoaded": 5
+    }
+  ],
+  "compiledFilesMatched": 2327,
+  "performance": {
+    "raw": {
+      "event": "phase13.performance.raw_metrics",
+      "baselineP95RawMs": 397.1568600000028,
+      "evidenceEnabledP95RawMs": 408.51043400000344,
+      "regressionRawPercent": 2.858712801788337,
+      "baselineWindowMediansRawMs": [331.6404715000026, 305.3668624999991, 317.83567849999963],
+      "baselineMedianDriftRawPercent": 8.249075826183006,
+      "appendP95RawMs": 2.239357000000382,
+      "appendSamplesMs": [
+        2.243635999999242, 2.1185430000005, 2.06227299999955, 2.0945730000003095, 2.175578000000314,
+        2.0515070000001288, 2.0883620000004157, 2.1009999999987485, 2.06212400000004,
+        2.0668299999997544, 2.467780999999377, 2.071164000000863, 2.1455750000004628,
+        2.095188999999664, 2.117151999998896, 2.060895000000528, 2.0094289999997272,
+        2.0358089999990625, 2.043551999999181, 2.0587429999995948, 2.004290000000765,
+        2.04779199999939, 2.436859999999797, 2.1198089999998047, 2.052025999999387,
+        2.071428000001106, 2.2092960000009043, 1.9834429999991698, 1.950235000000248,
+        1.9704380000002857, 1.96211299999959, 2.022689999999784, 2.091747000000396,
+        2.0215160000007018, 2.413206999999602, 2.0299030000005587, 1.9344189999992523,
+        1.9243270000006305, 1.9150150000004942, 1.9331729999994423, 1.9255260000009002,
+        1.9953009999990172, 2.042617999999493, 2.001109999999244, 1.9638030000005529,
+        1.9568340000005264, 2.1614730000001146, 2.15666500000043, 2.075596000000587,
+        2.0327159999997093, 2.0657570000003034, 1.9635879999987083, 1.9352409999992233,
+        2.0248540000011417, 1.9251430000003893, 1.9651809999995749, 1.9342259999993985,
+        2.025681999999506, 2.2409480000005715, 2.151964999999109, 1.9717020000007324,
+        1.9045960000003106, 1.972037999999884, 1.9032890000016778, 1.9140919999990729,
+        1.9268629999987752, 1.930702999999994, 1.9669839999987744, 1.900300999999672,
+        1.934065000001283, 1.88284399999975, 2.1143749999991996, 2.091803000001164,
+        1.963804999999411, 1.988538999999946, 2.0120349999997416, 1.894350000000486,
+        1.8769300000003568, 1.9727250000014465, 1.9035579999999754, 1.956319999999323,
+        1.9472609999993438, 1.9506799999999203, 1.9693500000012136, 2.239357000000382,
+        1.9740689999998722, 2.071420999998736, 2.121255000000019, 1.9358499999998457,
+        1.9191499999997177, 1.9092089999994641, 1.9152389999999286, 1.922429000000193,
+        1.8584429999991698, 1.8431319999999687, 1.9027019999994081, 2.0311639999999898,
+        2.0940840000002936, 1.8824939999994967, 1.884963999998945
+      ],
+      "appendTailMs": [
+        2.15666500000043, 2.1614730000001146, 2.175578000000314, 2.2092960000009043,
+        2.239357000000382, 2.2409480000005715, 2.243635999999242, 2.413206999999602,
+        2.436859999999797, 2.467780999999377
+      ]
+    },
+    "unchangedThresholds": {
+      "baselineMedianDriftMaxPercent": 15,
+      "relativeP95RegressionMaxPercent": 10,
+      "appendP95MaxMs": 20
+    }
+  },
+  "g0": {
+    "ready": false,
+    "expectedPreflightExitCode": 2,
+    "checkedContractInputs": 17,
+    "missing": [
+      "SIMULATION_ID_UNCONFIRMED",
+      "PROVIDER_BINDING_PROVIDERID_UNCONFIRMED",
+      "PROVIDER_BINDING_RESOURCEID_UNCONFIRMED",
+      "PROVIDER_BINDING_SOURCESESSIONKEY_UNCONFIRMED",
+      "PLANNER_POLICY_UNCONFIRMED",
+      "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+      "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+      "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+      "EVIDENCE_CAPABILITYSCOPE_MISSING",
+      "EVIDENCE_SERVERIMPLEMENTATION_MISSING",
+      "EVIDENCE_PLANNERPOLICY_MISSING",
+      "EVIDENCE_PROVIDERGOLDENFRAMES_MISSING"
+    ]
+  },
+  "preservedFailures": [
+    {
+      "id": "sdar-full-30-final",
+      "exitCode": 1,
+      "source": "df639088f4a429fe5b7a978e246eda17fb322e98",
+      "logSha256": "207a1a71150e963a28f27642b13221cbdf2f29837268dd18a867420193483c3b"
+    },
+    {
+      "id": "sdar-full-30-media-final",
+      "exitCode": 1,
+      "source": "c20855a99771fd52121fedff8e54d3889275dc64",
+      "logSha256": "b4f6682b2a8ad38a25cc8a0a8bdb4f74bf6a00d0b1ae91aaf57259fbac43cded"
+    },
+    {
+      "id": "image-console-frozen",
+      "exitCode": 1,
+      "source": "0e4b25a8f97d6d590554bd33a457f081ebf7e531",
+      "logSha256": "b877abf61871f46c1f8e5624ed90565d2976e91b2435be633902ed73a8706157"
+    },
+    {
+      "id": "image-sdar-runtime-frozen",
+      "exitCode": 1,
+      "source": "c20855a99771fd52121fedff8e54d3889275dc64",
+      "logSha256": "08fbf452a9268484f139be2977a5a8f4f65d4961add6c4bc569e01b635604814"
+    },
+    {
+      "id": "build-sdar-declaration-repair",
+      "exitCode": 1,
+      "source": "c20855a99771fd52121fedff8e54d3889275dc64",
+      "logSha256": "3b8e79f257eb5e5a0126248297f7b61897396012dd185d4c561f62717485dd96"
+    },
+    {
+      "id": "console-unit-build-repaired",
+      "exitCode": 1,
+      "source": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+      "logSha256": "62cd1f7e2f332953d29fb59420403606c56038377c3a9ebe104536451ccaa2e1"
+    }
+  ],
+  "openAcceptance": [
+    "native_patrol_successor",
+    "g0_authoritative_source_facts",
+    "full_gowm_owner_site_qualification",
+    "fenced_idle_handoff",
+    "field_execution_and_rollback"
+  ],
+  "artifactManifest": [
+    {
+      "path": "raw/receipts/sdar-full-30-build-repaired.receipt.json",
+      "bytes": 2497,
+      "sha256": "1a3ec9b5a5fd5e262db832c7343a1a6882c0851e6f2ca204a05f8b6ba8463799",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/sdar-full-30-build-repaired.receipt.json",
+      "sourceSha256": "1a3ec9b5a5fd5e262db832c7343a1a6882c0851e6f2ca204a05f8b6ba8463799",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/sdar-full-30-build-repaired.log.gz",
+      "bytes": 29768,
+      "sha256": "5b9c9a0589178d93d4eeafdfba7b1c97028fdc663f1dd0587b5c8a71e6b69856",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/sdar-full-30-build-repaired.log",
+      "sourceSha256": "66e910b6146dfb713d6dd40766b858d0acde4c7b239a7c909f0464100bbbfaf8",
+      "encoding": "gzip",
+      "redacted": true
+    },
+    {
+      "path": "raw/receipts/joint-native-build-repaired.receipt.json",
+      "bytes": 2499,
+      "sha256": "5c226169d8eaf2d5c83757f1686f6799bbd5a1b071549af3a47493d17e6cd670",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-native-build-repaired.receipt.json",
+      "sourceSha256": "5c226169d8eaf2d5c83757f1686f6799bbd5a1b071549af3a47493d17e6cd670",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/joint-native-build-repaired.log.gz",
+      "bytes": 1264,
+      "sha256": "635c1c85e61cf3e110fe451264225c9c8d4d926a8fd27d8f56aa2f2ae99416a3",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/joint-native-build-repaired.log",
+      "sourceSha256": "fde5cb7705d16e1695c7eac2bac1fae3a412129a1a241bdca7d6e66c3d72a5e6",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/receipts/formal-10-build-repaired.receipt.json",
+      "bytes": 1945,
+      "sha256": "66358e6d880d70ff2e57bc81fc67c9bfe13ce0f3201ab239a783fde6bae6d899",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/formal-10-build-repaired.receipt.json",
+      "sourceSha256": "66358e6d880d70ff2e57bc81fc67c9bfe13ce0f3201ab239a783fde6bae6d899",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/formal-10-build-repaired.log.gz",
+      "bytes": 219,
+      "sha256": "16837e02aa9c6720dc313e063180ae45f51a231f0aa43b0d4a682ad999f684e1",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/formal-10-build-repaired.log",
+      "sourceSha256": "eeffa9e29326b617e0432b25e7deca8cebb48347795f9ce43cbd8a2d18efa0e9",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/receipts/console-unit-build-repaired2.receipt.json",
+      "bytes": 1720,
+      "sha256": "ed32d0b61179d78bbefa3ca960af25953e5397e5c73789567776e57f441e23bd",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/console-unit-build-repaired2.receipt.json",
+      "sourceSha256": "ed32d0b61179d78bbefa3ca960af25953e5397e5c73789567776e57f441e23bd",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/console-unit-build-repaired2.log.gz",
+      "bytes": 351,
+      "sha256": "54eb792ff411ac5514bd52470e42c8a74bac76a142d971cd4328054a09d6b707",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/console-unit-build-repaired2.log",
+      "sourceSha256": "69e134466b596e7306adca5fb65acb913a12d2f8613d9be0b0c2d144ee8d6d07",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/receipts/console-browser-build-repaired.receipt.json",
+      "bytes": 1727,
+      "sha256": "20ffc4f2645448fec3049e03ce646f9d1b4d9d56234e638dfbab6939ad09d1f5",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/console-browser-build-repaired.receipt.json",
+      "sourceSha256": "20ffc4f2645448fec3049e03ce646f9d1b4d9d56234e638dfbab6939ad09d1f5",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/console-browser-build-repaired.log.gz",
+      "bytes": 467,
+      "sha256": "aa5e153f9793eb95f77f0d7bcab46126670962669166486827a7221d6a3fad7f",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/console-browser-build-repaired.log",
+      "sourceSha256": "f1c358558d0c9c3c7cb168a2b73b8e617b8b07c71b3ef716809b8ecc1c5c8969",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/receipts/console-legacy-browser-build-repaired.receipt.json",
+      "bytes": 1748,
+      "sha256": "a29dc4f6b46f33157dc1049fe2fba16ba3e47d20c1392782bdfa2cd4c8f34767",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/console-legacy-browser-build-repaired.receipt.json",
+      "sourceSha256": "a29dc4f6b46f33157dc1049fe2fba16ba3e47d20c1392782bdfa2cd4c8f34767",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/console-legacy-browser-build-repaired.log.gz",
+      "bytes": 564,
+      "sha256": "1a31f4f2ad8d0d3592bbc8840dc064769a07a180f7f644f431958ded6db97aa2",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/console-legacy-browser-build-repaired.log",
+      "sourceSha256": "194adb50ede38247c4ba09a4cf67ee3d299479793d7830dc9bc58c021807d9de",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/receipts/image-provider-frozen.receipt.json",
+      "bytes": 1718,
+      "sha256": "5e49a3d111ae0c305ce650fdc6a11ce8093b1d119c53a4548a83b3f5f3892388",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/image-provider-frozen.receipt.json",
+      "sourceSha256": "5e49a3d111ae0c305ce650fdc6a11ce8093b1d119c53a4548a83b3f5f3892388",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/image-provider-frozen.log.gz",
+      "bytes": 4327,
+      "sha256": "77b8bfb709d737e635ff362ef1a911db28dd45579a4022a04e8f605af97e365b",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/image-provider-frozen.log",
+      "sourceSha256": "f571c23eddf726012df3eb32d522c036506d598a56cf58714ba2af628fea9ebb",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/receipts/image-smpp-runtime-frozen.receipt.json",
+      "bytes": 1716,
+      "sha256": "f7383f0267cff1067440b017eb91dc6b1ca6fed163ffde2f7618fba940551d26",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/image-smpp-runtime-frozen.receipt.json",
+      "sourceSha256": "f7383f0267cff1067440b017eb91dc6b1ca6fed163ffde2f7618fba940551d26",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/image-smpp-runtime-frozen.log.gz",
+      "bytes": 2866,
+      "sha256": "26f485c57a1344a2b49a02a7075c656e9ffb2468389e0b562f9fb1528d0496d4",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/image-smpp-runtime-frozen.log",
+      "sourceSha256": "5f185c63d29e8e482ded4c8584bc754bbed6b3c4d0692dfaae53f2f16d6fe8f1",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/receipts/image-console-build-repaired.receipt.json",
+      "bytes": 1758,
+      "sha256": "fd3db6e113813e9f8d599e7db74e3f51ac8866af34a1d8fec26568b1f4e6e385",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/image-console-build-repaired.receipt.json",
+      "sourceSha256": "fd3db6e113813e9f8d599e7db74e3f51ac8866af34a1d8fec26568b1f4e6e385",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/image-console-build-repaired.log.gz",
+      "bytes": 2279,
+      "sha256": "a2618793291d97fe7688d427447871e590d27a4b418c3a8ae24c7e5c95812b70",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/image-console-build-repaired.log",
+      "sourceSha256": "02bd6a7191f3c40f0efdbf73dbeb931668e75652514a835ca96b39bd2b600145",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/receipts/image-sdar-runtime-build-repaired.receipt.json",
+      "bytes": 2335,
+      "sha256": "9602ee193a592cb789344c7eb49e6aabf806df06d403f9c27d907f1bc6b558b8",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/image-sdar-runtime-build-repaired.receipt.json",
+      "sourceSha256": "9602ee193a592cb789344c7eb49e6aabf806df06d403f9c27d907f1bc6b558b8",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/image-sdar-runtime-build-repaired.log.gz",
+      "bytes": 1124,
+      "sha256": "273ee79331e4f4607b338c40e309632da24a60f5ea50212417be09d696f30b32",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/image-sdar-runtime-build-repaired.log",
+      "sourceSha256": "27cf21ae84fea306e8896399ff9bb84a9ac2869cedd307371d20ee9ada65b8e5",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/receipts/image-proof-build-repaired.receipt.json",
+      "bytes": 1469,
+      "sha256": "83904bc4af3c3a6f529c690f34f8f18804880016b617909399186c4149b42667",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/image-proof-build-repaired.receipt.json",
+      "sourceSha256": "83904bc4af3c3a6f529c690f34f8f18804880016b617909399186c4149b42667",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/image-proof-build-repaired.log.gz",
+      "bytes": 271,
+      "sha256": "374e9ce43813f06e079ca6d0dcdb2fe564a8348fcf3feb6bc348dbf81287c9ee",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/image-proof-build-repaired.log",
+      "sourceSha256": "284aabbcf69e109438fe217eab95594ed7f91fcc941e22eed0aef63930acbf51",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/receipts/image-export-build-repaired.receipt.json",
+      "bytes": 1743,
+      "sha256": "a52978e64958b39535d4b177769be74f5c5811664408b58a8d1068344070aef2",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/image-export-build-repaired.receipt.json",
+      "sourceSha256": "a52978e64958b39535d4b177769be74f5c5811664408b58a8d1068344070aef2",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/image-export-build-repaired.log.gz",
+      "bytes": 20,
+      "sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/image-export-build-repaired.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/receipts/image-import-roundtrip-build-repaired.receipt.json",
+      "bytes": 1538,
+      "sha256": "1696abae9bb4d803700bbe22ef77a7a7a6b6382f9ca7c1591596b84339894e4b",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/image-import-roundtrip-build-repaired.receipt.json",
+      "sourceSha256": "1696abae9bb4d803700bbe22ef77a7a7a6b6382f9ca7c1591596b84339894e4b",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/image-import-roundtrip-build-repaired.log.gz",
+      "bytes": 140,
+      "sha256": "d4c0c787e302f638a3d5af31c28447fbc3430617b0683a3341bf6098c69814ba",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/image-import-roundtrip-build-repaired.log",
+      "sourceSha256": "50ab4662b86b7dbff52a9680e7f6350ef4d00934800be3bbf3ae47d7922d5be6",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/receipts/task-lifecycle-build-repaired.receipt.json",
+      "bytes": 1727,
+      "sha256": "5c19af7ffe58a68db28684ea561004ff2498cce9f8693eb6ebd8e5d7107a6f89",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/task-lifecycle-build-repaired.receipt.json",
+      "sourceSha256": "5c19af7ffe58a68db28684ea561004ff2498cce9f8693eb6ebd8e5d7107a6f89",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/task-lifecycle-build-repaired.log.gz",
+      "bytes": 340,
+      "sha256": "cda7eda04aa2b95c4219380be4c453014774fbd1ca3f15a880d8ea70a0e6352b",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/task-lifecycle-build-repaired.log",
+      "sourceSha256": "24908e7b8f79533d9e49c141868e01d6538a2658fdbe463357385bbc8932c2b2",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/receipts/smpp-native-regressions-build-repaired.receipt.json",
+      "bytes": 1810,
+      "sha256": "1ddb74707549e88dbd26a6ee1fe33e3d3f30c0835d5bb2bd80d1961d3c82e016",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/smpp-native-regressions-build-repaired.receipt.json",
+      "sourceSha256": "1ddb74707549e88dbd26a6ee1fe33e3d3f30c0835d5bb2bd80d1961d3c82e016",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/smpp-native-regressions-build-repaired.log.gz",
+      "bytes": 221,
+      "sha256": "b31b0fa61c17ce0d9acd0c29ad6a9af9def3b91b6fb647c8cfdb153c36e1d7f1",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/smpp-native-regressions-build-repaired.log",
+      "sourceSha256": "6614316efa6eae39871ea9ee10c6e1ee3ef56e19840e23d9031c85f81b38d293",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/receipts/lint-smpp-source-build-repaired.receipt.json",
+      "bytes": 1545,
+      "sha256": "da0bde46895df5950e53f139637e598b3a01f46784258df621a85841e10db3f0",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/lint-smpp-source-build-repaired.receipt.json",
+      "sourceSha256": "da0bde46895df5950e53f139637e598b3a01f46784258df621a85841e10db3f0",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/lint-smpp-source-build-repaired.log.gz",
+      "bytes": 20,
+      "sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/lint-smpp-source-build-repaired.log",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/receipts/format-smpp-build-repaired.receipt.json",
+      "bytes": 1961,
+      "sha256": "15138017e50a4c6c96fedb6a4c3e4fc3ba1c45a88ec357b593c4c4e143ebffc9",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/format-smpp-build-repaired.receipt.json",
+      "sourceSha256": "15138017e50a4c6c96fedb6a4c3e4fc3ba1c45a88ec357b593c4c4e143ebffc9",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/format-smpp-build-repaired.log.gz",
+      "bytes": 82,
+      "sha256": "6cd316ae8e81df0ff79776205007450fac3d62e1ba8e884e169e326d7955ebe5",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/format-smpp-build-repaired.log",
+      "sourceSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/receipts/types-smpp-build-repaired.receipt.json",
+      "bytes": 1721,
+      "sha256": "8a8fd69650039b0f01e71cf19907f7deddee2e971f1d5f75bc088dfe8fe39bf5",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/types-smpp-build-repaired.receipt.json",
+      "sourceSha256": "8a8fd69650039b0f01e71cf19907f7deddee2e971f1d5f75bc088dfe8fe39bf5",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/types-smpp-build-repaired.log.gz",
+      "bytes": 49,
+      "sha256": "89414887291f4aa94ceb8d0fe24831345a657243f2c23bf8e9bf2797ce3a0eb7",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/types-smpp-build-repaired.log",
+      "sourceSha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/receipts/build-smpp-build-repaired.receipt.json",
+      "bytes": 1717,
+      "sha256": "edcb1afd9e2faafc0e6a598726aab91782e115ea58a055c8aeb0155b99851491",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/build-smpp-build-repaired.receipt.json",
+      "sourceSha256": "edcb1afd9e2faafc0e6a598726aab91782e115ea58a055c8aeb0155b99851491",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/build-smpp-build-repaired.log.gz",
+      "bytes": 93,
+      "sha256": "1eb0ee2f9927a16ece567686bb43775419d82b23869b33baf50683ac7b7f8005",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/build-smpp-build-repaired.log",
+      "sourceSha256": "536cc4f74bc927dcd4e9e023fc52b0871374c6ac34ebbfec8258499cfd7b634f",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/receipts/types-console-full-frozen.receipt.json",
+      "bytes": 1758,
+      "sha256": "5b6955bbcd4466092144d951fec4a3e17bc4732e7c57eb830e6adca55436e385",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/types-console-full-frozen.receipt.json",
+      "sourceSha256": "5b6955bbcd4466092144d951fec4a3e17bc4732e7c57eb830e6adca55436e385",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/types-console-full-frozen.log.gz",
+      "bytes": 49,
+      "sha256": "89414887291f4aa94ceb8d0fe24831345a657243f2c23bf8e9bf2797ce3a0eb7",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/types-console-full-frozen.log",
+      "sourceSha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/receipts/package-regressions-build-repaired.receipt.json",
+      "bytes": 1543,
+      "sha256": "3ac8db3d7d9182a85d683c083829ce413c191fe21c810d9aed783e03d8243339",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/package-regressions-build-repaired.receipt.json",
+      "sourceSha256": "3ac8db3d7d9182a85d683c083829ce413c191fe21c810d9aed783e03d8243339",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/package-regressions-build-repaired.log.gz",
+      "bytes": 53,
+      "sha256": "4274368184702811fc780f624c26fd82b10b92a98f4e28a96dda8fe92ec7f198",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/package-regressions-build-repaired.log",
+      "sourceSha256": "6dfdb603bd6f2c6cd4b8f74475fe6e9714c2c01b8abdf0b4834ebb85968370a3",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/receipts/owned-fixture-cleanup-final.receipt.json",
+      "bytes": 1473,
+      "sha256": "56c8244361677a10d3fe585b341c60ca5f301ffafdd1c886cd5878fc0cbf428a",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/owned-fixture-cleanup-final.receipt.json",
+      "sourceSha256": "56c8244361677a10d3fe585b341c60ca5f301ffafdd1c886cd5878fc0cbf428a",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/logs/owned-fixture-cleanup-final.log.gz",
+      "bytes": 85,
+      "sha256": "a2dbe2fa4dce664dc32d9f6c2e6d5bd0b61cbf60c17a5d253b4bd3db0c09183d",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/owned-fixture-cleanup-final.log",
+      "sourceSha256": "5f2f731354aae302733627adced0b8e940dd0d506ead95f3f002a17f26ceae4a",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/run.json",
+      "bytes": 2706,
+      "sha256": "5d0741e4184924f8eeda8b1ca0a05ee9575e1b9989dcda9a87a1391a482d756e",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/run.json",
+      "sourceSha256": "5d0741e4184924f8eeda8b1ca0a05ee9575e1b9989dcda9a87a1391a482d756e",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/cleanup.json",
+      "bytes": 2028,
+      "sha256": "9a2cdf452fba3f3194f5671c3b3ecf9c13eb9714fe05d12089b2cd036dc9058b",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/cleanup.json",
+      "sourceSha256": "9a2cdf452fba3f3194f5671c3b3ecf9c13eb9714fe05d12089b2cd036dc9058b",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/inputs.json.gz",
+      "bytes": 390273,
+      "sha256": "a3d9c6b7dda80e26e5e24196af6a9a772c0e550a9fb5b486d64582ea63079b1d",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/inputs.json",
+      "sourceSha256": "3351048f830ec1cf5b5dac7e66c92cb0c484cd805720af1bdc0bd57a0001ec0f",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/network.json",
+      "bytes": 511,
+      "sha256": "636feabf543c710bb9d9e2483dd6b506a47fb8cad2b2c6250e3e0b8877699efd",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/network.json",
+      "sourceSha256": "636feabf543c710bb9d9e2483dd6b506a47fb8cad2b2c6250e3e0b8877699efd",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/summary.json",
+      "bytes": 21374,
+      "sha256": "b3faa23f86882daed5e4d5e36ee820049bcfa02e197a95d7377a27d1904dcea2",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/summary.json",
+      "sourceSha256": "b3faa23f86882daed5e4d5e36ee820049bcfa02e197a95d7377a27d1904dcea2",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/format.log.gz",
+      "bytes": 199,
+      "sha256": "66c02c5835a2bc3d8f0a9a00d778ec83ea242e13ef1877274d83400e21fe69d5",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/format.log",
+      "sourceSha256": "f13c710a152b72dd3daf30145799daf04e4627cc1313e3c7a47b2bd72474c641",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/format.json",
+      "bytes": 571,
+      "sha256": "2bba69a1ccb2212f87a5753b080fcd7cddab8a5ff7414ceb7079c89faa9da11d",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/format.json",
+      "sourceSha256": "2bba69a1ccb2212f87a5753b080fcd7cddab8a5ff7414ceb7079c89faa9da11d",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/verification-runner-contract.log.gz",
+      "bytes": 1469,
+      "sha256": "021721255bed0cdf50b67fdd19c9d2b55b7c6b7607096c5925ca5ee664a73673",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/verification-runner-contract.log",
+      "sourceSha256": "ea44af4bbfe28b16840eaeddef26748e7610691c7d9bfd2ce0aaf4aaef7fe65a",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/verification-runner-contract.json",
+      "bytes": 617,
+      "sha256": "95b10b3c4e03bd897dd63879891fd65f524cf168b4fa310af2685d2b401da0df",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/verification-runner-contract.json",
+      "sourceSha256": "95b10b3c4e03bd897dd63879891fd65f524cf168b4fa310af2685d2b401da0df",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/lint.log.gz",
+      "bytes": 31,
+      "sha256": "a3fc63b15eb42f707fa9d63b0a9a9628dd72eaec4b6f4cd626a9cf98d67ebe19",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/lint.log",
+      "sourceSha256": "050c69da23536758722729aeda55a8d0fb9d557495ef6d33d70873a3b64a71c1",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/lint.json",
+      "bytes": 563,
+      "sha256": "2c3cd8a859a9cdd898521b7e0037baceea2a30e85337d93e6701f833aa01084c",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/lint.json",
+      "sourceSha256": "2c3cd8a859a9cdd898521b7e0037baceea2a30e85337d93e6701f833aa01084c",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/typecheck.log.gz",
+      "bytes": 49,
+      "sha256": "5b091cfa84f153e454772c0c86ea561333701b98e8aa9ac99687a1b460087dea",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/typecheck.log",
+      "sourceSha256": "38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/typecheck.json",
+      "bytes": 576,
+      "sha256": "bb11077f3630ca4c040b363fdba08541c783d8224ecb3061e9ce3389b3e77ff4",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/typecheck.json",
+      "sourceSha256": "bb11077f3630ca4c040b363fdba08541c783d8224ecb3061e9ce3389b3e77ff4",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/unit.log.gz",
+      "bytes": 5802,
+      "sha256": "76eefecf064847d1adb30d7ff843cb9757deaf66350f4e6882f9cd0809b71f78",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/unit.log",
+      "sourceSha256": "e913c2f37db07d27d18cc02bd92eb765c6d5a2c03f5febf19bc8356f15d40483",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/unit.json",
+      "bytes": 611,
+      "sha256": "07d6e9803884d4f067f974e3c203200e4ecb9c91f61952fdbe83ca6da5b4cf8e",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/unit.json",
+      "sourceSha256": "07d6e9803884d4f067f974e3c203200e4ecb9c91f61952fdbe83ca6da5b4cf8e",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/contract.log.gz",
+      "bytes": 1758,
+      "sha256": "fb8db03a9c9601d92529fcfba1036934e74f376f2b6f4ce8a4fb3a7b8cdafa29",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/contract.log",
+      "sourceSha256": "157e453b0998f60a6938cc47ac69b1018a3af89c17d6f155d79399b4a95d59e7",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/contract.json",
+      "bytes": 618,
+      "sha256": "a1c6aef4fff82ffe70e9cf1a8dd8c1e481210dd7988d2743dd83cb4025f46d16",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/contract.json",
+      "sourceSha256": "a1c6aef4fff82ffe70e9cf1a8dd8c1e481210dd7988d2743dd83cb4025f46d16",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/evidence-contract.log.gz",
+      "bytes": 320,
+      "sha256": "3f98314b8e357cc368fa974576a3845f440556645f66f3cf62e65063ad547bd2",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/evidence-contract.log",
+      "sourceSha256": "033e01bff17562106c488c2118ed95434204705c32ea5de67dc81eac9722cbb4",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/evidence-contract.json",
+      "bytes": 603,
+      "sha256": "4ca384af0c73ca84745df9668b9623d1337cfc9cc237dcef48a1c18414cae497",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/evidence-contract.json",
+      "sourceSha256": "4ca384af0c73ca84745df9668b9623d1337cfc9cc237dcef48a1c18414cae497",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/evidence-coverage.log.gz",
+      "bytes": 157,
+      "sha256": "e895c431e920f8bcc73684df3172437626cc9f091ae922e56a92a781d775bd9a",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/evidence-coverage.log",
+      "sourceSha256": "27d2d19da39a975aad08c9c8fbff6e43c7b1edf1a7889d27175d946b08163634",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/evidence-coverage.json",
+      "bytes": 601,
+      "sha256": "aaee5872c7e7d054798e1371d73a0b6f71950c20ce7aaa288e5ba986ef21a340",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/evidence-coverage.json",
+      "sourceSha256": "aaee5872c7e7d054798e1371d73a0b6f71950c20ce7aaa288e5ba986ef21a340",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/architecture.log.gz",
+      "bytes": 311,
+      "sha256": "aee5d2a07399e2908228c318c986256a49afb593353740e31f226a7a182822a3",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/architecture.log",
+      "sourceSha256": "8fc1cb770fc8558746bac7a5510008c30d1723067d4b2b032c0c5a0097055c79",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/architecture.json",
+      "bytes": 588,
+      "sha256": "e5a5bd0b658b2d4fc66d296b9730bb9422b4a5565f865cf354601dae90984e9b",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/architecture.json",
+      "sourceSha256": "e5a5bd0b658b2d4fc66d296b9730bb9422b4a5565f865cf354601dae90984e9b",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/a2a-baseline.log.gz",
+      "bytes": 243,
+      "sha256": "4f1379b5e1996a18ce75bcf4cea6c43e6bdc0babf4da9bae27fc24801248754a",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/a2a-baseline.log",
+      "sourceSha256": "13523a659a4afec0736384a0de0216aed3ff191c1479d5767dc235c79f05901f",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/a2a-baseline.json",
+      "bytes": 586,
+      "sha256": "172b86716f0269d444f2059554e2b8ce28f9c1d86de5993b64f30bcc1667e550",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/a2a-baseline.json",
+      "sourceSha256": "172b86716f0269d444f2059554e2b8ce28f9c1d86de5993b64f30bcc1667e550",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/management-openapi.log.gz",
+      "bytes": 105,
+      "sha256": "341fb6c1232c6e65869f73efb7d85afb3f34b9a82443978118d9cd45f71e7db8",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/management-openapi.log",
+      "sourceSha256": "d51f3467f4d2c8dfafbb1e892734ede51b02d440d1f2227c1a1d5337f237888a",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/management-openapi.json",
+      "bytes": 636,
+      "sha256": "6e689ee8397c314c39dd03c59df100f6857ef48d6d5feaa5bb726316ac3fe4e8",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/management-openapi.json",
+      "sourceSha256": "6e689ee8397c314c39dd03c59df100f6857ef48d6d5feaa5bb726316ac3fe4e8",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/node-control-contract.log.gz",
+      "bytes": 134,
+      "sha256": "dadf517cfae4e3905e31e5ec2cc2d5ee61e2d80ed71472ef114d048c891b9510",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/node-control-contract.log",
+      "sourceSha256": "b308fc64632fbf19d874b19f63fe850752fed2cbdce625258333905238ea3dab",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/node-control-contract.json",
+      "bytes": 613,
+      "sha256": "6b102d0cc0dfb290903257053648efedcaf3d30ca10dff8d48e9b87cd94d244d",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/node-control-contract.json",
+      "sourceSha256": "6b102d0cc0dfb290903257053648efedcaf3d30ca10dff8d48e9b87cd94d244d",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/node-control-implementation-conformance.log.gz",
+      "bytes": 187,
+      "sha256": "dbdf4b3b3c7fb3f62c6324d13918c293281ad9c0ddd8c2319e7a425f4f2180b8",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/node-control-implementation-conformance.log",
+      "sourceSha256": "6ba8a7328603451b474fe61d9b56dacc4c1e169a173e787f4c344f5363edd29b",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/node-control-implementation-conformance.json",
+      "bytes": 669,
+      "sha256": "81d59bcaffba7a27fbae9d727034d4607142d611e87f58b86c0db153a3e7e260",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/node-control-implementation-conformance.json",
+      "sourceSha256": "81d59bcaffba7a27fbae9d727034d4607142d611e87f58b86c0db153a3e7e260",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/smpp-registry-projection.log.gz",
+      "bytes": 427,
+      "sha256": "a68d9c1c8dba59c9f2b270298465f6d59cfca3ba8694ac78f2d37af91b783fdf",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/smpp-registry-projection.log",
+      "sourceSha256": "f879a101de0cbded93d5a34cf6a315f29f9b59e4a1195c6e8931ab7efb3cbcab",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/smpp-registry-projection.json",
+      "bytes": 622,
+      "sha256": "3847ccac8df00fcd6508063f52f2857d572b929b83d4a69f72280cafda247415",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/smpp-registry-projection.json",
+      "sourceSha256": "3847ccac8df00fcd6508063f52f2857d572b929b83d4a69f72280cafda247415",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/acceptance.log.gz",
+      "bytes": 149,
+      "sha256": "a242dce08b09fc93c2ec48dd18ad7ff6a153b68560bc363a70d0a6aefd1c95ca",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/acceptance.log",
+      "sourceSha256": "d94263c612588fa3c74b93d5d877079f05bbc5a3538e68e19dcb3725ecdab788",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/acceptance.json",
+      "bytes": 580,
+      "sha256": "e0bfb6e29101b7758df96e1703d54f2385718ed40d2d9fa04adb4d29fac845a7",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/acceptance.json",
+      "sourceSha256": "e0bfb6e29101b7758df96e1703d54f2385718ed40d2d9fa04adb4d29fac845a7",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/sources.log.gz",
+      "bytes": 103,
+      "sha256": "6ac4e8c737717a7704e709d7cbd8ba9bb1b99bd6e2aacd2ad6f3118d1235a2f4",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/sources.log",
+      "sourceSha256": "a382d8438c8da8d0e65f5155682361a1be32937cfef504dc8228567d4b4e49cc",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/sources.json",
+      "bytes": 571,
+      "sha256": "719d37993a812a3cc5cbd8cabc03ed979f602fdfaa39d91d6343fc72a3364aba",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/sources.json",
+      "sourceSha256": "719d37993a812a3cc5cbd8cabc03ed979f602fdfaa39d91d6343fc72a3364aba",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/protocol.log.gz",
+      "bytes": 143,
+      "sha256": "08d928ef6ad4b24404bd2c85cd8d5e24bbeda58602dee0ccc11b7c09a21ed10e",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/protocol.log",
+      "sourceSha256": "58603e97baca9e3264e4334e177b35057bbbe8c95353d8789e44f50eec698a27",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/protocol.json",
+      "bytes": 574,
+      "sha256": "42484fa9f4e01b793e26956b058cb9a076b65085613cd1b29a8a1725eb287f9b",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/protocol.json",
+      "sourceSha256": "42484fa9f4e01b793e26956b058cb9a076b65085613cd1b29a8a1725eb287f9b",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/infra.log.gz",
+      "bytes": 119,
+      "sha256": "e1692692cd991aaf2ef61a6f7d2295e65f15a9b0a98370d726dc50d34ba29df9",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/infra.log",
+      "sourceSha256": "49842141f43fb1d5757f0fa45eea88f83e3d412fcf80f11f8b3b389e0673894d",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/infra.json",
+      "bytes": 565,
+      "sha256": "289505853d00d1c56bac2145f50be2e9b8492e96d411bbb8bb58d154e8ac2e2d",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/infra.json",
+      "sourceSha256": "289505853d00d1c56bac2145f50be2e9b8492e96d411bbb8bb58d154e8ac2e2d",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/project-license.log.gz",
+      "bytes": 117,
+      "sha256": "d8c8fb372f50aa866b81d1026031cac3b1e8291f5c8885ef1d8da77e26927f0f",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/project-license.log",
+      "sourceSha256": "11054109617d351d51b769f4e2056b1de2c82f26806ad3ad3aed6d5b4db71861",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/project-license.json",
+      "bytes": 595,
+      "sha256": "ba2f62d51b6c6012b3c0edadd624e29bd6093aafdd7d5a9e5a2dc253e8cd4b44",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/project-license.json",
+      "sourceSha256": "ba2f62d51b6c6012b3c0edadd624e29bd6093aafdd7d5a9e5a2dc253e8cd4b44",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/licenses.log.gz",
+      "bytes": 145,
+      "sha256": "0fd55b6fb1e1063d256cd5f349cdc9380a90704a2a21b05cdcbf6a275e11cef7",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/licenses.log",
+      "sourceSha256": "95ab9975c1ad5ebecff93c57cd63695f568e622c389b142d3fb171160046a16c",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/licenses.json",
+      "bytes": 574,
+      "sha256": "0d2c2f0c9ba80a492964c5d98d002b687c268363330ce8b49121e89b5710516f",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/licenses.json",
+      "sourceSha256": "0d2c2f0c9ba80a492964c5d98d002b687c268363330ce8b49121e89b5710516f",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/build.log.gz",
+      "bytes": 304,
+      "sha256": "c2e5dfecffa25483cf3495230c2a52e4b153b656c8b64a9736c9b3ed7b2a2d10",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/build.log",
+      "sourceSha256": "93507034a1ca22fadac8930b92e7235b5e94cacc68e7edb0b3321947ad3154d3",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/build.json",
+      "bytes": 563,
+      "sha256": "045e2f3592ba1baf035bc52f01bbf70e60dec690d0f0ada6337c008d18952173",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/build.json",
+      "sourceSha256": "045e2f3592ba1baf035bc52f01bbf70e60dec690d0f0ada6337c008d18952173",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/cognitive-replay-no-physical-provider.log.gz",
+      "bytes": 129,
+      "sha256": "e41245fe39381ca0b9589f72a8b557b0247e26be4024632649b6af5eeb14c3ae",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/cognitive-replay-no-physical-provider.log",
+      "sourceSha256": "0919bdd9413b3a39e5a8b46f8e6a4a41dff307ddef5269fa00ea04bb5c90a1b2",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/cognitive-replay-no-physical-provider.json",
+      "bytes": 640,
+      "sha256": "16084dbdb5bcd9617d841bf9b1558a73952b3ef2a6fec9c7092ce8303a3fd13d",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/cognitive-replay-no-physical-provider.json",
+      "sourceSha256": "16084dbdb5bcd9617d841bf9b1558a73952b3ef2a6fec9c7092ce8303a3fd13d",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/clean-baseline-reset-seed.log.gz",
+      "bytes": 1502,
+      "sha256": "6e3f346f083a251ceeee5b3113a71ab187a2831feb884a85129adeb6c425a5b4",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/clean-baseline-reset-seed.log",
+      "sourceSha256": "7c037b6c473816b3cdd815ed9e8ed4c21fdd3241e28835fc236712a46fa50d23",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/clean-baseline-reset-seed.json",
+      "bytes": 642,
+      "sha256": "495345222010eb95ce8f274c8b37bd318ff3b06e74c7111a97532fa59104b468",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/clean-baseline-reset-seed.json",
+      "sourceSha256": "495345222010eb95ce8f274c8b37bd318ff3b06e74c7111a97532fa59104b468",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/postgres-redis-integration.log.gz",
+      "bytes": 9008,
+      "sha256": "ac9ab401da34e967ac48bf8dc233fb27a62354d8a459408cb5426a572cd65791",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/postgres-redis-integration.log",
+      "sourceSha256": "541a45844dc5355c9a87c26a922bdb972fb2c8303abecb26c06c92ea81189a8b",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/postgres-redis-integration.json",
+      "bytes": 659,
+      "sha256": "dd4ceceafe047f52cc1463607411e486131cee8a1bd4762424771b2ba1311e25",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/postgres-redis-integration.json",
+      "sourceSha256": "dd4ceceafe047f52cc1463607411e486131cee8a1bd4762424771b2ba1311e25",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/postgres-redis-model-mcp-e2e.log.gz",
+      "bytes": 7497,
+      "sha256": "bbc2252990a99a6d88f2a8124fc57d92c040ca0041c139839d48cb5cb1a93dce",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/postgres-redis-model-mcp-e2e.log",
+      "sourceSha256": "c42868e5b20fe27b4480ea6651affa5d9a36e7a4cf8f119af4446d0a7b6848cc",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/postgres-redis-model-mcp-e2e.json",
+      "bytes": 653,
+      "sha256": "b06e3692680cc68f0613d12b01885d6034b4b83f9a628fa6b172ed0afe98a468",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/postgres-redis-model-mcp-e2e.json",
+      "sourceSha256": "b06e3692680cc68f0613d12b01885d6034b4b83f9a628fa6b172ed0afe98a468",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/official-a2a-tck.log.gz",
+      "bytes": 1385,
+      "sha256": "7a3b6ad0827d3148445a24eb879f49bb671bd98e045de5c48a50d2c225626707",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/official-a2a-tck.log",
+      "sourceSha256": "f40822bdc86cc3cc30991da790dffef964ada242a2834a18eeea910abf280515",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/official-a2a-tck.json",
+      "bytes": 592,
+      "sha256": "44fa918111c70c5ddeaa26277ae7daa2ce001e86a1ccdcb5e2813101850bb407",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/official-a2a-tck.json",
+      "sourceSha256": "44fa918111c70c5ddeaa26277ae7daa2ce001e86a1ccdcb5e2813101850bb407",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/canonical-evidence-demo.log.gz",
+      "bytes": 2047,
+      "sha256": "4ef2ebc3f79b69dcfc55aa520f6e620f2ccde48dac2d20ba30827a8339232bcc",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/canonical-evidence-demo.log",
+      "sourceSha256": "74f42334e9e3a33834854aa6133e42f8523a83d72338f7268b841d3678f0c97c",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/canonical-evidence-demo.json",
+      "bytes": 613,
+      "sha256": "a566c62ef971c50a4a49b6f8960055bab03703ca69cf92b74b0ec4b5a7d5009d",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/canonical-evidence-demo.json",
+      "sourceSha256": "a566c62ef971c50a4a49b6f8960055bab03703ca69cf92b74b0ec4b5a7d5009d",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/infrastructure-smoke.log.gz",
+      "bytes": 1417,
+      "sha256": "e20bb514ded8fef23bd9d592ac105f8ef873ee848cb6a0b17097660c36a4d592",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/infrastructure-smoke.log",
+      "sourceSha256": "7020defdbf7a6f337558780af6dc454e64e0cdd4b651c71c913ecfb139094612",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/stages/infrastructure-smoke.json",
+      "bytes": 598,
+      "sha256": "de5535cc5674600ca39d1e8287b882a7ebfb5712284cce86a1710621fde7fd13",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/infrastructure-smoke.json",
+      "sourceSha256": "de5535cc5674600ca39d1e8287b882a7ebfb5712284cce86a1710621fde7fd13",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/server-console-smoke.log.gz",
+      "bytes": 1802,
+      "sha256": "b813246e77370bd1a03b8f555e2e492db9a40e472615a4ba37e616753674ddae",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/server-console-smoke.log",
+      "sourceSha256": "94b401a4ca6b6ae7685e34faa564e665b7f610b48fabc269642c2372b7b112ed",
+      "encoding": "gzip",
+      "redacted": true
+    },
+    {
+      "path": "raw/sdar-full/stages/server-console-smoke.json",
+      "bytes": 600,
+      "sha256": "72863b707a3989362066fddc76ca44428207f9ba0073b756f1fb9656f06c2877",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/server-console-smoke.json",
+      "sourceSha256": "72863b707a3989362066fddc76ca44428207f9ba0073b756f1fb9656f06c2877",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/sdar-full/logs/node-control-api-worker-smoke.log.gz",
+      "bytes": 2267,
+      "sha256": "32714ea933d8a226843c37d25823d1ee3a9c1de6c823a342a560b2b6d616758f",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/raw/node-control-api-worker-smoke.log",
+      "sourceSha256": "255bbc8610499f77d6a816e9e43f48bd7ab68f7d69fd38cb7d8b00c62e7f82b0",
+      "encoding": "gzip",
+      "redacted": true
+    },
+    {
+      "path": "raw/sdar-full/stages/node-control-api-worker-smoke.json",
+      "bytes": 625,
+      "sha256": "d3149fd15d37544a7569a65d7406c6e10a3734baf6161ffc5c78e59596fc5041",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-90b419a7-c47d-481c-9195-77fb58fd8b0a/snapshot-reports/verification/node-control-api-worker-smoke.json",
+      "sourceSha256": "d3149fd15d37544a7569a65d7406c6e10a3734baf6161ffc5c78e59596fc5041",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/joint/joint-evidence.json.gz",
+      "bytes": 63919,
+      "sha256": "82a8877160f064ba24fc62b1c5fd6b935bdc96968ad4fb6e70fcef9e6b910d7e",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/zmqgov-1eccc345ef7f-4f66ec72/joint-evidence.json",
+      "sourceSha256": "8f1ee1383a4458dabc8d3eb431d7eb48356a34eabe96f6a9ac7c8743767e8115",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/joint/provider-evidence.json.gz",
+      "bytes": 1253334,
+      "sha256": "bb45eb9bd787e01dfd8c93ce50b8dbb1df0c0d66ff8b59086e006652ba22c07f",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/zmqgov-1eccc345ef7f-4f66ec72/provider-evidence.json",
+      "sourceSha256": "36455ef40c4ed524891b9be9599622ab7d94ed78c1e16d3b9e61fef90c7013c9",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/formal-build-repaired.json.gz",
+      "bytes": 109963,
+      "sha256": "ed37cdd060a4fcd7e6ad66c7752298dee88bc6a3bece87b45d56e29e88e2b636",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/formal-build-repaired.json",
+      "sourceSha256": "54b903259912886002e1eefe8ce99d7416a6348796bc390f2b8c8aa1f746f2ac",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/formal-build-repaired.ndjson.gz",
+      "bytes": 1177718,
+      "sha256": "b70276eeb9c1d0114c57cf036aa1d66c377516c2e16e2d2df25bac982d68decb",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/formal-build-repaired.ndjson",
+      "sourceSha256": "635edf1f59b941a113360ee772a5717dff21e07c20d34d029e20974b5a895fad",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/image-proof-build-repaired.json.gz",
+      "bytes": 111557,
+      "sha256": "c8d4501aa3eb650b2b63983ca51a0b5c86599c264b9176c9f649b4c4458175e7",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/image-proof-build-repaired.json",
+      "sourceSha256": "aef5f5e806e9d75505c5166d6bbbdd62441ce144195f16f541241686123c6b4e",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/image-provider-preflight-build-repaired.json.gz",
+      "bytes": 1054,
+      "sha256": "d22c3ca9cc6fa4dbc5e01c47ead828bd89d0eb3e26239bbbee998507abaf3205",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/image-provider-preflight-build-repaired.json",
+      "sourceSha256": "65b4ecfa19b9358a27c8965875209ee4b9a92dd3d9763930ee2533792b975849",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/images-build-repaired.json.gz",
+      "bytes": 741,
+      "sha256": "875b2c4231af496451374b2233cc3a066c6c7f91dde95f66c98fff16e9876b7f",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/images-build-repaired.json",
+      "sourceSha256": "8f02fb3c2379242015a3743fed43d74ca8ac89c8c8d01893eaca5cb078424fbb",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/existing-service-snapshot-final.json.gz",
+      "bytes": 626,
+      "sha256": "cef9326e0e4d80fdf1a933e6181ec32fc1b17dee8bc39c370c2517593f00330f",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/existing-service-snapshot-final.json",
+      "sourceSha256": "8592a7f2e05957c03a8898e163ca930c85ce51a75a0519b897d52f170c49a849",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/source-lock-recheck.json.gz",
+      "bytes": 566,
+      "sha256": "3abfe4614afe1b05b37d5ef3aad402b8ef1906aed3a812a59324b7f58152ac5b",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/source-lock-recheck.json",
+      "sourceSha256": "80efc2f3958562952d73ea85fcaa5f683b217b021e7c0c90365635c2b9a52403",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/fixture-cleanup-final.json.gz",
+      "bytes": 593,
+      "sha256": "011a921681228f00843e2da15ef100c1a5ddb83ed566d60346e8deb674eeb932",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/fixture-cleanup-final.json",
+      "sourceSha256": "86188cdfc5c4783d29a325123ffbb3c0341b0b183c430b0e584d9ffda3ad68a0",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/validation-runner.py",
+      "bytes": 3179,
+      "sha256": "b930ff336be08890845c521525aa906f8b1b812cabfd3de4f8d259f017928bdd",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/validation-runner.py",
+      "sourceSha256": "b930ff336be08890845c521525aa906f8b1b812cabfd3de4f8d259f017928bdd",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/console-validation.mjs",
+      "bytes": 3571,
+      "sha256": "7fdb749325de3736f37c710bccfdad5e1970e3b334865bedb2a0ffd8782df3f6",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/console-validation.mjs",
+      "sourceSha256": "7fdb749325de3736f37c710bccfdad5e1970e3b334865bedb2a0ffd8782df3f6",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/image-proof.py",
+      "bytes": 4584,
+      "sha256": "793cf73de63b112cd4aa8b220e028f9994414235eb38e82a49237207e2c2dcf6",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/image-proof.py",
+      "sourceSha256": "793cf73de63b112cd4aa8b220e028f9994414235eb38e82a49237207e2c2dcf6",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/cleanup-owned.py",
+      "bytes": 2177,
+      "sha256": "b0892fce99851d7ae87e3e98159545a38543a655cbdc93add5a3a8a346b8a2c6",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/cleanup-owned.py",
+      "sourceSha256": "b0892fce99851d7ae87e3e98159545a38543a655cbdc93add5a3a8a346b8a2c6",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/fixture-cleanup/console-legacy-browser-56ad8dfe66c84fd5ad00e2d2dd5e21f2-cleanup.json",
+      "bytes": 229,
+      "sha256": "b92d0786b8ba87ce424e929524345b84d55a33bb5760da8a7ceb54bd4ac06cc1",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/console-legacy-browser-56ad8dfe66c84fd5ad00e2d2dd5e21f2-cleanup.json",
+      "sourceSha256": "b92d0786b8ba87ce424e929524345b84d55a33bb5760da8a7ceb54bd4ac06cc1",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/fixture-cleanup/console-lifecycle-c8b38716a09242029820d669621cbc8f-cleanup.json",
+      "bytes": 224,
+      "sha256": "03aa5d987a7458890b6a267077fa2c564fc6e99fa218e04c7a9036fe4a7db162",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/console-lifecycle-c8b38716a09242029820d669621cbc8f-cleanup.json",
+      "sourceSha256": "03aa5d987a7458890b6a267077fa2c564fc6e99fa218e04c7a9036fe4a7db162",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/fixture-cleanup/console-browser-d68a994e806b4baf89e0b75a1ddec76b-cleanup.json",
+      "bytes": 222,
+      "sha256": "1dc5a5ff8f245efd50f7a424fff8db4d3551102a9a41744871828659de009d76",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/console-browser-d68a994e806b4baf89e0b75a1ddec76b-cleanup.json",
+      "sourceSha256": "1dc5a5ff8f245efd50f7a424fff8db4d3551102a9a41744871828659de009d76",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/fixture-cleanup/console-unit-979e66b976f942c1a3cc2d495d7f7852-cleanup.json",
+      "bytes": 219,
+      "sha256": "dfce83249cdfacc26d41441754fdbcb96b2093125039233744dcb53b0050829e",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/console-unit-979e66b976f942c1a3cc2d495d7f7852-cleanup.json",
+      "sourceSha256": "dfce83249cdfacc26d41441754fdbcb96b2093125039233744dcb53b0050829e",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/fixture-cleanup/console-unit-af73b7ed83794c6fa09c3013d39372f4-cleanup.json",
+      "bytes": 219,
+      "sha256": "51ebb986c77066fd5032d82e8d20363fdc8036dbc2e3750e2b1e6050a9b5dc6b",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/console-unit-af73b7ed83794c6fa09c3013d39372f4-cleanup.json",
+      "sourceSha256": "51ebb986c77066fd5032d82e8d20363fdc8036dbc2e3750e2b1e6050a9b5dc6b",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/failures/sdar-full-30-final.receipt.json",
+      "bytes": 2098,
+      "sha256": "0aa30441ecbd453d6773fcbb0dc6f6c811b24eb49c56236d1742ac14c7db7810",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/sdar-full-30-final.receipt.json",
+      "sourceSha256": "0aa30441ecbd453d6773fcbb0dc6f6c811b24eb49c56236d1742ac14c7db7810",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/failures/sdar-full-30-final.log.gz",
+      "bytes": 9220,
+      "sha256": "55851ef394039dd38959345be83abf8aedd489920599c5bc544dbea48e2921a7",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/sdar-full-30-final.log",
+      "sourceSha256": "207a1a71150e963a28f27642b13221cbdf2f29837268dd18a867420193483c3b",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/failures/sdar-full-30-media-final.receipt.json",
+      "bytes": 2300,
+      "sha256": "8c1b0558038ed73d5ff0608ae236e4628f6d29676c36e8a04858bb8216840486",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/sdar-full-30-media-final.receipt.json",
+      "sourceSha256": "8c1b0558038ed73d5ff0608ae236e4628f6d29676c36e8a04858bb8216840486",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/failures/sdar-full-30-media-final.log.gz",
+      "bytes": 10698,
+      "sha256": "c7c1c21b24414a7067699bc62ef2c342dda7476ab699eba6e6e765875a8c77fc",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/sdar-full-30-media-final.log",
+      "sourceSha256": "b4f6682b2a8ad38a25cc8a0a8bdb4f74bf6a00d0b1ae91aaf57259fbac43cded",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/failures/image-console-frozen.receipt.json",
+      "bytes": 1734,
+      "sha256": "e01eda823163a1afc6c7070675afb5e5a46e878a864175237b8463bdda5c4a1c",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/image-console-frozen.receipt.json",
+      "sourceSha256": "e01eda823163a1afc6c7070675afb5e5a46e878a864175237b8463bdda5c4a1c",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/failures/image-console-frozen.log.gz",
+      "bytes": 1534,
+      "sha256": "dc70a89b12ba264590404955b826ef3cf351bca7ce74cab15f0c69b337112444",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/image-console-frozen.log",
+      "sourceSha256": "b877abf61871f46c1f8e5624ed90565d2976e91b2435be633902ed73a8706157",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/failures/image-sdar-runtime-frozen.receipt.json",
+      "bytes": 2216,
+      "sha256": "83a4a1adfc995b3e05c9391e0ad6702cf8a2fd3e54d0d214c3c66ebf9605b23c",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/image-sdar-runtime-frozen.receipt.json",
+      "sourceSha256": "83a4a1adfc995b3e05c9391e0ad6702cf8a2fd3e54d0d214c3c66ebf9605b23c",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/failures/image-sdar-runtime-frozen.log.gz",
+      "bytes": 1779,
+      "sha256": "2314d0a820c178788443c3235cbc8cf6cd791ab692417f68d989cddb3525c94d",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/image-sdar-runtime-frozen.log",
+      "sourceSha256": "08fbf452a9268484f139be2977a5a8f4f65d4961add6c4bc569e01b635604814",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/failures/build-sdar-declaration-repair.receipt.json",
+      "bytes": 2400,
+      "sha256": "b048a39d1b87a745c72156d98d863ee81d1ee3d44c333fe4359a76a1b0831320",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/build-sdar-declaration-repair.receipt.json",
+      "sourceSha256": "b048a39d1b87a745c72156d98d863ee81d1ee3d44c333fe4359a76a1b0831320",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/failures/build-sdar-declaration-repair.log.gz",
+      "bytes": 508,
+      "sha256": "630caee82586b763b2a03faf10f5e4f0be7e24dee09eca442b7f63c7f78d5d25",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/build-sdar-declaration-repair.log",
+      "sourceSha256": "3b8e79f257eb5e5a0126248297f7b61897396012dd185d4c561f62717485dd96",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/failures/console-unit-build-repaired.receipt.json",
+      "bytes": 1717,
+      "sha256": "0601337ba0a5ab52fe0bd87e1ec0f3161bebe321a3b41c8b21fb4ace163aca24",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/console-unit-build-repaired.receipt.json",
+      "sourceSha256": "0601337ba0a5ab52fe0bd87e1ec0f3161bebe321a3b41c8b21fb4ace163aca24",
+      "encoding": "identity",
+      "redacted": false
+    },
+    {
+      "path": "raw/failures/console-unit-build-repaired.log.gz",
+      "bytes": 885,
+      "sha256": "a3eaa60a2c2971ac0b7a536df9f461aa124fefcc6bfe894881c894eee9c75f7c",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/console-unit-build-repaired.log",
+      "sourceSha256": "62cd1f7e2f332953d29fb59420403606c56038377c3a9ebe104536451ccaa2e1",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/failures/sdar-verify-67f3e13a-e768-4d0b-adbb-3c150c8fa5fc/run.json.gz",
+      "bytes": 592,
+      "sha256": "5e0c60977803caa1d76f36409fbabbbc44d018a34d7fddea364de53b810b99f8",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-67f3e13a-e768-4d0b-adbb-3c150c8fa5fc/run.json",
+      "sourceSha256": "a018806f733b721b88f00cd2e248112764c80e815ab80a1415de8c0addf56ed1",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/failures/sdar-verify-67f3e13a-e768-4d0b-adbb-3c150c8fa5fc/cleanup.json.gz",
+      "bytes": 366,
+      "sha256": "20c615eab88019a07f0330a6a81e0fa3473a8ebf8e67a508d6d958a01cd11039",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-67f3e13a-e768-4d0b-adbb-3c150c8fa5fc/cleanup.json",
+      "sourceSha256": "b5f0cc34bcd19785af5f219147d742901dfbdb72c87974983571f8a9e4d36108",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/failures/sdar-verify-67f3e13a-e768-4d0b-adbb-3c150c8fa5fc/inputs.json.gz",
+      "bytes": 390264,
+      "sha256": "09e26ef350b2b667b6ba4cbd02c90d0d5cc64ad057ab52bd7ec4221676f706c0",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-67f3e13a-e768-4d0b-adbb-3c150c8fa5fc/inputs.json",
+      "sourceSha256": "f71940d9892b64debbe15123c4624fb2e48a21ef008bb1dd2979cb960ef515f5",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/failures/sdar-verify-a01df1c2-266c-48b7-a5a4-20d63ca1a294/run.json.gz",
+      "bytes": 579,
+      "sha256": "947c7ae2c7298e95466905ed083915f5c5c9bae7695b144e2cd6ba171845022e",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-a01df1c2-266c-48b7-a5a4-20d63ca1a294/run.json",
+      "sourceSha256": "e6c1cbfeb46e5e69c2dc0041c1012c7b3416465d5db341291de0e21ae3985296",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/failures/sdar-verify-a01df1c2-266c-48b7-a5a4-20d63ca1a294/cleanup.json.gz",
+      "bytes": 354,
+      "sha256": "508220e298628871ae360830f30fc4822761f4cc8e79d111b567d67538e92fd2",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-a01df1c2-266c-48b7-a5a4-20d63ca1a294/cleanup.json",
+      "sourceSha256": "5be60fb6e5adb96fcb836e8e32e7757b5788e75865c7ae81a10ba5ab51a87476",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/failures/sdar-verify-a01df1c2-266c-48b7-a5a4-20d63ca1a294/inputs.json.gz",
+      "bytes": 390269,
+      "sha256": "d11d58c7fa22c1c3c628642139c17faf7b9e6bb3e08de2fc54164fb801a413cf",
+      "sourcePath": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/reports/runtime-semantic-closure/sdar-verify-a01df1c2-266c-48b7-a5a4-20d63ca1a294/inputs.json",
+      "sourceSha256": "01f30da076accc52bf2c372f76c6df386f3f52734cc5ade88597d92ca860b7cd",
+      "encoding": "gzip",
+      "redacted": false
+    },
+    {
+      "path": "raw/workspace-cleanup-final.json",
+      "bytes": 719,
+      "sha256": "8e64a1786f97301fabb37b1788ab7ba1a73e4b4d498ea13da773b3ddc6b8303c",
+      "sourcePath": "/mnt/data/ugv-zmq-phase5-governance-20261025/workspace-cleanup-final.json",
+      "sourceSha256": "8e64a1786f97301fabb37b1788ab7ba1a73e4b4d498ea13da773b3ddc6b8303c",
+      "encoding": "identity",
+      "redacted": false
+    }
+  ],
+  "workspaceCleanup": {
+    "schemaVersion": "ugv.zmq-private-workspace-cleanup/1",
+    "completedAt": "2026-10-25T09:48:43.454529+00:00",
+    "exitCode": 0,
+    "removedPaths": [
+      "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/node_modules",
+      "/home/sz/code/skill-driven-agent-runtime-zmq-phase5/apps/console/node_modules",
+      "/mnt/data/ugv-zmq-phase5-governance-20261025/fixture-config.json",
+      "/mnt/data/ugv-zmq-phase5-governance-20261025/zmqgov-1eccc345ef7f-postgres.env",
+      "/mnt/data/ugv-zmq-phase5-governance-20261025/mosquitto-fixture.conf"
+    ],
+    "removedVerifiedOwnedTemporaryDirectories": [],
+    "unverifiedTemporaryDirectoriesPreserved": [],
+    "dependencyTargetsModified": false,
+    "productionServicesUpdated": false
+  }
+}

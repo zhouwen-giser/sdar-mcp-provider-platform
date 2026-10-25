@@ -1,0 +1,21 @@
+{
+  "name": "typecheck",
+  "command": "pnpm typecheck",
+  "status": "passed",
+  "startedAt": "2026-10-25T09:16:08.386Z",
+  "finishedAt": "2026-10-25T09:16:53.872Z",
+  "timeoutMs": 1200000,
+  "logPath": "reports/verification/raw/typecheck.log",
+  "outputSha256": "38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630",
+  "metrics": {},
+  "exitCode": 0,
+  "signal": null,
+  "durationMs": 45486,
+  "resources": {
+    "source": "linux-proc-process-group-sampling",
+    "samples": 46,
+    "peakRssBytes": 2226233344,
+    "peakProcesses": 3
+  },
+  "cleanupErrors": []
+}

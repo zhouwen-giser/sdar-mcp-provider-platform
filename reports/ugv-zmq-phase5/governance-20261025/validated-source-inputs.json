@@ -1,0 +1,354 @@
+{
+  "smpp": {
+    "validatedCommit": "8b8f44c6641962e131bf297ee63d32c90ba4fd05",
+    "previousIncrement": "74e63cf",
+    "changedTrackedInputs": [
+      {
+        "path": "apps/ugv-control-console/package.json",
+        "bytes": 1096,
+        "sha256": "1ea43209902558c2fee8dc7f91a0b3e88f5056db9f6a2173f5b31e34e065df24"
+      },
+      {
+        "path": "apps/ugv-control-console/shared/zmq-native-catalog.json",
+        "bytes": 182555,
+        "sha256": "eef64a78eb8a5ffad63a1efe30c0bc15f711cfb6602eff3ebe5e8e84d1369e13"
+      },
+      {
+        "path": "apps/ugv-control-console/tsconfig.build.json",
+        "bytes": 95,
+        "sha256": "19608d73fe6c5fb3021436e242591c4bba1e33cbacede4a95a59c1ae67f6c86b"
+      },
+      {
+        "path": "apps/ugv-zmq-provider-adapter/src/runtime.ts",
+        "bytes": 14905,
+        "sha256": "8026dc39cf628690c1c4fb3868542dc1af898bf5948801a9ffeba6b18a931803"
+      },
+      {
+        "path": "apps/ugv-zmq-provider-adapter/src/server.ts",
+        "bytes": 1448,
+        "sha256": "78e0959ce09b68ce011d2ae52b77c993f0d85c6c377f2e4b4e21a7946182b832"
+      },
+      {
+        "path": "contracts/ugv-zmq/provider-v1.0.1/README.md",
+        "bytes": 1101,
+        "sha256": "d8de99a1bad6594c21d6c9c165df166481238cf498468c311124a81acd6a0a6e"
+      },
+      {
+        "path": "contracts/ugv-zmq/provider-v1.0.1/catalog.json",
+        "bytes": 182555,
+        "sha256": "eef64a78eb8a5ffad63a1efe30c0bc15f711cfb6602eff3ebe5e8e84d1369e13"
+      },
+      {
+        "path": "deploy/ugv-zmq/FORMAL.md",
+        "bytes": 5621,
+        "sha256": "038bddbdc7bbce870d03c5ef8db7a22a16a9a63b47435191870b49c80ea68491"
+      },
+      {
+        "path": "docs/decisions/ADR-014-zmq-public-result-and-initial-binding.md",
+        "bytes": 1900,
+        "sha256": "1ed482f806d4d2d97eee04dd2ca65ddcee49ae04de6018c31320198db5fa0649"
+      },
+      {
+        "path": "docs/execplans/ugv-zmq-formal-phase5-20261024.md",
+        "bytes": 8466,
+        "sha256": "cceaef6036520ba238629fc7061e4171ac53f61093e23b89f97f9655e4d2939e"
+      },
+      {
+        "path": "packages/persistence-postgres/src/tasks.ts",
+        "bytes": 228382,
+        "sha256": "c791a2a294cc4b9cb72988280418aa981974a7af92064bcccd326b3f604ac2b6"
+      },
+      {
+        "path": "packages/task-engine/src/command-dispatcher.ts",
+        "bytes": 27193,
+        "sha256": "0da5d440c3e2d584f867115726f39f6e92ba9051c27ac165eace5b8543c92989"
+      },
+      {
+        "path": "packages/task-engine/src/engine.ts",
+        "bytes": 66642,
+        "sha256": "f87d7c2dff3ea6265bc905962e503fd122acaebbf8a041640cfbc4902f27de95"
+      },
+      {
+        "path": "packages/vehicle-zmq-control/src/catalog.ts",
+        "bytes": 9126,
+        "sha256": "abcee7f1c17d3b619649e4e17e97605bcdee712e2a344d63631a838788dece21"
+      },
+      {
+        "path": "packages/vehicle-zmq-control/src/result-schemas.ts",
+        "bytes": 6458,
+        "sha256": "94116eb3b0f9a252839b6e015af93307ff92ac0017d839741853b6da2da71c24"
+      },
+      {
+        "path": "scripts/package-zmq-candidate.py",
+        "bytes": 6547,
+        "sha256": "bbc3e2da7035e971a81dfaff326b7024183aa5b5d77a0640cee50b62e2baa169"
+      },
+      {
+        "path": "tests/integration/task-lifecycle-postgres.test.ts",
+        "bytes": 243303,
+        "sha256": "9832f0637a5d862449cad81821ddf8af0606b5502a0e7303be5d3e4c6628e255"
+      },
+      {
+        "path": "tests/ugv-zmq-provider/contract.test.ts",
+        "bytes": 5978,
+        "sha256": "17d14934349aede27e67e57c5c35f3d3950adfcd10e187207115af3c2af114f7"
+      },
+      {
+        "path": "tests/ugv-zmq-provider/formal.postgres.test.ts",
+        "bytes": 28486,
+        "sha256": "f03cf2680e39d353cd9a96989391c98738730a9460a44b4ac7a21853307c60f5"
+      },
+      {
+        "path": "tests/ugv-zmq-provider/governance-fixture.ts",
+        "bytes": 9365,
+        "sha256": "f01a6e511478663187946d7de4aa1030549cf4bafc7cff3371c09070e830e92a"
+      },
+      {
+        "path": "tests/ugv-zmq-provider/package_candidate_test.py",
+        "bytes": 5870,
+        "sha256": "4f24c1a59bdc7fe19f9bab68e32349c18d8598aa1ca12e85d3a95ee060c8e2b0"
+      }
+    ]
+  },
+  "sdar": {
+    "validatedCommit": "93cada52ef1ec2e60d232a36064d4823d5524b86",
+    "previousIncrement": "f796fee",
+    "changedTrackedInputs": [
+      {
+        "path": "CHANGELOG.md",
+        "bytes": 229678,
+        "sha256": "e20ebf95cedeb06267535c7a903762d5ae23a0616389af03932f5fb628b9dcd9"
+      },
+      {
+        "path": "PROJECT_STATUS.md",
+        "bytes": 257125,
+        "sha256": "b880a1e1b9854236c5b041427de393ed943e71ee24af19d0e0e8dede7e2d693e"
+      },
+      {
+        "path": "adr/ADR-167-zmq-governed-native-skills.md",
+        "bytes": 3888,
+        "sha256": "24e234353a9389fb95b25e5a0cec2a3c73c4991bf5b78a7b47bd0750cc0e6d35"
+      },
+      {
+        "path": "apps/node-control-acceptance/src/provider-json-schema.ts",
+        "bytes": 2402,
+        "sha256": "e11a401c57e6adb4d643a03eba5f301b4078af2823e13e4f433478c982117c23"
+      },
+      {
+        "path": "apps/node-control-acceptance/src/smpp-provider-materializer.ts",
+        "bytes": 43008,
+        "sha256": "9aace3f81d6ad7bd32589e8b1b4f31c5dfe5dc508b34cef8658e50ce017e3dc8"
+      },
+      {
+        "path": "apps/node-control-acceptance/src/zmq-provider-materialization.ts",
+        "bytes": 5408,
+        "sha256": "0062bd4ab8ade0b3b9bb60674e30b57941fbe72af2a4e2fa8db2d5ee0952dbab"
+      },
+      {
+        "path": "apps/node-control-acceptance/src/zmq-skill-governance.ts",
+        "bytes": 22387,
+        "sha256": "d1ea310f9327ef50e9610db9efbe608978cfedf7c841a1f2442cd62a3b78d9ef"
+      },
+      {
+        "path": "apps/node-control-acceptance/test/provider-json-schema.unit.test.ts",
+        "bytes": 2909,
+        "sha256": "232f8a4d51f99daccec02dbe9d5dc7bce4c390a89e4c657e6ddb84ebe6ad1b71"
+      },
+      {
+        "path": "apps/node-control-api/src/http-endpoint.ts",
+        "bytes": 111918,
+        "sha256": "ab5ee7235160a526d4c606b1356bfee598221af73d80656243e12229d57856a9"
+      },
+      {
+        "path": "apps/node-control-api/test/http-endpoint.contract.test.ts",
+        "bytes": 56832,
+        "sha256": "32451c300adb8462597072f8d30cb7433318e9526c5a407aef5bfa9be59528b8"
+      },
+      {
+        "path": "apps/server/src/area-report-initial-admission.ts",
+        "bytes": 6338,
+        "sha256": "226036f6e57576e942149103f399affdd9167b0b18f622a13dd9782aa24e4509"
+      },
+      {
+        "path": "apps/server/src/area-report-terminal.ts",
+        "bytes": 7127,
+        "sha256": "8b9b6635038840a6411b2a29276f87e8b5b3383239d51dfd189f50c55338aa52"
+      },
+      {
+        "path": "apps/server/src/composition/execution.ts",
+        "bytes": 76160,
+        "sha256": "7383ea07b7589e76ff3c8673047a90e9d141445bfdd435a6048967bb38d27c9e"
+      },
+      {
+        "path": "apps/server/src/composition/knowledge.ts",
+        "bytes": 63537,
+        "sha256": "84c18c4e27e2e4ae46b9c226234872269e8f5ed68c1fc245958c8257e679b148"
+      },
+      {
+        "path": "apps/server/src/composition/preparation.ts",
+        "bytes": 24352,
+        "sha256": "2f1afee0d900d0164dbe876f69481da82b73b4663be06c8af43bf871ffa022e4"
+      },
+      {
+        "path": "apps/server/src/composition/task-planning-candidate-generator.ts",
+        "bytes": 10171,
+        "sha256": "5af4d9b01ecce84fda9223a1a214880c045cd24b01e3a6b47bf7ecfc77d2e9fb"
+      },
+      {
+        "path": "apps/server/src/runtime.ts",
+        "bytes": 28723,
+        "sha256": "920e566c614c56b3af8c8bb8a55305d3e8d787947d57364799f4b4998e442efb"
+      },
+      {
+        "path": "docs/17_TRACEABILITY_MATRIX.md",
+        "bytes": 666783,
+        "sha256": "d462183fecbde1d11ac8a2cbbb8cdac111dcd0b0bb6960abb9d89c3c6b938a4d"
+      },
+      {
+        "path": "docs/18_KNOWN_ASSUMPTIONS_AND_GAPS.md",
+        "bytes": 71528,
+        "sha256": "845b925e732d0fea4a817cb3de146748aac5f8c2eae8d415f99443386c94ca95"
+      },
+      {
+        "path": "docs/zmq-native-skills.md",
+        "bytes": 3320,
+        "sha256": "71b24c962a44028ee00fd07e1f663ab7e7a0415279f82f4c4d61d0f2006734d7"
+      },
+      {
+        "path": "execplans/ugv-zmq-phase5-20261024.md",
+        "bytes": 8171,
+        "sha256": "d413144006b79d0c596dbea12c42ee6d5176cc0f50b96dbc249301afc6477a5c"
+      },
+      {
+        "path": "packages/application/src/task-capability.ts",
+        "bytes": 78118,
+        "sha256": "116a8d4e62e179b701bcd08708d42257ee2222be04bd70cbf42710c9743678c3"
+      },
+      {
+        "path": "packages/application/src/workflow-controller.ts",
+        "bytes": 51688,
+        "sha256": "7487166c8c67487eec02eabece0ee9b043fccf80e05ef3c3559eb42dc9f1d9a1"
+      },
+      {
+        "path": "packages/application/test/workflow-controller.unit.test.ts",
+        "bytes": 40384,
+        "sha256": "e5698c0f052c23c157d7c66393745b530c0d7abf04fa42affa5b478159322e9a"
+      },
+      {
+        "path": "packages/domain/src/area-inspection.ts",
+        "bytes": 14157,
+        "sha256": "30dba3c2d7f8d8be820ea7443cfec84a395c4c4b356e66e5795eb9a9d3240fe3"
+      },
+      {
+        "path": "packages/domain/src/evidence/canonical-evidence.ts",
+        "bytes": 17442,
+        "sha256": "36f6c17a45ca824507e9d345b991baad954a77372fcda6560a9587ac8d0078db"
+      },
+      {
+        "path": "packages/domain/src/evidence/index.ts",
+        "bytes": 203,
+        "sha256": "82e6c828baabaca4da85a0e2e42baa7d94ee6ac8a044dbb2491ece64387381b9"
+      },
+      {
+        "path": "packages/domain/src/evidence/node-control-card-artifact.ts",
+        "bytes": 3062,
+        "sha256": "ce3aabd09af5fc3123e7622b2f035fe3ba5cebf1a693ff8749f8be7e56fede9a"
+      },
+      {
+        "path": "packages/domain/src/index.ts",
+        "bytes": 5929,
+        "sha256": "adc2e22942ac5f3b95ad5cffc9634cd856a9b371f3c087eabde195a1271c94e0"
+      },
+      {
+        "path": "packages/domain/src/zmq-capability.ts",
+        "bytes": 5964,
+        "sha256": "25208b1cb089bda8d90d6471d4f88a0c5d6a34fe9417ee4c95c9965426ddfac0"
+      },
+      {
+        "path": "packages/domain/test/evidence-domain.unit.test.ts",
+        "bytes": 26595,
+        "sha256": "dc41dd06b9c9a4f2883471bcc9ffb16860675a8db03750d342e57e392b96acd2"
+      },
+      {
+        "path": "packages/domain/test/node-control-card-artifact.unit.test.ts",
+        "bytes": 1892,
+        "sha256": "9402bcee6cc53968574ef4eca87a5cb5f4c4802efb49dd3b7d020791c932028f"
+      },
+      {
+        "path": "packages/node-control-application/src/a2a-exposure-service.ts",
+        "bytes": 18530,
+        "sha256": "ecec642359bd8f8f2c4837e60d0fbfcec238fce24af53147c35345be3d33e9e3"
+      },
+      {
+        "path": "packages/node-control-persistence-postgres/src/a2a-exposure-repository.ts",
+        "bytes": 17529,
+        "sha256": "f0fe0bf41e1cdb8763f9a509f03d496056ba51344a38494969578c931f8cd2d0"
+      },
+      {
+        "path": "packages/node-control-persistence-postgres/src/node-control-evidence-source.ts",
+        "bytes": 56601,
+        "sha256": "f810c7d50cecddc544979094c2ae3c88de09761ced8a0d8e083f3dc616ce6e81"
+      },
+      {
+        "path": "packages/node-control-persistence-postgres/test/foundation.integration.test.ts",
+        "bytes": 53372,
+        "sha256": "fd030f311fe02b39e8059c28855dcb30cdc51e3216172d6adbf0f2bb10a259ee"
+      },
+      {
+        "path": "packages/ugv-profile/src/index.ts",
+        "bytes": 1148,
+        "sha256": "4bcd67b825954bafde9554d2218e0a41f7f569e3684a423335bb326bd8294214"
+      },
+      {
+        "path": "packages/ugv-profile/src/ugv-agent-profile-catalog.ts",
+        "bytes": 8011,
+        "sha256": "47e2428e6e5b58dacd36484d94d0359113c9702ef8273ca57ff7fc47669895f0"
+      },
+      {
+        "path": "packages/ugv-profile/src/ugv-initial-workflow-planning.ts",
+        "bytes": 6478,
+        "sha256": "02ec326052c1fc62c53d13d0dc1680c290e21cb76c3b1750eda9564f46d35ba0"
+      },
+      {
+        "path": "packages/ugv-profile/src/zmq-catalog-contract-v1.0.0.json",
+        "bytes": 182929,
+        "sha256": "0a4a1ffbe6e03a779ea219f911057f61693d3bbd130c02151d82b1412c708334"
+      },
+      {
+        "path": "packages/ugv-profile/src/zmq-catalog-contract.json",
+        "bytes": 182555,
+        "sha256": "eef64a78eb8a5ffad63a1efe30c0bc15f711cfb6602eff3ebe5e8e84d1369e13"
+      },
+      {
+        "path": "packages/ugv-profile/src/zmq-provider-profile.ts",
+        "bytes": 9632,
+        "sha256": "e7a5165e49c89476f8f53c75e804d1a986c04e0b16346e632a8e53b8734771cb"
+      },
+      {
+        "path": "packages/ugv-profile/src/zmq-skill.ts",
+        "bytes": 8047,
+        "sha256": "675b6574b6fb735be21491f32de66e2d013d17dbca12657aa5b50ca8dc6b894c"
+      },
+      {
+        "path": "packages/ugv-profile/src/zmq-workflow.ts",
+        "bytes": 2580,
+        "sha256": "f2a79568b6903df4379a532b749899e45f3169f81f53b15646f5bd54144fca29"
+      },
+      {
+        "path": "packages/ugv-profile/test-support/zmq.ts",
+        "bytes": 2376,
+        "sha256": "6df504e4103ae4c759f40549489204f3c9ee26f5756b178c0e535f13e9be9568"
+      },
+      {
+        "path": "packages/ugv-profile/test/zmq-skill.unit.test.ts",
+        "bytes": 7901,
+        "sha256": "7593768f83af9d681105a1d764522c23dd7d61c7af2c604fd9231f2c9b5e68f3"
+      },
+      {
+        "path": "scripts/ugv-zmq/governance-joint.mts",
+        "bytes": 33721,
+        "sha256": "c1f665dde91f55d19b0415fc680e6126b3d6b61228fa71c915e0dce7dc8651b6"
+      }
+    ]
+  }
+}

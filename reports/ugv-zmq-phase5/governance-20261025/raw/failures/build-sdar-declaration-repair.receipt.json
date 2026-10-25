@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "ugv.zmq-command-receipt/1",
+  "id": "build-sdar-declaration-repair",
+  "cwd": "/home/sz/code/skill-driven-agent-runtime-zmq-phase5",
+  "argv": [
+    "/home/sz/.nvm/versions/node/v22.23.2/bin/node",
+    "/home/sz/.cache/node/corepack/v1/pnpm/11.7.0/bin/pnpm.mjs",
+    "build"
+  ],
+  "explicitEnvironmentPathsAndTooling": {
+    "PATH": "/home/sz/.nvm/versions/node/v22.23.2/lib/node_modules/corepack/shims:/home/sz/.nvm/versions/node/v22.23.2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+  },
+  "startedAt": "2026-10-25T09:10:50.480916+00:00",
+  "completedAt": "2026-10-25T09:10:52.587214+00:00",
+  "elapsedSeconds": 2.106,
+  "exitCode": 1,
+  "log": "build-sdar-declaration-repair.log",
+  "logSha256": "3b8e79f257eb5e5a0126248297f7b61897396012dd185d4c561f62717485dd96",
+  "sourceBefore": {
+    "commit": "c20855a99771fd52121fedff8e54d3889275dc64",
+    "branch": "codex/ugv-zmq-phase5-20261024",
+    "trackedDiffSha256": "b9d4b5d2ce1687299849e0bdecfdd2c2d9b2d3c3b3ac7a0aec8b6fe488abb9fb",
+    "codeInputSha256": "d2a421125feaee8a1c3e1cfa6236196866685aac6fac926d4164d0769a2e0058",
+    "trackedCodeFileCount": 2990,
+    "codeInputExclusions": [
+      "reports/**"
+    ],
+    "status": [
+      " M execplans/ugv-zmq-phase5-20261024.md",
+      " M packages/ugv-profile/src/zmq-workflow.ts",
+      "?? apps/console/node_modules",
+      "?? node_modules",
+      "?? reports/runtime-semantic-closure/sdar-verify-67f3e13a-e768-4d0b-adbb-3c150c8fa5fc/",
+      "?? reports/runtime-semantic-closure/sdar-verify-a01df1c2-266c-48b7-a5a4-20d63ca1a294/"
+    ]
+  },
+  "sourceAfter": {
+    "commit": "c20855a99771fd52121fedff8e54d3889275dc64",
+    "branch": "codex/ugv-zmq-phase5-20261024",
+    "trackedDiffSha256": "b9d4b5d2ce1687299849e0bdecfdd2c2d9b2d3c3b3ac7a0aec8b6fe488abb9fb",
+    "codeInputSha256": "d2a421125feaee8a1c3e1cfa6236196866685aac6fac926d4164d0769a2e0058",
+    "trackedCodeFileCount": 2990,
+    "codeInputExclusions": [
+      "reports/**"
+    ],
+    "status": [
+      " M execplans/ugv-zmq-phase5-20261024.md",
+      " M packages/ugv-profile/src/zmq-workflow.ts",
+      "?? apps/console/node_modules",
+      "?? node_modules",
+      "?? reports/runtime-semantic-closure/sdar-verify-67f3e13a-e768-4d0b-adbb-3c150c8fa5fc/",
+      "?? reports/runtime-semantic-closure/sdar-verify-a01df1c2-266c-48b7-a5a4-20d63ca1a294/"
+    ]
+  },
+  "codeInputsUnchanged": true
+}
