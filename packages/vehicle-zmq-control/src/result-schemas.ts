@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ResultIdentity } from "./results.js";
+import { RESERVED_RESULT_FIELDS } from "../../domain/src/index.js";
 const digest = z.string().regex(/^[a-f0-9]{64}$/),
   missing = z.array(z.string()).max(256);
 const source = z
@@ -130,7 +131,7 @@ const effect = z
     historySource: z.literal("platform_retained_only"),
   })
   .strict();
-export function nativeOutputSchema(name: string): Record<string, unknown> {
+export function nativeDtoOutputSchema(name: string): Record<string, unknown> {
   const schema =
     name === "vehicle_zmq_inspect_area"
       ? inspection
@@ -163,4 +164,23 @@ export function nativeOutputSchema(name: string): Record<string, unknown> {
   const { $schema, ...json } = z.toJSONSchema(schema);
   void $schema;
   return json;
+}
+/** Frozen Runtime reserves these root keys. Internal DTOs retain them under Context/history. */
+export function nativeOutputSchema(name: string): Record<string, unknown> {
+  const schema = nativeDtoOutputSchema(name);
+  if (
+    schema.properties &&
+    typeof schema.properties === "object" &&
+    !Array.isArray(schema.properties)
+  )
+    schema.properties = Object.fromEntries(
+      Object.entries(schema.properties).filter(
+        ([key]) => !RESERVED_RESULT_FIELDS.some((reserved) => reserved === key),
+      ),
+    );
+  if (Array.isArray(schema.required))
+    schema.required = schema.required.filter(
+      (key: unknown) => !RESERVED_RESULT_FIELDS.some((reserved) => reserved === key),
+    );
+  return schema;
 }

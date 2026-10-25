@@ -22,10 +22,15 @@ class CandidatePackageTest(unittest.TestCase):
         for project, paths in (
             (self.smpp, ['apps/ugv-zmq-provider-adapter/src/bootstrap.ts',
                          'contracts/ugv-zmq/provider-v1/catalog.json',
+                         'contracts/ugv-zmq/provider-v1.0.1/catalog.json',
                          'apps/ugv-control-console/shared/zmq-native-catalog.json',
                          'deploy/ugv-zmq/compose.formal-candidate.yaml']),
             (self.sdar, ['packages/ugv-profile/src/zmq-provider-profile.ts',
-                         'packages/ugv-profile/src/zmq-catalog-contract.json']),
+                         'packages/ugv-profile/src/zmq-catalog-contract.json',
+                         'packages/ugv-profile/src/zmq-catalog-contract-v1.0.0.json',
+                         'packages/ugv-profile/src/zmq-skill.ts',
+                         'apps/node-control-acceptance/src/zmq-skill-governance.ts',
+                         'scripts/ugv-zmq/governance-joint.mts']),
         ):
             for name in paths:
                 path = project / name

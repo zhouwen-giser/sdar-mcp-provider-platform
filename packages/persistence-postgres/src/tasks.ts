@@ -326,6 +326,8 @@ interface TaskTransitionUpdate {
 interface TaskTransitionRequest {
   taskId: string;
   expectedVersion?: number;
+  /** Only the claimed scheduled admission may bind its first, possibly revision-zero snapshot. */
+  initialAdapterBinding?: true;
   update: TaskTransitionUpdate;
   observation: TransitionObservation;
   outboxType: string;
@@ -2030,17 +2032,22 @@ export class TaskRepository {
       );
       const row = locked.rows[0];
       if (row === undefined) throw new Error("SCHEDULED_TASK_CLAIM_LOST");
+      const appliedTransition = mergeStopState(
+        row.cancel_requested ? { ...fromRow(row), internalState: "STOPPING" } : fromRow(row),
+        transition,
+      );
       await transitionTask(client, {
         taskId,
         expectedVersion: Number(row.version),
+        initialAdapterBinding: true,
         update: {
           externalExecutionId,
-          internalState: transition.internalState,
-          mcpStatus: transition.mcpStatus,
-          substate: transition.substate,
-          statusMessage: transition.statusMessage,
-          result: transition.result,
-          error: transition.error,
+          internalState: appliedTransition.internalState,
+          mcpStatus: appliedTransition.mcpStatus,
+          substate: appliedTransition.substate,
+          statusMessage: appliedTransition.statusMessage,
+          result: appliedTransition.result,
+          error: appliedTransition.error,
           adapterRevision,
           actualStartedAt: row.actual_started_at ?? actualStartedAt ?? null,
           scheduleClaimOwner: null,
@@ -2097,6 +2104,26 @@ export class TaskRepository {
       );
       const row = locked.rows[0];
       if (row === undefined) throw new Error("SCHEDULED_TASK_CLAIM_LOST");
+      if (row.cancel_requested) {
+        await transitionTask(client, {
+          taskId,
+          expectedVersion: Number(row.version),
+          update: cancelledBeforeStart(),
+          observation: {
+            type: "task.cancelled",
+            occurredAt: new Date(),
+            reasonCode: "CANCELLED_BEFORE_START",
+            message: "Cancellation applied after admission was confirmed absent.",
+            substate: null,
+            source: "runtime",
+          },
+          outboxType: "task.cancelled",
+          eventKey: `${taskId}:cancel-before-start:${String(row.invocation_attempt)}`,
+        });
+        await reconcileMcpExecutionLinks(client);
+        await client.query("COMMIT");
+        return;
+      }
       await transitionTask(client, {
         taskId,
         expectedVersion: Number(row.version),
@@ -3159,6 +3186,46 @@ export class TaskRepository {
     };
   }
 
+  async cancelScheduledBeforeDispatch(taskId: string, now: Date): Promise<boolean> {
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      const locked = await client.query<TaskRow>(
+        `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")})
+         AND task_id=$1 AND internal_state='SCHEDULED' AND external_execution_id IS NULL FOR UPDATE`,
+        [taskId],
+      );
+      const row = locked.rows[0];
+      if (!row) {
+        await client.query("COMMIT");
+        return false;
+      }
+      await transitionTask(client, {
+        taskId,
+        expectedVersion: Number(row.version),
+        update: cancelledBeforeStart(),
+        observation: {
+          type: "task.cancelled",
+          occurredAt: now,
+          reasonCode: "CANCELLED_BEFORE_START",
+          message: "Scheduled task cancelled before Provider admission.",
+          substate: null,
+          source: "runtime",
+        },
+        outboxType: "task.cancelled",
+        eventKey: `${taskId}:cancel-before-start`,
+      });
+      await reconcileMcpExecutionLinks(client);
+      await client.query("COMMIT");
+      return true;
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
   async beginCancel(taskId: string, requestHash: string): Promise<CommandResolution> {
     const client = await this.pool.connect();
     try {
@@ -3252,7 +3319,10 @@ export class TaskRepository {
         update: {
           cancelRequested: true,
           stopReason: "USER_REQUESTED",
-          internalState: "STOPPING",
+          internalState:
+            previous.internal_state === "STARTING" && previous.external_execution_id === null
+              ? "STARTING"
+              : "STOPPING",
           mcpStatus: "working",
           substate: "stopping",
           statusMessage: "Cancellation requested.",
@@ -4838,6 +4908,20 @@ function assertAcceptedPublicationIdentity(existing: TaskRecord, input: PublishT
   }
 }
 
+function cancelledBeforeStart(): TaskTransitionUpdate {
+  return {
+    internalState: "TERMINAL_CANCELLED",
+    mcpStatus: "cancelled",
+    substate: null,
+    statusMessage: "Cancelled before execution admission.",
+    cancelRequested: true,
+    stopReason: "USER_REQUESTED",
+    scheduleClaimOwner: null,
+    scheduleClaimUntil: null,
+    nextStartAttemptAt: null,
+  };
+}
+
 export function mergeStopState(
   existing: TaskRecord,
   adapterTransition: SnapshotTransition,
@@ -4879,11 +4963,19 @@ async function transitionTask(
   ) {
     throw new Error("TASK_VERSION_CONFLICT");
   }
-  if (
-    request.update.adapterRevision !== undefined &&
-    request.update.adapterRevision <= Number(existing.adapter_revision)
-  ) {
-    return { row: existing, applied: false };
+  if (request.update.adapterRevision !== undefined) {
+    const revision = Number(existing.adapter_revision);
+    const firstBinding =
+      request.initialAdapterBinding === true &&
+      existing.external_execution_id === null &&
+      typeof request.update.externalExecutionId === "string" &&
+      request.update.externalExecutionId.length > 0;
+    if (
+      request.update.adapterRevision < revision ||
+      (request.update.adapterRevision === revision && !firstBinding)
+    ) {
+      return { row: existing, applied: false };
+    }
   }
 
   const values: unknown[] = [request.taskId, request.observation.occurredAt];

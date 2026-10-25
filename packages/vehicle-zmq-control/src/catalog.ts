@@ -178,7 +178,7 @@ export function zmqProviderManifest(providerId: string, resourceId: string, stor
     adapterProtocolVersion: "1.0",
     providerId,
     providerType: "isr.vehicle.ugv.zmq",
-    providerVersion: "1.0.0",
+    providerVersion: "1.0.1",
     inventoryMode: "RUNTIME_VISIBLE",
     businessEventSources: store.businessEventSources(),
     operations: ZMQ_PROVIDER_TOOLS.map((name) => {

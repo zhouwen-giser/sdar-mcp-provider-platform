@@ -1,6 +1,6 @@
 {
   "schemaVersion": "ugv.zmq-provider-catalog-contract/1",
-  "profile": "zmq_v1_12",
+  "profile": "zmq_v1_0_1_12",
   "tools": [
     {
       "name": "vehicle_get_state",
@@ -3204,10 +3204,6 @@
                 "type": "string",
                 "const": "ugv.zmq-inspection-result/1"
               },
-              "outcome": {
-                "type": "string",
-                "const": "partial"
-              },
               "inspectionReport": {
                 "type": "object",
                 "properties": {
@@ -3522,7 +3518,6 @@
             },
             "required": [
               "schemaVersion",
-              "outcome",
               "inspectionReport",
               "anomalies",
               "observationCount",
@@ -3745,9 +3740,6 @@
                 "type": "string",
                 "enum": ["unknown", "hit", "miss", "destroyed"]
               },
-              "outcome": {
-                "type": "string"
-              },
               "missingEvidence": {
                 "maxItems": 256,
                 "type": "array",
@@ -3805,7 +3797,6 @@
               "executionState",
               "executionFinished",
               "effect",
-              "outcome",
               "missingEvidence",
               "sourceRefs",
               "supplementalResultRevision",
@@ -3957,10 +3948,6 @@
               "schemaVersion": {
                 "type": "string",
                 "const": "ugv.zmq-inspection-result/1"
-              },
-              "outcome": {
-                "type": "string",
-                "const": "partial"
               },
               "inspectionReport": {
                 "type": "object",
@@ -4538,7 +4525,6 @@
             },
             "required": [
               "schemaVersion",
-              "outcome",
               "inspectionReport",
               "anomalies",
               "observationCount",

@@ -42,7 +42,8 @@ united packaging changes and both older SDAR checkouts' evidence remain untouche
       fix regressions. Archive tests cover reproducibility, executable modes and required inputs.
 - [x] Record source/commands/exit codes/evidence hashes and prepare both source/evidence deliveries;
       final commit, remote and package identities are fixed by the external delivery receipt.
-- [ ] Accept actual SDAR CAS publication and the native Skill task chain/patrol successor.
+- [x] 2026-10-25 Implement and exercise actual isolated SDAR CAS publication and the native Skill task chain; final frozen receipts pending.
+- [ ] Accept a separate native patrol successor; legacy patrol substitution remains rejected.
 - [ ] Qualify GOWM owner deployment, G0 source facts and an idle fenced handoff before cutover.
 
 ## Discoveries
@@ -97,3 +98,17 @@ remain 15%, 10% and 20ms. No other service/process resource configuration was ch
 
 This closes the first formal isolated increment. Phase 5 remains open for the acceptance items
 above. No 19100/19101 cutover, real control or SDAR governance publication is claimed.
+
+## Second isolated increment — 2026-10-25 (validation in progress)
+
+- Publish public catalog 1.0.1 matching frozen reserved-root-field projection; retain raw DTO validation and the historical pin.
+- Fix scheduled revision-zero first binding without weakening later deduplication or identity fences. Real formal test proves readable Context and confirmed cancel/release.
+- Add an owned joint fixture for actual SDAR CAS/Skill/A2A/MCP/native-ZMQ/PostgreSQL acceptance: readonly, empty, missing-source, cancel and failure. No commands reach external devices.
+- Include the new native Skill/governance source and both catalog pins in required candidate package inputs. Final exact-source gates/evidence/package identities remain pending.
+
+The new native patrol successor and G0/owner deployment/idle handoff remain separate open items.
+
+Startup cancellation follow-up: scheduled future tasks cancel locally without dispatch. In-flight
+Start cancellation retains the claim, defers unbound commands, and preserves STOPPING after ACK.
+A proven absent admission never retries after cancellation. Focused real tests 3/3 and shared Task
+lifecycle 151/151 pass; full final-source gates are pending.

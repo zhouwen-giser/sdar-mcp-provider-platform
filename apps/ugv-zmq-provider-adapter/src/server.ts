@@ -31,7 +31,7 @@ export function zmqServer(
           qualification: "isolated_simulator_only",
           executionModes: ["simulation"],
           completeEvidence: false,
-          catalogProfile: "zmq_v1_12",
+          catalogProfile: "zmq_v1_0_1_12",
         }),
         lastSeenAt: protoTime(s.generatedAt),
       }),

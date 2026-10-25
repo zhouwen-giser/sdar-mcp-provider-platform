@@ -736,6 +736,7 @@ export class TaskEngine {
     if (isTerminalState(task.internalState)) return;
     const operation = await this.loadOperationSnapshot(task.operationSnapshotId);
     if (operation.capabilities.cancel) {
+      if (await this.#repository.cancelScheduledBeforeDispatch(taskId, this.clock.now())) return;
       const requestHash = createHash("sha256").update("cancel:user_requested").digest("hex");
       await this.#repository.beginCancel(taskId, requestHash);
       return;
@@ -949,6 +950,8 @@ export class TaskEngine {
     if (!operation.capabilities.cancel) {
       throw new CapabilityNotSupportedError("CANCEL_NOT_SUPPORTED");
     }
+    if (await this.#repository.cancelScheduledBeforeDispatch(taskId, this.clock.now()))
+      return this.#taskSnapshot(taskId, authorization);
     const requestHash = createHash("sha256").update("cancel:user_requested").digest("hex");
     const command = await this.#repository.beginCancel(taskId, requestHash);
     if (command.commandType !== "CANCEL") {

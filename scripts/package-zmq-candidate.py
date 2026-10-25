@@ -58,10 +58,15 @@ for label, root in [('smpp', smpp), ('sdar', sdar)]:
 required = {
     'smpp/apps/ugv-zmq-provider-adapter/src/bootstrap.ts',
     'smpp/contracts/ugv-zmq/provider-v1/catalog.json',
+    'smpp/contracts/ugv-zmq/provider-v1.0.1/catalog.json',
     'smpp/apps/ugv-control-console/shared/zmq-native-catalog.json',
     'smpp/deploy/ugv-zmq/compose.formal-candidate.yaml',
     'sdar/packages/ugv-profile/src/zmq-provider-profile.ts',
     'sdar/packages/ugv-profile/src/zmq-catalog-contract.json',
+    'sdar/packages/ugv-profile/src/zmq-catalog-contract-v1.0.0.json',
+    'sdar/packages/ugv-profile/src/zmq-skill.ts',
+    'sdar/apps/node-control-acceptance/src/zmq-skill-governance.ts',
+    'sdar/scripts/ugv-zmq/governance-joint.mts',
 }
 if required.difference(name for name, _, _ in entries):
     raise SystemExit('ZMQ_PACKAGE_REQUIRED_SOURCE_UNTRACKED_OR_MISSING')

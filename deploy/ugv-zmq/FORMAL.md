@@ -1,7 +1,7 @@
 # 原生 ZMQ 正式链路候选
 
 本包提供原生 Provider → gRPC → SMPP Runtime → MCP 的隔离验收实现。
-目录 profile 为 `zmq_v1_12`，不替换旧 MQTT 目录。当前原生控制只允许数字回环地址，
+当前目录 profile 为 `zmq_v1_0_1_12`（历史 1.0.0 pin 保留），不替换旧 MQTT 目录。当前原生控制只允许数字回环地址，
 资格固定为 `isolated_simulator_only`。`192.168.2.63` 现场控制仍拒绝启动。
 
 ## 当前工具
@@ -54,7 +54,7 @@ GOWM 模式必须通过既有 owner 合同及 TaskBusiness 开启路径，不能
    `databaseIdle` 只是瞬时计数，`switchAuthorized` 永远为 false，不是交接令牌。
 4. 由受控发布流程停止旧写端并确认容器/连接关闭；新写端取得同端点独占租约。
    未决 native occupancy 阻塞接管，北向终态不能清除它。跨数据库写端需额外站点独占证明。
-5. 新 SDAR 版本通过既有 CAS 治理后才能发布；本包的 SDAR 候选生成器不执行发布或物理动作。
+5. 新 SDAR 版本通过既有 CAS 治理后才能发布；SDAR 的 `governNativeZmqSkills` 仅对明确的回环隔离实例执行既有 CAS 发布；它不派发控制，控制仍需正式 Task 与计划确认。
 
 保留旧 Runtime 的原授权域与目录解码器用于只读历史，勿用新 simulationId 导入旧任务后操作。
 原 TaskBusiness Context 一经 finalized 不再改写；迟到效果通过独立结果页读取。
@@ -64,5 +64,5 @@ GOWM 模式必须通过既有 owner 合同及 TaskBusiness 开启路径，不能
 ## 验收范围
 
 本地正式 MCP/native ZMQ/PostgreSQL 隔离测试与只读跨仓库目录验证有独立证据。
-SDAR 实际治理发布、正式原生 Skill 任务链/巡逻后继、完整 GOWM 站点资格和现场动作仍未验收。
+SDAR 实际隔离治理及正式原生 Skill 任务链正在第二增量验收；精确结果见当前报告。原生巡逻后继、完整 GOWM 站点资格和现场动作仍未验收。
 参见第五阶段 ExecPlan，不能以本候选包声称已完成现场迁移。

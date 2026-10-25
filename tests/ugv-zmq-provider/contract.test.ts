@@ -9,7 +9,7 @@ import {
 } from "../../packages/vehicle-zmq-control/src/catalog.js";
 import { zmqConsoleTool } from "../../packages/vehicle-zmq-contract/src/console-contract.js";
 import { nativeTiming } from "../../apps/ugv-zmq-provider-adapter/src/runtime.js";
-import pinned from "../../contracts/ugv-zmq/provider-v1/catalog.json" with { type: "json" };
+import pinned from "../../contracts/ugv-zmq/provider-v1.0.1/catalog.json" with { type: "json" };
 import consolePinned from "../../apps/ugv-control-console/shared/zmq-native-catalog.json" with { type: "json" };
 import { nativeCatalogReason } from "../../apps/ugv-control-console/shared/zmq-native.js";
 import {

@@ -112,6 +112,16 @@ export class DurableCommandDispatcher {
       result.terminal += 1;
       return;
     }
+    if (task.externalExecutionId === null) {
+      await this.repository.retryClaimedCommand(
+        command,
+        new Date(this.clock.now().getTime() + 500),
+        "ADAPTER_EXECUTION_NOT_BOUND",
+        "Awaiting the reconciled Provider execution identity before command dispatch.",
+      );
+      result.retried += 1;
+      return;
+    }
     try {
       const operation = (
         await this.operationSnapshots.loadOperationSnapshot(task.operationSnapshotId)

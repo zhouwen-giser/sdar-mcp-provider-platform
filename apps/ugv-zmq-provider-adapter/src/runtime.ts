@@ -3,6 +3,8 @@ import { EventEmitter } from "node:events";
 import AjvImport, { type ValidateFunction } from "ajv";
 import addFormatsImport from "ajv-formats";
 import { z } from "zod";
+import { RESERVED_RESULT_FIELDS } from "../../../packages/domain/src/index.js";
+import { nativeDtoOutputSchema } from "../../../packages/vehicle-zmq-control/src/result-schemas.js";
 import { jsonToProtoStruct } from "../../../packages/adapter-protocol/src/index.js";
 import type { AvailabilityDecision } from "../../../packages/vehicle-provider-core/src/index.js";
 import type {
@@ -76,6 +78,7 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
 > {
   readonly events = new EventEmitter();
   readonly validators = new Map<string, ValidateFunction>();
+  readonly resultValidators = new Map<string, ValidateFunction>();
   constructor(
     readonly engine: ZmqControlEngine,
     readonly observer: ZmqObservationObserver,
@@ -85,6 +88,8 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
     addFormats(ajv);
     for (const name of ZMQ_PROVIDER_TOOLS)
       this.validators.set(name, ajv.compile(zmqTool(name, this.resourceId).inputSchema));
+    for (const name of ZMQ_PROVIDER_TOOLS.slice(4))
+      this.resultValidators.set(name, ajv.compile(nativeDtoOutputSchema(name)));
     engine.events.on("execution", (e: ZmqExecution) =>
       this.events.emit(e.taskId, this.executionSnapshot(e)),
     );
@@ -220,7 +225,7 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
       return {
         schemaVersion: "ugv.zmq-provider-capabilities/1",
         qualification: "isolated_simulator_only",
-        catalogProfile: "zmq_v1_12",
+        catalogProfile: "zmq_v1_0_1_12",
         resourceId: this.resourceId,
         executionMode: "simulation",
         simulationId: context.simulationId,
@@ -332,6 +337,16 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
     return this.business.service.getBusinessArtifact(...args);
   }
   executionSnapshot(e: ProviderExecution): Record<string, unknown> {
+    const validate = this.resultValidators.get(e.operationName);
+    if (e.result && validate && !validate(e.result))
+      throw Error("ZMQ_INTERNAL_RESULT_CONTRACT_INVALID");
+    const publicResult = e.result
+      ? Object.fromEntries(
+          Object.entries(e.result).filter(
+            ([key]) => !RESERVED_RESULT_FIELDS.some((reserved) => reserved === key),
+          ),
+        )
+      : undefined;
     return {
       taskId: e.taskId,
       externalExecutionId: e.externalExecutionId,
@@ -344,8 +359,30 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
       message: e.reasonCode,
       retryable: false,
       observedAt: protoTime(e.updatedAt),
-      evidence: e.evidence,
-      ...(e.result ? { result: jsonToProtoStruct(e.result) } : {}),
+      // Attests this persisted report, including its gaps; it does not attest complete device coverage.
+      evidence:
+        publicResult && e.terminalAt
+          ? [
+              {
+                evidenceId: sha256(
+                  canonical({
+                    taskId: e.taskId,
+                    executionId: e.externalExecutionId,
+                    operation: e.operationName,
+                    resourceId: e.resourceId,
+                    context: e.executionContext,
+                    result: publicResult,
+                  }),
+                ),
+                evidenceType: "ugv.zmq.retained_report",
+                observedAt: e.terminalAt,
+                subjectRef: e.resourceId,
+                payloadRef: { kind: "structured_content", jsonPointer: "" },
+                producer: [e.providerId, "ugv-zmq-provider-adapter"],
+              },
+            ]
+          : e.evidence,
+      ...(publicResult ? { result: jsonToProtoStruct(publicResult) } : {}),
     };
   }
 }

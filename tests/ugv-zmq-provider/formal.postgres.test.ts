@@ -4,7 +4,7 @@ import { readZmqHandoffState } from "../../packages/vehicle-zmq-control/src/hand
 import { randomUUID } from "node:crypto";
 import { readFileSync, writeFileSync, appendFileSync } from "node:fs";
 import { Pool } from "pg";
-import { afterAll, beforeAll, describe, it, expect } from "vitest";
+import { afterAll, beforeAll, describe, it, expect, vi } from "vitest";
 import { createRuntime } from "../../apps/runtime/src/runtime.js";
 import { loadRuntimeConfig } from "../../apps/runtime/src/config.js";
 import { openZmqProvider } from "../../apps/ugv-zmq-provider-adapter/src/bootstrap.js";
@@ -337,7 +337,163 @@ describe.skipIf(!file)("formal Runtime -> gRPC -> native ZMQ -> PostgreSQL", () 
     expect(other.error ?? other.result?.isError).toBeTruthy();
     expect(device.commands).toHaveLength(before);
   });
+  it("binds a scheduled native execution before lifecycle commands and Context reads", async () => {
+    const started = await rpc(
+      "tools/call",
+      {
+        name: "vehicle_zmq_inspect_area",
+        arguments: args(),
+        _meta: {
+          "io.sdar/taskExecution": {
+            profileVersion: "1.0",
+            idempotencyKey: randomUUID(),
+            timing: {
+              start: {
+                mode: "scheduled",
+                scheduledAt: new Date(Date.now() + 500).toISOString(),
+                startToleranceMs: 30000,
+              },
+              maxElapsedMs: 20000,
+            },
+          },
+        },
+      },
+      "vehicle_zmq_inspect_area",
+    );
+    expect(started.error).toBeUndefined();
+    const id = String(started.result?.taskId);
+    await until(async () => (await provider.repository.get(id))?.state === "RUNNING");
+    const native = present(await provider.repository.get(id));
+    await expect
+      .poll(
+        async () => {
+          const row = (
+            await runtime.pool.query<{
+              external_execution_id: string | null;
+              internal_state: string;
+              status_message: string;
+            }>(
+              "SELECT external_execution_id,internal_state,status_message FROM provider_task WHERE task_id=$1",
+              [id],
+            )
+          ).rows[0];
+          return row?.external_execution_id;
+        },
+        { timeout: 5000 },
+      )
+      .toBe(native.externalExecutionId);
+    const context = await rpc(
+      "io.sdar/taskBusiness/context/get",
+      { taskId: id, maxPageBytes: 65536 },
+      id,
+    );
+    expect(context.error).toBeUndefined();
+    await rpc("tasks/cancel", { taskId: id }, id);
+    await until(async () => (await provider.repository.get(id))?.state === "CANCELLED");
+    expect((await provider.repository.get(id))?.zmqControl.occupancy).toBe("released");
+  }, 15000);
+  it("cancels a future task locally without any Provider dispatch", async () => {
+    const before = device.commands.length;
+    const started = await rpc(
+      "tools/call",
+      {
+        name: "vehicle_zmq_inspect_area",
+        arguments: args(),
+        _meta: {
+          "io.sdar/taskExecution": {
+            profileVersion: "1.0",
+            idempotencyKey: randomUUID(),
+            timing: {
+              start: {
+                mode: "scheduled",
+                scheduledAt: new Date(Date.now() + 1500).toISOString(),
+                startToleranceMs: 30000,
+              },
+              maxElapsedMs: 20000,
+            },
+          },
+        },
+      },
+      "vehicle_zmq_inspect_area",
+    );
+    const id = String(started.result?.taskId);
+    expect(started.error).toBeUndefined();
+    expect((await rpc("tasks/cancel", { taskId: id }, id)).error).toBeUndefined();
+    await expect.poll(async () => (await task(id)).status, { timeout: 1000 }).toBe("cancelled");
+    await new Promise((resolve) => setTimeout(resolve, 1800));
+    expect(device.commands).toHaveLength(before);
+    expect(await provider.repository.get(id)).toBeUndefined();
+  });
+  it("retains cancellation while the native Start ACK is delayed and never dispatches an unbound command", async () => {
+    let release: (() => void) | undefined;
+    const delayed = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const start = provider.runtime.start.bind(provider.runtime);
+    const spy = vi.spyOn(provider.runtime, "start").mockImplementationOnce(async (input) => {
+      const accepted = await start(input);
+      await delayed;
+      return accepted;
+    });
+    const before = device.commands.filter((d) => d.request.method === "AreaSearch").length;
+    try {
+      const started = await rpc(
+        "tools/call",
+        {
+          name: "vehicle_zmq_inspect_area",
+          arguments: args(),
+          _meta: {
+            "io.sdar/taskExecution": {
+              profileVersion: "1.0",
+              idempotencyKey: randomUUID(),
+              timing: {
+                start: {
+                  mode: "scheduled",
+                  scheduledAt: new Date(Date.now() + 500).toISOString(),
+                  startToleranceMs: 30000,
+                },
+                maxElapsedMs: 20000,
+              },
+            },
+          },
+        },
+        "vehicle_zmq_inspect_area",
+      );
+      expect(started.error).toBeUndefined();
+      const id = String(started.result?.taskId);
+      await until(async () => (await provider.repository.get(id))?.state === "RUNNING");
+      await rpc("tasks/cancel", { taskId: id }, id);
+      await until(
+        async () =>
+          (
+            await runtime.pool.query<{ last_error_code: string }>(
+              "SELECT last_error_code FROM task_command WHERE task_id=$1 AND command_type='CANCEL'",
+              [id],
+            )
+          ).rows[0]?.last_error_code === "ADAPTER_EXECUTION_NOT_BOUND",
+      );
+      release?.();
+      await until(async () => (await provider.repository.get(id))?.state === "CANCELLED");
+      expect((await provider.repository.get(id))?.zmqControl.occupancy).toBe("released");
+      await until(async () => (await task(id)).status === "cancelled");
+      expect(device.commands.filter((d) => d.request.method === "AreaSearch")).toHaveLength(
+        before + 1,
+      );
+      expect(
+        (
+          await runtime.pool.query<{ state: string }>(
+            "SELECT state FROM task_command WHERE task_id=$1 AND command_type='CANCEL'",
+            [id],
+          )
+        ).rows[0]?.state,
+      ).toBe("ACKNOWLEDGED");
+    } finally {
+      release?.();
+      spy.mockRestore();
+    }
+  }, 15000);
   it("keeps public inspection identity, supports lifecycle and finalizes an incomplete report", async () => {
+    const priorScans = device.commands.filter((d) => d.request.method === "AreaSearch").length;
     const key = randomUUID(),
       first = await call("vehicle_zmq_inspect_area", args(), 10000, key);
     expect(first.error).toBeUndefined();
@@ -393,6 +549,17 @@ describe.skipIf(!file)("formal Runtime -> gRPC -> native ZMQ -> PostgreSQL", () 
     );
     device.completeRecon();
     const final = await done(inspectionTaskId);
+    const retained = present(await provider.repository.get(inspectionTaskId));
+    expect(retained.result?.outcome).toBe("partial");
+    expect(
+      (final.result as { structuredContent: Record<string, unknown> }).structuredContent,
+    ).not.toHaveProperty("outcome");
+    const invalid = structuredClone(retained);
+    if (!invalid.result) throw Error("INTERNAL_RESULT_REQUIRED");
+    delete invalid.result.outcome;
+    expect(() => provider.runtime.executionSnapshot(invalid)).toThrow(
+      "ZMQ_INTERNAL_RESULT_CONTRACT_INVALID",
+    );
     expect(final.result).toMatchObject({
       structuredContent: {
         schemaVersion: "ugv.zmq-inspection-result/1",
@@ -426,7 +593,9 @@ describe.skipIf(!file)("formal Runtime -> gRPC -> native ZMQ -> PostgreSQL", () 
       identity: { operationName: "vehicle_zmq_inspect_area" },
       page: { historySource: "platform_retained_only" },
     });
-    expect(device.commands.filter((d) => d.request.method === "AreaSearch")).toHaveLength(1);
+    expect(device.commands.filter((d) => d.request.method === "AreaSearch")).toHaveLength(
+      priorScans + 1,
+    );
   });
   it("executes native navigation and camera through Task-required tools", async () => {
     const n = await call("vehicle_zmq_navigate", {

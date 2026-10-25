@@ -2319,6 +2319,65 @@ describe("durable task lifecycle", () => {
     );
   });
 
+  it("cancels an unbound scheduled claim instead of retrying after proven admission absence", async () => {
+    const clock = new FakeClock(new Date("2026-07-16T12:20:00Z"));
+    const repository = new TaskRepository(pool);
+    const scheduled = new TaskEngine(
+      engine.manifest,
+      engine.operationSnapshotIds,
+      gateway,
+      repository,
+      undefined,
+      clock,
+    );
+    const before = sideEffectCount;
+    const created = await scheduled.callOperation(
+      requiredOperation("durable_task"),
+      { resourceId: "cancel-unbound-before-retry" },
+      authorization,
+      undefined,
+      undefined,
+      {
+        start: {
+          mode: "scheduled",
+          scheduledAt: clock.now().toISOString(),
+          startToleranceMs: 5000,
+        },
+        maxElapsedMs: null,
+      },
+    );
+    if (created.kind !== "task") throw Error("Expected scheduled Task");
+    const taskId = String(created.task.taskId);
+    const claims = await repository.claimDueScheduled(clock.now(), "cancel-unbound-owner");
+    expect(claims.map((t) => t.taskId)).toContain(taskId);
+    await scheduled.cancelTask(taskId, authorization);
+    expect(await repository.getById(taskId)).toMatchObject({
+      internalState: "STARTING",
+      cancelRequested: true,
+      externalExecutionId: null,
+    });
+    // The scheduler calls this only after an explicit rejected/NOT_FOUND response; uncertainty
+    // uses markScheduleResponseUncertain and cannot take this no-execution terminal path.
+    await repository.releaseScheduleRetry(
+      taskId,
+      "cancel-unbound-owner",
+      clock.now(),
+      "Admission confirmed absent.",
+    );
+    expect(await repository.getById(taskId)).toMatchObject({
+      internalState: "TERMINAL_CANCELLED",
+      mcpStatus: "cancelled",
+    });
+    await new DurableScheduler(
+      engine.manifest,
+      gateway,
+      repository,
+      clock,
+      "cancel-unbound-retry",
+    ).tick();
+    expect(sideEffectCount).toBe(before);
+  });
+
   it("T-013 reconciles a response-lost scheduled start without a duplicate side effect", async () => {
     const clock = new FakeClock(new Date("2026-07-16T12:30:00Z"));
     const repository = new TaskRepository(pool);
