@@ -44,7 +44,7 @@ united packaging files, SDAR sources, database volumes, bindings, PMS and signin
 - [x] Capture actual subscriptions and geometrically verified 7879 responses (11 and 19 points).
 - [x] Deploy candidate and assess handoff. Keep 19100/19101 unchanged: two active tasks and
       two pending commands prevent the approved handoff conditions from being met.
-- [ ] Freeze evidence/package hashes, commit and push the delivery branch.
+- [x] Freeze evidence/package hashes, commit and push the delivery branch.
 
 ## Validation
 
@@ -120,3 +120,15 @@ The candidate remains at HTTP 127.0.0.1:19111 and MCP 127.0.0.1:19110/mcp. Exist
 19101 login passes, but it is the existing deployment. Production cutover and device/SDAR
 patrol acceptance are not claimed. Detailed statuses and evidence are in
 reports/ugv-zmq-site-readonly-20261026/REPORT.md and acceptance.json.
+
+## Delivery receipt
+
+The verified bundle contains 3,618 entries and pins source commit
+`35a77c270d9052253fab30bb94d348a38fc3ca87`. Archive SHA256:
+`f7b5ea19b7859965a4fdb541df01085d2a9494246f76f82ebd27578f29ca6e6e`.
+All three Docker image identities survive export/import, and every archive member passes
+content/mode verification. The source/evidence commit is published on the delivery branch.
+Package identity and commands are recorded outside the bundle at
+reports/ugv-zmq-site-readonly-20261026.delivery.json to avoid recursive package hashes.
+Only delivery metadata changes after the bundle source commit. Production handoff remains
+blocked as recorded above; this is an explicit conditional deployment outcome.

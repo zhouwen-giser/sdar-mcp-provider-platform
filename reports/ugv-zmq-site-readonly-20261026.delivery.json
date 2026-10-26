@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "ugv.zmq-site-delivery/1",
+  "createdAt": "2026-10-26T09:25:59.597087+00:00",
+  "branch": "codex/ugv-zmq-site-readonly-20261026",
+  "remote": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform",
+  "publishedBundleSourceCommit": "35a77c270d9052253fab30bb94d348a38fc3ca87",
+  "publication": "source commit verified on remote branch",
+  "packageReceipt": {
+    "schemaVersion": "ugv.zmq-site-readonly-bundle/1",
+    "sourceCommit": "35a77c270d9052253fab30bb94d348a38fc3ca87",
+    "fileCount": 3618,
+    "path": "/mnt/data/ugv-zmq-site-readonly-20261026/ugv-zmq-site-readonly-20261026.tar.gz",
+    "bytes": 195070187,
+    "sha256": "f7b5ea19b7859965a4fdb541df01085d2a9494246f76f82ebd27578f29ca6e6e",
+    "images": [
+      {
+        "role": "provider",
+        "tag": "smpp/ugv-zmq-provider:site-readonly-20261026-d7824dc",
+        "id": "sha256:aba3d3969cec1b3b204962f4831d10f506c4aa5c891259a8c980052d6db29bef",
+        "revision": "d7824dcd9b66493d0f16a6f46092e35bf4ca92bf"
+      },
+      {
+        "role": "runtime",
+        "tag": "smpp/runtime:site-readonly-20261026-8af8f25",
+        "id": "sha256:9f3e6ae6b876f4fc34848a4c65f7a16af3d28f7c947dfc4ba4a0b5b4e26c2d79",
+        "revision": "8af8f25c050f9ff4315e48254f44907b0f5dbb04"
+      },
+      {
+        "role": "console",
+        "tag": "smpp/ugv-control-console:site-readonly-20261026-8243c22",
+        "id": "sha256:b248a516be983a603346fb2a5870af6f6fe6a2302f15cd7569a1854e623b361c",
+        "revision": "8243c22"
+      }
+    ],
+    "controlQualified": false,
+    "imageRoundTripVerified": true
+  },
+  "packageCommand": {
+    "argv": [
+      "python3",
+      "scripts/package-zmq-site-readonly.py",
+      "--output",
+      "/mnt/data/ugv-zmq-site-readonly-20261026/ugv-zmq-site-readonly-20261026.tar.gz",
+      "--provider-image",
+      "smpp/ugv-zmq-provider:site-readonly-20261026-d7824dc",
+      "--runtime-image",
+      "smpp/runtime:site-readonly-20261026-8af8f25",
+      "--console-image",
+      "smpp/ugv-control-console:site-readonly-20261026-8243c22",
+      "--evidence-root",
+      "reports/ugv-zmq-site-readonly-20261026"
+    ],
+    "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+    "exitCode": 0,
+    "logSha256": "3f873e512de1eedd3e231387d82dc1a57a0f4409a76f45c9c28428719e3675c5"
+  },
+  "candidate": {
+    "mcp": "http://127.0.0.1:19110/mcp",
+    "console": "http://127.0.0.1:19111/",
+    "http": true,
+    "controlEnabled": false,
+    "retained": true
+  },
+  "productionCutover": {
+    "performed": false,
+    "reason": "2 active Runtime tasks, 2 active Provider executions, 2 pending commands; handoff exit 2"
+  },
+  "testContainersRemoved": ["smpp-zmq-site-test-20261026", "smpp-zmq-site-test-mqtt-20261026"],
+  "preservedObservationVolume": "smpp_zmq_site_observation",
+  "report": "reports/ugv-zmq-site-readonly-20261026/REPORT.md"
+}
