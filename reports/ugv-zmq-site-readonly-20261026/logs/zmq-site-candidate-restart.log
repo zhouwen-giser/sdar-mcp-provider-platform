@@ -1,0 +1,6 @@
+ Container smpp-zmq-site-readonly-runtime-1 Restarting 
+ Container smpp-zmq-site-readonly-provider-1 Restarting 
+ Container smpp-zmq-site-readonly-console-1 Restarting 
+ Container smpp-zmq-site-readonly-console-1 Started 
+ Container smpp-zmq-site-readonly-runtime-1 Started 
+ Container smpp-zmq-site-readonly-provider-1 Started 

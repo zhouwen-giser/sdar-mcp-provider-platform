@@ -1,0 +1,25 @@
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-control-console/shared/zmq-native.ts
+  49:12  error  'record(tool._meta?.["io.sdar/ugvZmq"]).catalogProfile ?? nativeCatalog.profile' will use Object's default stringification format ('[object Object]') when stringified  @typescript-eslint/no-base-to-string
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-control-console/test/site-readonly.test.ts
+  146:10  error  Unsafe member access .count on an `any` value                                      @typescript-eslint/no-unsafe-member-access
+  149:93  error  Unsafe member access .count on an `any` value                                      @typescript-eslint/no-unsafe-member-access
+  164:15  error  Prefer the safe `: unknown` for a `catch` callback variable                        @typescript-eslint/use-unknown-in-catch-callback-variable
+  170:32  error  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-zmq-provider-adapter/src/site-bootstrap.ts
+  46:7   error  Unnecessary conditional, comparison is always false, since `"site_readonly" !== "site_readonly"` is false                          @typescript-eslint/no-unnecessary-condition
+  57:7   error  Prefer using an optional chain expression instead, as it's more concise and easier to read                                         @typescript-eslint/prefer-optional-chain
+  61:45  error  Unnecessary conditional, comparison is always false, since `"airport_south_positive_v1" !== "airport_south_positive_v1"` is false  @typescript-eslint/no-unnecessary-condition
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-zmq-provider-adapter/src/site-runtime.ts
+  348:8  error  '_args' is defined but never used  @typescript-eslint/no-unused-vars
+  353:8  error  '_args' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/tests/ugv-zmq-provider/site-fixture.ts
+  56:21  error  'data' may use Object's default stringification format ('[object Object]') when stringified  @typescript-eslint/no-base-to-string
+
+✖ 11 problems (11 errors, 0 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+

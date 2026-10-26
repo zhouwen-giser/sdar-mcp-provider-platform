@@ -1,0 +1,315 @@
+{
+  "schemaVersion": "ugv.zmq-site-acceptance/1",
+  "sourceCommit": "8243c2247b86128c0a1b15acc8198c5a11f96c7c",
+  "profile": "zmq_v1_1_0_readonly_13",
+  "catalogVersion": "1.1.0",
+  "catalogHash": "c972bc0eb13d642d9b73752f9a5f79fda51fb495164576a74e50e08ec17b5006",
+  "software": {
+    "completeGateRun": "verification-final-2/verification.json",
+    "supplemental": "supplemental-verification.json",
+    "passed": true,
+    "optionalExternalSdarTestSkipped": true,
+    "globalLintIgnoredDebugArtifact": "preserved pre-existing ignored artifacts/inspection-area-v1/debug/vendor-managed.test.ts; product source lint passes"
+  },
+  "site": {
+    "subscriptions": {
+      "chassis": {
+        "state": "connected",
+        "lastReceptionAt": "2026-10-26T09:16:36.733Z",
+        "lastValidCommittedAt": "2026-10-26T09:16:36.733Z",
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "SOURCE_TIMEBASE_UNCONFIRMED"
+        ]
+      },
+      "eo": {
+        "state": "connected",
+        "lastReceptionAt": "2026-10-26T09:16:36.578Z",
+        "lastValidCommittedAt": "2026-10-26T09:16:36.578Z",
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+        ]
+      },
+      "simulationEffect": {
+        "state": "connected",
+        "lastReceptionAt": "2026-10-26T09:16:35.839Z",
+        "lastValidCommittedAt": "2026-10-26T09:16:35.839Z",
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+        ]
+      }
+    },
+    "position": "fresh received localization; producer clock and epoch unverified",
+    "targetReports": "not_observed",
+    "planning": {
+      "status": 202,
+      "commandId": "8d3349a5-b0be-45b5-a6ad-f7eb11c59ebf",
+      "commandStatus": "completed",
+      "taskId": null,
+      "startProvenance": "fresh_received_localization_source_clock_unverified",
+      "reasonCode": null,
+      "points": 19,
+      "adoption": "preview_only",
+      "alerts": [],
+      "stopDisabled": true
+    },
+    "historicalReports": [
+      {
+        "taskId": "ed90ab34-2c7b-4508-8a33-5b7c54d59c51",
+        "status": 200,
+        "businessReadable": true,
+        "missingBusinessReason": null
+      },
+      {
+        "taskId": "ac1fb94e-f92b-45d7-b7ae-8564a3a66504",
+        "status": 200,
+        "businessReadable": true,
+        "missingBusinessReason": null
+      }
+    ],
+    "retainedPreview": {
+      "commandId": "e004747d-db93-44fd-b3e0-4b9cfaef2b77",
+      "status": "completed",
+      "taskId": null,
+      "previewId": "d4a87a74-e9a8-4e46-847a-8a5c7ca4b893",
+      "sourceHashValid": true
+    },
+    "productionLanHttpLogin": {
+      "url": "http://17.26.1.20:19101/",
+      "status": 200,
+      "deployment": "existing unchanged deployment"
+    },
+    "candidateHttp": "http://127.0.0.1:19111/",
+    "candidateMcp": "http://127.0.0.1:19110/mcp"
+  },
+  "admission": {
+    "schemaVersion": "ugv.zmq-site-capabilities/1",
+    "qualification": "site_readonly",
+    "catalogProfile": "zmq_v1_1_0_readonly_13",
+    "resourceId": "vehicle:ugv",
+    "observationAdmission": "diagnostic_readonly",
+    "controlAdmission": "disabled",
+    "controlAvailable": false,
+    "executionDomain": {
+      "mode": "simulation",
+      "simulationId": null
+    },
+    "deploymentBinding": "unqualified_diagnostic",
+    "sourceProducerEpoch": null,
+    "completeSpatialEvidence": false,
+    "tools": [
+      {
+        "name": "vehicle_get_state",
+        "available": true,
+        "blockers": []
+      },
+      {
+        "name": "vehicle_get_capabilities",
+        "available": true,
+        "blockers": []
+      },
+      {
+        "name": "vehicle_get_payload_status",
+        "available": true,
+        "blockers": []
+      },
+      {
+        "name": "vehicle_get_targets",
+        "available": true,
+        "blockers": []
+      },
+      {
+        "name": "vehicle_zmq_navigate",
+        "available": false,
+        "blockers": [
+          "ZMQ_SITE_READONLY_CONTROL_DISABLED",
+          "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE",
+          "CHASSIS_FEEDBACK_UNCORRELATED",
+          "ZMQ_CHASSIS_CONTROL_SENDER_UNSPECIFIED",
+          "SIMULATION_ID_UNCONFIRMED",
+          "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+          "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+          "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+          "EVIDENCE_CAPABILITYSCOPE_MISSING",
+          "EVIDENCE_SERVERIMPLEMENTATION_MISSING",
+          "EVIDENCE_PLANNERPOLICY_MISSING",
+          "EVIDENCE_PROVIDERGOLDENFRAMES_MISSING"
+        ]
+      },
+      {
+        "name": "vehicle_zmq_area_recon",
+        "available": false,
+        "blockers": [
+          "ZMQ_SITE_READONLY_CONTROL_DISABLED",
+          "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE",
+          "SIMULATION_ID_UNCONFIRMED",
+          "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+          "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+          "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+          "EVIDENCE_CAPABILITYSCOPE_MISSING",
+          "EVIDENCE_SERVERIMPLEMENTATION_MISSING",
+          "EVIDENCE_PLANNERPOLICY_MISSING",
+          "EVIDENCE_PROVIDERGOLDENFRAMES_MISSING"
+        ]
+      },
+      {
+        "name": "vehicle_zmq_circular_recon",
+        "available": false,
+        "blockers": [
+          "ZMQ_SITE_READONLY_CONTROL_DISABLED",
+          "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE",
+          "SIMULATION_ID_UNCONFIRMED",
+          "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+          "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+          "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+          "EVIDENCE_CAPABILITYSCOPE_MISSING",
+          "EVIDENCE_SERVERIMPLEMENTATION_MISSING",
+          "EVIDENCE_PLANNERPOLICY_MISSING",
+          "EVIDENCE_PROVIDERGOLDENFRAMES_MISSING"
+        ]
+      },
+      {
+        "name": "vehicle_zmq_camera",
+        "available": false,
+        "blockers": [
+          "ZMQ_SITE_READONLY_CONTROL_DISABLED",
+          "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE",
+          "SIMULATION_ID_UNCONFIRMED",
+          "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+          "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+          "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+          "EVIDENCE_CAPABILITYSCOPE_MISSING",
+          "EVIDENCE_SERVERIMPLEMENTATION_MISSING",
+          "EVIDENCE_PLANNERPOLICY_MISSING",
+          "EVIDENCE_PROVIDERGOLDENFRAMES_MISSING"
+        ]
+      },
+      {
+        "name": "vehicle_zmq_inspect_area",
+        "available": false,
+        "blockers": [
+          "ZMQ_SITE_READONLY_CONTROL_DISABLED",
+          "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE",
+          "INSPECTION_SOURCE_STREAM_NOT_RECOVERABLE",
+          "SIMULATION_ID_UNCONFIRMED",
+          "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+          "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+          "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+          "EVIDENCE_CAPABILITYSCOPE_MISSING",
+          "EVIDENCE_SERVERIMPLEMENTATION_MISSING",
+          "EVIDENCE_PLANNERPOLICY_MISSING",
+          "EVIDENCE_PROVIDERGOLDENFRAMES_MISSING"
+        ]
+      },
+      {
+        "name": "simulation_apply_effect",
+        "available": false,
+        "blockers": [
+          "ZMQ_SITE_READONLY_CONTROL_DISABLED",
+          "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE",
+          "SIMULATION_ID_UNCONFIRMED",
+          "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+          "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+          "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+          "EVIDENCE_CAPABILITYSCOPE_MISSING",
+          "EVIDENCE_SERVERIMPLEMENTATION_MISSING",
+          "EVIDENCE_PLANNERPOLICY_MISSING",
+          "EVIDENCE_PROVIDERGOLDENFRAMES_MISSING"
+        ]
+      },
+      {
+        "name": "vehicle_get_inspection_result",
+        "available": true,
+        "blockers": []
+      },
+      {
+        "name": "simulation_get_effect_result",
+        "available": true,
+        "blockers": []
+      },
+      {
+        "name": "vehicle_zmq_plan_route",
+        "available": true,
+        "blockers": []
+      }
+    ],
+    "planner": {
+      "policy": "retain",
+      "available": true,
+      "correlation": "geometry_only_no_request_id",
+      "adoption": "preview_only"
+    }
+  },
+  "handoff": {
+    "schemaVersion": "ugv.zmq-site-handoff-snapshot/1",
+    "observedAt": "2026-10-26T09:22:30.076Z",
+    "providerId": "isr.vehicle.ugv.ugv",
+    "runtimeActive": 2,
+    "unresolvedAdmissions": 0,
+    "providerActive": 2,
+    "unresolvedNativeOccupancy": 0,
+    "databaseIdle": false,
+    "switchAuthorized": false,
+    "missingEvidence": [
+      "ADMISSION_DRAIN_FENCE_REQUIRED",
+      "OLD_WRITER_STOP_CONFIRMATION_REQUIRED",
+      "QUALIFIED_SOURCE_IDLE_REQUIRED"
+    ],
+    "authority": "read_only_point_in_time_not_a_handoff_lease",
+    "ownerStartup": "verified",
+    "role": {
+      "role": "ugv_smpp_app",
+      "superuser": false
+    },
+    "binding": {
+      "deviceId": "ugv:ugv",
+      "dataScopeKey": "default",
+      "bindingId": "80099d63-dae7-4f5d-8f5e-7aa1113a47a8",
+      "smppServiceKey": "smpp.sz-gowm.ugv",
+      "providerId": "isr.vehicle.ugv.ugv",
+      "resourceId": "vehicle:ugv",
+      "sourceSessionKey": "gowm-analysis-dev-f3dc6f4b8e-smpp-ugv-mqtt"
+    },
+    "pendingCommands": 2,
+    "unresolvedDispatches": 0,
+    "liveLeases": 0
+  },
+  "images": [
+    {
+      "role": "provider",
+      "tag": "smpp/ugv-zmq-provider:site-readonly-20261026-d7824dc",
+      "id": "sha256:aba3d3969cec1b3b204962f4831d10f506c4aa5c891259a8c980052d6db29bef",
+      "revision": "d7824dcd9b66493d0f16a6f46092e35bf4ca92bf",
+      "comparedFiles": 1592,
+      "mismatches": []
+    },
+    {
+      "role": "runtime",
+      "tag": "smpp/runtime:site-readonly-20261026-8af8f25",
+      "id": "sha256:9f3e6ae6b876f4fc34848a4c65f7a16af3d28f7c947dfc4ba4a0b5b4e26c2d79",
+      "revision": "8af8f25c050f9ff4315e48254f44907b0f5dbb04",
+      "comparedFiles": 1536,
+      "mismatches": []
+    },
+    {
+      "role": "console",
+      "tag": "smpp/ugv-control-console:site-readonly-20261026-8243c22",
+      "id": "sha256:b248a516be983a603346fb2a5870af6f6fe6a2302f15cd7569a1854e623b361c",
+      "revision": "8243c22",
+      "comparedFiles": 17,
+      "mismatches": []
+    }
+  ],
+  "controlAcceptance": "not_in_scope_disabled",
+  "sdarPatrolAcceptance": "not_in_scope_unchanged_exact_binding",
+  "productionCutover": "blocked_candidate_retained"
+}

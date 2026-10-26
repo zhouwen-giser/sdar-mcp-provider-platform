@@ -1,0 +1,109 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.88kB done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 446B done
+#3 DONE 0.0s
+
+#4 [build 1/8] FROM docker.io/library/node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c
+#4 resolve docker.io/library/node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 1.21MB 0.1s done
+#5 DONE 0.1s
+
+#6 [build 5/8] COPY apps/ugv-control-console/package.json apps/ugv-control-console/package.json
+#6 CACHED
+
+#7 [build 2/8] WORKDIR /workspace
+#7 CACHED
+
+#8 [build 3/8] RUN corepack enable
+#8 CACHED
+
+#9 [build 4/8] COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+#9 CACHED
+
+#10 [build 6/8] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     pnpm install --filter @sdar/ugv-control-console --frozen-lockfile --ignore-scripts --prefer-offline --store-dir=/pnpm/store
+#10 CACHED
+
+#11 [build 7/8] COPY apps/ugv-control-console apps/ugv-control-console
+#11 DONE 0.4s
+
+#12 [build 8/8] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     pnpm --filter @sdar/ugv-control-console build     && pnpm --filter @sdar/ugv-control-console deploy --legacy --prod /release
+#12 1.027 $ tsc --noEmit -p tsconfig.build.json && vite build && tsc -p tsconfig.server.json
+#12 6.927 vite v8.1.5 building client environment for production...
+#12 6.946 [2Ktransforming...✓ 153 modules transformed.
+#12 7.596 rendering chunks...
+#12 7.702 computing gzip size...
+#12 7.709 dist/index.html                   0.46 kB │ gzip:   0.32 kB
+#12 7.709 dist/assets/index-0gF-0iXN.css   11.60 kB │ gzip:   3.43 kB
+#12 7.709 dist/assets/index-B_v0JJhb.js   515.68 kB │ gzip: 121.58 kB
+#12 7.709 
+#12 7.709 ✓ built in 781ms
+#12 7.710 [plugin builtin:vite-reporter] 
+#12 7.710 (!) Some chunks are larger than 500 kB after minification. Consider:
+#12 7.710 - Using dynamic import() to code-split the application
+#12 7.710 - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+#12 7.710 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+#12 11.80 [WARN] Shared workspace lockfile detected but configuration forces legacy deploy implementation.
+#12 11.87 Packages are copied from the content-addressable store to the virtual store.
+#12 11.87   Content-addressable store is at: /pnpm/store/v11
+#12 11.87   Virtual store is at:             ../release/node_modules/.pnpm
+#12 11.88 ✓ Lockfile passes supply-chain policies (verified 23h ago)
+#12 12.09 Progress: resolved 1, reused 0, downloaded 0, added 0
+#12 12.25 .                                        | [WARN] deprecated @opentelemetry/sdk-trace-node@2.9.0
+#12 13.09 Progress: resolved 55, reused 55, downloaded 0, added 0
+#12 14.09 Progress: resolved 236, reused 236, downloaded 0, added 0
+#12 19.29 Progress: resolved 237, reused 236, downloaded 0, added 0
+#12 20.29 Progress: resolved 408, reused 404, downloaded 0, added 0
+#12 21.29 Progress: resolved 411, reused 405, downloaded 0, added 0
+#12 25.34 Progress: resolved 412, reused 405, downloaded 0, added 0
+#12 26.34 Progress: resolved 453, reused 407, downloaded 0, added 0
+#12 27.34 Progress: resolved 462, reused 411, downloaded 0, added 0
+#12 28.34 Progress: resolved 552, reused 501, downloaded 0, added 0
+#12 28.98 [WARN] 3 deprecated subdependencies found: @opentelemetry/propagator-jaeger@2.9.0, @opentelemetry/sdk-trace-base@2.9.0, node-domexception@1.0.0
+#12 28.99 .                                        | +323 ++++++++++++++++++++++++++++++++
+#12 29.34 Progress: resolved 587, reused 536, downloaded 0, added 42
+#12 30.34 Progress: resolved 587, reused 536, downloaded 0, added 185
+#12 31.34 Progress: resolved 587, reused 536, downloaded 0, added 292
+#12 32.34 Progress: resolved 587, reused 536, downloaded 0, added 322
+#12 33.01 Progress: resolved 587, reused 536, downloaded 0, added 323, done
+#12 33.13 .../node_modules/protobufjs postinstall$ node scripts/postinstall
+#12 33.15 .../zeromq@6.8.0/node_modules/zeromq install$ node ./script/install.js
+#12 33.19 .../node_modules/protobufjs postinstall: Done
+#12 33.22 .../zeromq@6.8.0/node_modules/zeromq install: Done
+#12 33.42 [WARN] Failed to create bin at /release/node_modules/.bin/tsx. ENOENT: no such file or directory, open '/release/node_modules/.pnpm/tsx@4.23.1/node_modules/tsx/dist/cli.mjs'
+#12 33.42 [WARN] Failed to create bin at /release/node_modules/.bin/esbuild. ENOENT: no such file or directory, open '/release/node_modules/.pnpm/esbuild@0.28.1/node_modules/esbuild/bin/esbuild'
+#12 33.42 [WARN] Failed to create bin at /release/node_modules/.bin/acorn. ENOENT: no such file or directory, open '/release/node_modules/.pnpm/acorn@8.17.0/node_modules/acorn/bin/acorn'
+#12 33.42 [WARN] Failed to create bin at /release/node_modules/.bin/vite. ENOENT: no such file or directory, open '/release/node_modules/.pnpm/vite@8.1.5_@types+node@22.20.1_esbuild@0.28.1_tsx@4.23.1_yaml@2.9.0/node_modules/vite/bin/vite.js'
+#12 33.42 [WARN] Failed to create bin at /release/node_modules/.bin/esbuild. ENOENT: no such file or directory, open '/release/node_modules/.pnpm/esbuild@0.28.1/node_modules/esbuild/bin/esbuild'
+#12 DONE 34.0s
+
+#13 [runtime 2/3] WORKDIR /app
+#13 CACHED
+
+#14 [runtime 3/3] COPY --from=build --chown=node:node /release/ ./
+#14 DONE 4.7s
+
+#15 exporting to image
+#15 exporting layers
+#15 exporting layers 8.9s done
+#15 exporting manifest sha256:9434f7a1b1a34aef5231d865c7e45487b76c8b755d3294dde80f3af4d5c83942
+#15 exporting manifest sha256:9434f7a1b1a34aef5231d865c7e45487b76c8b755d3294dde80f3af4d5c83942 0.0s done
+#15 exporting config sha256:bf22585d96787356a980a3ad06de7b240955fd12c3a2bad0e521d786d59d9140 0.1s done
+#15 exporting attestation manifest sha256:146e2321679e0a5f80d15fbf5ca681ac6a79607165afbd76879ac6572d8bca3b
+#15 exporting attestation manifest sha256:146e2321679e0a5f80d15fbf5ca681ac6a79607165afbd76879ac6572d8bca3b 0.2s done
+#15 exporting manifest list sha256:b248a516be983a603346fb2a5870af6f6fe6a2302f15cd7569a1854e623b361c
+#15 exporting manifest list sha256:b248a516be983a603346fb2a5870af6f6fe6a2302f15cd7569a1854e623b361c 0.0s done
+#15 naming to docker.io/smpp/ugv-control-console:site-readonly-20261026-8243c22 done
+#15 unpacking to docker.io/smpp/ugv-control-console:site-readonly-20261026-8243c22
+#15 unpacking to docker.io/smpp/ugv-control-console:site-readonly-20261026-8243c22 5.2s done
+#15 DONE 14.5s

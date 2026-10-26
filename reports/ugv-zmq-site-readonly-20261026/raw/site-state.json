@@ -1,0 +1,342 @@
+{
+  "resultType": "complete",
+  "content": [
+    {
+      "type": "text",
+      "text": "ZMQ_SITE_READ_COMPLETED"
+    }
+  ],
+  "isError": false,
+  "structuredContent": {
+    "schemaVersion": "ugv.vehicle-observation-state/2.0",
+    "generatedAt": "2026-10-26T07:32:16.592Z",
+    "partitionHash": "653311d92261e514a90dd12484b8273b4df8610cc6b507ea6134ce746d8d526d",
+    "sessionId": "746dcbef-b749-4324-acb0-ec60b354aef9",
+    "runtimeAdmission": "not_published",
+    "readOnly": true,
+    "deploymentBinding": "unqualified_diagnostic",
+    "sourceProducerEpoch": null,
+    "channels": {
+      "chassis": {
+        "state": "connected",
+        "lastReceptionAt": "2026-10-26T07:32:15.840Z",
+        "lastValidCommittedAt": "2026-10-26T07:32:15.840Z",
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ]
+      },
+      "eo": {
+        "state": "connected",
+        "lastReceptionAt": "2026-10-26T07:32:15.749Z",
+        "lastValidCommittedAt": "2026-10-26T07:32:15.749Z",
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+        ]
+      },
+      "simulationEffect": {
+        "state": "connected",
+        "lastReceptionAt": "2026-10-26T07:32:15.851Z",
+        "lastValidCommittedAt": "2026-10-26T07:32:15.851Z",
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+        ]
+      }
+    },
+    "observations": [
+      {
+        "component": "simulationEffect",
+        "receivedAt": "2026-10-26T07:32:15.850Z",
+        "ageMs": 741.411813,
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "receptionId": "4bd96ac3-9dce-4e90-ab4f-c580a5018640",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+        ],
+        "observation": {
+          "key": "device_status",
+          "protocolVersion": "1.0",
+          "versionEvidence": "in_band",
+          "deviceId": "artillery-01",
+          "nativeTaskId": null,
+          "nativeRequestId": null,
+          "runtimeTaskId": null,
+          "sourceProducerEpoch": null,
+          "sourceTime": {
+            "unit": "utc_ms",
+            "value": "1792999935659"
+          },
+          "acquisitionUtcMs": null,
+          "reportedOrigin": "unattested",
+          "position": null,
+          "data": {
+            "mode": "idle",
+            "ready": true,
+            "active_task_id": null,
+            "fault_code": null,
+            "fault_message": null
+          }
+        }
+      },
+      {
+        "component": "simulationEffect",
+        "receivedAt": "2026-10-26T07:32:15.851Z",
+        "ageMs": 740.955131,
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "receptionId": "f15fdf0a-2bae-49bc-a388-3ea9bf06bd69",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+        ],
+        "observation": {
+          "key": "task_status",
+          "protocolVersion": "1.0",
+          "versionEvidence": "in_band",
+          "deviceId": "artillery-01",
+          "nativeTaskId": null,
+          "nativeRequestId": null,
+          "runtimeTaskId": null,
+          "sourceProducerEpoch": null,
+          "sourceTime": {
+            "unit": "utc_ms",
+            "value": "1792999935659"
+          },
+          "acquisitionUtcMs": null,
+          "reportedOrigin": "unattested",
+          "position": null,
+          "data": {
+            "task": null
+          }
+        }
+      },
+      {
+        "component": "eo",
+        "receivedAt": "2026-10-26T07:32:15.748Z",
+        "ageMs": 843.357797,
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "receptionId": "6e27db62-647e-4a3f-ae93-ee8b380f0afa",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+        ],
+        "observation": {
+          "key": "device_status",
+          "protocolVersion": "2.2",
+          "versionEvidence": "in_band",
+          "deviceId": "isr-01",
+          "nativeTaskId": null,
+          "nativeRequestId": null,
+          "runtimeTaskId": null,
+          "sourceProducerEpoch": null,
+          "sourceTime": {
+            "unit": "utc_ms",
+            "value": "1792999935557"
+          },
+          "acquisitionUtcMs": null,
+          "reportedOrigin": "simulated",
+          "position": null,
+          "data": {
+            "mode": "idle",
+            "ready": false,
+            "data_origin": "simulated",
+            "camera_online": false,
+            "gimbal_online": true,
+            "navigation_valid": false,
+            "gimbal_yaw_rad": 0,
+            "gimbal_pitch_rad": 0,
+            "zoom_ratio": null,
+            "active_task_id": null,
+            "telecontrol": null,
+            "fault_code": null,
+            "fault_message": null
+          }
+        }
+      },
+      {
+        "component": "eo",
+        "receivedAt": "2026-10-26T07:32:15.749Z",
+        "ageMs": 842.792215,
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "receptionId": "6f6e231c-0178-435c-a6dd-7b11d0f5eade",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+        ],
+        "observation": {
+          "key": "task_status",
+          "protocolVersion": "2.2",
+          "versionEvidence": "in_band",
+          "deviceId": "isr-01",
+          "nativeTaskId": null,
+          "nativeRequestId": null,
+          "runtimeTaskId": null,
+          "sourceProducerEpoch": null,
+          "sourceTime": {
+            "unit": "utc_ms",
+            "value": "1792999935557"
+          },
+          "acquisitionUtcMs": null,
+          "reportedOrigin": "unattested",
+          "position": null,
+          "data": {
+            "task": null,
+            "command": null
+          }
+        }
+      },
+      {
+        "component": "chassis",
+        "receivedAt": "2026-10-26T07:32:15.839Z",
+        "ageMs": 752.425408,
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "receptionId": "3572f602-7e7b-449f-b36d-7093c305b60f",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "observation": {
+          "key": "failsafe",
+          "protocolVersion": "2.0",
+          "versionEvidence": "selected_contract_not_in_band",
+          "deviceId": "1",
+          "nativeTaskId": null,
+          "nativeRequestId": null,
+          "runtimeTaskId": null,
+          "sourceProducerEpoch": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "acquisitionUtcMs": null,
+          "reportedOrigin": "unattested",
+          "position": null,
+          "data": {
+            "type": "failsafe",
+            "faults": []
+          }
+        }
+      },
+      {
+        "component": "chassis",
+        "receivedAt": "2026-10-26T07:32:15.840Z",
+        "ageMs": 752.035459,
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "receptionId": "4fb494b1-eb8c-4913-9e8c-602df54a2b08",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "observation": {
+          "key": "systemState",
+          "protocolVersion": "2.0",
+          "versionEvidence": "selected_contract_not_in_band",
+          "deviceId": "1",
+          "nativeTaskId": null,
+          "nativeRequestId": null,
+          "runtimeTaskId": null,
+          "sourceProducerEpoch": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "acquisitionUtcMs": null,
+          "reportedOrigin": "unattested",
+          "position": null,
+          "data": {
+            "type": "systemState",
+            "runState": 1,
+            "mode": 0,
+            "speedLimitMetresPerSecond": 8.333333015441895,
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "errorCodes": []
+          }
+        }
+      },
+      {
+        "component": "chassis",
+        "receivedAt": "2026-10-26T07:32:15.840Z",
+        "ageMs": 751.817865,
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "receptionId": "5659b099-0ba7-4609-8ccc-3e06de61534b",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "observation": {
+          "key": "performance",
+          "protocolVersion": "2.0",
+          "versionEvidence": "selected_contract_not_in_band",
+          "deviceId": "1",
+          "nativeTaskId": null,
+          "nativeRequestId": null,
+          "runtimeTaskId": null,
+          "sourceProducerEpoch": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "acquisitionUtcMs": null,
+          "reportedOrigin": "unattested",
+          "position": null,
+          "data": {
+            "type": "performance",
+            "cpuUsage": 0.19066937267780304,
+            "memoryUsage": 0.6019362211227417,
+            "temperature": 53,
+            "uploadBytesPerSecond": 11982.7763671875,
+            "downloadBytesPerSecond": 5481.8125
+          }
+        }
+      }
+    ],
+    "diagnostics": [
+      "READ_ONLY_UNQUALIFIED_OBSERVER",
+      "SOURCE_CONTINUITY_UNVERIFIED",
+      "POSITION_NOT_OBSERVED",
+      "TARGET_REPORT_NOT_OBSERVED"
+    ],
+    "archive": {
+      "status": "running",
+      "pendingRecords": 0,
+      "pendingBytes": 0,
+      "committedEvents": 818,
+      "receivedMessages": 812,
+      "committedReceptions": 812,
+      "unconfirmedReceptions": 0,
+      "locallyDiscardedMessages": 0,
+      "failureCode": null,
+      "failureRecorded": null
+    },
+    "continuity": "upstream_loss_and_producer_epoch_unverified",
+    "completeEvidence": false
+  }
+}

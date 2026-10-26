@@ -1,0 +1,16 @@
+{
+  "observedAt": "2026-10-26T08:22:54.921Z",
+  "origin": "http://127.0.0.1:19111",
+  "loginStatus": 200,
+  "cookieNamespaceIsolated": true,
+  "deviceStatus": 200,
+  "catalogHash": "c972bc0eb13d642d9b73752f9a5f79fda51fb495164576a74e50e08ec17b5006",
+  "provider": {
+    "providerId": "isr.vehicle.ugv.ugv",
+    "providerType": "isr.vehicle.ugv.zmq",
+    "providerVersion": "1.1.0",
+    "manifestHash": "c972bc0eb13d642d9b73752f9a5f79fda51fb495164576a74e50e08ec17b5006"
+  },
+  "tools": 13,
+  "errors": {}
+}

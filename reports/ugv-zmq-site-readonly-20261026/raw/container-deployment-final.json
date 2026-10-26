@@ -1,0 +1,184 @@
+[
+  {
+    "name": "smpp-zmq-site-readonly-provider-1",
+    "id": "6545ed531676823c4c052c88fec7398133ac925506c0e96647a36a2cc2099b56",
+    "image": "smpp/ugv-zmq-provider:site-readonly-20261026-d7824dc",
+    "imageId": "sha256:aba3d3969cec1b3b204962f4831d10f506c4aa5c891259a8c980052d6db29bef",
+    "status": "running",
+    "health": null,
+    "restarts": 0,
+    "user": "node",
+    "readOnlyRoot": true,
+    "networkMode": "host",
+    "mounts": [
+      {
+        "type": "bind",
+        "name": null,
+        "sourcePath": "/home/sz/.smpp-debug/zmq-site-readonly-20261026/provider-host.json",
+        "destination": "/run/secrets/provider.json",
+        "writable": false
+      },
+      {
+        "type": "bind",
+        "name": null,
+        "sourcePath": "/home/sz/.smpp-debug/zmq-site-readonly-20261026/gowm-host.url",
+        "destination": "/run/secrets/gowm.url",
+        "writable": false
+      }
+    ]
+  },
+  {
+    "name": "smpp-zmq-site-readonly-runtime-1",
+    "id": "1589b5153811791c4cc423f765ed63388cc42e668e5a415b8364a781a2753ebc",
+    "image": "smpp/runtime:site-readonly-20261026-8af8f25",
+    "imageId": "sha256:9f3e6ae6b876f4fc34848a4c65f7a16af3d28f7c947dfc4ba4a0b5b4e26c2d79",
+    "status": "running",
+    "health": null,
+    "restarts": 0,
+    "user": "node",
+    "readOnlyRoot": true,
+    "networkMode": "host",
+    "mounts": [
+      {
+        "type": "bind",
+        "name": null,
+        "sourcePath": "/home/sz/.smpp-debug/zmq-site-readonly-20261026/gowm-host.url",
+        "destination": "/run/secrets/gowm.url",
+        "writable": false
+      }
+    ]
+  },
+  {
+    "name": "smpp-zmq-site-readonly-console-1",
+    "id": "0fda710294d5710a442d59ced4b6a8d5ada3b2e7b5139295beb6384e6b4924d6",
+    "image": "smpp/ugv-control-console:site-readonly-20261026-8243c22",
+    "imageId": "sha256:b248a516be983a603346fb2a5870af6f6fe6a2302f15cd7569a1854e623b361c",
+    "status": "running",
+    "health": "healthy",
+    "restarts": 0,
+    "user": "node",
+    "readOnlyRoot": true,
+    "networkMode": "host",
+    "mounts": [
+      {
+        "type": "bind",
+        "name": null,
+        "sourcePath": "/home/sz/.smpp-debug/ugv-control-console/credentials.json",
+        "destination": "/run/secrets/credentials.json",
+        "writable": false
+      },
+      {
+        "type": "bind",
+        "name": null,
+        "sourcePath": "/home/sz/.smpp-debug/zmq-site-readonly-20261026/console-host.url",
+        "destination": "/run/secrets/console-database.url",
+        "writable": false
+      }
+    ]
+  },
+  {
+    "name": "smpp-zmq-site-observation",
+    "id": "5df428342cd8bcac49030277020f1b1d9289623399081b142ce97d791fbb816b",
+    "image": "postgres:17.10-alpine3.23",
+    "imageId": "sha256:8189a1f6e40904781fc9e2612687877791d21679866db58b1de996b31fc312e4",
+    "status": "running",
+    "health": null,
+    "restarts": 0,
+    "user": "",
+    "readOnlyRoot": false,
+    "networkMode": "bridge",
+    "mounts": [
+      {
+        "type": "volume",
+        "name": "smpp_zmq_site_observation",
+        "sourcePath": "/mnt/data/docker/volumes/smpp_zmq_site_observation/_data",
+        "destination": "/var/lib/postgresql/data",
+        "writable": true
+      }
+    ]
+  },
+  {
+    "name": "gowm-analysis-dev-f3dc6f4b8e-smpp-runtime-1",
+    "id": "bde837e7b503ca7e17257486d0bdb627f97648d4e00a7a6e25d45bfb48eb68ed",
+    "image": "smpp-recovery/runtime:20261022-66b90521",
+    "imageId": "sha256:82c1e79f6c56587b6b090cf144e6e0e0fa6f48c413ec8ccd33a7b115997cb632",
+    "status": "running",
+    "health": null,
+    "restarts": 0,
+    "user": "node",
+    "readOnlyRoot": false,
+    "networkMode": "gowm-analysis-dev-f3dc6f4b8e-smpp_default",
+    "mounts": [
+      {
+        "type": "volume",
+        "name": "gowm-analysis-dev-f3dc6f4b8e-smpp_runtime-state",
+        "sourcePath": "/mnt/data/docker/volumes/gowm-analysis-dev-f3dc6f4b8e-smpp_runtime-state/_data",
+        "destination": "/var/lib/sdar",
+        "writable": true
+      },
+      {
+        "type": "bind",
+        "name": null,
+        "sourcePath": "/home/sz/.smpp-debug/refresh-cfda8c7f-20261013-2i1s3dqr/smpp/deploy/development/server/config",
+        "destination": "/run/config",
+        "writable": false
+      }
+    ]
+  },
+  {
+    "name": "gowm-analysis-dev-f3dc6f4b8e-smpp-adapter-1",
+    "id": "314ae9720af82f5d7c2c7e37dc6cffdeb377415e86eb7656b91aa9e52b114776",
+    "image": "smpp-recovery/adapter:20261022-f67fd0a",
+    "imageId": "sha256:f4f798e4b72bc4e18699bdb041ee6a9c3223de8f077b6c4cdcf1cafa34ebfb55",
+    "status": "running",
+    "health": null,
+    "restarts": 1972,
+    "user": "node",
+    "readOnlyRoot": false,
+    "networkMode": "gowm-analysis-dev-f3dc6f4b8e-smpp_default",
+    "mounts": [
+      {
+        "type": "volume",
+        "name": "gowm-analysis-dev-f3dc6f4b8e-smpp_adapter-state",
+        "sourcePath": "/mnt/data/docker/volumes/gowm-analysis-dev-f3dc6f4b8e-smpp_adapter-state/_data",
+        "destination": "/var/lib/sdar",
+        "writable": true
+      },
+      {
+        "type": "bind",
+        "name": null,
+        "sourcePath": "/home/sz/.smpp-debug/refresh-cfda8c7f-20261013-2i1s3dqr/smpp/deploy/development/server/config",
+        "destination": "/run/config",
+        "writable": false
+      }
+    ]
+  },
+  {
+    "name": "smpp-ugv-control-console",
+    "id": "7f62a54ed808c236f9ecfb1ec19ed6576ad10e1f5cb4f3f97ce5ae4b8f92eb0f",
+    "image": "smpp/ugv-control-console:20261023-availability-18d6754",
+    "imageId": "sha256:a93c5883f5868a89f28d2da8d43c2bc9a18fa7fa852bff5f0e2e9e7d1d4a923b",
+    "status": "running",
+    "health": "healthy",
+    "restarts": 0,
+    "user": "node",
+    "readOnlyRoot": true,
+    "networkMode": "smpp-ugv-console_edge",
+    "mounts": [
+      {
+        "type": "bind",
+        "name": null,
+        "sourcePath": "/home/sz/.smpp-debug/ugv-control-console/database-url",
+        "destination": "/run/secrets/database-url",
+        "writable": false
+      },
+      {
+        "type": "bind",
+        "name": null,
+        "sourcePath": "/home/sz/.smpp-debug/ugv-control-console/credentials.json",
+        "destination": "/run/secrets/credentials.json",
+        "writable": false
+      }
+    ]
+  }
+]

@@ -1,0 +1,18 @@
+[
+  {
+    "taskId": "ed90ab34-2c7b-4508-8a33-5b7c54d59c51",
+    "operation": "vehicle_area_recon",
+    "expected": true,
+    "storedContextPresent": true,
+    "read": "passed",
+    "unchanged": true
+  },
+  {
+    "taskId": "ac1fb94e-f92b-45d7-b7ae-8564a3a66504",
+    "operation": "vehicle_inspect_area",
+    "expected": true,
+    "storedContextPresent": true,
+    "read": "passed",
+    "unchanged": true
+  }
+]

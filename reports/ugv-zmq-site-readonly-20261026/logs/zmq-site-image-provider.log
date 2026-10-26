@@ -1,0 +1,576 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 24.25kB done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c
+#2 DONE 0.3s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 446B done
+#3 DONE 0.0s
+
+#4 [build 1/8] FROM docker.io/library/node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c
+#4 resolve docker.io/library/node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 33.01MB 0.7s done
+#5 DONE 0.7s
+
+#6 [build 15/59] COPY apps/pms-web/package.json apps/pms-web/package.json
+#6 CACHED
+
+#7 [build 16/59] COPY apps/ugv-control-console/package.json apps/ugv-control-console/package.json
+#7 DONE 0.6s
+
+#8 [build 17/59] COPY apps/pms-worker/package.json apps/pms-worker/package.json
+#8 DONE 0.2s
+
+#9 [build 18/59] COPY packages/adapter-protocol/package.json packages/adapter-protocol/package.json
+#9 DONE 0.2s
+
+#10 [build 19/59] COPY packages/catalog-manager/package.json packages/catalog-manager/package.json
+#10 DONE 0.2s
+
+#11 [build 20/59] COPY packages/configuration-center/package.json packages/configuration-center/package.json
+#11 DONE 0.2s
+
+#12 [build 21/59] COPY packages/conformance-testkit/package.json packages/conformance-testkit/package.json
+#12 DONE 0.1s
+
+#13 [build 22/59] COPY packages/database-migration-runner/package.json packages/database-migration-runner/package.json
+#13 DONE 0.2s
+
+#14 [build 23/59] COPY packages/domain/package.json packages/domain/package.json
+#14 DONE 0.3s
+
+#15 [build 24/59] COPY packages/mcp-protocol/package.json packages/mcp-protocol/package.json
+#15 DONE 0.1s
+
+#16 [build 25/59] COPY packages/observability/package.json packages/observability/package.json
+#16 DONE 0.2s
+
+#17 [build 26/59] COPY packages/operation-registry/package.json packages/operation-registry/package.json
+#17 DONE 0.2s
+
+#18 [build 27/59] COPY packages/persistence-postgres/package.json packages/persistence-postgres/package.json
+#18 DONE 0.1s
+
+#19 [build 28/59] COPY packages/pm2-runtime-adapter/package.json packages/pm2-runtime-adapter/package.json
+#19 DONE 0.1s
+
+#20 [build 29/59] COPY packages/pms-application/package.json packages/pms-application/package.json
+#20 DONE 0.1s
+
+#21 [build 30/59] COPY packages/pms-console-api-contract/package.json packages/pms-console-api-contract/package.json
+#21 DONE 0.1s
+
+#22 [build 31/59] COPY packages/pms-console-api-testkit/package.json packages/pms-console-api-testkit/package.json
+#22 DONE 0.1s
+
+#23 [build 32/59] COPY packages/pms-domain/package.json packages/pms-domain/package.json
+#23 DONE 0.1s
+
+#24 [build 33/59] COPY packages/pms-persistence-postgres/package.json packages/pms-persistence-postgres/package.json
+#24 DONE 0.2s
+
+#25 [build 34/59] COPY packages/postgres-provisioner/package.json packages/postgres-provisioner/package.json
+#25 DONE 0.1s
+
+#26 [build 35/59] COPY packages/task-engine/package.json packages/task-engine/package.json
+#26 DONE 0.2s
+
+#27 [build 36/59] COPY packages/provider-adapter-kit/package.json packages/provider-adapter-kit/package.json
+#27 DONE 0.2s
+
+#28 [build 37/59] COPY packages/provider-package-registry/package.json packages/provider-package-registry/package.json
+#28 DONE 0.2s
+
+#29 [build 38/59] COPY packages/registry-snapshot/package.json packages/registry-snapshot/package.json
+#29 DONE 0.2s
+
+#30 [build 39/59] COPY packages/runtime-config-client/package.json packages/runtime-config-client/package.json
+#30 DONE 0.2s
+
+#31 [build 40/59] COPY packages/runtime-configuration-contract/package.json packages/runtime-configuration-contract/package.json
+#31 DONE 0.1s
+
+#32 [build 41/59] COPY packages/runtime-deployment/package.json packages/runtime-deployment/package.json
+#32 DONE 0.1s
+
+#33 [build 42/59] COPY packages/runtime-migration-runner/package.json packages/runtime-migration-runner/package.json
+#33 DONE 0.2s
+
+#34 [build 43/59] COPY packages/runtime-registration/package.json packages/runtime-registration/package.json
+#34 DONE 0.1s
+
+#35 [build 44/59] COPY packages/secret-store/package.json packages/secret-store/package.json
+#35 DONE 0.2s
+
+#36 [build 45/59] COPY packages/vehicle-zmq-contract/package.json packages/vehicle-zmq-contract/package.json
+#36 DONE 0.2s
+
+#37 [build 46/59] COPY packages/vehicle-zmq-observer/package.json packages/vehicle-zmq-observer/package.json
+#37 DONE 0.1s
+
+#38 [build 47/59] COPY packages/vehicle-zmq-control/package.json packages/vehicle-zmq-control/package.json
+#38 DONE 0.2s
+
+#39 [build 48/59] COPY packages/vehicle-provider-core/package.json packages/vehicle-provider-core/package.json
+#39 DONE 0.2s
+
+#40 [build 49/59] COPY packages/vehicle-mqtt-ingress/package.json packages/vehicle-mqtt-ingress/package.json
+#40 DONE 0.2s
+
+#41 [build 50/59] COPY packages/vehicle-device-mcp-client/package.json packages/vehicle-device-mcp-client/package.json
+#41 DONE 0.1s
+
+#42 [build 51/59] COPY examples/mock-adapter-typescript/package.json examples/mock-adapter-typescript/package.json
+#42 DONE 0.2s
+
+#43 [build 52/59] COPY examples/mock-adapter-python/package.json examples/mock-adapter-python/package.json
+#43 DONE 0.1s
+
+#44 [build 53/59] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     pnpm install --frozen-lockfile --ignore-scripts --prefer-offline       --network-concurrency=8 --store-dir=/pnpm/store     && pnpm rebuild esbuild grpc-tools
+#44 132.3 Scope: all 49 workspace projects
+#44 132.4 ? Verifying lockfile against supply-chain policies (639 entries)...
+#44 132.4 Lockfile is up to date, resolution step is skipped
+#44 132.6 Progress: resolved 1, reused 0, downloaded 0, added 0
+#44 132.7 Packages: +559
+#44 132.7 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#44 133.6 Progress: resolved 559, reused 559, downloaded 0, added 97
+#44 134.6 Progress: resolved 559, reused 559, downloaded 0, added 179
+#44 135.6 Progress: resolved 559, reused 559, downloaded 0, added 309
+#44 136.6 Progress: resolved 559, reused 559, downloaded 0, added 361
+#44 137.6 Progress: resolved 559, reused 559, downloaded 0, added 383
+#44 138.6 Progress: resolved 559, reused 559, downloaded 0, added 408
+#44 139.6 Progress: resolved 559, reused 559, downloaded 0, added 445
+#44 140.6 Progress: resolved 559, reused 559, downloaded 0, added 486
+#44 141.6 Progress: resolved 559, reused 559, downloaded 0, added 509
+#44 ...
+
+#45 [runtime 2/3] WORKDIR /app
+#45 CACHED
+
+#44 [build 53/59] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     pnpm install --frozen-lockfile --ignore-scripts --prefer-offline       --network-concurrency=8 --store-dir=/pnpm/store     && pnpm rebuild esbuild grpc-tools
+#44 142.6 Progress: resolved 559, reused 559, downloaded 0, added 532
+#44 143.6 Progress: resolved 559, reused 559, downloaded 0, added 556
+#44 144.2 Progress: resolved 559, reused 559, downloaded 0, added 559, done
+#44 145.5 
+#44 145.5 dependencies:
+#44 145.5 + @grpc/grpc-js 1.14.5
+#44 145.5 + @grpc/proto-loader 0.8.1
+#44 145.5 + @modelcontextprotocol/sdk 1.31.0
+#44 145.5 + @opentelemetry/api 1.9.1
+#44 145.5 + @opentelemetry/api-logs 0.220.0
+#44 145.5 + @opentelemetry/context-async-hooks 2.9.0
+#44 145.5 + @opentelemetry/core 2.9.0
+#44 145.5 + @opentelemetry/exporter-logs-otlp-http 0.220.0
+#44 145.5 + @opentelemetry/exporter-metrics-otlp-http 0.220.0
+#44 145.5 + @opentelemetry/exporter-trace-otlp-http 0.220.0
+#44 145.5 + @opentelemetry/otlp-transformer 0.220.0
+#44 145.5 + @opentelemetry/resources 2.9.0
+#44 145.5 + @opentelemetry/sdk-logs 0.220.0
+#44 145.5 + @opentelemetry/sdk-metrics 2.9.0
+#44 145.5 + @opentelemetry/sdk-node 0.220.0
+#44 145.5 + @opentelemetry/sdk-trace-node 2.9.0
+#44 145.5 + @opentelemetry/semantic-conventions 1.43.0
+#44 145.5 + ajv 8.18.0
+#44 145.5 + ajv-formats 3.0.1
+#44 145.5 + fastify 5.12.2
+#44 145.5 + google-proto-files 5.0.2
+#44 145.5 + mqtt 5.15.2
+#44 145.5 + pg 8.22.0
+#44 145.5 + pino 10.3.1
+#44 145.5 + pm2 7.0.3
+#44 145.5 + ws 8.21.0
+#44 145.5 + zeromq 6.8.0
+#44 145.5 + zod 4.4.3
+#44 145.5 
+#44 145.5 devDependencies:
+#44 145.5 + @eslint/js 10.0.1
+#44 145.5 + @pb33f/openapi-changes 0.2.7
+#44 145.5 + @redocly/cli 2.40.0
+#44 145.5 + @types/node 22.20.1
+#44 145.5 + @types/pg 8.20.0
+#44 145.5 + @types/ws 8.18.1
+#44 145.5 + @typescript-eslint/eslint-plugin 8.64.0
+#44 145.5 + @typescript-eslint/parser 8.64.0
+#44 145.5 + eslint 10.0.1
+#44 145.5 + grpc_tools_node_protoc_ts 5.3.3
+#44 145.5 + grpc-tools 1.13.1
+#44 145.5 + openapi-typescript 7.13.0
+#44 145.5 + prettier 3.9.5
+#44 145.5 + tsx 4.23.1
+#44 145.5 + typescript 5.9.3
+#44 145.5 + typescript-eslint 8.64.0
+#44 145.5 + vitest 4.1.10
+#44 145.5 + yaml 2.9.0
+#44 145.5 
+#44 146.9 ✓ Lockfile passes supply-chain policies (639 entries in 14.4s)
+#44 147.3 Done in 16s using pnpm v11.13.1
+#44 148.2 .../esbuild@0.28.1/node_modules/esbuild postinstall$ node install.js
+#44 148.2 .../node_modules/grpc-tools install$ node-pre-gyp install
+#44 148.3 .../node_modules/grpc-tools install: [info] it worked if it ends with ok
+#44 148.3 .../node_modules/grpc-tools install: [info] using node-pre-gyp@2.0.3
+#44 148.3 .../node_modules/grpc-tools install: [info] using node@22.23.3 | linux | x64 
+#44 148.3 .../esbuild@0.28.1/node_modules/esbuild postinstall: Done
+#44 148.3 .../node_modules/grpc-tools install: [info] check checked for "/workspace/node_modules/.pnpm/grpc-tools@1.13.1/node_modules/grpc-tools/bin/grpc_tools.node" (not found)
+#44 148.3 .../node_modules/grpc-tools install: [log] GET https://node-precompiled-binaries.grpc.io/grpc-tools/v1.13.1/linux-x64.tar.gz
+#44 154.1 .../node_modules/grpc-tools install: [info] install unpacking bin/
+#44 154.1 .../node_modules/grpc-tools install: [info] install unpacking bin/grpc_node_plugin
+#44 157.3 .../node_modules/grpc-tools install: [info] install unpacking bin/protoc
+#44 162.3 .../node_modules/grpc-tools install: [info] extracted file count: 3
+#44 162.3 .../node_modules/grpc-tools install: [info] ok
+#44 162.3 .../node_modules/grpc-tools install: [grpc-tools] Success: "/workspace/node_modules/.pnpm/grpc-tools@1.13.1/node_modules/grpc-tools/bin/grpc_tools.node" is installed via remote
+#44 162.3 .../node_modules/grpc-tools install: Done
+#44 DONE 164.5s
+
+#46 [build 54/59] COPY Dockerfile Dockerfile
+#46 DONE 0.7s
+
+#47 [build 55/59] COPY scripts/verify-docker-workspace-manifests.mjs scripts/verify-docker-workspace-manifests.mjs
+#47 DONE 0.9s
+
+#48 [build 56/59] RUN node scripts/verify-docker-workspace-manifests.mjs
+#48 0.386 Docker workspace manifests verified: 48 required, 48 staged
+#48 DONE 0.5s
+
+#49 [build 57/59] COPY . .
+#49 DONE 1.2s
+
+#50 [build 58/59] RUN find contracts deploy/development/server/profiles -type d -exec chmod 755 {} +     && find contracts deploy/development/server/profiles -type f -exec chmod 644 {} +
+#50 DONE 2.7s
+
+#51 [build 59/59] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     test "api" = api     && pnpm build     && pnpm --filter @sdar/pms-web build     && cp -R dist/packages release-packages     && node --input-type=module -e 'import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs"; for (const directory of readdirSync("release-packages", { withFileTypes: true })) { if (!directory.isDirectory()) continue; const name = directory.name; const manifest = `packages/${name}/package.json`; if (!existsSync(manifest)) continue; const source = JSON.parse(readFileSync(manifest, "utf8")); writeFileSync(`release-packages/${name}/package.json`, `${JSON.stringify({ name: source.name, version: source.version, private: true, type: "module", main: "./src/index.js", exports: { ".": "./src/index.js" } }, null, 2)}\n`); }'     && find dist proto migrations release-packages -exec touch -h -d '@0' {} +
+#51 1.098 $ pnpm proto:generate && tsc -p tsconfig.build.json
+#51 1.782 $ node scripts/generate-proto.mjs
+#51 22.40 $ npm run contract:check && npm run validate:architecture && npm run validate:pages && npm run check:imports && npm run typecheck && vite build
+#51 23.58 
+#51 23.58 > @sdar/pms-web@0.1.0 contract:check
+#51 23.58 > node scripts/check-contract-types.mjs
+#51 23.58 
+#51 24.51 Contract check passed: 1.0.0 dddf9a6c9a5d8264b71aa11495106e197857e186b02fd8e54fc0f0a53e33f042
+#51 24.71 
+#51 24.71 > @sdar/pms-web@0.1.0 validate:architecture
+#51 24.71 > node scripts/validate-architecture.mjs
+#51 24.71 
+#51 24.78 Architecture validation passed
+#51 24.94 
+#51 24.94 > @sdar/pms-web@0.1.0 validate:pages
+#51 24.94 > node scripts/validate-page-completion.mjs
+#51 24.94 
+#51 24.99 Page completion validation passed: 123 routes
+#51 25.14 
+#51 25.14 > @sdar/pms-web@0.1.0 check:imports
+#51 25.14 > node scripts/check-relative-imports.mjs
+#51 25.14 
+#51 25.21 Relative import validation passed
+#51 25.36 
+#51 25.36 > @sdar/pms-web@0.1.0 typecheck
+#51 25.36 > tsc --noEmit -p tsconfig.json
+#51 25.36 
+#51 31.21 vite v8.1.5 building client environment for production...
+#51 31.23 [2Ktransforming...✓ 105 modules transformed.
+#51 31.55 rendering chunks...
+#51 32.34 computing gzip size...
+#51 32.46 dist/index.html                               0.73 kB │ gzip:   0.46 kB
+#51 32.46 dist/assets/index-BfOSSl_w.css                9.20 kB │ gzip:   2.91 kB
+#51 32.46 dist/assets/product-components--jyh2IvQ.js    2.78 kB │ gzip:   1.35 kB │ map:     7.36 kB
+#51 32.46 dist/assets/ResourcePages-BUrPMguk.js         5.53 kB │ gzip:   2.11 kB │ map:    16.56 kB
+#51 32.46 dist/assets/GovernancePages-C0kOkh3V.js       7.33 kB │ gzip:   2.72 kB │ map:    20.03 kB
+#51 32.46 dist/assets/OverviewPages-a2m3RS99.js         7.47 kB │ gzip:   2.87 kB │ map:    19.75 kB
+#51 32.46 dist/assets/SystemPages-DA3J_4mh.js          10.96 kB │ gzip:   4.19 kB │ map:    25.82 kB
+#51 32.46 dist/assets/ConfigurationPages-DyPgJ3zN.js   12.91 kB │ gzip:   4.19 kB │ map:    38.36 kB
+#51 32.46 dist/assets/DiscoveryPages-D9KwZjx_.js       13.52 kB │ gzip:   4.43 kB │ map:    37.63 kB
+#51 32.46 dist/assets/OperationsPages-DXQq_ksm.js      13.79 kB │ gzip:   4.09 kB │ map:    38.50 kB
+#51 32.46 dist/assets/ProviderPages-D96QnSmT.js        16.18 kB │ gzip:   5.13 kB │ map:    45.48 kB
+#51 32.46 dist/assets/hooks-Drxy1ZGi.js                23.37 kB │ gzip:   6.82 kB │ map:    88.61 kB
+#51 32.46 dist/assets/RuntimePages-ya-pD650.js         25.13 kB │ gzip:   6.95 kB │ map:    70.28 kB
+#51 32.46 dist/assets/index-B5roESGf.js               379.60 kB │ gzip: 114.36 kB │ map: 1,665.10 kB
+#51 32.46 
+#51 32.47 ✓ built in 1.25s
+#51 DONE 34.1s
+
+#52 [production-dependencies 1/1] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     rm -rf node_modules apps/*/node_modules packages/*/node_modules examples/*/node_modules     && CI=true pnpm install --prod --offline --frozen-lockfile       --filter='!@sdar/pms-web' --store-dir=/pnpm/store     && find node_modules -type f -name '*.map' -delete     && find node_modules -type f -iname '*.md'       ! -iname 'license*' ! -iname 'notice*' ! -iname 'copying*' -delete     && rm -f node_modules/.modules.yaml node_modules/.pnpm-workspace-state-v1.json     && find node_modules -exec touch -h -d '@0' {} +
+#52 64.31 Scope: 48 of 49 workspace projects
+#52 64.44 ✓ Lockfile passes supply-chain policies (verified 2m ago)
+#52 64.45 Lockfile is up to date, resolution step is skipped
+#52 64.48 Progress: resolved 1, reused 0, downloaded 0, added 0
+#52 64.56 .                                        | +321 ++++++++++++++++++++++++++++++++
+#52 65.48 Progress: resolved 321, reused 321, downloaded 0, added 117
+#52 66.48 Progress: resolved 321, reused 321, downloaded 0, added 250
+#52 67.48 Progress: resolved 321, reused 321, downloaded 0, added 319
+#52 68.24 Progress: resolved 321, reused 321, downloaded 0, added 321, done
+#52 68.38 .../node_modules/protobufjs postinstall$ node scripts/postinstall
+#52 68.40 .../zeromq@6.8.0/node_modules/zeromq install$ node ./script/install.js
+#52 68.45 .../node_modules/protobufjs postinstall: Done
+#52 68.46 .../zeromq@6.8.0/node_modules/zeromq install: Done
+#52 68.93 Done in 5.2s using pnpm v11.13.1
+#52 DONE 70.1s
+
+#53 [ugv-real-production-dependencies 1/1] RUN rm -rf node_modules/.pnpm/node_modules/@sdar     && touch -h -d '@0' node_modules/.pnpm/node_modules
+#53 DONE 0.8s
+
+#54 [ugv-real-base 3/8] COPY --from=ugv-real-production-dependencies --chown=root:root /workspace/node_modules /app/node_modules
+#54 CACHED
+
+#55 [ugv-real-base 4/8] COPY --from=build --chown=root:root /workspace/dist/packages /app/dist/packages
+#55 DONE 0.5s
+
+#56 [ugv-real-base 5/8] COPY --from=build --chown=root:root /workspace/proto /app/proto
+#56 DONE 0.3s
+
+#57 [ugv-real-base 6/8] COPY --from=build --chown=root:root /workspace/contracts/gowm-shared-storage /app/contracts/gowm-shared-storage
+#57 DONE 0.2s
+
+#58 [ugv-real-base 7/8] COPY --from=build --chown=root:root /workspace/migrations /app/migrations
+#58 DONE 0.2s
+
+#59 [ugv-real-base 8/8] RUN mkdir -p /var/lib/sdar     && chown node:node /var/lib/sdar     && touch -d '@0' /var/lib/sdar /app
+#59 DONE 0.5s
+
+#60 [build 10/59] COPY apps/mock-ugv-device-mcp/package.json apps/mock-ugv-device-mcp/package.json
+#60 CACHED
+
+#61 [build 39/59] COPY packages/runtime-config-client/package.json packages/runtime-config-client/package.json
+#61 CACHED
+
+#62 [ugv-real-base 6/8] COPY --from=build --chown=root:root /workspace/contracts/gowm-shared-storage /app/contracts/gowm-shared-storage
+#62 CACHED
+
+#63 [build 29/59] COPY packages/pms-application/package.json packages/pms-application/package.json
+#63 CACHED
+
+#64 [ugv-real-production-dependencies 1/1] RUN rm -rf node_modules/.pnpm/node_modules/@sdar     && touch -h -d '@0' node_modules/.pnpm/node_modules
+#64 CACHED
+
+#65 [ugv-real-base 3/8] COPY --from=ugv-real-production-dependencies --chown=root:root /workspace/node_modules /app/node_modules
+#65 CACHED
+
+#66 [build 31/59] COPY packages/pms-console-api-testkit/package.json packages/pms-console-api-testkit/package.json
+#66 CACHED
+
+#67 [build  7/59] COPY apps/home-assistant-light-provider/package.json apps/home-assistant-light-provider/package.json
+#67 CACHED
+
+#68 [build 25/59] COPY packages/observability/package.json packages/observability/package.json
+#68 CACHED
+
+#69 [build 41/59] COPY packages/runtime-deployment/package.json packages/runtime-deployment/package.json
+#69 CACHED
+
+#70 [build 55/59] COPY scripts/verify-docker-workspace-manifests.mjs scripts/verify-docker-workspace-manifests.mjs
+#70 CACHED
+
+#71 [build 43/59] COPY packages/runtime-registration/package.json packages/runtime-registration/package.json
+#71 CACHED
+
+#72 [build  9/59] COPY apps/npc-tank-provider-adapter/package.json apps/npc-tank-provider-adapter/package.json
+#72 CACHED
+
+#73 [build 45/59] COPY packages/vehicle-zmq-contract/package.json packages/vehicle-zmq-contract/package.json
+#73 CACHED
+
+#74 [build 17/59] COPY apps/pms-worker/package.json apps/pms-worker/package.json
+#74 CACHED
+
+#75 [build 48/59] COPY packages/vehicle-provider-core/package.json packages/vehicle-provider-core/package.json
+#75 CACHED
+
+#76 [build 24/59] COPY packages/mcp-protocol/package.json packages/mcp-protocol/package.json
+#76 CACHED
+
+#77 [build 51/59] COPY examples/mock-adapter-typescript/package.json examples/mock-adapter-typescript/package.json
+#77 CACHED
+
+#78 [build 52/59] COPY examples/mock-adapter-python/package.json examples/mock-adapter-python/package.json
+#78 CACHED
+
+#79 [build 16/59] COPY apps/ugv-control-console/package.json apps/ugv-control-console/package.json
+#79 CACHED
+
+#80 [build 36/59] COPY packages/provider-adapter-kit/package.json packages/provider-adapter-kit/package.json
+#80 CACHED
+
+#81 [build 37/59] COPY packages/provider-package-registry/package.json packages/provider-package-registry/package.json
+#81 CACHED
+
+#82 [build 42/59] COPY packages/runtime-migration-runner/package.json packages/runtime-migration-runner/package.json
+#82 CACHED
+
+#83 [build 40/59] COPY packages/runtime-configuration-contract/package.json packages/runtime-configuration-contract/package.json
+#83 CACHED
+
+#84 [build 26/59] COPY packages/operation-registry/package.json packages/operation-registry/package.json
+#84 CACHED
+
+#85 [build 11/59] COPY apps/mock-ugv-mqtt-publisher/package.json apps/mock-ugv-mqtt-publisher/package.json
+#85 CACHED
+
+#86 [build  2/59] RUN corepack enable
+#86 CACHED
+
+#87 [build 56/59] RUN node scripts/verify-docker-workspace-manifests.mjs
+#87 CACHED
+
+#88 [build 57/59] COPY . .
+#88 CACHED
+
+#89 [build 30/59] COPY packages/pms-console-api-contract/package.json packages/pms-console-api-contract/package.json
+#89 CACHED
+
+#90 [build 34/59] COPY packages/postgres-provisioner/package.json packages/postgres-provisioner/package.json
+#90 CACHED
+
+#91 [build  4/59] COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml .npmrc ./
+#91 CACHED
+
+#92 [build 28/59] COPY packages/pm2-runtime-adapter/package.json packages/pm2-runtime-adapter/package.json
+#92 CACHED
+
+#93 [build 59/59] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     test "api" = api     && pnpm build     && pnpm --filter @sdar/pms-web build     && cp -R dist/packages release-packages     && node --input-type=module -e 'import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs"; for (const directory of readdirSync("release-packages", { withFileTypes: true })) { if (!directory.isDirectory()) continue; const name = directory.name; const manifest = `packages/${name}/package.json`; if (!existsSync(manifest)) continue; const source = JSON.parse(readFileSync(manifest, "utf8")); writeFileSync(`release-packages/${name}/package.json`, `${JSON.stringify({ name: source.name, version: source.version, private: true, type: "module", main: "./src/index.js", exports: { ".": "./src/index.js" } }, null, 2)}\n`); }'     && find dist proto migrations release-packages -exec touch -h -d '@0' {} +
+#93 CACHED
+
+#94 [build 38/59] COPY packages/registry-snapshot/package.json packages/registry-snapshot/package.json
+#94 CACHED
+
+#95 [build 27/59] COPY packages/persistence-postgres/package.json packages/persistence-postgres/package.json
+#95 CACHED
+
+#96 [build 46/59] COPY packages/vehicle-zmq-observer/package.json packages/vehicle-zmq-observer/package.json
+#96 CACHED
+
+#97 [build 14/59] COPY apps/pms-api/package.json apps/pms-api/package.json
+#97 CACHED
+
+#98 [build 18/59] COPY packages/adapter-protocol/package.json packages/adapter-protocol/package.json
+#98 CACHED
+
+#99 [build 33/59] COPY packages/pms-persistence-postgres/package.json packages/pms-persistence-postgres/package.json
+#99 CACHED
+
+#100 [ugv-real-base 8/8] RUN mkdir -p /var/lib/sdar     && chown node:node /var/lib/sdar     && touch -d '@0' /var/lib/sdar /app
+#100 CACHED
+
+#101 [build 13/59] COPY apps/mock-npc-tank-mqtt-publisher/package.json apps/mock-npc-tank-mqtt-publisher/package.json
+#101 CACHED
+
+#102 [build 47/59] COPY packages/vehicle-zmq-control/package.json packages/vehicle-zmq-control/package.json
+#102 CACHED
+
+#103 [build 44/59] COPY packages/secret-store/package.json packages/secret-store/package.json
+#103 CACHED
+
+#104 [build  3/59] WORKDIR /workspace
+#104 CACHED
+
+#105 [build  5/59] COPY apps/runtime/package.json apps/runtime/package.json
+#105 CACHED
+
+#106 [build 12/59] COPY apps/mock-npc-tank-device-mcp/package.json apps/mock-npc-tank-device-mcp/package.json
+#106 CACHED
+
+#107 [build 23/59] COPY packages/domain/package.json packages/domain/package.json
+#107 CACHED
+
+#108 [build 20/59] COPY packages/configuration-center/package.json packages/configuration-center/package.json
+#108 CACHED
+
+#109 [ugv-real-base 4/8] COPY --from=build --chown=root:root /workspace/dist/packages /app/dist/packages
+#109 CACHED
+
+#110 [build 32/59] COPY packages/pms-domain/package.json packages/pms-domain/package.json
+#110 CACHED
+
+#111 [production-dependencies 1/1] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     rm -rf node_modules apps/*/node_modules packages/*/node_modules examples/*/node_modules     && CI=true pnpm install --prod --offline --frozen-lockfile       --filter='!@sdar/pms-web' --store-dir=/pnpm/store     && find node_modules -type f -name '*.map' -delete     && find node_modules -type f -iname '*.md'       ! -iname 'license*' ! -iname 'notice*' ! -iname 'copying*' -delete     && rm -f node_modules/.modules.yaml node_modules/.pnpm-workspace-state-v1.json     && find node_modules -exec touch -h -d '@0' {} +
+#111 CACHED
+
+#112 [build 21/59] COPY packages/conformance-testkit/package.json packages/conformance-testkit/package.json
+#112 CACHED
+
+#113 [ugv-real-base 7/8] COPY --from=build --chown=root:root /workspace/migrations /app/migrations
+#113 CACHED
+
+#114 [build 50/59] COPY packages/vehicle-device-mcp-client/package.json packages/vehicle-device-mcp-client/package.json
+#114 CACHED
+
+#115 [build 53/59] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     pnpm install --frozen-lockfile --ignore-scripts --prefer-offline       --network-concurrency=8 --store-dir=/pnpm/store     && pnpm rebuild esbuild grpc-tools
+#115 CACHED
+
+#116 [build 54/59] COPY Dockerfile Dockerfile
+#116 CACHED
+
+#117 [ugv-real-base 5/8] COPY --from=build --chown=root:root /workspace/proto /app/proto
+#117 CACHED
+
+#118 [build 15/59] COPY apps/pms-web/package.json apps/pms-web/package.json
+#118 CACHED
+
+#119 [build 22/59] COPY packages/database-migration-runner/package.json packages/database-migration-runner/package.json
+#119 CACHED
+
+#120 [build  6/59] COPY apps/home-assistant-climate-provider/package.json apps/home-assistant-climate-provider/package.json
+#120 CACHED
+
+#121 [build  8/59] COPY apps/ugv-provider-adapter/package.json apps/ugv-provider-adapter/package.json
+#121 CACHED
+
+#122 [build 58/59] RUN find contracts deploy/development/server/profiles -type d -exec chmod 755 {} +     && find contracts deploy/development/server/profiles -type f -exec chmod 644 {} +
+#122 CACHED
+
+#123 [build 19/59] COPY packages/catalog-manager/package.json packages/catalog-manager/package.json
+#123 CACHED
+
+#124 [build 35/59] COPY packages/task-engine/package.json packages/task-engine/package.json
+#124 CACHED
+
+#125 [build 49/59] COPY packages/vehicle-mqtt-ingress/package.json packages/vehicle-mqtt-ingress/package.json
+#125 CACHED
+
+#126 [ugv-real-adapter 1/4] COPY --from=build --chown=root:root /workspace/dist/apps/ugv-provider-adapter /app/dist/apps/ugv-provider-adapter
+#126 DONE 0.2s
+
+#127 [ugv-real-adapter 2/4] COPY --from=build --chown=root:root /workspace/contracts/ugv-trajectory-history/v1/gowm-storage.json /app/contracts/ugv-trajectory-history/v1/gowm-storage.json
+#127 DONE 0.5s
+
+#128 [ugv-real-adapter 3/4] COPY --from=build --chown=root:root /workspace/scripts/ugv-simulation /app/scripts/ugv-simulation
+#128 DONE 0.4s
+
+#129 [ugv-real-adapter 4/4] COPY --from=build --chown=root:root /workspace/deploy/development/server/profiles /app/profiles
+#129 DONE 0.2s
+
+#130 [ugv-zmq-candidate 1/6] COPY --from=build --chown=root:root /workspace/dist/apps/ugv-zmq-provider-adapter /app/dist/apps/ugv-zmq-provider-adapter
+#130 DONE 0.3s
+
+#131 [ugv-zmq-candidate 2/6] COPY --from=build --chown=root:root /workspace/dist/scripts/ugv-zmq /app/dist/scripts/ugv-zmq
+#131 DONE 0.4s
+
+#132 [ugv-zmq-candidate 3/6] COPY --from=build --chown=root:root /workspace/contracts/ugv-zmq /app/contracts/ugv-zmq
+#132 DONE 0.4s
+
+#133 [ugv-zmq-candidate 4/6] COPY --from=build --chown=root:root /workspace/deploy/ugv-zmq /app/deploy/ugv-zmq
+#133 DONE 0.2s
+
+#134 [ugv-zmq-candidate 5/6] COPY --from=build --chown=root:root /workspace/packages/vehicle-zmq-contract/package.json /app/packages/vehicle-zmq-contract/package.json
+#134 DONE 0.2s
+
+#135 [ugv-zmq-candidate 6/6] COPY --from=build --chown=root:root /workspace/packages/vehicle-zmq-contract/src /app/packages/vehicle-zmq-contract/src
+#135 DONE 0.2s
+
+#136 exporting to image
+#136 exporting layers
+#136 exporting layers 1.6s done
+#136 exporting manifest sha256:aab9ee89bed2652a214f63c115a8cd7a63ab815b4dc888dfa90a1ca6e65d90f4 0.1s done
+#136 exporting config sha256:d59c4c0d973546110233b667ac713ed7c4d3a20513b1465a87ddd50c1cba4084
+#136 exporting config sha256:d59c4c0d973546110233b667ac713ed7c4d3a20513b1465a87ddd50c1cba4084 0.1s done
+#136 exporting attestation manifest sha256:e337376e6267ea1f9ca7eecf5ddc6f8275997f70daee0d63d9c0d93ea44223de
+#136 exporting attestation manifest sha256:e337376e6267ea1f9ca7eecf5ddc6f8275997f70daee0d63d9c0d93ea44223de 0.1s done
+#136 exporting manifest list sha256:fa0a71cb08f603a5aa31df73dec51cb6f3c9f8dc08ca9e4d48213407ca14834f 0.1s done
+#136 naming to docker.io/smpp/ugv-zmq-provider:site-readonly-20261026-8af8f25
+#136 naming to docker.io/smpp/ugv-zmq-provider:site-readonly-20261026-8af8f25 done
+#136 unpacking to docker.io/smpp/ugv-zmq-provider:site-readonly-20261026-8af8f25
+#136 unpacking to docker.io/smpp/ugv-zmq-provider:site-readonly-20261026-8af8f25 0.3s done
+#136 DONE 2.3s

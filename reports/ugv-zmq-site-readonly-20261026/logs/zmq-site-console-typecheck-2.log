@@ -1,0 +1,5 @@
+$ tsc --noEmit -p tsconfig.json
+../ugv-zmq-provider-adapter/src/site-runtime.ts(39,54): error TS2339: Property 'default' does not exist on type 'typeof Ajv'.
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-control-console:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @sdar/ugv-control-console@0.1.0 typecheck: `tsc --noEmit -p tsconfig.json`
+Exit status 2

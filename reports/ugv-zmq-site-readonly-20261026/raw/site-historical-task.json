@@ -1,0 +1,61 @@
+{
+  "source": "existing_GOWM_task_original_execution_domain",
+  "reports": [
+    {
+      "task": {
+        "task_id": "ac1fb94e-f92b-45d7-b7ae-8564a3a66504",
+        "operation_name": "vehicle_inspect_area",
+        "internal_state": "STOPPING",
+        "execution_mode": "live",
+        "simulation_id": null
+      },
+      "result": {
+        "resultType": "complete",
+        "taskId": "ac1fb94e-f92b-45d7-b7ae-8564a3a66504",
+        "status": "working",
+        "statusMessage": "Deadline reached; safe stop requested.",
+        "createdAt": "2026-10-23T07:03:51.734Z",
+        "lastUpdatedAt": "2026-10-23T07:08:55.056Z",
+        "ttlMs": 518801421,
+        "pollIntervalMs": 2000,
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "runtimeRevision": "13",
+            "providerRevision": "5",
+            "substate": "stopping",
+            "cancellationRequested": true
+          }
+        }
+      }
+    },
+    {
+      "task": {
+        "task_id": "ed90ab34-2c7b-4508-8a33-5b7c54d59c51",
+        "operation_name": "vehicle_area_recon",
+        "internal_state": "STOPPING",
+        "execution_mode": "live",
+        "simulation_id": null
+      },
+      "result": {
+        "resultType": "complete",
+        "taskId": "ed90ab34-2c7b-4508-8a33-5b7c54d59c51",
+        "status": "working",
+        "statusMessage": "Deadline reached; safe stop requested.",
+        "createdAt": "2026-10-22T03:30:12.089Z",
+        "lastUpdatedAt": "2026-10-23T07:04:14.468Z",
+        "ttlMs": 617661066,
+        "pollIntervalMs": 2000,
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "runtimeRevision": "11016",
+            "providerRevision": "11",
+            "substate": "stopping",
+            "cancellationRequested": true
+          }
+        }
+      }
+    }
+  ]
+}

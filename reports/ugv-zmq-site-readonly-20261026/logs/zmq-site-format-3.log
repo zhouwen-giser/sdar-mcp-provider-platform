@@ -1,0 +1,11 @@
+apps/ugv-control-console/server/config.ts 122ms
+apps/ugv-control-console/server/app.ts 145ms
+apps/ugv-control-console/e2e/site-server.ts 12ms
+apps/ugv-control-console/e2e/site.spec.ts 18ms
+apps/ugv-control-console/playwright.site.config.ts 4ms
+apps/ugv-zmq-provider-adapter/src/site-runtime.ts 84ms
+packages/vehicle-zmq-control/src/site-catalog.ts 21ms (unchanged)
+apps/ugv-zmq-provider-adapter/src/site-planner.ts 10ms (unchanged)
+scripts/ugv-zmq/site-handoff-check.ts 17ms
+deploy/ugv-zmq/site-readonly/README.md 70ms (unchanged)
+deploy/ugv-zmq/site-readonly/compose.yaml 29ms

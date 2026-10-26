@@ -1,0 +1,78 @@
+{
+  "observedAt": "2026-10-26T09:04:36.678Z",
+  "login": 200,
+  "catalogTools": 13,
+  "errors": {},
+  "afterContainerRestart": true,
+  "retainedPreviewUnchanged": true,
+  "retainedPreviewId": "d4a87a74-e9a8-4e46-847a-8a5c7ca4b893",
+  "historical": [
+    {
+      "taskId": "ed90ab34-2c7b-4508-8a33-5b7c54d59c51",
+      "status": 200,
+      "businessReadable": true,
+      "reason": null,
+      "taskStatus": "working"
+    },
+    {
+      "taskId": "ac1fb94e-f92b-45d7-b7ae-8564a3a66504",
+      "status": 200,
+      "businessReadable": true,
+      "reason": null,
+      "taskStatus": "working"
+    }
+  ],
+  "channels": {
+    "chassis": {
+      "state": "connected",
+      "lastReceptionAt": "2026-10-26T09:04:35.483Z",
+      "lastValidCommittedAt": "2026-10-26T09:04:35.483Z",
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+        "SOURCE_TIMEBASE_UNCONFIRMED"
+      ]
+    },
+    "eo": {
+      "state": "connected",
+      "lastReceptionAt": "2026-10-26T09:04:35.312Z",
+      "lastValidCommittedAt": "2026-10-26T09:04:35.312Z",
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+      ]
+    },
+    "simulationEffect": {
+      "state": "connected",
+      "lastReceptionAt": "2026-10-26T09:04:35.452Z",
+      "lastValidCommittedAt": "2026-10-26T09:04:35.452Z",
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+      ]
+    }
+  },
+  "diagnostics": [
+    "READ_ONLY_UNQUALIFIED_OBSERVER",
+    "SOURCE_CONTINUITY_UNVERIFIED",
+    "TARGET_REPORT_NOT_OBSERVED"
+  ],
+  "archive": {
+    "status": "running",
+    "pendingRecords": 3,
+    "pendingBytes": 6642,
+    "committedEvents": 3882,
+    "receivedMessages": 3879,
+    "committedReceptions": 3876,
+    "unconfirmedReceptions": 0,
+    "locallyDiscardedMessages": 0,
+    "failureCode": null,
+    "failureRecorded": null
+  }
+}

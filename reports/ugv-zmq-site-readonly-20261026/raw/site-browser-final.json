@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "ugv.zmq-site-browser-check/1",
+  "startedAt": "2026-10-26T09:16:36.640Z",
+  "finishedAt": "2026-10-26T09:16:39.585Z",
+  "sourceCommit": "8243c2247b86128c0a1b15acc8198c5a11f96c7c",
+  "url": "http://127.0.0.1:19111",
+  "login": 200,
+  "device": 200,
+  "retainedPreview": {
+    "commandId": "e004747d-db93-44fd-b3e0-4b9cfaef2b77",
+    "status": "completed",
+    "taskId": null,
+    "previewId": "d4a87a74-e9a8-4e46-847a-8a5c7ca4b893",
+    "sourceHashValid": true
+  },
+  "history": [
+    {
+      "taskId": "ed90ab34-2c7b-4508-8a33-5b7c54d59c51",
+      "status": 200,
+      "businessReadable": true,
+      "missingBusinessReason": null
+    },
+    {
+      "taskId": "ac1fb94e-f92b-45d7-b7ae-8564a3a66504",
+      "status": 200,
+      "businessReadable": true,
+      "missingBusinessReason": null
+    }
+  ],
+  "planning": {
+    "status": 202,
+    "commandId": "8d3349a5-b0be-45b5-a6ad-f7eb11c59ebf",
+    "commandStatus": "completed",
+    "taskId": null,
+    "startProvenance": "fresh_received_localization_source_clock_unverified",
+    "reasonCode": null,
+    "points": 19,
+    "adoption": "preview_only",
+    "alerts": [],
+    "stopDisabled": true
+  }
+}

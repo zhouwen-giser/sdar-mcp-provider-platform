@@ -1,0 +1,4 @@
+Checking formatting...
+[warn] apps/ugv-control-console/shared/zmq-site-catalog.json
+[warn] contracts/ugv-zmq/provider-v1.1.0-readonly/catalog.json
+[warn] Code style issues found in 2 files. Run Prettier with --write to fix.

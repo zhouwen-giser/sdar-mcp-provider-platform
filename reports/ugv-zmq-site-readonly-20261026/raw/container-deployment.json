@@ -1,0 +1,47 @@
+[
+  {
+    "name": "smpp-zmq-site-readonly-provider-1",
+    "id": "dffcfd9296c6184db7b5cd8c8b26dc188de0bae7f6172105ec2961379cba424f",
+    "image": "smpp/ugv-zmq-provider:site-readonly-20261026-8af8f25",
+    "imageId": "sha256:fa0a71cb08f603a5aa31df73dec51cb6f3c9f8dc08ca9e4d48213407ca14834f",
+    "status": "running",
+    "health": null,
+    "restartCount": 0,
+    "readOnlyRootfs": true,
+    "networkMode": "host",
+    "user": "node",
+    "tmpfs": {
+      "/tmp": "size=16m,mode=1777"
+    }
+  },
+  {
+    "name": "smpp-zmq-site-readonly-runtime-1",
+    "id": "1589b5153811791c4cc423f765ed63388cc42e668e5a415b8364a781a2753ebc",
+    "image": "smpp/runtime:site-readonly-20261026-8af8f25",
+    "imageId": "sha256:9f3e6ae6b876f4fc34848a4c65f7a16af3d28f7c947dfc4ba4a0b5b4e26c2d79",
+    "status": "running",
+    "health": null,
+    "restartCount": 0,
+    "readOnlyRootfs": true,
+    "networkMode": "host",
+    "user": "node",
+    "tmpfs": {
+      "/tmp": "size=16m,mode=1777"
+    }
+  },
+  {
+    "name": "smpp-zmq-site-readonly-console-1",
+    "id": "4a80fbadcc5f4e087fcd7b3ae987e999d0ad32900facf32e2544ce0b1aaf3723",
+    "image": "smpp/ugv-control-console:site-readonly-20261026-8af8f25",
+    "imageId": "sha256:5a8c92dfc2b0fcd40f9a0c510543c924ccdb89b9fc4fb341e9bd5fb768a4bd76",
+    "status": "running",
+    "health": "healthy",
+    "restartCount": 0,
+    "readOnlyRootfs": true,
+    "networkMode": "host",
+    "user": "node",
+    "tmpfs": {
+      "/tmp": "size=16m,mode=1777"
+    }
+  }
+]

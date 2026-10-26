@@ -1,0 +1,31 @@
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+ ❯ apps/ugv-control-console/test/site-history.test.ts (3 tests | 1 failed) 1821ms
+     × reads a legacy Context without finalizing or repairing its historical projection 13ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  apps/ugv-control-console/test/site-history.test.ts > retained native reports through site read-only storage > reads a legacy Context without finalizing or repairing its historical projection
+Error: BUSINESS_RECON_AREA_INVALID
+ ❯ requestedReconArtifacts apps/ugv-provider-adapter/src/task-business-service.ts:724:13
+    722|         : execution.arguments.area;
+    723|     if (!area || typeof area !== "object" || Array.isArray(area))
+    724|       throw new Error("BUSINESS_RECON_AREA_INVALID");
+       |             ^
+    725|     const polygon = (area as Record<string, unknown>).polygon;
+    726|     if (!Array.isArray(polygon) || polygon.length < 3)
+ ❯ UgvTaskBusinessContextService.ensureForCreatedExecution apps/ugv-provider-adapter/src/task-business-service.ts:244:10
+ ❯ apps/ugv-control-console/test/site-history.test.ts:200:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 10 passed (11)
+   Start at  16:50:26
+   Duration  11.31s (transform 1.66s, setup 32ms, import 3.47s, tests 7.46s, environment 0ms)
+
+undefined
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-control-console:
+[ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL] Command failed with exit code 1: vitest run --config vitest.config.ts site-history site-readonly

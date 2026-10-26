@@ -1,0 +1,9 @@
+{
+  "url": "http://127.0.0.1:19111/",
+  "login": "passed",
+  "planning": "not_accepted",
+  "alerts": [
+    "请求未受理"
+  ],
+  "stopDisabled": true
+}

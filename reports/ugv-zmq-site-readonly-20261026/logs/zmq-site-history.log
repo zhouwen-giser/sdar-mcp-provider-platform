@@ -1,0 +1,62 @@
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+ ❯ apps/ugv-control-console/test/site-history.test.ts (2 tests | 2 failed) 1730ms
+     × rebuilds a valid empty-frame summary in the original domain without rewriting history 11ms
+     × reads supplemental effects while retaining the original result and unresolved occupancy 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  apps/ugv-control-console/test/site-history.test.ts > retained native reports through site read-only storage > rebuilds a valid empty-frame summary in the original domain without rewriting history
+ZodError: [
+  {
+    "code": "unrecognized_keys",
+    "keys": [
+      "correlationId"
+    ],
+    "path": [],
+    "message": "Unrecognized key: \"correlationId\""
+  }
+]
+ ❯ seeded apps/ugv-control-console/test/site-history.test.ts:77:37
+     75|     });
+     76|     await f.provider.store.putExecution(e);
+     77|     const identity = ResultIdentity.parse({
+       |                                     ^
+     78|       scopeHash: "c".repeat(64),
+     79|       providerId: e.providerId,
+ ❯ apps/ugv-control-console/test/site-history.test.ts:138:34
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  apps/ugv-control-console/test/site-history.test.ts > retained native reports through site read-only storage > reads supplemental effects while retaining the original result and unresolved occupancy
+ZodError: [
+  {
+    "code": "unrecognized_keys",
+    "keys": [
+      "correlationId"
+    ],
+    "path": [],
+    "message": "Unrecognized key: \"correlationId\""
+  }
+]
+ ❯ seeded apps/ugv-control-console/test/site-history.test.ts:77:37
+     75|     });
+     76|     await f.provider.store.putExecution(e);
+     77|     const identity = ResultIdentity.parse({
+       |                                     ^
+     78|       scopeHash: "c".repeat(64),
+     79|       providerId: e.providerId,
+ ❯ apps/ugv-control-console/test/site-history.test.ts:158:34
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  16:14:22
+   Duration  4.97s (transform 2.17s, setup 24ms, import 3.04s, tests 1.73s, environment 0ms)
+
+undefined
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-control-console:
+[ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL] Command failed with exit code 1: vitest run --config vitest.config.ts site-history

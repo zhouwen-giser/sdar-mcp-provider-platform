@@ -1,0 +1,16 @@
+packages/provider-adapter-kit/src/navigation-planner.ts 169ms
+apps/ugv-provider-adapter/src/navigation-planner.ts 2ms (unchanged)
+packages/vehicle-zmq-control/src/site-catalog.ts 39ms
+apps/ugv-zmq-provider-adapter/src/site-bootstrap.ts 39ms
+apps/ugv-zmq-provider-adapter/src/site-planner.ts 16ms
+apps/ugv-zmq-provider-adapter/src/site-runtime.ts 63ms
+apps/ugv-zmq-provider-adapter/src/main.ts 9ms
+packages/operation-registry/src/registry.ts 59ms (unchanged)
+scripts/ugv-zmq/site-catalog.ts 9ms
+apps/ugv-control-console/shared/zmq-native.ts 13ms
+apps/ugv-control-console/shared/model.ts 23ms (unchanged)
+apps/ugv-control-console/shared/zmq.ts 29ms
+apps/ugv-control-console/server/service.ts 75ms
+apps/ugv-control-console/web/SiteReadonlyConsole.tsx 61ms
+apps/ugv-control-console/web/main.tsx 258ms
+apps/ugv-control-console/web/Diagram.tsx 33ms

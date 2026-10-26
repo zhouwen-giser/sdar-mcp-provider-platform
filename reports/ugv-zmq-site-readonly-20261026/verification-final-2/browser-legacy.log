@@ -1,0 +1,15 @@
+[WebServer] (node:2073692) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+
+Running 4 tests using 1 worker
+
+(node:2074315) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1/4] e2e/console.spec.ts:4:1 › operator login, coordinate preview, shared task and original-task lifecycle
+[2/4] e2e/console.spec.ts:62:1 › polygon validation rejects a self-intersection before a control call
+[3/4] e2e/console.spec.ts:78:1 › expired availability refreshes after the EO channel is released without dispatching
+[4/4] e2e/console.spec.ts:129:1 › late availability for edited coordinates never becomes the current result
+  4 passed (9.0s)

@@ -40,9 +40,10 @@ united packaging files, SDAR sources, database volumes, bindings, PMS and signin
 - [x] Implement read-only Provider and owner startup verification.
 - [x] Implement planning preview and exact versioned catalog.
 - [x] Implement console and audit integration.
-- [ ] Pass source, protocol, PostgreSQL, browser and image verification.
-- [ ] Capture actual subscriptions and a geometrically verified 7879 response.
-- [ ] Deploy candidate, assess handoff and update site only if conditions hold.
+- [x] Pass source, protocol, PostgreSQL, browser and image verification.
+- [x] Capture actual subscriptions and geometrically verified 7879 responses (11 and 19 points).
+- [x] Deploy candidate and assess handoff. Keep 19100/19101 unchanged: two active tasks and
+      two pending commands prevent the approved handoff conditions from being met.
 - [ ] Freeze evidence/package hashes, commit and push the delivery branch.
 
 ## Validation
@@ -95,3 +96,27 @@ and cwd-sensitive full-stack fixtures; both are repaired. Initial global ESLint 
 a pre-existing ignored artifacts/inspection-area-v1/debug/vendor-managed.test.ts outside its
 project service. Product source lint is run over apps/packages/scripts/tests/examples; the
 ignored debug artifact is preserved. Initial failed logs are retained with final evidence.
+
+## Final candidate verification — 2026-10-26
+
+The complete thirteen-command source/protocol/build/PostgreSQL/browser gate passes. Later
+retained-history fixes pass 68 console tests, 11 focused read-only/history cases and the
+formal MCP/contract suite (17 passed, one optional external SDAR test skipped). The final
+console passes three browser scenarios, including the nested MCP timeout diagnostic. The
+baseline native/lifecycle group passes 284 tests with that same optional SDAR skip.
+
+Provider, Runtime and console images run with a read-only root, nonroot identity and dropped
+capabilities. Their 3,145 compiled/runtime file hashes match the local build. A complete
+candidate restart preserves the old preview and both imported task reports. Legacy Context
+queries no longer trigger terminal finalization; before/after JSON remains unchanged.
+
+Localization appeared after the initial observation capture. A final browser login, filling
+the fresh received position and requesting 7879, produces 19 actual route points. Source time,
+producer epoch, scene identity and target-report completeness remain unverified; no device
+commands or navigation tasks are produced. Earlier timeouts using the historical start are
+retained as failures instead of being replaced by the successful attempt.
+
+The candidate remains at HTTP 127.0.0.1:19111 and MCP 127.0.0.1:19110/mcp. Existing LAN HTTP
+19101 login passes, but it is the existing deployment. Production cutover and device/SDAR
+patrol acceptance are not claimed. Detailed statuses and evidence are in
+reports/ugv-zmq-site-readonly-20261026/REPORT.md and acceptance.json.

@@ -1,0 +1,11 @@
+packages/vehicle-zmq-control/src/site-catalog.ts 130ms
+packages/task-engine/src/engine.ts 332ms
+apps/runtime/src/runtime.ts 195ms
+apps/ugv-zmq-provider-adapter/src/site-runtime.ts 52ms
+apps/ugv-zmq-provider-adapter/src/site-planner.ts 11ms
+tests/ugv-zmq-observer/helpers.ts 19ms
+tests/ugv-zmq-provider/site-contract.test.ts 9ms
+tests/ugv-zmq-provider/site-fixture.ts 22ms
+apps/ugv-control-console/test/setup.ts 3ms (unchanged)
+apps/ugv-control-console/test/site-readonly.test.ts 36ms
+apps/ugv-control-console/vitest.config.ts 2ms (unchanged)

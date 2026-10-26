@@ -1,0 +1,22 @@
+{
+  "observedAt": "2026-10-26T07:37:11.956Z",
+  "states": [
+    {
+      "internal_state": "STOPPING",
+      "count": 2,
+      "readable": 2
+    },
+    {
+      "internal_state": "TERMINAL_COMPLETED",
+      "count": 5,
+      "readable": 0
+    },
+    {
+      "internal_state": "TERMINAL_FAILED",
+      "count": 5,
+      "readable": 0
+    }
+  ],
+  "expiredReadAttempt": "TASK_EXPIRED",
+  "action": "no_ttl_extension_or_identity_rewrite"
+}

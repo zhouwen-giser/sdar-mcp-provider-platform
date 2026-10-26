@@ -1,0 +1,48 @@
+$ vitest run --config vitest.config.ts
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+ ❯ apps/ugv-control-console/test/runtime.test.ts (6 tests | 6 skipped) 1594ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  apps/ugv-control-console/test/runtime.test.ts [ apps/ugv-control-console/test/runtime.test.ts ]
+Error: FIXTURE_EXIT: /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/scripts/inspection/provider-harness.ts:42
+  .parse(JSON.parse(readFileSync(process.env.SMPP_INSPECTION_TEST_CONFIG_FILE, "utf8")));
+   ^
+
+ZodError: [
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "brokerUrl"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  }
+]
+    at <anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/scripts/inspection/provider-harness.ts:42:4)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+
+Node.js v22.23.2
+
+ ❯ <anonymous> scripts/inspection/provider-harness.ts:42:4
+ ❯ ChildProcess.<anonymous> apps/ugv-control-console/test/runtime.test.ts:47:14
+     45|     child.once("exit", () => {
+     46|       clearTimeout(timer);
+     47|       reject(Error("FIXTURE_EXIT: " + failure.slice(-2000)));
+       |              ^
+     48|     });
+     49|     child.on("message", (value) => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 7 passed (8)
+      Tests  58 passed | 6 skipped (64)
+   Start at  15:23:47
+   Duration  13.48s (transform 1.83s, setup 73ms, import 3.82s, tests 8.19s, environment 1ms)
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-control-console:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @sdar/ugv-control-console@0.1.0 test: `vitest run --config vitest.config.ts`
+Exit status 1

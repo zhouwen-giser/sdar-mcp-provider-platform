@@ -1,0 +1,14 @@
+$ tsc --noEmit -p tsconfig.json
+apps/runtime/src/runtime.ts(1046,7): error TS2322: Type '"disabled" | "ready"' is not assignable to type '"failed" | "starting" | "ready"'.
+  Type '"disabled"' is not assignable to type '"failed" | "starting" | "ready"'.
+apps/runtime/src/runtime.ts(1052,7): error TS2322: Type '"disabled" | "ready"' is not assignable to type '"failed" | "starting" | "ready"'.
+  Type '"disabled"' is not assignable to type '"failed" | "starting" | "ready"'.
+apps/runtime/src/runtime.ts(1054,7): error TS2322: Type '"disabled" | "ready"' is not assignable to type '"failed" | "starting" | "ready"'.
+  Type '"disabled"' is not assignable to type '"failed" | "starting" | "ready"'.
+apps/runtime/src/runtime.ts(1056,7): error TS2322: Type '"disabled" | "ready"' is not assignable to type '"failed" | "starting" | "ready"'.
+  Type '"disabled"' is not assignable to type '"failed" | "starting" | "ready"'.
+apps/runtime/src/runtime.ts(1058,7): error TS2322: Type '"disabled" | "ready"' is not assignable to type '"failed" | "starting" | "ready"'.
+  Type '"disabled"' is not assignable to type '"failed" | "starting" | "ready"'.
+apps/runtime/src/runtime.ts(1060,7): error TS2322: Type '"disabled" | "ready"' is not assignable to type '"failed" | "starting" | "ready"'.
+  Type '"disabled"' is not assignable to type '"failed" | "starting" | "ready"'.
+[ELIFECYCLE] Command failed with exit code 2.

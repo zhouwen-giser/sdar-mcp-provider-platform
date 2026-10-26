@@ -1,0 +1,37 @@
+$ tsc --noEmit -p tsconfig.json
+apps/ugv-control-console/server/service.ts(97,9): error TS2322: Type 'undefined' is not assignable to type 'Promise<Json>'.
+apps/ugv-control-console/shared/coordinates.ts(21,68): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+apps/ugv-control-console/shared/coordinates.ts(22,67): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+apps/ugv-control-console/shared/coordinates.ts(30,26): error TS2532: Object is possibly 'undefined'.
+apps/ugv-control-console/shared/coordinates.ts(31,25): error TS2532: Object is possibly 'undefined'.
+apps/ugv-control-console/shared/coordinates.ts(56,34): error TS2345: Argument of type 'Point | undefined' is not assignable to parameter of type 'Point'.
+  Type 'undefined' is not assignable to type 'Point'.
+apps/ugv-control-console/shared/coordinates.ts(83,16): error TS2345: Argument of type 'Point | undefined' is not assignable to parameter of type 'Point'.
+  Type 'undefined' is not assignable to type 'Point'.
+apps/ugv-control-console/shared/coordinates.ts(83,33): error TS2345: Argument of type 'Point | undefined' is not assignable to parameter of type 'Point'.
+  Type 'undefined' is not assignable to type 'Point'.
+apps/ugv-control-console/shared/coordinates.ts(83,55): error TS2345: Argument of type 'Point | undefined' is not assignable to parameter of type 'Point'.
+  Type 'undefined' is not assignable to type 'Point'.
+apps/ugv-control-console/shared/coordinates.ts(83,72): error TS2345: Argument of type 'Point | undefined' is not assignable to parameter of type 'Point'.
+  Type 'undefined' is not assignable to type 'Point'.
+apps/ugv-control-console/shared/coordinates.ts(84,12): error TS2345: Argument of type 'Point | undefined' is not assignable to parameter of type 'Point'.
+  Type 'undefined' is not assignable to type 'Point'.
+apps/ugv-control-console/shared/coordinates.ts(85,12): error TS2345: Argument of type 'Point | undefined' is not assignable to parameter of type 'Point'.
+  Type 'undefined' is not assignable to type 'Point'.
+apps/ugv-control-console/shared/coordinates.ts(86,12): error TS2345: Argument of type 'Point | undefined' is not assignable to parameter of type 'Point'.
+  Type 'undefined' is not assignable to type 'Point'.
+apps/ugv-control-console/shared/coordinates.ts(87,12): error TS2345: Argument of type 'Point | undefined' is not assignable to parameter of type 'Point'.
+  Type 'undefined' is not assignable to type 'Point'.
+apps/ugv-control-console/shared/coordinates.ts(92,66): error TS2345: Argument of type 'Point | undefined' is not assignable to parameter of type 'Point'.
+  Type 'undefined' is not assignable to type 'Point'.
+apps/ugv-control-console/shared/zmq.ts(157,8): error TS18048: 'b' is possibly 'undefined'.
+apps/ugv-control-console/shared/zmq.ts(157,38): error TS18048: 'c' is possibly 'undefined'.
+apps/ugv-control-console/shared/zmq.ts(157,51): error TS18048: 'b' is possibly 'undefined'.
+apps/ugv-control-console/shared/zmq.ts(158,10): error TS18048: 'b' is possibly 'undefined'.
+apps/ugv-control-console/shared/zmq.ts(158,38): error TS18048: 'c' is possibly 'undefined'.
+apps/ugv-control-console/shared/zmq.ts(158,52): error TS18048: 'b' is possibly 'undefined'.
+tests/ugv-zmq-provider/site-fixture.ts(56,35): error TS2339: Property 'close' does not exist on type 'RuntimeApplication'.
+tests/ugv-zmq-provider/site-readonly.postgres.test.ts(57,29): error TS2339: Property 'repository' does not exist on type 'RuntimeApplication'.
+[ELIFECYCLE] Command failed with exit code 2.

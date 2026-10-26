@@ -1,0 +1,230 @@
+{
+  "schemaVersion": "ugv.zmq-site-supplement/1",
+  "sourceCommits": {
+    "base": "15a357a1b0ced1a1b90e9b5edb679646f377ea37",
+    "implementation": "8af8f25c050f9ff4315e48254f44907b0f5dbb04",
+    "consoleAndHistory": "f6437a250c6f0a3be14a9de2230bf3d5144f5adf",
+    "retainedContextFix": "d7824dcd9b66493d0f16a6f46092e35bf4ca92bf",
+    "finalConsole": "8243c2247b86128c0a1b15acc8198c5a11f96c7c"
+  },
+  "commands": [
+    {
+      "id": "root-typecheck",
+      "sourceCommit": "d7824dcd9b66493d0f16a6f46092e35bf4ca92bf",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "pnpm",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "log": "logs/zmq-site-typecheck-last.log",
+      "logSha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39",
+      "logLastModifiedAtUnix": 1793005562.1267462,
+      "executionTiming": "test_start_and_duration_in_log_or_observed_file_mtime"
+    },
+    {
+      "id": "root-build",
+      "sourceCommit": "d7824dcd9b66493d0f16a6f46092e35bf4ca92bf",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "pnpm",
+        "build"
+      ],
+      "exitCode": 0,
+      "log": "logs/zmq-site-build-final.log",
+      "logSha256": "536cc4f74bc927dcd4e9e023fc52b0871374c6ac34ebbfec8258499cfd7b634f",
+      "logLastModifiedAtUnix": 1793005093.7113085,
+      "executionTiming": "test_start_and_duration_in_log_or_observed_file_mtime"
+    },
+    {
+      "id": "retained-history-and-readonly",
+      "sourceCommit": "d7824dcd9b66493d0f16a6f46092e35bf4ca92bf",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "exitCode": 0,
+      "log": "logs/zmq-site-business-tests-2.log",
+      "logSha256": "5e18230f962b1848a79c1ddb9c6ca337b6bd9c4e002286c2e4502a9d7037ce4b",
+      "logLastModifiedAtUnix": 1793005007.39227,
+      "executionTiming": "test_start_and_duration_in_log_or_observed_file_mtime",
+      "reproductionArgv": [
+        "pnpm",
+        "--filter",
+        "@sdar/ugv-control-console",
+        "exec",
+        "vitest",
+        "run",
+        "test/site-readonly.test.ts",
+        "test/site-history.test.ts"
+      ],
+      "commandAuthority": "reproduction invocation; original focused console command was not captured in a structured transcript"
+    },
+    {
+      "id": "console-regression",
+      "sourceCommit": "d7824dcd9b66493d0f16a6f46092e35bf4ca92bf",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "pnpm",
+        "--filter",
+        "@sdar/ugv-control-console",
+        "test"
+      ],
+      "exitCode": 0,
+      "log": "logs/zmq-site-console-business-final.log",
+      "logSha256": "bd390cea4d12eab0c6c5cd13203ccab69c8f33e67ff9240309ffe4b651baa885",
+      "logLastModifiedAtUnix": 1793005343.6947105,
+      "executionTiming": "test_start_and_duration_in_log_or_observed_file_mtime"
+    },
+    {
+      "id": "formal-mcp-and-contract",
+      "sourceCommit": "d7824dcd9b66493d0f16a6f46092e35bf4ca92bf",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "tests/ugv-zmq-provider/formal.postgres.test.ts",
+        "tests/ugv-zmq-provider/contract.test.ts",
+        "tests/ugv-zmq-provider/site-contract.test.ts"
+      ],
+      "exitCode": 0,
+      "log": "logs/zmq-site-formal-business-final.log",
+      "logSha256": "4d00d3f19bc4141b9622b1fcaf0a65c0cd503af5876d1420e3bf0a69adf9b89b",
+      "logLastModifiedAtUnix": 1793005561.3437386,
+      "executionTiming": "test_start_and_duration_in_log_or_observed_file_mtime"
+    },
+    {
+      "id": "console-typecheck",
+      "sourceCommit": "8243c2247b86128c0a1b15acc8198c5a11f96c7c",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "pnpm",
+        "--filter",
+        "@sdar/ugv-control-console",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "log": "logs/zmq-site-ui-error-typecheck.log",
+      "logSha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39",
+      "logLastModifiedAtUnix": 1793005898.2372105,
+      "executionTiming": "test_start_and_duration_in_log_or_observed_file_mtime"
+    },
+    {
+      "id": "console-build",
+      "sourceCommit": "8243c2247b86128c0a1b15acc8198c5a11f96c7c",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "pnpm",
+        "--filter",
+        "@sdar/ugv-control-console",
+        "build"
+      ],
+      "exitCode": 0,
+      "log": "logs/zmq-site-ui-error-build.log",
+      "logSha256": "4e6f0e657e8b670e5387d3c78617fade80710b9ef57db6a7768afc3701436048",
+      "logLastModifiedAtUnix": 1793005904.2662752,
+      "executionTiming": "test_start_and_duration_in_log_or_observed_file_mtime"
+    },
+    {
+      "id": "console-changed-lint",
+      "sourceCommit": "8243c2247b86128c0a1b15acc8198c5a11f96c7c",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "pnpm",
+        "exec",
+        "eslint",
+        "apps/ugv-control-console/web/api.ts",
+        "apps/ugv-control-console/web/SiteReadonlyConsole.tsx",
+        "apps/ugv-control-console/e2e/site.spec.ts"
+      ],
+      "exitCode": 0,
+      "log": "logs/zmq-site-ui-error-lint.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "logLastModifiedAtUnix": 1793005909.4973311,
+      "executionTiming": "test_start_and_duration_in_log_or_observed_file_mtime"
+    },
+    {
+      "id": "browser-with-timeout-diagnostic",
+      "sourceCommit": "8243c2247b86128c0a1b15acc8198c5a11f96c7c",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "pnpm",
+        "--filter",
+        "@sdar/ugv-control-console",
+        "exec",
+        "playwright",
+        "test",
+        "--config",
+        "playwright.site.config.ts"
+      ],
+      "exitCode": 0,
+      "log": "logs/zmq-site-ui-error-browser.log",
+      "logSha256": "935902adca781abe3d84b864974519b1b7e90c3dce553c16cdc2d19a9a3b2dc8",
+      "logLastModifiedAtUnix": 1793005949.0247571,
+      "executionTiming": "test_start_and_duration_in_log_or_observed_file_mtime"
+    },
+    {
+      "id": "field-browser",
+      "sourceCommit": "8243c2247b86128c0a1b15acc8198c5a11f96c7c",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "reports/ugv-zmq-site-readonly-20261026/field-probe.mjs"
+      ],
+      "exitCode": 0,
+      "log": "logs/zmq-site-final-field-probe-2.log",
+      "logSha256": "d7ee57a555b3e0377efe715aa0914351ad84cece3d5d93420854bd17affee839",
+      "logLastModifiedAtUnix": 1793006199.5915136,
+      "executionTiming": "test_start_and_duration_in_log_or_observed_file_mtime"
+    },
+    {
+      "id": "candidate-restart",
+      "sourceCommit": "d7824dcd9b66493d0f16a6f46092e35bf4ca92bf",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "docker",
+        "compose",
+        "--env-file",
+        "/private/site-images.env",
+        "-p",
+        "smpp-zmq-site-readonly",
+        "-f",
+        "deploy/ugv-zmq/site-readonly/compose.yaml",
+        "restart"
+      ],
+      "exitCode": 0,
+      "log": "logs/zmq-site-candidate-restart.log",
+      "logSha256": "05c01fce77aba028a426876addda6e0479e432d879973118207244e0061a456c",
+      "logLastModifiedAtUnix": 1793005436.2415454,
+      "executionTiming": "test_start_and_duration_in_log_or_observed_file_mtime",
+      "commandAuthority": "private env-file path represented by /private; no secret values included"
+    },
+    {
+      "id": "handoff-final",
+      "sourceCommit": "8243c2247b86128c0a1b15acc8198c5a11f96c7c",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/ugv-zmq/site-handoff-check.ts"
+      ],
+      "environmentFiles": {
+        "SMPP_ZMQ_OWNER_CONFIG_FILE": "/home/sz/.smpp-debug/zmq-site-readonly-20261026/owner-host.json",
+        "UGV_ZMQ_SITE_PROFILE_FILE": "/home/sz/.smpp-debug/zmq-site-readonly-20261026/profile.json"
+      },
+      "exitCode": 2,
+      "stdout": "raw/site-handoff-final.json",
+      "stdoutSha256": "9ef40e3ede88bc8f8ec130558ee1a1c4da4a3f2b8b1a985a947b0c053ef2b641",
+      "expectedOutcome": "blocked; candidate retained"
+    }
+  ],
+  "environment": {
+    "SMPP_ZMQ_TEST_CONFIG_FILE": "private loopback PostgreSQL/MQTT config; no values archived",
+    "SITE_CONSOLE_PRIVATE_DIRECTORY": "private existing credentials; no values archived",
+    "UGV_CONSOLE_CHROMIUM": "/home/sz/.cache/ms-playwright/chromium-1194/chrome-linux/chrome"
+  },
+  "scope": "supplements the complete 13-gate run; overlapping test counts must not be summed",
+  "commandSourceNote": "sourceCommit identifies the equivalent tested code state; complete gate Git HEAD/timing authority is in verification-final-2. Supplemental timing is from test logs/file mtime, not a reconstructed wall-clock transcript."
+}

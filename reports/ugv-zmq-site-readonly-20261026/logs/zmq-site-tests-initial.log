@@ -1,0 +1,63 @@
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+{"level":50,"time":1792998670896,"service":"sdar-mcp-tasks-runtime","err":{"type":"Error","message":"14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:35853. Resolution note: ","stack":"Error: 14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:35853. Resolution note: \n    at callErrorFromStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/call.js:32:19)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:193:76)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:367:141)\n    at Object.onReceiveStatus (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:327:181)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/resolving-call.js:148:78\n    at processTicksAndRejections (node:internal/process/task_queues:84:11)\nfor call at\n    at ServiceClientImpl.makeUnaryRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/client.js:161:32)\n    at ServiceClientImpl.<anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/@grpc+grpc-js@1.14.5/node_modules/@grpc/grpc-js/build/src/make-client.js:105:19)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:669:24\n    at new Promise (<anonymous>)\n    at invoke (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:613:7)\n    at /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:461:16\n    at ProviderTelemetry.#traceInContext (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:595:70)\n    at ProviderTelemetry.traceAdapterRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/observability/src/telemetry.ts:444:17)\n    at GrpcAdapterGateway.#traceRpc (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/runtime/src/runtime.ts:181:18)\n    at GrpcAdapterGateway.#unary (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/adapter-protocol/src/gateway.ts:705:17)","code":14,"details":"No connection established. Last error: Error: connect ECONNREFUSED 127.0.0.1:35853. Resolution note: ","metadata":{}},"requestId":"cd1385f1-aeb2-4d2c-afd6-f26ae9d4f903","msg":"Frozen MCP technical request failure"}
+ ❯ tests/ugv-zmq-provider/site-readonly.postgres.test.ts (7 tests | 3 failed) 16975ms
+     × audits one preview, deduplicates two browsers and never creates a navigation task 166ms
+     × serializes planner sessions across Provider objects and fails on unrelated geometry 10002ms
+     × restarts subscriptions and historical queries without creating a control engine 5166ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/ugv-zmq-provider/site-readonly.postgres.test.ts > site read-only formal MCP and PostgreSQL
+TypeError: runtime.close is not a function
+ ❯ Object.close tests/ugv-zmq-provider/site-fixture.ts:56:35
+
+ ❯ tests/ugv-zmq-provider/site-readonly.postgres.test.ts:24:41
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/ugv-zmq-provider/site-readonly.postgres.test.ts > site read-only formal MCP and PostgreSQL > audits one preview, deduplicates two browsers and never creates a navigation task
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/ugv-zmq-provider/site-readonly.postgres.test.ts:50:55
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/ugv-zmq-provider/site-readonly.postgres.test.ts > site read-only formal MCP and PostgreSQL > serializes planner sessions across Provider objects and fails on unrelated geometry
+Error: Test timed out in 10000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/ugv-zmq-provider/site-readonly.postgres.test.ts:67:3
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/ugv-zmq-provider/site-readonly.postgres.test.ts > site read-only formal MCP and PostgreSQL > restarts subscriptions and historical queries without creating a control engine
+Error: MCP_RPC_ERROR_-32603
+ ❯ Mcp.rpc apps/ugv-control-console/server/mcp.ts:80:13
+     78|         details = record(err.data);
+     79|       const reason = text(details.reasonCode ?? details.reason ?? err.…
+     80|       throw new UpstreamError(
+       |             ^
+     81|         /^[A-Z][A-Z0-9_]{2,100}$/.test(reason) ? reason : `MCP_RPC_ERR…
+     82|         response.status >= 500 || err.code === -32603,
+ ❯ tests/ugv-zmq-provider/site-readonly.postgres.test.ts:79:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  3 failed | 14 passed (17)
+   Start at  15:10:50
+   Duration  21.91s (transform 2.13s, setup 0ms, import 3.69s, tests 17.69s, environment 0ms)
+

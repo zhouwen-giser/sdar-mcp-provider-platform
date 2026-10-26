@@ -1,0 +1,102 @@
+{
+  "observedAt": "2026-10-26T07:32:17.084Z",
+  "startProvenance": "operator_supplied_historical_navigation_coordinate_not_current_GNSS",
+  "arguments": {
+    "resourceId": "vehicle:ugv",
+    "start": {
+      "longitude": 106.81307318,
+      "latitude": 29.71952521
+    },
+    "waypoints": [
+      {
+        "longitude": 106.81283082,
+        "latitude": 29.72057535
+      }
+    ],
+    "density": "adaptive"
+  },
+  "result": {
+    "resultType": "complete",
+    "content": [
+      {
+        "type": "text",
+        "text": "ZMQ_SITE_READ_COMPLETED"
+      }
+    ],
+    "isError": false,
+    "structuredContent": {
+      "schemaVersion": "ugv.zmq-route-preview/1",
+      "previewId": "3c95d267-d62d-4afe-97e7-d5d25a0fd132",
+      "resourceId": "vehicle:ugv",
+      "adoption": "preview_only",
+      "correlation": "geometry_only_no_request_id",
+      "createdAt": "2026-10-26T07:32:17.074Z",
+      "requestHash": "ecb5db90415ef873c0593cf91b73c9fea67f67fa67e27d8f5102da2af1c59bc4",
+      "routeSource": "isr.airport.dashboard.road-planner/v1",
+      "sourceRecordId": "f36e14ce17f4daac9e96392bbceaf8fed3ccf15c66dc840474f7eb372b8c1209",
+      "sourceMessageSha256": "f5d325b3e85b2df82c2f14051dbb64bb0412e6b6da31408ed2bb47c0759da6b1",
+      "transform": {
+        "policy": "airport_south_positive_v1",
+        "sha256": "5af5ccfa2398e5bdcf2c0033c57f4f205dbc8f89fc305fad3001237dd7b97fa0"
+      },
+      "start": {
+        "longitude": 106.81307318,
+        "latitude": 29.71952521
+      },
+      "waypoints": [
+        {
+          "longitude": 106.81306505271499,
+          "latitude": 29.719500665413374
+        },
+        {
+          "longitude": 106.81308752498954,
+          "latitude": 29.719526007002067
+        },
+        {
+          "longitude": 106.8130625567929,
+          "latitude": 29.719551669205018
+        },
+        {
+          "longitude": 106.8130498856278,
+          "latitude": 29.719592167574724
+        },
+        {
+          "longitude": 106.8130499479083,
+          "latitude": 29.719853152043726
+        },
+        {
+          "longitude": 106.81305001018877,
+          "latitude": 29.720114136512727
+        },
+        {
+          "longitude": 106.81305007246925,
+          "latitude": 29.720375120981732
+        },
+        {
+          "longitude": 106.81303570128627,
+          "latitude": 29.720412764157324
+        },
+        {
+          "longitude": 106.81301010970525,
+          "latitude": 29.720435805392686
+        },
+        {
+          "longitude": 106.81295205869552,
+          "latitude": 29.720450607774985
+        },
+        {
+          "longitude": 106.81290307298421,
+          "latitude": 29.720441132930997
+        }
+      ],
+      "requestedWaypoints": [
+        {
+          "longitude": 106.81283082,
+          "latitude": 29.72057535
+        }
+      ],
+      "sourceFreshness": "unverified",
+      "completeSpatialEvidence": false
+    }
+  }
+}

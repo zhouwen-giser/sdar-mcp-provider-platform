@@ -1,0 +1,265 @@
+{
+  "schemaVersion": "ugv.zmq-site-verification/1",
+  "source": "49ee6b3da08a52ae6b534fd83c58d25785bd85faf5d63fcd44a8783e710ab04f",
+  "commands": [
+    {
+      "id": "typecheck",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "pnpm",
+        "typecheck"
+      ],
+      "startedAt": "2026-10-26T07:53:19.895Z",
+      "finishedAt": "2026-10-26T07:53:43.071Z",
+      "exitCode": 0,
+      "log": "typecheck.log",
+      "logSha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39",
+      "sourceUnchanged": true
+    },
+    {
+      "id": "console-typecheck",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "pnpm",
+        "--filter",
+        "@sdar/ugv-control-console",
+        "typecheck"
+      ],
+      "startedAt": "2026-10-26T07:53:43.072Z",
+      "finishedAt": "2026-10-26T07:53:54.275Z",
+      "exitCode": 0,
+      "log": "console-typecheck.log",
+      "logSha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39",
+      "sourceUnchanged": true
+    },
+    {
+      "id": "lint-source",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "pnpm",
+        "exec",
+        "eslint",
+        "apps",
+        "packages",
+        "scripts",
+        "tests",
+        "examples"
+      ],
+      "startedAt": "2026-10-26T07:53:54.275Z",
+      "finishedAt": "2026-10-26T07:55:26.972Z",
+      "exitCode": 0,
+      "log": "lint-source.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourceUnchanged": true
+    },
+    {
+      "id": "format-changed",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "pnpm",
+        "exec",
+        "prettier",
+        "--check",
+        "apps/runtime/src/runtime.ts",
+        "apps/ugv-control-console/server/app.ts",
+        "apps/ugv-control-console/server/config.ts",
+        "apps/ugv-control-console/server/service.ts",
+        "apps/ugv-control-console/shared/model.ts",
+        "apps/ugv-control-console/shared/zmq-native.ts",
+        "apps/ugv-control-console/shared/zmq.ts",
+        "apps/ugv-control-console/vitest.config.ts",
+        "apps/ugv-control-console/web/Diagram.tsx",
+        "apps/ugv-control-console/web/main.tsx",
+        "apps/ugv-provider-adapter/src/navigation-planner.ts",
+        "apps/ugv-zmq-provider-adapter/src/main.ts",
+        "packages/operation-registry/src/registry.ts",
+        "packages/task-engine/src/engine.ts",
+        "tests/ugv-zmq-observer/helpers.ts",
+        "apps/ugv-control-console/e2e/site-server.ts",
+        "apps/ugv-control-console/e2e/site.spec.ts",
+        "apps/ugv-control-console/playwright.site.config.ts",
+        "apps/ugv-control-console/shared/zmq-site-catalog.json",
+        "apps/ugv-control-console/test/setup.ts",
+        "apps/ugv-control-console/test/site-readonly.test.ts",
+        "apps/ugv-control-console/web/SiteReadonlyConsole.tsx",
+        "apps/ugv-zmq-provider-adapter/src/site-bootstrap.ts",
+        "apps/ugv-zmq-provider-adapter/src/site-planner.ts",
+        "apps/ugv-zmq-provider-adapter/src/site-runtime.ts",
+        "contracts/ugv-zmq/provider-v1.1.0-readonly/catalog.json",
+        "deploy/ugv-zmq/site-readonly/README.md",
+        "deploy/ugv-zmq/site-readonly/compose.yaml",
+        "docs/execplans/ugv-zmq-site-readonly-20261026.md",
+        "packages/provider-adapter-kit/src/navigation-planner.ts",
+        "packages/vehicle-zmq-control/src/site-catalog.ts",
+        "scripts/ugv-zmq/site-catalog.ts",
+        "scripts/ugv-zmq/site-handoff-check.ts",
+        "scripts/ugv-zmq/site-verify.mjs",
+        "tests/ugv-zmq-provider/site-contract.test.ts",
+        "tests/ugv-zmq-provider/site-fixture.ts"
+      ],
+      "startedAt": "2026-10-26T07:55:26.973Z",
+      "finishedAt": "2026-10-26T07:55:30.235Z",
+      "exitCode": 1,
+      "log": "format-changed.log",
+      "logSha256": "d8891d22c424e568d3ca3e2397b8899a9fb037a2a27ef4285e05c784f61481c7",
+      "sourceUnchanged": true
+    },
+    {
+      "id": "protocol",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "pnpm",
+        "protocol:check"
+      ],
+      "startedAt": "2026-10-26T07:55:30.235Z",
+      "finishedAt": "2026-10-26T07:55:31.656Z",
+      "exitCode": 0,
+      "log": "protocol.log",
+      "logSha256": "b211fded711fc0109091affb9a8bcc281769bdd5f30159cdbbd4e0f9196b9434",
+      "sourceUnchanged": true
+    },
+    {
+      "id": "contract-lock",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "pnpm",
+        "zmq:contract:check"
+      ],
+      "startedAt": "2026-10-26T07:55:31.657Z",
+      "finishedAt": "2026-10-26T07:55:32.905Z",
+      "exitCode": 0,
+      "log": "contract-lock.log",
+      "logSha256": "1bc3618e95d59aa833e15b784be76aacc117f01f421548cee8091e640935343b",
+      "sourceUnchanged": true
+    },
+    {
+      "id": "catalog",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/ugv-zmq/site-catalog.ts",
+        "--check"
+      ],
+      "startedAt": "2026-10-26T07:55:32.906Z",
+      "finishedAt": "2026-10-26T07:55:34.083Z",
+      "exitCode": 0,
+      "log": "catalog.log",
+      "logSha256": "0a97c8a784671bc46108093f268b32c8bbd0ede15a710ea98c55ed793d4a3d80",
+      "sourceUnchanged": true
+    },
+    {
+      "id": "build",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "pnpm",
+        "build"
+      ],
+      "startedAt": "2026-10-26T07:55:34.083Z",
+      "finishedAt": "2026-10-26T07:55:55.298Z",
+      "exitCode": 0,
+      "log": "build.log",
+      "logSha256": "536cc4f74bc927dcd4e9e023fc52b0871374c6ac34ebbfec8258499cfd7b634f",
+      "sourceUnchanged": true
+    },
+    {
+      "id": "console-build",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "pnpm",
+        "--filter",
+        "@sdar/ugv-control-console",
+        "build"
+      ],
+      "startedAt": "2026-10-26T07:55:55.299Z",
+      "finishedAt": "2026-10-26T07:56:04.866Z",
+      "exitCode": 0,
+      "log": "console-build.log",
+      "logSha256": "45a67fcf8b6c6d29c5a06bd32f82b945a0024f3b948a640f9535032234b8b955",
+      "sourceUnchanged": true
+    },
+    {
+      "id": "native-and-lifecycle",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "tests/integration/task-lifecycle-postgres.test.ts",
+        "tests/ugv-zmq/",
+        "tests/ugv-zmq-observer/",
+        "tests/ugv-zmq-control/",
+        "tests/ugv-zmq-provider/contract.test.ts",
+        "tests/ugv-zmq-provider/site-contract.test.ts",
+        "tests/ugv-zmq-provider/formal.postgres.test.ts",
+        "tests/ugv-zmq-provider/owner-route.postgres.test.ts",
+        "tests/contract/ugv-navigation-planner.test.ts"
+      ],
+      "startedAt": "2026-10-26T07:56:04.866Z",
+      "finishedAt": "2026-10-26T07:57:07.653Z",
+      "exitCode": 0,
+      "log": "native-and-lifecycle.log",
+      "logSha256": "e2c8c319641d5dc194c3946f4e69195bb1e416f91b50d89f10dd553c482261c4",
+      "sourceUnchanged": true
+    },
+    {
+      "id": "console",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "pnpm",
+        "--filter",
+        "@sdar/ugv-control-console",
+        "test"
+      ],
+      "startedAt": "2026-10-26T07:57:07.654Z",
+      "finishedAt": "2026-10-26T07:58:00.060Z",
+      "exitCode": 0,
+      "log": "console.log",
+      "logSha256": "057a4d9840f98fdccb8a26e5863e75656f8f2b191f947566cfb057b5e7144086",
+      "sourceUnchanged": true
+    },
+    {
+      "id": "browser-site",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "pnpm",
+        "--filter",
+        "@sdar/ugv-control-console",
+        "exec",
+        "playwright",
+        "test",
+        "--config",
+        "playwright.site.config.ts"
+      ],
+      "startedAt": "2026-10-26T07:58:00.061Z",
+      "finishedAt": "2026-10-26T07:58:10.052Z",
+      "exitCode": 0,
+      "log": "browser-site.log",
+      "logSha256": "5bd37a00e4163bfd1ff463d5cb70013074f0b09e663babeca2ab4031edfb2912",
+      "sourceUnchanged": true
+    },
+    {
+      "id": "browser-legacy",
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "argv": [
+        "pnpm",
+        "--filter",
+        "@sdar/ugv-control-console",
+        "exec",
+        "playwright",
+        "test",
+        "--config",
+        "playwright.config.ts"
+      ],
+      "startedAt": "2026-10-26T07:58:10.052Z",
+      "finishedAt": "2026-10-26T07:58:20.933Z",
+      "exitCode": 0,
+      "log": "browser-legacy.log",
+      "logSha256": "e3eaee29d4ac17b986fdc9c5ddf1fc4b5aa94ab0d64dda801b3608dad05ba7b5",
+      "sourceUnchanged": true
+    }
+  ],
+  "passed": false
+}

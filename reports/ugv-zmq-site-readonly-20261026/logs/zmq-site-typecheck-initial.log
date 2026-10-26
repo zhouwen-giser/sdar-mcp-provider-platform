@@ -1,0 +1,6 @@
+$ tsc --noEmit -p tsconfig.json
+apps/ugv-zmq-provider-adapter/src/site-runtime.ts(121,96): error TS2339: Property 'operationName' does not exist on type 'VehicleBusinessReadIdentity'.
+apps/ugv-zmq-provider-adapter/src/site-runtime.ts(121,141): error TS2339: Property 'argumentHash' does not exist on type 'VehicleBusinessReadIdentity'.
+packages/operation-registry/src/registry.ts(217,26): error TS7053: Element implicitly has an 'any' type because expression of type '"io.sdar/taskBusiness"' can't be used to index type '{ "io.sdar/taskBusiness"?: { schemaVersion: "sdar.task-business-operation-profile/1.0-rc2"; profileVersion: "1.0-rc2"; availability: "available"; source: { sourceId: "vehicle.business"; deliverySemantics: "durable_at_least_once"; replaySupported: true; }; ... 8 more ...; qualification: { ...; }; }; "io.sdar/tool-exe...'.
+  Property 'io.sdar/taskBusiness' does not exist on type '{ "io.sdar/taskBusiness"?: { schemaVersion: "sdar.task-business-operation-profile/1.0-rc2"; profileVersion: "1.0-rc2"; availability: "available"; source: { sourceId: "vehicle.business"; deliverySemantics: "durable_at_least_once"; replaySupported: true; }; ... 8 more ...; qualification: { ...; }; }; "io.sdar/tool-exe...'.
+[ELIFECYCLE] Command failed with exit code 2.
