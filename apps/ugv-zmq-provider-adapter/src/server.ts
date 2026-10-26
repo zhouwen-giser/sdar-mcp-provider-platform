@@ -1,4 +1,8 @@
 import {
+  siteControlManifest,
+  SITE_CONTROL_PROFILE,
+} from "../../../packages/vehicle-zmq-control/src/site-control-catalog.js";
+import {
   VehicleProviderGrpcServer,
   type ProviderStore,
 } from "../../../packages/provider-adapter-kit/src/index.js";
@@ -20,7 +24,12 @@ export function zmqServer(
       port,
       tlsMode: "disabled",
       internalErrorCode: "ZMQ_PROVIDER_ERROR",
-      manifest: () => zmqProviderManifest(providerId, runtime.resourceId, store),
+      manifest: () =>
+        (runtime.siteReads ? siteControlManifest : zmqProviderManifest)(
+          providerId,
+          runtime.resourceId,
+          store,
+        ),
       resource: (s) => ({
         resourceId: runtime.resourceId,
         resourceType: "isr.vehicle.ugv.zmq",
@@ -28,10 +37,10 @@ export function zmqServer(
         enabled: true,
         health: s.archive.status === "running" ? "degraded" : "unknown",
         metadata: jsonToProtoStruct({
-          qualification: "isolated_simulator_only",
-          executionModes: ["simulation"],
+          qualification: runtime.siteReads ? "site_control" : "isolated_simulator_only",
+          executionModes: runtime.siteReads ? ["live"] : ["simulation"],
           completeEvidence: false,
-          catalogProfile: "zmq_v1_0_1_12",
+          catalogProfile: runtime.siteReads ? SITE_CONTROL_PROFILE : "zmq_v1_0_1_12",
         }),
         lastSeenAt: protoTime(s.generatedAt),
       }),

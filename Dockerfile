@@ -407,3 +407,7 @@ COPY --from=build --chown=root:root /workspace/deploy/ugv-zmq /app/deploy/ugv-zm
 COPY --from=build --chown=root:root /workspace/packages/vehicle-zmq-contract/package.json /app/packages/vehicle-zmq-contract/package.json
 COPY --from=build --chown=root:root /workspace/packages/vehicle-zmq-contract/src /app/packages/vehicle-zmq-contract/src
 CMD ["node", "dist/apps/ugv-zmq-provider-adapter/src/main.js"]
+
+FROM ugv-zmq-candidate AS ugv-zmq-site-control
+ARG VCS_REF=unknown
+LABEL org.opencontainers.image.title="SMPP ZMQ site control and read-only rollback" org.opencontainers.image.revision="${VCS_REF}"

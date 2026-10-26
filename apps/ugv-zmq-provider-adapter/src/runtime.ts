@@ -1,6 +1,15 @@
+import {
+  siteControlTool,
+  siteControlOperation,
+  siteControlOutputSchema,
+  SITE_CONTROL_PROFILE,
+  SITE_TOOLS,
+} from "../../../packages/vehicle-zmq-control/src/site-control-catalog.js";
+import { PLAN_ROUTE } from "../../../packages/vehicle-zmq-control/src/site-catalog.js";
+import type { SiteReadonlyRuntime } from "./site-runtime.js";
 import { randomUUID } from "node:crypto";
 import { EventEmitter } from "node:events";
-import AjvImport, { type ValidateFunction } from "ajv";
+import AjvImport, { type Options, type ValidateFunction } from "ajv";
 import addFormatsImport from "ajv-formats";
 import { z } from "zod";
 import { RESERVED_RESULT_FIELDS } from "../../../packages/domain/src/index.js";
@@ -36,8 +45,10 @@ import {
   type ZmqObservationObserver,
 } from "../../../packages/vehicle-zmq-observer/src/index.js";
 import type { zmqBusiness } from "./business.js";
-const Ajv = AjvImport as unknown as typeof AjvImport.default;
-const addFormats = addFormatsImport as unknown as typeof addFormatsImport.default;
+const Ajv = AjvImport as unknown as new (options: Options) => {
+  compile(schema: object): ValidateFunction;
+};
+const addFormats = addFormatsImport as unknown as (instance: unknown) => void;
 const query = z
   .object({
     resourceId: z.string(),
@@ -79,17 +90,31 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
   readonly events = new EventEmitter();
   readonly validators = new Map<string, ValidateFunction>();
   readonly resultValidators = new Map<string, ValidateFunction>();
+  readonly historicalResultValidators = new Map<string, ValidateFunction>();
   constructor(
     readonly engine: ZmqControlEngine,
     readonly observer: ZmqObservationObserver,
     readonly business: ReturnType<typeof zmqBusiness>,
+    readonly siteReads?: SiteReadonlyRuntime,
   ) {
     const ajv = new Ajv({ strict: false, allErrors: true });
     addFormats(ajv);
-    for (const name of ZMQ_PROVIDER_TOOLS)
-      this.validators.set(name, ajv.compile(zmqTool(name, this.resourceId).inputSchema));
+    for (const name of this.siteReads ? SITE_TOOLS : ZMQ_PROVIDER_TOOLS)
+      this.validators.set(
+        name,
+        ajv.compile(
+          (this.siteReads ? siteControlTool : zmqTool)(name, this.resourceId).inputSchema,
+        ),
+      );
     for (const name of ZMQ_PROVIDER_TOOLS.slice(4))
-      this.resultValidators.set(name, ajv.compile(nativeDtoOutputSchema(name)));
+      this.resultValidators.set(
+        name,
+        ajv.compile(
+          this.siteReads ? siteControlOutputSchema(name, true) : nativeDtoOutputSchema(name),
+        ),
+      );
+    for (const name of ZMQ_PROVIDER_TOOLS.slice(4))
+      this.historicalResultValidators.set(name, ajv.compile(nativeDtoOutputSchema(name)));
     engine.events.on("execution", (e: ZmqExecution) =>
       this.events.emit(e.taskId, this.executionSnapshot(e)),
     );
@@ -105,7 +130,10 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
       ...value,
       executionMode: value?.executionMode.toLowerCase(),
     });
-    if (c.simulationId !== this.engine.scope.profile.executionDomain.simulationId)
+    if (
+      (c.simulationId || null) !== this.engine.scope.profile.executionDomain.simulationId ||
+      c.executionMode !== this.engine.scope.profile.executionDomain.mode
+    )
       throw Error("ZMQ_EXECUTION_IDENTITY_MISMATCH");
     return c;
   }
@@ -128,13 +156,19 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
     });
     try {
       this.validate(name, args);
-      const c = this.context(context);
+      const c =
+        this.siteReads && !ZMQ_CONTROL_TOOLS.has(name)
+          ? this.siteReads.context(context)
+          : this.context(context);
       if (!ZMQ_CONTROL_TOOLS.has(name)) {
         if (name.endsWith("_result")) await this.read(name, args, c);
         return result(true, "ZMQ_READ_AVAILABLE");
       }
       nativeTiming(timing);
-      const a = await this.engine.checkAvailability(zmqOperation(name, args).operation, c);
+      const a = await this.engine.checkAvailability(
+        (this.siteReads ? siteControlOperation : zmqOperation)(name, args).operation,
+        c,
+      );
       return result(a.available, a.reasonCode);
     } catch (e) {
       return result(
@@ -157,7 +191,10 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
     this.validate(input.operationName, input.arguments);
     if (sha256(canonical(input.arguments)) !== input.argumentHash)
       throw Error("ZMQ_ARGUMENT_HASH_MISMATCH");
-    const c = this.context(input.executionContext);
+    const c =
+      this.siteReads && !ZMQ_CONTROL_TOOLS.has(input.operationName)
+        ? this.siteReads.context(input.executionContext)
+        : this.context(input.executionContext);
     if (input.signal?.aborted) throw Error("ZMQ_ADMISSION_CANCELLED");
     const previous = await this.engine.repository.store.getExecution(input.taskId);
     if (previous) {
@@ -169,7 +206,10 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
     }
     let e: ProviderExecution;
     if (ZMQ_CONTROL_TOOLS.has(input.operationName)) {
-      const native = zmqOperation(input.operationName, input.arguments);
+      const native = (this.siteReads ? siteControlOperation : zmqOperation)(
+        input.operationName,
+        input.arguments,
+      );
       e = await this.engine.start(
         {
           taskId: input.taskId,
@@ -209,7 +249,7 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
         terminalAt: at,
         evidence: [],
       };
-      await this.engine.repository.store.putExecution(e);
+      if (!this.siteReads) await this.engine.repository.store.putExecution(e);
     }
     return {
       externalExecutionId: e.externalExecutionId,
@@ -221,6 +261,27 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
     args: Record<string, unknown>,
     context: ExecutionContextRecord,
   ): Promise<Record<string, unknown>> {
+    if (name === "vehicle_get_capabilities" && this.siteReads) {
+      const readings = this.siteReads.capabilities();
+      return {
+        ...readings,
+        schemaVersion: "ugv.zmq-site-capabilities/2",
+        qualification: "site_control",
+        catalogProfile: SITE_CONTROL_PROFILE,
+        executionDomain: this.engine.scope.profile.executionDomain,
+        controlAdmission: "per_operation",
+        controlAvailable: true,
+        controlScopeHash: this.engine.scope.hash,
+        controllerSystemId: this.engine.scope.profile.components.chassis.controllerSystemId,
+        tools: SITE_TOOLS.map((name) => ({
+          name,
+          available: !ZMQ_CONTROL_TOOLS.has(name),
+          blockers: [],
+          requiresParameters: ZMQ_CONTROL_TOOLS.has(name),
+        })),
+      };
+    }
+    if (this.siteReads && name === PLAN_ROUTE) return this.siteReads.read(name, args, context);
     if (name === "vehicle_get_capabilities")
       return {
         schemaVersion: "ugv.zmq-provider-capabilities/1",
@@ -241,8 +302,14 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
         ],
         completeSpatialEvidence: false,
       };
+    if (this.siteReads && name === "vehicle_get_targets")
+      return {
+        ...this.snapshot(),
+        effectCandidates: await this.engine.currentEffectCandidates(context),
+      };
     if (["vehicle_get_state", "vehicle_get_payload_status", "vehicle_get_targets"].includes(name))
       return this.snapshot();
+    if (this.siteReads) return this.siteReads.read(name, args, context);
     const q = query.parse(args),
       e = await this.engine.get(q.taskId, context);
     if (e?.externalExecutionId !== q.executionId || e.resourceId !== q.resourceId)
@@ -268,6 +335,7 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
   }
   async get(taskId: string, identity?: VehicleBusinessReadIdentity) {
     if (!identity) throw Error("ZMQ_EXECUTION_IDENTITY_REQUIRED");
+    if (this.siteReads) return this.siteReads.get(taskId, identity);
     const e = await this.engine.repository.store.getExecution(taskId);
     if (!e) return undefined;
     this.match(e, {
@@ -310,7 +378,7 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
         ...identity,
         executionContext: {
           ...this.context(identity.executionContext),
-          executionMode: "SIMULATION",
+          executionMode: this.engine.scope.settings.mode === "site_control" ? "LIVE" : "SIMULATION",
         },
       },
     };
@@ -321,23 +389,44 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
   getBusinessContext(
     ...args: Parameters<ReturnType<typeof zmqBusiness>["service"]["getBusinessContext"]>
   ) {
-    args[0] = { ...args[0], executionContext: this.context(args[0].executionContext) };
-    return this.business.service.getBusinessContext(...args);
+    args[0] = {
+      ...args[0],
+      executionContext: this.siteReads
+        ? this.siteReads.context(args[0].executionContext)
+        : this.context(args[0].executionContext),
+    };
+    return (this.siteReads?.business.service ?? this.business.service).getBusinessContext(...args);
   }
   getBusinessSnapshotPart(
     ...args: Parameters<ReturnType<typeof zmqBusiness>["service"]["getBusinessSnapshotPart"]>
   ) {
-    args[0] = { ...args[0], executionContext: this.context(args[0].executionContext) };
-    return this.business.service.getBusinessSnapshotPart(...args);
+    args[0] = {
+      ...args[0],
+      executionContext: this.siteReads
+        ? this.siteReads.context(args[0].executionContext)
+        : this.context(args[0].executionContext),
+    };
+    return (this.siteReads?.business.service ?? this.business.service).getBusinessSnapshotPart(
+      ...args,
+    );
   }
   getBusinessArtifact(
     ...args: Parameters<ReturnType<typeof zmqBusiness>["service"]["getBusinessArtifact"]>
   ) {
-    args[0] = { ...args[0], executionContext: this.context(args[0].executionContext) };
-    return this.business.service.getBusinessArtifact(...args);
+    args[0] = {
+      ...args[0],
+      executionContext: this.siteReads
+        ? this.siteReads.context(args[0].executionContext)
+        : this.context(args[0].executionContext),
+    };
+    return (this.siteReads?.business.service ?? this.business.service).getBusinessArtifact(...args);
   }
   executionSnapshot(e: ProviderExecution): Record<string, unknown> {
-    const validate = this.resultValidators.get(e.operationName);
+    const validate = (
+      e.executionContext.executionMode === "simulation"
+        ? this.historicalResultValidators
+        : this.resultValidators
+    ).get(e.operationName);
     if (e.result && validate && !validate(e.result))
       throw Error("ZMQ_INTERNAL_RESULT_CONTRACT_INVALID");
     const publicResult = e.result
@@ -352,7 +441,10 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
       externalExecutionId: e.externalExecutionId,
       operationName: e.operationName,
       argumentHash: e.argumentHash,
-      executionContext: { ...e.executionContext, executionMode: "SIMULATION" },
+      executionContext: {
+        ...e.executionContext,
+        executionMode: e.executionContext.executionMode.toUpperCase(),
+      },
       state: e.state === "STARTING" ? "ACCEPTED" : e.state,
       revision: String(e.revision),
       reasonCode: e.reasonCode,

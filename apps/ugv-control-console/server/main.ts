@@ -11,12 +11,17 @@ const config = loadConfig(),
     connectionTimeoutMillis: 8000,
     statement_timeout: 15000,
   });
-const store = new Store(pool, config.domain);
+const store = new Store(pool, config.domain, config.historyDomain, config.historyDomains);
 await store.migrate();
 await store.recover();
 const app = createApp(
   config,
-  new Service(new Mcp(config.mcpUrl, config.upstreamHeaders), store, config.credentials.username),
+  new Service(
+    new Mcp(config.mcpUrl, config.upstreamHeaders),
+    store,
+    config.credentials.username,
+    config.managementUrl,
+  ),
 );
 await app.listen({ host: config.host, port: config.port });
 console.log(`UGV_CONSOLE_READY port=${config.port} tls=${config.secure}`);

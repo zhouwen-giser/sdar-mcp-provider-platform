@@ -19,6 +19,9 @@ export interface Config {
   webRoot: string;
   secure: boolean;
   sessionCookieName?: string;
+  managementUrl?: string;
+  historyDomain?: string;
+  historyDomains?: string[];
   tls?: { key: Buffer; cert: Buffer };
 }
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
@@ -75,6 +78,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     const u = new URL(origin);
     if (u.origin !== origin || u.protocol !== `${protocol}:`) throw Error("CONSOLE_ORIGIN_INVALID");
   }
+  const managementUrl = env.UGV_CONSOLE_SITE_MANAGEMENT_URL;
+  if (managementUrl && !/^http:\/\/127\.0\.0\.1:[0-9]+$/.test(managementUrl))
+    throw Error("CONSOLE_MANAGEMENT_URL_INVALID");
   const sessionCookieName = env.UGV_CONSOLE_SESSION_COOKIE_NAME;
   if (sessionCookieName !== undefined && !/^[A-Za-z0-9_-]{1,64}$/.test(sessionCookieName))
     throw Error("CONSOLE_COOKIE_NAME_INVALID");
@@ -92,10 +98,30 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     databaseUrl,
     credentials,
     upstreamHeaders,
-    domain: createHash("sha256").update(JSON.stringify({ mcpUrl, upstreamHeaders })).digest("hex"),
+    domain: createHash("sha256")
+      .update(
+        env.UGV_CONSOLE_AUTHORITY_KEY
+          ? JSON.stringify({
+              authority: env.UGV_CONSOLE_AUTHORITY_KEY,
+              mode: upstreamHeaders["x-sdar-execution-mode"],
+              simulationId: upstreamHeaders["x-sdar-simulation-id"] ?? null,
+            })
+          : JSON.stringify({ mcpUrl, upstreamHeaders }),
+      )
+      .digest("hex"),
     webRoot: resolve(env.UGV_CONSOLE_WEB_ROOT ?? "dist"),
     secure,
     ...(sessionCookieName ? { sessionCookieName } : {}),
+    ...(managementUrl ? { managementUrl } : {}),
+    ...(env.UGV_CONSOLE_HISTORY_DOMAIN ? { historyDomain: env.UGV_CONSOLE_HISTORY_DOMAIN } : {}),
+    ...(env.UGV_CONSOLE_HISTORY_DOMAINS
+      ? {
+          historyDomains: env.UGV_CONSOLE_HISTORY_DOMAINS.split(",").map((v) => {
+            if (!/^[a-f0-9]{64}$/.test(v)) throw Error("CONSOLE_HISTORY_DOMAIN_INVALID");
+            return v;
+          }),
+        }
+      : {}),
     ...(tls ? { tls } : {}),
   };
 }

@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { DeploymentProfile } from "../../vehicle-zmq-contract/src/index.js";
+import type { ControlDeploymentProfile as DeploymentProfile } from "../../vehicle-zmq-contract/src/site-profile.js";
 import {
   canonical,
   type Component,

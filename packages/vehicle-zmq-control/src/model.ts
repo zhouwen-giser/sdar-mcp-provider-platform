@@ -1,9 +1,9 @@
-import { z } from "zod";
 import {
-  DeploymentProfile,
-  EoRequest,
-  SimulationEffectRequest,
-} from "../../vehicle-zmq-contract/src/index.js";
+  ControlDeploymentProfile,
+  type ControlDeploymentProfile as DeploymentProfile,
+} from "../../vehicle-zmq-contract/src/site-profile.js";
+import { z } from "zod";
+import { EoRequest, SimulationEffectRequest } from "../../vehicle-zmq-contract/src/index.js";
 import type { InspectionSummary } from "./inspection.js";
 import { canonical, sha256 } from "../../vehicle-zmq-observer/src/config.js";
 import type {
@@ -83,11 +83,19 @@ export const Operation = z.discriminatedUnion("name", [
         .object({
           targetId: SimulationEffectRequest.shape.params.shape.target_id,
           position: SimulationEffectRequest.shape.params.shape.position,
+          targetSource: z.enum(["observation", "manual"]).optional(),
+          sourceNote: z.string().trim().min(1).max(1024).optional(),
           observation: z
             .object({ taskId: id, externalExecutionId: id, revision: z.number().int().positive() })
-            .strict(),
+            .strict()
+            .optional(),
         })
-        .strict(),
+        .strict()
+        .refine((p) =>
+          p.targetSource === "manual"
+            ? !!p.sourceNote && !p.observation
+            : !!p.observation && !p.sourceNote,
+        ),
     })
     .strict(),
   z
@@ -152,11 +160,12 @@ export const StartControl = z
     executionContext: z
       .object({
         authorizationContextHash: z.string().regex(/^[a-f0-9]{64}$/),
-        executionMode: z.literal("simulation"),
-        simulationId: id,
+        executionMode: z.enum(["simulation", "live"]),
+        simulationId: z.union([id, z.literal("")]),
         correlationId: id,
       })
-      .strict(),
+      .strict()
+      .refine((c) => (c.executionMode === "live") === (c.simulationId === "")),
     /** A formal Provider admission preserves its public identity independently of native operation. */
     admission: z
       .object({
@@ -179,7 +188,12 @@ export const StartControl = z
 export type StartControl = z.infer<typeof StartControl>;
 export const ControlSettings = z
   .object({
-    mode: z.literal("isolated_simulator"),
+    mode: z.enum(["isolated_simulator", "site_control"]),
+    siteEndpoints: z.array(z.url()).length(6).optional(),
+    handoffGrantHash: z
+      .string()
+      .regex(/^[a-f0-9]{64}$/)
+      .optional(),
     contractSha256: z.string().regex(/^[a-f0-9]{64}$/),
     observerPartitionHash: z.string().regex(/^[a-f0-9]{64}$/),
     observerSessionId: z.uuid(),
@@ -236,19 +250,26 @@ export interface ControlScope {
   settings: ControlSettings;
 }
 export function controlScope(profileInput: unknown, settingsInput: unknown): ControlScope {
-  const profile = DeploymentProfile.parse(profileInput),
+  const profile = ControlDeploymentProfile.parse(profileInput),
     settings = ControlSettings.parse(settingsInput);
   for (const component of Object.values(profile.components)) {
     for (const endpoint of [component.commandEndpoint, component.publicationEndpoint]) {
       // Numeric loopback only: no DNS, forwarding URL or externally routable command target.
-      if (new URL(endpoint).hostname !== "127.0.0.1") throw Error("ZMQ_CONTROL_ISOLATION_REQUIRED");
+      if (settings.mode === "isolated_simulator") {
+        if (new URL(endpoint).hostname !== "127.0.0.1")
+          throw Error("ZMQ_CONTROL_ISOLATION_REQUIRED");
+      } else if (!settings.handoffGrantHash || !settings.siteEndpoints?.includes(endpoint)) {
+        throw Error("ZMQ_SITE_ENDPOINT_OR_HANDOFF_UNAUTHORIZED");
+      }
     }
   }
   if (
     !profile.providerBinding.providerId ||
     !profile.providerBinding.resourceId ||
     !profile.providerBinding.sourceSessionKey ||
-    !profile.executionDomain.simulationId
+    (settings.mode === "isolated_simulator"
+      ? !profile.executionDomain.simulationId
+      : profile.schemaVersion !== "ugv.zmq-site-deployment/1")
   )
     throw Error("ZMQ_CONTROL_BINDING_REQUIRED");
   const stableSettings = { ...settings, observerSessionId: null };

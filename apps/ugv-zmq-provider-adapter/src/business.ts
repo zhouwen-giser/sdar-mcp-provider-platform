@@ -98,8 +98,10 @@ export function zmqBusiness(
     if (!e.zmqAdmission) return;
     if (
       !isZmqExecution(e) ||
-      e.executionContext.executionMode !== "simulation" ||
-      !e.executionContext.simulationId ||
+      !(
+        (e.executionContext.executionMode === "simulation" && !!e.executionContext.simulationId) ||
+        (e.executionContext.executionMode === "live" && !e.executionContext.simulationId)
+      ) ||
       e.providerId !== providerId ||
       e.resourceId !== resourceId
     )

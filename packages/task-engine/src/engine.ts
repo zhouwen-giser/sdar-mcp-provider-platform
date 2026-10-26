@@ -114,6 +114,24 @@ export class TaskEngine {
     if (this.controlDenialReason) throw new InvalidParamsError(this.controlDenialReason);
   }
 
+  private ownsTaskAuthority(
+    task: Pick<TaskRecord, "operationName" | "operationSnapshotId" | "executionMode">,
+  ): boolean {
+    return (
+      !(
+        this.manifest.providerType === "isr.vehicle.ugv.zmq" &&
+        this.manifest.providerVersion === "1.2.0"
+      ) ||
+      (task.executionMode === "live" &&
+        this.operationSnapshotIds.get(task.operationName) === task.operationSnapshotId)
+    );
+  }
+  private assertTaskControl(
+    task: Pick<TaskRecord, "operationName" | "operationSnapshotId" | "executionMode">,
+  ): void {
+    if (!this.ownsTaskAuthority(task))
+      throw new InvalidParamsError("ZMQ_ARCHIVED_EXECUTION_READONLY");
+  }
   async loadOperationSnapshot(snapshotId: string): Promise<ValidatedOperation> {
     return (await this.resolveTaskOperation(snapshotId)).operation;
   }
@@ -663,13 +681,14 @@ export class TaskEngine {
     authorization: AuthorizationContext,
   ): Promise<Record<string, unknown>> {
     let task = await this.#repository.getAuthorized(taskId, authorization);
-    if (this.controlDenialReason)
+    if (this.controlDenialReason || !this.ownsTaskAuthority(task))
       return detailedTask(
         task,
         await this.#repository.listInputRequests(taskId),
         await this.#repository.listObservationPage(taskId),
         { snapshotFreshness: "stale", degradedReasonCode: "ZMQ_SITE_READONLY_HISTORY_SNAPSHOT" },
       );
+    this.assertTaskControl(task);
     const operation = await this.loadOperationSnapshot(task.operationSnapshotId);
     if (
       !isTerminalState(task.internalState) &&
@@ -768,6 +787,7 @@ export class TaskEngine {
     this.assertControlAdmission();
     const task = await this.#repository.getAuthorized(taskId, authorization);
     if (isTerminalState(task.internalState)) return;
+    this.assertTaskControl(task);
     const operation = await this.loadOperationSnapshot(task.operationSnapshotId);
     if (operation.capabilities.cancel) {
       if (await this.#repository.cancelScheduledBeforeDispatch(taskId, this.clock.now())) return;
@@ -801,6 +821,11 @@ export class TaskEngine {
     resolvedOperation?: ValidatedOperation,
   ): Promise<ToolInvocationResult> {
     this.assertControlAdmission();
+    this.assertTaskControl({
+      operationName: admission.operationName,
+      operationSnapshotId: admission.operationSnapshotId,
+      executionMode: admission.authorization.executionMode,
+    });
     const operation =
       resolvedOperation ?? (await this.loadOperationSnapshot(admission.operationSnapshotId));
     return this.#executeOperation(
@@ -827,7 +852,7 @@ export class TaskEngine {
     task: TaskRecord,
     resolvedOperation?: ValidatedOperation,
   ): Promise<"found" | "not_found" | "deferred"> {
-    if (this.controlDenialReason) return "deferred";
+    if (this.controlDenialReason || !this.ownsTaskAuthority(task)) return "deferred";
     if (task.internalState === "STARTING" && task.externalExecutionId === null) {
       await this.#repository.recordReconciliationResult(
         task.taskId,
@@ -973,6 +998,7 @@ export class TaskEngine {
       executionMode: authorization.executionMode,
     });
     let task = await this.#repository.getAuthorized(taskId, authorization);
+    this.assertTaskControl(task);
     const operation = await this.loadOperationSnapshot(task.operationSnapshotId);
     this.onTrace?.({
       event: "task.cancel_requested",
@@ -1005,6 +1031,7 @@ export class TaskEngine {
   ): Promise<Record<string, unknown>> {
     this.assertControlAdmission();
     const task = await this.#repository.getAuthorized(taskId, authorization);
+    this.assertTaskControl(task);
     const operation = await this.loadOperationSnapshot(task.operationSnapshotId);
     if (!operation.capabilities.inputRequired) {
       throw new CapabilityNotSupportedError("INPUT_NOT_SUPPORTED");
@@ -1067,6 +1094,7 @@ export class TaskEngine {
   ): Promise<void> {
     this.assertControlAdmission();
     const task = await this.#repository.getAuthorized(taskId, authorization);
+    this.assertTaskControl(task);
     const operation = await this.loadOperationSnapshot(task.operationSnapshotId);
     if (!operation.capabilities.inputRequired) {
       throw new CapabilityNotSupportedError("INPUT_NOT_SUPPORTED");
@@ -1108,6 +1136,7 @@ export class TaskEngine {
     this.assertControlAdmission();
     const command = RuntimeInterventionCommandSchema.parse(candidate);
     const task = await this.#repository.getAuthorized(command.taskId, authorization);
+    this.assertTaskControl(task);
     const operation = await this.loadOperationSnapshot(task.operationSnapshotId);
     const profile = TaskBusinessOperationProfileSchema.safeParse(operation.businessFeedbackProfile);
     if (
@@ -1161,6 +1190,7 @@ export class TaskEngine {
   ): Promise<Record<string, unknown>> {
     this.assertControlAdmission();
     const task = await this.#repository.getAuthorized(taskId, authorization);
+    this.assertTaskControl(task);
     const operation = await this.loadOperationSnapshot(task.operationSnapshotId);
     if (!operation.capabilities.pauseResume) {
       throw new CapabilityNotSupportedError("PAUSE_RESUME_NOT_SUPPORTED");

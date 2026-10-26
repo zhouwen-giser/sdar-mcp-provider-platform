@@ -3,7 +3,7 @@ import { EventEmitter } from "node:events";
 import AjvImport, { type Options, type ValidateFunction } from "ajv";
 import addFormatsImport from "ajv-formats";
 import { z } from "zod";
-import type { DeploymentProfile } from "../../../packages/vehicle-zmq-contract/src/index.js";
+import type { ControlDeploymentProfile as DeploymentProfile } from "../../../packages/vehicle-zmq-contract/src/site-profile.js";
 import type { ZmqObservationObserver } from "../../../packages/vehicle-zmq-observer/src/index.js";
 import { canonical, sha256 } from "../../../packages/vehicle-zmq-observer/src/index.js";
 import { scopePredicate } from "../../../packages/gowm-shared-storage-adapter/src/index.js";
@@ -210,7 +210,7 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
       initialSnapshot: this.executionSnapshot(e),
     };
   }
-  private async read(
+  async read(
     name: string,
     args: Record<string, unknown>,
     context: ExecutionContextRecord,
@@ -238,7 +238,7 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
     const identity = resultIdentity(e);
     const retainedPage = async (after: number, limit: number) => {
       const rows = await this.store.pool.query<{ snapshot: ResultRecord }>(
-        `SELECT snapshot FROM ugv_state_snapshot WHERE (${scopePredicate(this.store.pool, "ugv_state_snapshot", "ugv_state_snapshot")}) AND snapshot->>'schemaVersion'='ugv.zmq-result-record/1' AND snapshot->'identity'=$1::jsonb AND (snapshot->>'revision')::bigint>$2 ORDER BY (snapshot->>'revision')::bigint LIMIT $3`,
+        `SELECT snapshot FROM ugv_state_snapshot WHERE (${scopePredicate(this.store.pool, "ugv_state_snapshot", "ugv_state_snapshot")}) AND snapshot->>'schemaVersion' IN ('ugv.zmq-result-record/1','ugv.zmq-result-record/2') AND snapshot->'identity'=$1::jsonb AND (snapshot->>'revision')::bigint>$2 ORDER BY (snapshot->>'revision')::bigint LIMIT $3`,
         [JSON.stringify(identity), after, limit + 1],
       );
       return resultPage(
@@ -273,7 +273,15 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
     }
     if (e.zmqInspection) {
       if (pending) e.zmqInspection.missingEvidence.push("LOCAL_SUMMARY_REBUILD_LIMIT_USE_PAGES");
-      return { ...inspectionReport(e.zmqInspection, pending), identity, page };
+      return {
+        ...inspectionReport(e.zmqInspection, pending),
+        schemaVersion:
+          identity.executionMode === "live"
+            ? "ugv.zmq-inspection-result/2"
+            : "ugv.zmq-inspection-result/1",
+        identity,
+        page,
+      };
     }
     if (!e.zmqEffect) throw Error("ZMQ_SIMULATION_EFFECT_TASK_REQUIRED");
     if (pending) throw Error("ZMQ_RESULT_SUMMARY_REBUILD_LIMIT_USE_PAGES");
@@ -292,7 +300,8 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
     )
       missing.add("SIMULATION_EFFECT_UNKNOWN");
     return {
-      schemaVersion: "ugv.zmq-effect-query/1",
+      schemaVersion:
+        identity.executionMode === "live" ? "ugv.zmq-effect-query/2" : "ugv.zmq-effect-query/1",
       identity,
       originalTask: {
         state: e.state,

@@ -23,6 +23,7 @@ import {
   nativeCatalogReason,
   PLAN_ROUTE,
   siteReadonlyTools,
+  siteControlTools,
   validateZmqGeometry,
 } from "../shared/zmq.js";
 import { businessSnapshot, readArtifact } from "./business.js";
@@ -57,6 +58,7 @@ export class Service {
     readonly mcp: Mcp,
     readonly store: Store,
     readonly actor: string,
+    readonly managementUrl?: string,
   ) {}
   async catalog() {
     const [discovery, list] = await Promise.all([
@@ -138,10 +140,18 @@ export class Service {
     if (
       (isZmqControl(name) || [INSPECTION_RESULT, EFFECT_RESULT].includes(name)) &&
       !siteReadonlyTools(c.tools) &&
+      !siteControlTools(c.tools) &&
       (this.mcp.headers["x-sdar-execution-mode"] !== "simulation" ||
         !this.mcp.headers["x-sdar-simulation-id"])
     )
       throw Error("ZMQ_SIMULATION_DOMAIN_REQUIRED");
+    if (
+      siteControlTools(c.tools) &&
+      isZmqControl(name) &&
+      (this.mcp.headers["x-sdar-execution-mode"] !== "live" ||
+        this.mcp.headers["x-sdar-simulation-id"])
+    )
+      throw Error("ZMQ_SITE_LIVE_DOMAIN_REQUIRED");
     validateSchema(tool.inputSchema, args);
     if (name === ZMQ_INSPECT || name === "vehicle_zmq_area_recon") validateZmqGeometry(args);
     const isControl = (CONTROL_TOOLS as readonly string[]).includes(name);
@@ -358,6 +368,101 @@ export class Service {
           (CONTROL_TOOLS as readonly string[]).includes(request.tool ?? ""))
       )
         throw Error("ZMQ_SITE_READONLY_CONTROL_DISABLED");
+      if (request.kind === "reconcile") {
+        if (!siteControlTools(catalog.tools) || !this.managementUrl)
+          throw Error("ZMQ_SITE_MANAGEMENT_UNAVAILABLE");
+        const saved = await this.store.task(request.taskId ?? "");
+        if (!saved) throw Error("TASK_NOT_IMPORTED");
+        const a = request.arguments;
+        if (
+          Object.keys(a).some((k) => !["component", "reason"].includes(k)) ||
+          !["chassis", "eo", "simulationEffect"].includes(text(a.component)) ||
+          !text(a.reason).trim()
+        )
+          throw Error("ZMQ_RECONCILIATION_INVALID");
+        sent = true;
+        const r = await fetch(this.managementUrl + "/reconcile", {
+          method: "POST",
+          redirect: "error",
+          signal: AbortSignal.timeout(8000),
+          headers: { ...this.mcp.headers, "content-type": "application/json" },
+          body: JSON.stringify({ ...a, taskId: request.taskId, commandId: request.commandId }),
+        });
+        const response = (await r.json()) as Json;
+        await this.store.audit(
+          this.actor,
+          "component.reconcile",
+          request.commandId,
+          text(response.reasonCode) || text(a.reason),
+        );
+        return await this.store.finish(
+          request.commandId,
+          r.ok ? "completed" : "rejected",
+          response,
+          request.taskId,
+        );
+      }
+      if (request.previewCommandId) {
+        if (
+          !siteControlTools(catalog.tools) ||
+          request.kind !== "tool" ||
+          request.tool !== "vehicle_zmq_navigate"
+        )
+          throw Error("ZMQ_PREVIEW_ADOPTION_INVALID");
+        const previous = await this.store.command(request.previewCommandId),
+          preview = record(record(previous?.response).structuredContent);
+        if (
+          previous?.status !== "completed" ||
+          previous.request.tool !== PLAN_ROUTE ||
+          previous.request.catalogHash !== catalog.catalogHash ||
+          preview.resourceId !== catalog.resourceId ||
+          preview.adoption !== "preview_only" ||
+          wireHash({
+            ...previous.request.arguments,
+            density: previous.request.arguments.density ?? "adaptive",
+          }) !== preview.requestHash ||
+          wireHash(preview.transform) !==
+            wireHash(
+              record(catalog.tools.find((t) => t.name === PLAN_ROUTE)?._meta?.["io.sdar/ugvZmq"])
+                .routeTransform,
+            ) ||
+          preview.routeSource !==
+            record(catalog.tools.find((t) => t.name === PLAN_ROUTE)?._meta?.["io.sdar/ugvZmq"])
+              .plannerSource ||
+          !(
+            Date.now() - Date.parse(text(preview.createdAt)) >= 0 &&
+            Date.now() - Date.parse(text(preview.createdAt)) <= 300000
+          ) ||
+          createHash("sha256").update(text(preview.sourceMessage)).digest("hex") !==
+            preview.sourceMessageSha256
+        )
+          throw Error("ZMQ_PREVIEW_PROVENANCE_INVALID");
+        const state = record(record((await this.state()).data).vehicle_get_state),
+          observation = array(state.observations)
+            .map(record)
+            .find(
+              (o) =>
+                record(o.observation).key === "localization" &&
+                o.receiptFresh === true &&
+                Date.now() - Date.parse(text(o.receivedAt)) >= 0 &&
+                Date.now() - Date.parse(text(o.receivedAt)) <= 3000,
+            );
+        const position = record(record(observation?.observation).position),
+          origin = record(preview.start);
+        const dx =
+            (Number(position.longitude) - Number(origin.longitude)) *
+            111320 *
+            Math.cos((Number(origin.latitude) * Math.PI) / 180),
+          dy = (Number(position.latitude) - Number(origin.latitude)) * 110540;
+        if (!Number.isFinite(dx + dy) || Math.hypot(dx, dy) > 20)
+          throw Error("ZMQ_PREVIEW_START_MISMATCH");
+        const operation = record(request.arguments.operation);
+        if (
+          operation.name !== "navigation.route" ||
+          wireHash(record(operation.params).waypoints) !== wireHash(preview.waypoints)
+        )
+          throw Error("ZMQ_PREVIEW_ROUTE_MISMATCH");
+      }
       let method: string, params: Json;
       if (request.kind === "tool") {
         const name = request.tool ?? "";
@@ -382,7 +487,7 @@ export class Service {
             throw Error("CATALOG_CHANGED_REFRESH_REQUIRED");
           if (
             available.availability !== "available" ||
-            Date.parse(text(available.validUntil)) <= Date.now()
+            !(Date.parse(text(available.validUntil)) > Date.now())
           ) {
             const response = { outcome: "admission_rejected", ...available };
             await this.store.audit(

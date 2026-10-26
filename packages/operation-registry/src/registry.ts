@@ -1,3 +1,4 @@
+import { siteControlTool } from "../../vehicle-zmq-control/src/site-control-catalog.js";
 import { createHash } from "node:crypto";
 import { SITE_TOOLS, siteTool } from "../../vehicle-zmq-control/src/site-catalog.js";
 import { ZMQ_PROVIDER_TOOLS, zmqTool } from "../../vehicle-zmq-control/src/catalog.js";
@@ -126,8 +127,9 @@ export class OperationRegistry {
 
   #validate(manifest: ProviderManifest, verifyBusinessSource: boolean): ValidatedManifest {
     const zmq = manifest.providerType === "isr.vehicle.ugv.zmq";
-    const site = zmq && manifest.providerVersion === "1.1.0";
-    const nativeTool = site ? siteTool : zmqTool;
+    const site = zmq && ["1.1.0", "1.2.0"].includes(manifest.providerVersion);
+    const nativeTool =
+      manifest.providerVersion === "1.2.0" ? siteControlTool : site ? siteTool : zmqTool;
     if (
       zmq &&
       canonicalize(manifest.operations.map((o) => o.name).sort()) !==

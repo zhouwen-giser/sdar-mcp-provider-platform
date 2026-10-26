@@ -1,10 +1,7 @@
+import type { ControlDeploymentProfile as DeploymentProfile } from "../../vehicle-zmq-contract/src/site-profile.js";
 import { randomUUID } from "node:crypto";
 import { ZodError } from "zod";
-import {
-  decodeChassisFrame,
-  parsePublication,
-  type DeploymentProfile,
-} from "../../vehicle-zmq-contract/src/index.js";
+import { decodeChassisFrame, parsePublication } from "../../vehicle-zmq-contract/src/index.js";
 import { canonical, sha256, type Component, type ObserverSettings } from "./config.js";
 import {
   multipartHash,

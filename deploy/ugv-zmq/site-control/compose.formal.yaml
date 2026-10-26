@@ -1,0 +1,63 @@
+# Shared network namespace preserves the existing PMS endpoint and keeps Provider/management on loopback.
+services:
+  runtime:
+    container_name: ${SITE_RUNTIME_CONTAINER_NAME:?preserved PMS logical instance name}
+    image: ${SITE_RUNTIME_IMAGE:?pin the verified Runtime image}
+    init: true
+    read_only: true
+    restart: unless-stopped
+    env_file: ${SITE_RUNTIME_ENV:?formal private Runtime environment}
+    extra_hosts: ["adapter:127.0.0.1"]
+    ports: ["19100:8080", "19101:19101"]
+    networks:
+      runtime_network:
+        aliases: ["${SITE_RUNTIME_CONTAINER_NAME}"]
+      owner_network:
+        aliases: ["${SITE_RUNTIME_CONTAINER_NAME}"]
+    volumes:
+      - ${SITE_GOWM_URL_FILE:?existing restricted owner URL}:/run/secrets/gowm.url:ro
+      - ${SITE_RUNTIME_CONFIG_DIR:?preserved PMS token directory}:/run/config:ro
+      - ${SITE_RUNTIME_DATA_DIR:?preserved trajectory signing keys}:/var/lib/sdar
+    tmpfs: ["/tmp:size=32m,mode=1777"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+  provider:
+    image: ${SITE_PROVIDER_IMAGE:?pin the verified Provider image}
+    network_mode: service:runtime
+    depends_on: [runtime]
+    read_only: true
+    init: true
+    restart: unless-stopped
+    env_file: ${SITE_PROVIDER_ENV:?formal private owner environment}
+    environment:
+      UGV_ZMQ_PROVIDER_CONFIG_FILE: /run/secrets/provider.json
+    volumes:
+      - ${SITE_PROVIDER_CONFIG:?formal site_control configuration with port 7010}:/run/secrets/provider.json:ro
+      - ${SITE_GOWM_URL_FILE:?existing restricted owner URL}:/run/secrets/gowm.url:ro
+      - ${SITE_HANDOFF_GRANT_FILE:?verified handoff grant}:/run/secrets/handoff.json:ro
+      - ${SITE_JWT_SECRET_FILE:?server management JWT secret}:/run/secrets/site-jwt.key:ro
+    tmpfs: ["/tmp:size=16m,mode=1777"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+  console:
+    image: ${SITE_CONSOLE_IMAGE:?pin the verified console image}
+    network_mode: service:runtime
+    depends_on: [runtime]
+    read_only: true
+    init: true
+    restart: unless-stopped
+    env_file: ${SITE_CONSOLE_ENV:?formal private console environment}
+    volumes:
+      - ${SITE_CONSOLE_DATABASE_URL_FILE:?preserved console database URL}:/run/secrets/console-database.url:ro
+      - ${SITE_CONSOLE_CREDENTIALS_FILE:?preserved operator credentials}:/run/secrets/credentials.json:ro
+      - ${SITE_CONSOLE_AUTHORIZATION_FILE:?server-only signed bearer token}:/run/secrets/upstream-authorization:ro
+    tmpfs: ["/tmp:size=16m,mode=1777"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+networks:
+  runtime_network:
+    external: true
+    name: ${SITE_EXISTING_RUNTIME_NETWORK:?preserved Runtime/PMS network}
+  owner_network:
+    external: true
+    name: ${SITE_EXISTING_OWNER_NETWORK:?preserved GOWM owner network}

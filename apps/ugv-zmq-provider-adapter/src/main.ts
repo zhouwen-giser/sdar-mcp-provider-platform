@@ -18,6 +18,8 @@ if (
         "mode",
         "contractSha256",
         "plannerFrame",
+        "handoffGrantFile",
+        "management",
         "host",
         "port",
       ].includes(k),
@@ -25,10 +27,17 @@ if (
 )
   throw Error("ZMQ_PROVIDER_CONFIG_FIELD_UNKNOWN");
 const gowm = loadGowmStorageConfig(process.env);
-if (value.mode !== undefined && value.mode !== "site_readonly")
+if (value.mode !== undefined && value.mode !== "site_readonly" && value.mode !== "site_control")
   throw Error("ZMQ_PROVIDER_MODE_INVALID");
 if (value.mode === "site_readonly" && value.controlSettings !== undefined)
   throw Error("ZMQ_SITE_CONTROL_SETTINGS_FORBIDDEN");
+if (value.mode === "site_control") {
+  const grantPath = value.handoffGrantFile;
+  if (typeof grantPath !== "string" || statSync(grantPath).mode & 0o077)
+    throw Error("ZMQ_PRIVATE_HANDOFF_GRANT_REQUIRED");
+  value.handoffGrant = JSON.parse(readFileSync(grantPath, "utf8")) as unknown;
+  delete value.handoffGrantFile;
+}
 const app =
   value.mode === "site_readonly"
     ? await openSiteReadonlyProvider({ ...value, ...(gowm ? { gowm } : {}) } as Parameters<

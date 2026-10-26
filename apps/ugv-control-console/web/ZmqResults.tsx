@@ -24,7 +24,8 @@ export function ZmqResults({ taskId, operation }: { taskId: string; operation: s
     rows = array(page.records).map(record),
     latest = record(data.latest),
     native = record(latest.nativeTask),
-    coverage = record(data.coverageEvidence);
+    coverage = record(data.coverageEvidence),
+    provenance = record(record(record(data.originalTask).result).targetProvenance);
   return (
     <section className="evidence-summary">
       <h3>{operation === EFFECT_APPLY ? "仿真裁判结果与附加版本" : "ZMQ 检查成果与已收报告"}</h3>
@@ -34,6 +35,12 @@ export function ZmqResults({ taskId, operation }: { taskId: string; operation: s
       {result.error && <div className="notice warning">{describe(result.error)}</div>}
       {operation === EFFECT_APPLY ? (
         <>
+          {provenance.kind && (
+            <p className="notice">
+              目标来源：{provenance.kind === "manual" ? "人工指定" : "关联设备观测"}
+              {provenance.sourceNote ? ` · ${text(provenance.sourceNote)}` : ""}
+            </p>
+          )}
           <div className="evidence-cards">
             <div>
               <small>动作状态</small>

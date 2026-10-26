@@ -5,8 +5,9 @@ import { api, ApiError, describe, download } from "./api.js";
 import { newCommandId } from "./command-id.js";
 import { AvailabilityNotice } from "./AvailabilityNotice.js";
 import { Diagram, visibleGeometryObjects } from "./Diagram.js";
+import { SiteControlConsole } from "./SiteControlConsole.js";
 import { SiteReadonlyConsole } from "./SiteReadonlyConsole.js";
-import { siteReadonlyTools } from "../shared/zmq-native.js";
+import { siteReadonlyTools, siteControlTools } from "../shared/zmq-native.js";
 import { ZmqResults } from "./ZmqResults.js";
 import {
   NATIVE_CONTROL_TOOLS,
@@ -419,30 +420,28 @@ function Console() {
         }}
       />
     );
-  if (siteReadonlyTools(tools))
-    return (
-      <SiteReadonlyConsole
-        device={d}
-        session={session.data}
-        commands={commands.data ?? []}
-        tasks={tasks.data ?? []}
-        refresh={() => {
-          void device.refetch();
-          refresh();
-        }}
-        renderTask={(id) => (
-          <TaskDetail
-            taskId={id}
-            operationName={tasks.data?.find((t) => t.taskId === id)?.operation ?? ""}
-            tools={tools}
-            resourceId={resourceId}
-            position={point}
-            sending={false}
-            submit={(command) => submit(command)}
-          />
-        )}
-      />
-    );
+  if (siteReadonlyTools(tools) || siteControlTools(tools))
+    return React.createElement(siteControlTools(tools) ? SiteControlConsole : SiteReadonlyConsole, {
+      device: d,
+      session: session.data,
+      commands: commands.data ?? [],
+      tasks: tasks.data ?? [],
+      refresh: () => {
+        void device.refetch();
+        refresh();
+      },
+      renderTask: (id: string) => (
+        <TaskDetail
+          taskId={id}
+          operationName={tasks.data?.find((t) => t.taskId === id)?.operation ?? ""}
+          tools={tools}
+          resourceId={resourceId}
+          position={point}
+          sending={false}
+          submit={(command) => submit(command)}
+        />
+      ),
+    });
   const controls = Object.keys(labels).filter((name) => name !== "vehicle_emergency_stop");
   const compatible =
     !!currentTool &&
@@ -451,6 +450,7 @@ function Console() {
     taskProfile(currentTool).idempotency === "server_managed" &&
     !zmqToolReason(currentTool, resourceId) &&
     (!isZmqControl(toolName) || session.data.executionMode === "simulation");
+
   return (
     <div className="console">
       <header className="topbar">
@@ -1079,6 +1079,7 @@ function Console() {
                             cancel: "取消",
                             input: "人工答复",
                             intervention: "计划调整",
+                            reconcile: "人工对账",
                           }[command.request.kind]}
                     </strong>
                     <small>

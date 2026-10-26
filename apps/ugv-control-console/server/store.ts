@@ -52,7 +52,18 @@ export class Store {
   constructor(
     readonly pool: Pool,
     readonly domain: string,
+    readonly historyDomain?: string,
+    readonly historyDomains: string[] = [],
   ) {}
+  get readDomains() {
+    return [
+      ...new Set([
+        this.domain,
+        ...(this.historyDomain ? [this.historyDomain] : []),
+        ...this.historyDomains,
+      ]),
+    ];
+  }
   async migrate() {
     const schema = await this.pool.query<{ present: boolean }>(
       "SELECT to_regnamespace('ugv_control_console') IS NOT NULL AS present",
@@ -78,6 +89,17 @@ export class Store {
   }
   async reserve(request: Command): Promise<{ fresh: boolean; row: CommandRow }> {
     const hash = fingerprint(request);
+    const historical =
+      this.readDomains.length > 1
+        ? await this.pool.query<DbCommand>(
+            "SELECT * FROM ugv_control_console.command WHERE domain=ANY($1::text[]) AND command_id=$2 ORDER BY (domain=$3) DESC LIMIT 1",
+            [this.readDomains, request.commandId, this.domain],
+          )
+        : undefined;
+    if (historical?.rows[0]) {
+      if (historical.rows[0].request_hash !== hash) throw Error("COMMAND_ID_CONFLICT");
+      return { fresh: false, row: commandRow(historical.rows[0]) };
+    }
     const inserted = await this.pool.query<DbCommand>(
       `INSERT INTO ugv_control_console.command(domain,command_id,request_hash,request,status) VALUES($1,$2,$3,$4,'dispatching') ON CONFLICT DO NOTHING RETURNING *`,
       [this.domain, request.commandId, hash, request],
@@ -102,16 +124,16 @@ export class Store {
   }
   async command(id: string) {
     const r = await this.pool.query<DbCommand>(
-      "SELECT * FROM ugv_control_console.command WHERE domain=$1 AND command_id=$2",
-      [this.domain, id],
+      "SELECT * FROM ugv_control_console.command WHERE domain=ANY($1::text[]) AND command_id=$2 ORDER BY (domain=$3) DESC LIMIT 1",
+      [this.readDomains, id, this.domain],
     );
     return r.rows[0] ? commandRow(r.rows[0]) : undefined;
   }
   async commands() {
     return (
       await this.pool.query<DbCommand>(
-        "SELECT * FROM ugv_control_console.command WHERE domain=$1 ORDER BY created_at DESC LIMIT 200",
-        [this.domain],
+        "SELECT * FROM (SELECT DISTINCT ON (command_id) * FROM ugv_control_console.command WHERE domain=ANY($1::text[]) ORDER BY command_id,(domain=$2) DESC) c ORDER BY created_at DESC LIMIT 200",
+        [this.readDomains, this.domain],
       )
     ).rows.map(commandRow);
   }
@@ -123,16 +145,16 @@ export class Store {
   }
   async task(id: string) {
     const r = await this.pool.query<DbTask>(
-      "SELECT * FROM ugv_control_console.task WHERE domain=$1 AND task_id=$2",
-      [this.domain, id],
+      "SELECT * FROM ugv_control_console.task WHERE domain=ANY($1::text[]) AND task_id=$2 ORDER BY (domain=$3) DESC LIMIT 1",
+      [this.readDomains, id, this.domain],
     );
     return r.rows[0] ? taskRow(r.rows[0]) : undefined;
   }
   async tasks() {
     return (
       await this.pool.query<DbTask>(
-        "SELECT * FROM ugv_control_console.task WHERE domain=$1 ORDER BY created_at DESC LIMIT 200",
-        [this.domain],
+        "SELECT * FROM (SELECT DISTINCT ON (task_id) * FROM ugv_control_console.task WHERE domain=ANY($1::text[]) ORDER BY task_id,(domain=$2) DESC) t ORDER BY created_at DESC LIMIT 200",
+        [this.readDomains, this.domain],
       )
     ).rows.map(taskRow);
   }

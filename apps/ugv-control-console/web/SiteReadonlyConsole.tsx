@@ -43,6 +43,10 @@ export function SiteReadonlyConsole({
   tasks,
   refresh,
   renderTask,
+  siteControl = false,
+  controls,
+  stopControl,
+  onAdoptPreview,
 }: {
   device: Json;
   session: Json;
@@ -50,6 +54,10 @@ export function SiteReadonlyConsole({
   tasks: TaskRow[];
   refresh: () => void;
   renderTask: (taskId: string) => ReactNode;
+  siteControl?: boolean;
+  controls?: ReactNode;
+  stopControl?: ReactNode;
+  onAdoptPreview?: (commandId: string, preview: Json) => void;
 }) {
   const state = record(record(device.data).vehicle_get_state),
     capabilities = record(record(device.data).vehicle_get_capabilities);
@@ -61,6 +69,7 @@ export function SiteReadonlyConsole({
   const [busy, setBusy] = useState(false),
     [error, setError] = useState<unknown>(),
     [preview, setPreview] = useState<Json>();
+  const [previewCommandId, setPreviewCommandId] = useState("");
   const [selected, setSelected] = useState(""),
     [importId, setImportId] = useState("");
   const planAvailable = record(capabilities.planner).available === true;
@@ -107,6 +116,7 @@ export function SiteReadonlyConsole({
       if (value.adoption !== "preview_only" || value.schemaVersion !== "ugv.zmq-route-preview/1")
         throw Error("UGV_PLANNER_PREVIEW_UNCONFIRMED");
       setPreview(value);
+      setPreviewCommandId(row.commandId);
     } catch (e) {
       setError(e);
     } finally {
@@ -115,7 +125,7 @@ export function SiteReadonlyConsole({
     }
   }
   return (
-    <div className="console">
+    <div className="console site-console">
       <header className="topbar">
         <div className="brand">
           <span className="brand-symbol">U</span>
@@ -125,7 +135,7 @@ export function SiteReadonlyConsole({
           </div>
         </div>
         <div className="topbar-right">
-          <span className="badge warning">现场只读</span>
+          <span className="badge warning">{siteControl ? "现场控制" : "现场只读"}</span>
           <span>{text(session.username)}</span>
           <button
             className="ghost"
@@ -135,9 +145,11 @@ export function SiteReadonlyConsole({
           >
             退出
           </button>
-          <button className="stop" disabled title="当前只读模式不能发送停止命令">
-            ■ 停止不可用 · 只读模式
-          </button>
+          {stopControl ?? (
+            <button className="stop" disabled title="当前只读模式不能发送停止命令">
+              ■ 停止不可用 · 只读模式
+            </button>
+          )}
         </div>
       </header>
       <main className="workspace">
@@ -151,7 +163,9 @@ export function SiteReadonlyConsole({
           <button onClick={refresh}>刷新状态</button>
         </div>
         <div className="notice warning">
-          控制准入关闭。当前数据来自真实接收，来源启动身份、源时间与完整性仍待核实；路线仅供预览，尚未采用。
+          {siteControl
+            ? "现场控制按操作参数、组件状态和租约核实。来源启动身份、源时钟与检查完整性仍待核实；规划与实际执行分别显示。"
+            : "控制准入关闭。当前数据来自真实接收，来源启动身份、源时间与完整性仍待核实；路线仅供预览，尚未采用。"}
         </div>
         {Object.keys(record(device.errors)).length > 0 && (
           <div className="notice error" role="alert">
@@ -176,6 +190,7 @@ export function SiteReadonlyConsole({
         </section>
         <div className="main-grid">
           <div>
+            {controls}
             <section className="panel">
               <div className="section-head">
                 <h2>7879 路线预览</h2>
@@ -263,6 +278,16 @@ export function SiteReadonlyConsole({
                   下载预览报告
                 </button>
               </div>
+              {onAdoptPreview && (
+                <button
+                  disabled={!preview}
+                  onClick={() => {
+                    if (preview) onAdoptPreview(previewCommandId, preview);
+                  }}
+                >
+                  采用并导航
+                </button>
+              )}
               {preview && (
                 <div className="notice">
                   <strong>路线预览已生成 · 尚未采用</strong>
@@ -274,24 +299,26 @@ export function SiteReadonlyConsole({
                 </div>
               )}
             </section>
-            <section className="panel">
-              <h2>控制能力与阻塞原因</h2>
-              {array(capabilities.tools)
-                .map(record)
-                .filter((t) => labels[text(t.name)])
-                .map((t) => (
-                  <details key={text(t.name)}>
-                    <summary>
-                      <button disabled>{labels[text(t.name)]}</button> 只读模式不可执行
-                    </summary>
-                    <ul>
-                      {array(t.blockers).map((code) => (
-                        <li key={text(code)}>{describe(Error(text(code)))}</li>
-                      ))}
-                    </ul>
-                  </details>
-                ))}
-            </section>
+            {!siteControl && (
+              <section className="panel">
+                <h2>控制能力与阻塞原因</h2>
+                {array(capabilities.tools)
+                  .map(record)
+                  .filter((t) => labels[text(t.name)])
+                  .map((t) => (
+                    <details key={text(t.name)}>
+                      <summary>
+                        <button disabled>{labels[text(t.name)]}</button> 只读模式不可执行
+                      </summary>
+                      <ul>
+                        {array(t.blockers).map((code) => (
+                          <li key={text(code)}>{describe(Error(text(code)))}</li>
+                        ))}
+                      </ul>
+                    </details>
+                  ))}
+              </section>
+            )}
           </div>
           <div className="right-column">
             <Diagram position={point} draft={draft} objects={[]} previewRoute={previewPoints} />
@@ -358,10 +385,10 @@ export function SiteReadonlyConsole({
             />
             <button>导入任务</button>
           </form>
-          <p>仅显示本面板记录或显式导入的任务。查询沿原身份域执行；只读模式禁用生命周期操作。</p>
+          <p>仅显示本面板记录或显式导入的任务。查询沿原身份域执行；历史退役任务仅供读取。</p>
           {tasks.map((t) => (
             <button className="ghost" key={t.taskId} onClick={() => setSelected(t.taskId)}>
-              {t.operation} · {t.taskId}
+              {labels[t.operation] ?? t.operation} · {t.taskId}
             </button>
           ))}
         </section>
@@ -378,7 +405,9 @@ export function SiteReadonlyConsole({
               <summary>
                 {c.request.tool ?? c.request.kind} ·{" "}
                 {c.status === "completed"
-                  ? "预览完成"
+                  ? c.request.tool === PLAN_ROUTE
+                    ? "预览完成"
+                    : "操作完成"
                   : c.status === "unknown"
                     ? "结果未确认"
                     : c.status === "rejected"

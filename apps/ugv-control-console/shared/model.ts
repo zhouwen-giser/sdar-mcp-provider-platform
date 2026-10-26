@@ -40,7 +40,7 @@ export const READ_TOOLS = [
 export const CommandSchema = z
   .object({
     commandId: z.uuid(),
-    kind: z.enum(["tool", "pause", "resume", "cancel", "input", "intervention"]),
+    kind: z.enum(["tool", "pause", "resume", "cancel", "input", "intervention", "reconcile"]),
     tool: z.string().max(128).optional(),
     taskId: z.string().min(1).max(256).optional(),
     arguments: z.record(z.string(), z.unknown()).default({}),
@@ -58,6 +58,7 @@ export const CommandSchema = z
       .strict()
       .optional(),
     catalogHash: z.string().min(1).max(256),
+    previewCommandId: z.uuid().optional(),
   })
   .strict();
 export type Command = z.infer<typeof CommandSchema>;
@@ -102,7 +103,7 @@ export function classifyTask(task: Json): { label: string; tone: string } {
       data = record(result.structuredContent);
     const evidence = record(data.inspectionReport ?? data.completeness ?? data.reportCompleteness);
     const outcome = text(data.outcome ?? data.status);
-    if (data.schemaVersion === "ugv.zmq-effect-result/1") {
+    if (["ugv.zmq-effect-result/1", "ugv.zmq-effect-result/2"].includes(text(data.schemaVersion))) {
       if (data.executionState === "failed") return { label: "仿真执行失败", tone: "error" };
       if (
         data.executionState !== "succeeded" ||

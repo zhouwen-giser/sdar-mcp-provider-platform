@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
-import { DeploymentProfile } from "../../vehicle-zmq-contract/src/index.js";
+import { ControlDeploymentProfile } from "../../vehicle-zmq-contract/src/site-profile.js";
 
 export const COMPONENTS = ["chassis", "eo", "simulationEffect"] as const;
 export type Component = (typeof COMPONENTS)[number];
@@ -63,7 +63,7 @@ export function observerIdentity(
   profileSha256: string,
   contractSha256: string,
 ) {
-  const profile = DeploymentProfile.parse(profileInput);
+  const profile = ControlDeploymentProfile.parse(profileInput);
   const digest = z.string().regex(/^[a-f0-9]{64}$/);
   digest.parse(profileSha256);
   digest.parse(contractSha256);

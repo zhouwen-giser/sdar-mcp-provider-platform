@@ -663,7 +663,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
         const ownerCatalog = new OperationRegistry().validate(ownerManifest);
         const ownerReadonly =
           ownerCatalog.providerType === "isr.vehicle.ugv.zmq" &&
-          ownerCatalog.providerVersion === "1.1.0";
+          ["1.1.0", "1.2.0"].includes(ownerCatalog.providerVersion);
         await verifyGowmStorage(pool, config.gowmStorage);
         await resolveDeviceContext(
           pool,
@@ -686,8 +686,17 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       assertRuntimeProviderIdentity(providerIdentity);
       const validated = new OperationRegistry().validate(manifest);
       validatedManifest = validated;
+      if (
+        validated.providerType === "isr.vehicle.ugv.zmq" &&
+        validated.providerVersion === "1.2.0" &&
+        config.AUTH_MODE !== "jwt_hs256"
+      )
+        throw Error("ZMQ_SITE_CONTROL_JWT_REQUIRED");
       const siteReadonly =
         validated.providerType === "isr.vehicle.ugv.zmq" && validated.providerVersion === "1.1.0";
+      const retainSiteHistory =
+        siteReadonly ||
+        (validated.providerType === "isr.vehicle.ugv.zmq" && validated.providerVersion === "1.2.0");
       assertTaskBusinessEventReadiness(validated, config.BUSINESS_EVENTS_ENABLED);
       if (config.BUSINESS_EVENTS_ENABLED && validated.businessEventSources.length === 0) {
         throw new Error("BUSINESS_EVENTS_ENABLED_REQUIRES_SOURCE");
@@ -830,6 +839,12 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       const operationSnapshots = new OperationSnapshotRepository(pool);
       const snapshotIds = await operationSnapshots.saveManifest(validated);
       const taskRepository = new TaskRepository(pool);
+      if (
+        validated.providerType === "isr.vehicle.ugv.zmq" &&
+        validated.providerVersion === "1.2.0"
+      ) {
+        taskRepository.setWorkerSnapshotIds([...snapshotIds.values()], "live");
+      }
       taskBusinessGateway = new TaskBusinessGateway(
         validated,
         taskRepository,
@@ -1061,9 +1076,9 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       dependencies.scheduler = "ready"; // Readiness includes the validated no-work policy for a read-only catalog.
       if (!siteReadonly) await commandDispatcher.tick();
       dependencies.commandDispatcher = "ready"; // Readiness includes the validated no-work policy for a read-only catalog.
-      if (!siteReadonly) await outboxCleaner.tick();
+      if (!retainSiteHistory) await outboxCleaner.tick();
       dependencies.outboxCleaner = "ready"; // Readiness includes the validated no-work policy for a read-only catalog.
-      if (!siteReadonly) await ttlCleaner.tick();
+      if (!retainSiteHistory) await ttlCleaner.tick();
       dependencies.ttlCleaner = "ready"; // Readiness includes the validated no-work policy for a read-only catalog.
       if (!siteReadonly) await outboxPublisher.tick();
       dependencies.outboxPublisher = "ready"; // Readiness includes the validated no-work policy for a read-only catalog.
@@ -1110,7 +1125,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       }, config.SCHEDULER_POLL_MS);
       commandDispatcherTimer.unref();
       outboxCleanerTimer = setInterval(() => {
-        if (siteReadonly) return;
+        if (retainSiteHistory) return;
         if (outboxCleanerTicking) return;
         outboxCleanerTicking = true;
         void outboxCleaner
@@ -1128,7 +1143,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       }, config.OUTBOX_CLEANER_POLL_MS);
       outboxCleanerTimer.unref();
       ttlCleanerTimer = setInterval(() => {
-        if (siteReadonly) return;
+        if (retainSiteHistory) return;
         if (ttlCleanerTicking) return;
         ttlCleanerTicking = true;
         void ttlCleaner

@@ -180,12 +180,15 @@ export class PostgresControlRepository implements ControlRepository {
         return existing.rows[0].snapshot;
       }
       const latest = await client.query<{ revision: number }>(
-        `SELECT COALESCE(MAX((snapshot->>'revision')::bigint),0)::int revision FROM ugv_state_snapshot WHERE (${scopePredicate(this.pool, "ugv_state_snapshot", "ugv_state_snapshot")}) AND snapshot->>'schemaVersion'='ugv.zmq-result-record/1' AND snapshot->'identity'=$1::jsonb`,
+        `SELECT COALESCE(MAX((snapshot->>'revision')::bigint),0)::int revision FROM ugv_state_snapshot WHERE (${scopePredicate(this.pool, "ugv_state_snapshot", "ugv_state_snapshot")}) AND snapshot->>'schemaVersion' IN ('ugv.zmq-result-record/1','ugv.zmq-result-record/2') AND snapshot->'identity'=$1::jsonb`,
         [JSON.stringify(draft.identity)],
       );
       const record: ResultRecord = {
         ...draft,
-        schemaVersion: "ugv.zmq-result-record/1",
+        schemaVersion:
+          draft.identity.executionMode === "live"
+            ? "ugv.zmq-result-record/2"
+            : "ugv.zmq-result-record/1",
         revision: (latest.rows[0]?.revision ?? 0) + 1,
         contentHash: hash,
       };
@@ -206,7 +209,7 @@ export class PostgresControlRepository implements ControlRepository {
     resultPage(identity, [], afterRevision, limit);
     if (identity.scopeHash !== this.scope.hash) throw Error("ZMQ_EXECUTION_SCOPE_MISMATCH");
     const rows = await this.pool.query<{ snapshot: ResultRecord }>(
-      `SELECT snapshot FROM ugv_state_snapshot WHERE (${scopePredicate(this.pool, "ugv_state_snapshot", "ugv_state_snapshot")}) AND snapshot->>'schemaVersion'='ugv.zmq-result-record/1' AND snapshot->'identity'=$1::jsonb AND (snapshot->>'revision')::bigint>$2 ORDER BY (snapshot->>'revision')::bigint LIMIT $3`,
+      `SELECT snapshot FROM ugv_state_snapshot WHERE (${scopePredicate(this.pool, "ugv_state_snapshot", "ugv_state_snapshot")}) AND snapshot->>'schemaVersion' IN ('ugv.zmq-result-record/1','ugv.zmq-result-record/2') AND snapshot->'identity'=$1::jsonb AND (snapshot->>'revision')::bigint>$2 ORDER BY (snapshot->>'revision')::bigint LIMIT $3`,
       [JSON.stringify(identity), afterRevision, limit + 1],
     );
     return resultPage(

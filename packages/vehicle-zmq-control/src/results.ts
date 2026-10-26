@@ -2,7 +2,7 @@ import { z } from "zod";
 import { canonical, sha256 } from "../../vehicle-zmq-observer/src/config.js";
 import type { SourceRef, ZmqExecution } from "./model.js";
 
-export const ResultIdentity = z
+export const LegacyResultIdentity = z
   .object({
     scopeHash: z.string().regex(/^[a-f0-9]{64}$/),
     providerId: z.string().min(1),
@@ -15,7 +15,15 @@ export const ResultIdentity = z
     simulationId: z.string().min(1),
   })
   .strict();
-export type ResultIdentity = z.infer<typeof ResultIdentity>;
+export const SiteResultIdentity = LegacyResultIdentity.extend({
+  executionMode: z.literal("live"),
+  simulationId: z.null(),
+});
+export const ResultIdentity = z.union([LegacyResultIdentity, SiteResultIdentity]);
+export type ResultIdentity = Omit<
+  z.infer<typeof LegacyResultIdentity>,
+  "executionMode" | "simulationId"
+> & { executionMode: "simulation" | "live"; simulationId: string | null };
 export function resultIdentity(e: ZmqExecution): ResultIdentity {
   return ResultIdentity.parse({
     scopeHash: e.zmqControl.scopeHash,
@@ -26,7 +34,7 @@ export function resultIdentity(e: ZmqExecution): ResultIdentity {
     operationName: e.operationName,
     authorizationContextHash: e.executionContext.authorizationContextHash,
     executionMode: e.executionContext.executionMode,
-    simulationId: e.executionContext.simulationId,
+    simulationId: e.executionContext.simulationId || null,
   });
 }
 export const identityHash = (identity: ResultIdentity) =>
@@ -39,12 +47,12 @@ export interface ResultDraft {
   content: Record<string, unknown>;
 }
 export interface ResultRecord extends ResultDraft {
-  schemaVersion: "ugv.zmq-result-record/1";
+  schemaVersion: "ugv.zmq-result-record/1" | "ugv.zmq-result-record/2";
   revision: number;
   contentHash: string;
 }
 export interface ResultPage {
-  schemaVersion: "ugv.zmq-result-page/1";
+  schemaVersion: "ugv.zmq-result-page/1" | "ugv.zmq-result-page/2";
   identity: ResultIdentity;
   records: ResultRecord[];
   nextRevision: number;
@@ -104,7 +112,8 @@ export function resultPage(
     bytes += size;
   }
   return {
-    schemaVersion: "ugv.zmq-result-page/1",
+    schemaVersion:
+      identity.executionMode === "live" ? "ugv.zmq-result-page/2" : "ugv.zmq-result-page/1",
     identity,
     records: selected,
     nextRevision: selected.at(-1)?.revision ?? after,

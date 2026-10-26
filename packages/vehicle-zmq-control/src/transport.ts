@@ -7,6 +7,7 @@ export interface DispatchResult {
   response: Record<string, unknown> | null;
 }
 export interface CommandTransport {
+  prepare?(): void;
   dispatch(command: WireCommand, permit: () => void): Promise<DispatchResult>;
   close(): void;
 }
@@ -21,9 +22,14 @@ export class NativeControlTransport implements CommandTransport {
   constructor(scope: ControlScope) {
     // Recheck at the socket boundary as well as coordinator admission.
     this.scope = controlScope(scope.profile, scope.settings);
+    if (scope.settings.mode === "isolated_simulator") this.prepare();
+  }
+  prepare(): void {
+    if (this.#closed) throw Error("ZMQ_CONTROL_TRANSPORT_CLOSED");
+    if (this.#publisherConnected) return;
     this.#publisher = new Publisher({
       linger: 0,
-      sendTimeout: scope.settings.transportTimeoutMs,
+      sendTimeout: this.scope.settings.transportTimeoutMs,
       sendHighWaterMark: 8,
       reconnectInterval: 1000,
       reconnectMaxInterval: 5000,

@@ -468,6 +468,20 @@ export async function insertCommittedTaskEvent(
 
 export class TaskRepository {
   constructor(readonly pool: Pool) {}
+  private workSnapshots: string[] | undefined;
+  private workLive = false;
+  setWorkerSnapshotIds(ids: readonly string[], mode?: "live"): void {
+    this.workLive = mode === "live";
+    this.workSnapshots = ids.map((v) => z.uuid().parse(v));
+  }
+  private workPredicate(alias: string, table: string): string {
+    if (!this.workSnapshots) return "TRUE";
+    const ids = this.workSnapshots.map((v) => "'" + v + "'").join(",");
+    const snapshots = ids ? `ARRAY[${ids}]::uuid[]` : "ARRAY[]::uuid[]";
+    if (["provider_task", "admission_intent"].includes(table))
+      return `${alias}.operation_snapshot_id=ANY(${snapshots})${this.workLive ? ` AND ${alias}.execution_mode='live' AND ${alias}.simulation_id IS NULL` : ""}`;
+    return `EXISTS (SELECT 1 FROM provider_task wp WHERE wp.task_id=${alias}.task_id AND (${scopePredicate(this.pool, "wp", "provider_task")}) AND wp.operation_snapshot_id=ANY(${snapshots})${this.workLive ? " AND wp.execution_mode='live' AND wp.simulation_id IS NULL" : ""})`;
+  }
 
   async createAdmissionIntent(input: AdmissionIntentInput): Promise<boolean> {
     const shared = storageScope(this.pool);
@@ -1028,7 +1042,7 @@ export class TaskRepository {
   async listAdmissionsForRecovery(limit = 128): Promise<AdmissionIntentRecord[]> {
     const result = await this.pool.query<{ task_id: string }>(
       `SELECT task_id FROM admission_intent
-       WHERE (${scopePredicate(this.pool, "admission_intent", "admission_intent")}) AND ( state IN ('PENDING','UNCERTAIN')
+       WHERE (${scopePredicate(this.pool, "admission_intent", "admission_intent")} AND (${this.workPredicate("admission_intent", "admission_intent")})) AND ( state IN ('PENDING','UNCERTAIN')
        ) ORDER BY updated_at, task_id LIMIT $1`,
       [limit],
     );
@@ -1039,7 +1053,7 @@ export class TaskRepository {
   async listTasksForRecovery(limit = 256): Promise<TaskRecord[]> {
     const result = await this.pool.query<TaskRow>(
       `SELECT * FROM provider_task
-       WHERE (${scopePredicate(this.pool, "provider_task", "provider_task")}) AND ( internal_state NOT LIKE 'TERMINAL_%' AND internal_state <> 'SCHEDULED'
+       WHERE (${scopePredicate(this.pool, "provider_task", "provider_task")} AND (${this.workPredicate("provider_task", "provider_task")})) AND ( internal_state NOT LIKE 'TERMINAL_%' AND internal_state <> 'SCHEDULED'
          AND next_recovery_at <= clock_timestamp()
        ) ORDER BY next_recovery_at, last_reconciled_at NULLS FIRST, task_id LIMIT $1`,
       [limit],
@@ -1095,7 +1109,7 @@ export class TaskRepository {
                 last_error_message='Safe stop superseded the pending command.',
                 updated_at=clock_timestamp()
            FROM provider_task
-          WHERE (${scopePredicate(client, "command", "task_command")} AND ${scopePredicate(client, "provider_task", "provider_task")}) AND ( provider_task.task_id=command.task_id
+          WHERE (${scopePredicate(client, "command", "task_command")} AND (${this.workPredicate("command", "task_command")}) AND ${scopePredicate(client, "provider_task", "provider_task")} AND (${this.workPredicate("provider_task", "provider_task")})) AND ( provider_task.task_id=command.task_id
             AND provider_task.cancel_requested IS TRUE
             AND command.command_type IN ('UPDATE','PAUSE','RESUME','INTERVENTION')
             AND command.state='CLAIMED'
@@ -1142,7 +1156,7 @@ export class TaskRepository {
          FROM task_command
          JOIN provider_task
            ON provider_task.task_id = task_command.task_id
-         WHERE (${scopePredicate(client, "task_command", "task_command")} AND ${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_command.command_type IN ('CANCEL','UPDATE','PAUSE','RESUME','INTERVENTION')
+         WHERE (${scopePredicate(client, "task_command", "task_command")} AND (${this.workPredicate("task_command", "task_command")}) AND ${scopePredicate(client, "provider_task", "provider_task")} AND (${this.workPredicate("provider_task", "provider_task")})) AND ( task_command.command_type IN ('CANCEL','UPDATE','PAUSE','RESUME','INTERVENTION')
            AND (
              (task_command.state IN ('PENDING','RETRY_WAIT')
               AND task_command.next_attempt_at <= GREATEST($1,clock_timestamp())
@@ -1155,7 +1169,7 @@ export class TaskRepository {
            )
            AND NOT EXISTS (
              SELECT 1 FROM task_command in_flight
-             WHERE (${scopePredicate(client, "in_flight", "task_command")}) AND ( in_flight.task_id = task_command.task_id
+             WHERE (${scopePredicate(client, "in_flight", "task_command")} AND (${this.workPredicate("in_flight", "task_command")})) AND ( in_flight.task_id = task_command.task_id
                AND in_flight.state = 'CLAIMED'
                AND in_flight.claim_until > GREATEST($1,clock_timestamp())
                AND in_flight.command_sequence <> task_command.command_sequence
@@ -1175,7 +1189,7 @@ export class TaskRepository {
          INNER JOIN candidates
            ON candidates.task_id = task_command.task_id
           AND candidates.command_sequence = task_command.command_sequence
-         WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( (task_command.state IN ('PENDING','RETRY_WAIT')
+         WHERE (${scopePredicate(client, "task_command", "task_command")} AND (${this.workPredicate("task_command", "task_command")})) AND ( (task_command.state IN ('PENDING','RETRY_WAIT')
                 AND task_command.next_attempt_at <= GREATEST($1,clock_timestamp()))
             OR (
               task_command.state = 'CLAIMED'
@@ -1186,7 +1200,7 @@ export class TaskRepository {
        UPDATE task_command command SET state='CLAIMED', claim_owner=$2,
          claim_until=GREATEST($1,clock_timestamp()) + ($3::text || ' milliseconds')::interval,
          attempt_count=attempt_count+1, updated_at=clock_timestamp()
-       FROM due WHERE (${scopePredicate(client, "command", "task_command")}) AND ( command.task_id=due.task_id
+       FROM due WHERE (${scopePredicate(client, "command", "task_command")} AND (${this.workPredicate("command", "task_command")})) AND ( command.task_id=due.task_id
          AND command.command_sequence=due.command_sequence
        ) RETURNING command.task_id, command.command_sequence, command.command_type,
          command.payload, command.state, command.attempt_count, command.claim_owner,
@@ -1847,7 +1861,7 @@ export class TaskRepository {
       await client.query("BEGIN");
       const due = await client.query<TaskRow>(
         `SELECT * FROM provider_task
-         WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( external_execution_id IS NULL AND internal_state='SCHEDULED'
+         WHERE (${scopePredicate(client, "provider_task", "provider_task")} AND (${this.workPredicate("provider_task", "provider_task")})) AND ( external_execution_id IS NULL AND internal_state='SCHEDULED'
            AND not_before <= $1 AND COALESCE(next_start_attempt_at,not_before) <= $1
            AND latest_start_at > $1
          ) ORDER BY COALESCE(next_start_attempt_at,not_before), task_id
@@ -1900,7 +1914,7 @@ export class TaskRepository {
       await client.query("BEGIN");
       const due = await client.query<{ task_id: string }>(
         `SELECT task_id FROM provider_task
-         WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( internal_state='SCHEDULED' AND external_execution_id IS NULL
+         WHERE (${scopePredicate(client, "provider_task", "provider_task")} AND (${this.workPredicate("provider_task", "provider_task")})) AND ( internal_state='SCHEDULED' AND external_execution_id IS NULL
            AND latest_start_at <= $1
          ) ORDER BY latest_start_at, task_id FOR UPDATE SKIP LOCKED LIMIT $2`,
         [now, limit],
@@ -1955,7 +1969,7 @@ export class TaskRepository {
       await client.query("BEGIN");
       const due = await client.query<TaskRow>(
         `SELECT * FROM provider_task
-         WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( external_execution_id IS NULL AND internal_state='STARTING'
+         WHERE (${scopePredicate(client, "provider_task", "provider_task")} AND (${this.workPredicate("provider_task", "provider_task")})) AND ( external_execution_id IS NULL AND internal_state='STARTING'
            AND schedule_claim_until <= $1
          ) ORDER BY schedule_claim_until, task_id FOR UPDATE SKIP LOCKED LIMIT $2`,
         [now, limit],
@@ -2380,7 +2394,7 @@ export class TaskRepository {
       await client.query("BEGIN");
       const due = await client.query<TaskRow>(
         `SELECT * FROM provider_task
-         WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( internal_state NOT LIKE 'TERMINAL_%'
+         WHERE (${scopePredicate(client, "provider_task", "provider_task")} AND (${this.workPredicate("provider_task", "provider_task")})) AND ( internal_state NOT LIKE 'TERMINAL_%'
            AND actual_started_at IS NULL
            AND COALESCE(start_confirmation_deadline,latest_start_at) <= $1
            AND external_execution_id IS NOT NULL
@@ -2558,7 +2572,7 @@ export class TaskRepository {
       await client.query("BEGIN");
       const expired = await client.query<TaskRow>(
         `SELECT * FROM provider_task
-         WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( deadline_at <= $1 AND stop_reason IS DISTINCT FROM 'DEADLINE_REACHED'
+         WHERE (${scopePredicate(client, "provider_task", "provider_task")} AND (${this.workPredicate("provider_task", "provider_task")})) AND ( deadline_at <= $1 AND stop_reason IS DISTINCT FROM 'DEADLINE_REACHED'
            AND external_execution_id IS NOT NULL
            AND internal_state NOT LIKE 'TERMINAL_%'
          ) ORDER BY deadline_at, task_id FOR UPDATE SKIP LOCKED LIMIT $2`,
@@ -2568,7 +2582,7 @@ export class TaskRepository {
       for (const row of expired.rows) {
         const active = await client.query<{ command_sequence: string }>(
           `SELECT command_sequence FROM task_command
-           WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_type='CANCEL'
+           WHERE (${scopePredicate(client, "task_command", "task_command")} AND (${this.workPredicate("task_command", "task_command")})) AND ( task_id=$1 AND command_type='CANCEL'
              AND state IN ('PENDING','CLAIMED','RETRY_WAIT','ACKNOWLEDGED')
            ) ORDER BY command_sequence DESC LIMIT 1`,
           [row.task_id],
@@ -2579,7 +2593,7 @@ export class TaskRepository {
         if (activeSequence === undefined) {
           const sequence = await client.query<{ next_command_sequence: string }>(
             `UPDATE provider_task SET next_command_sequence=next_command_sequence+1
-             WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) RETURNING next_command_sequence`,
+             WHERE (${scopePredicate(client, "provider_task", "provider_task")} AND (${this.workPredicate("provider_task", "provider_task")})) AND ( task_id=$1 ) RETURNING next_command_sequence`,
             [row.task_id],
           );
           commandSequence = Number(sequence.rows[0]?.next_command_sequence);
@@ -2608,7 +2622,7 @@ export class TaskRepository {
           await client.query(
             `UPDATE task_command SET stop_reason='DEADLINE_REACHED', priority=100,
                payload=$3::jsonb, updated_at=clock_timestamp()
-             WHERE (${scopePredicate(client, "task_command", "task_command")}) AND ( task_id=$1 AND command_sequence=$2) `,
+             WHERE (${scopePredicate(client, "task_command", "task_command")} AND (${this.workPredicate("task_command", "task_command")})) AND ( task_id=$1 AND command_sequence=$2) `,
             [row.task_id, commandSequence, JSON.stringify({ reason: "DEADLINE_REACHED" })],
           );
         }
@@ -2933,7 +2947,7 @@ export class TaskRepository {
     const candidates = await this.pool.query<{ task_id: string }>(
       `SELECT task_id
        FROM task_input_response_inbox
-       WHERE (${scopePredicate(this.pool, "task_input_response_inbox", "task_input_response_inbox")}) AND ( state='PENDING'
+       WHERE (${scopePredicate(this.pool, "task_input_response_inbox", "task_input_response_inbox")} AND (${this.workPredicate("task_input_response_inbox", "task_input_response_inbox")})) AND ( state='PENDING'
        ) GROUP BY task_id
        ORDER BY min(accepted_at), task_id
        LIMIT $1`,
@@ -2945,7 +2959,7 @@ export class TaskRepository {
       try {
         await client.query("BEGIN");
         const lockedTask = await client.query<TaskRow>(
-          `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) FOR UPDATE`,
+          `SELECT * FROM provider_task WHERE (${scopePredicate(client, "provider_task", "provider_task")} AND (${this.workPredicate("provider_task", "provider_task")})) AND ( task_id=$1 ) FOR UPDATE`,
           [taskId],
         );
         const task = lockedTask.rows[0];
@@ -2958,7 +2972,7 @@ export class TaskRepository {
           }>(
             `SELECT request_key, response_hash, response_json
              FROM task_input_response_inbox
-             WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")}) AND ( task_id=$1 AND state='PENDING'
+             WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")} AND (${this.workPredicate("task_input_response_inbox", "task_input_response_inbox")})) AND ( task_id=$1 AND state='PENDING'
              ) ORDER BY accepted_at, request_key
              FOR UPDATE SKIP LOCKED`,
             [taskId],
@@ -2981,7 +2995,7 @@ export class TaskRepository {
              SET state='IGNORED', updated_at=clock_timestamp(),
                  last_error_code='TASK_NOT_ACCEPTING_INPUT',
                  last_error_message='Task is stopping or terminal.'
-             WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")}) AND ( task_id=$1 AND request_key=ANY($2::text[]) AND state='PENDING') `,
+             WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")} AND (${this.workPredicate("task_input_response_inbox", "task_input_response_inbox")})) AND ( task_id=$1 AND request_key=ANY($2::text[]) AND state='PENDING') `,
             [taskId, keys],
           );
           await reconcileMcpExecutionLinks(client);
@@ -3001,7 +3015,7 @@ export class TaskRepository {
             : (
                 await client.query<{ request_key: string; status: InputRequestRecord["status"] }>(
                   `SELECT request_key,status FROM task_input_request
-                   WHERE (${scopePredicate(client, "task_input_request", "task_input_request")})
+                   WHERE (${scopePredicate(client, "task_input_request", "task_input_request")} AND (${this.workPredicate("task_input_request", "task_input_request")}))
                      AND task_id=$1 AND request_key=ANY($2::text[])
                    ORDER BY request_key FOR UPDATE`,
                   [taskId, businessKeys],
@@ -3020,7 +3034,7 @@ export class TaskRepository {
           if (taskNoLongerWaiting) {
             await client.query(
               `UPDATE task_input_request SET status='SUPERSEDED'
-               WHERE (${scopePredicate(client, "task_input_request", "task_input_request")}) AND ( task_id=$1 AND request_key=ANY($2::text[]) AND status='OPEN') `,
+               WHERE (${scopePredicate(client, "task_input_request", "task_input_request")} AND (${this.workPredicate("task_input_request", "task_input_request")})) AND ( task_id=$1 AND request_key=ANY($2::text[]) AND status='OPEN') `,
               [taskId, staleBusinessKeys],
             );
           }
@@ -3029,7 +3043,7 @@ export class TaskRepository {
              SET state='IGNORED', updated_at=clock_timestamp(),
                  last_error_code=$3,
                  last_error_message=$4
-             WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")}) AND ( task_id=$1 AND request_key=ANY($2::text[]) AND state='PENDING') `,
+             WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")} AND (${this.workPredicate("task_input_response_inbox", "task_input_response_inbox")})) AND ( task_id=$1 AND request_key=ANY($2::text[]) AND state='PENDING') `,
             [
               taskId,
               staleBusinessKeys,
@@ -3052,7 +3066,7 @@ export class TaskRepository {
         }
         const updated = await client.query<{ next_command_sequence: string }>(
           `UPDATE provider_task SET next_command_sequence=next_command_sequence+1
-           WHERE (${scopePredicate(client, "provider_task", "provider_task")}) AND ( task_id=$1 ) RETURNING next_command_sequence`,
+           WHERE (${scopePredicate(client, "provider_task", "provider_task")} AND (${this.workPredicate("provider_task", "provider_task")})) AND ( task_id=$1 ) RETURNING next_command_sequence`,
           [taskId],
         );
         const sequence = updated.rows[0]?.next_command_sequence;
@@ -3092,7 +3106,7 @@ export class TaskRepository {
           `UPDATE task_input_response_inbox
            SET state='ASSIGNED', command_sequence=$3, assigned_at=clock_timestamp(),
                updated_at=clock_timestamp()
-           WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")}) AND ( task_id=$1 AND request_key=ANY($2::text[]) AND state='PENDING') `,
+           WHERE (${scopePredicate(client, "task_input_response_inbox", "task_input_response_inbox")} AND (${this.workPredicate("task_input_response_inbox", "task_input_response_inbox")})) AND ( task_id=$1 AND request_key=ANY($2::text[]) AND state='PENDING') `,
           [taskId, readyResponses.map((response) => response.request_key), sequence],
         );
         if (assigned.rowCount !== readyResponses.length)

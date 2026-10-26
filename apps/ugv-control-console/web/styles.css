@@ -901,3 +901,17 @@ footer span {
 button {
   white-space: nowrap;
 }
+
+.site-console .panel button,
+.site-console .panel summary,
+.site-console .panel p {
+  white-space: normal;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.site-console .panel pre {
+  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  overflow: auto;
+}

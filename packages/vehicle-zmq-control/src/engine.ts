@@ -69,6 +69,7 @@ export class ZmqControlEngine {
   readonly #dirty = new Set<string>();
   readonly #commandReservations = new Map<string, string>();
   readonly #sourceInterrupted = new Map<string, SourceRef>();
+  readonly #inspectionSources = new Map<string, ZmqExecution>();
   readonly #watchedEffects = new Map<string, ZmqExecution>();
   readonly #coverageSignatures = new Map<string, string>();
   readonly #pendingReports = new Map<string, number>();
@@ -77,6 +78,7 @@ export class ZmqControlEngine {
     string,
     { firstMs: number; lastSequence: number; count: number }
   >();
+  readonly #positionWindow: Observed[] = [];
   #sequence = 0;
   #started = false;
   #closed = false;
@@ -106,6 +108,7 @@ export class ZmqControlEngine {
     if (this.#started) throw Error("ZMQ_CONTROL_ALREADY_STARTED");
     this.#started = true;
     await this.repository.start();
+    this.transport.prepare?.();
     for (const execution of await this.repository.pending()) {
       const s = execution.zmqControl;
       if (this.#active.has(s.component)) throw Error("ZMQ_CONTROL_OCCUPANCY_CONFLICT");
@@ -139,6 +142,7 @@ export class ZmqControlEngine {
         this.#recoveryFreshness.add(execution.taskId);
       }
       this.#active.set(s.component, execution);
+      if (execution.zmqInspection) this.#inspectionSources.set(execution.taskId, execution);
       if (s.component === "simulationEffect") this.#watchedEffects.set(execution.taskId, execution);
       await this.save(execution);
     }
@@ -210,6 +214,7 @@ export class ZmqControlEngine {
           if (component === "simulationEffect")
             for (const watched of this.#watchedEffects.values())
               this.#sourceInterrupted.set(watched.taskId, ref);
+          if (component === "chassis") this.#positionWindow.length = 0;
           // Clear pre-disconnect snapshots; reconnect must collect every required source anew.
           for (const key of this.#observations.keys())
             if (key.startsWith(component + "/")) this.#observations.delete(key);
@@ -224,6 +229,7 @@ export class ZmqControlEngine {
         ? this.scope.profile.components.chassis.systemId
         : this.scope.profile.components[receipt.component].deviceId;
     if (
+      this.scope.settings.mode === "isolated_simulator" &&
       receipt.component === "eo" &&
       receipt.observation.key !== "task_status" &&
       receipt.observation.reportedOrigin !== "simulated"
@@ -244,6 +250,10 @@ export class ZmqControlEngine {
       sequence: ++this.#sequence,
     };
     this.#observations.set(receipt.component + "/" + receipt.observation.key, observed);
+    if (receipt.component === "chassis" && receipt.observation.key === "localization") {
+      this.#positionWindow.push(observed);
+      if (this.#positionWindow.length > 256) this.#positionWindow.shift();
+    }
     this.queueReport(observed);
     this.wake(receipt.component);
   }
@@ -275,6 +285,8 @@ export class ZmqControlEngine {
     if (
       component === "eo" &&
       (state.ready !== true ||
+        state.mode !== "idle" ||
+        object(state.telecontrol).state === "running" ||
         state.camera_online !== true ||
         state.gimbal_online !== true ||
         state.active_task_id !== null ||
@@ -297,7 +309,27 @@ export class ZmqControlEngine {
     } catch {
       return { available: false, reasonCode: "ZMQ_DEPLOYMENT_LIMIT_EXCEEDED" };
     }
-    return { available: true, reasonCode: "SIMULATED_ONLY_NOT_QUALIFIED" };
+    if (component === "chassis" && this.scope.settings.mode === "site_control") {
+      const mission = this.latest("chassis", "missionState"),
+        position = this.latest("chassis", "localization");
+      if (!position) return { available: false, reasonCode: "ZMQ_STATE_STALE_OR_DISCONNECTED" };
+      const velocity = this.data(position).velocityEnu;
+      if (
+        [1, 2].includes(Number(this.data(mission).state)) ||
+        !Array.isArray(velocity) ||
+        velocity.some(
+          (v) => typeof v !== "number" || Math.abs(v) > this.scope.settings.stationarySpeedMps,
+        )
+      )
+        return { available: false, reasonCode: "ZMQ_CHASSIS_EXTERNAL_MISSION_ACTIVE" };
+    }
+    return {
+      available: true,
+      reasonCode:
+        this.scope.settings.mode === "site_control"
+          ? "ZMQ_SITE_OPERATION_READY"
+          : "SIMULATED_ONLY_NOT_QUALIFIED",
+    };
   }
   /** Full-parameter candidate admission; the synchronous method above is component health only. */
   async checkAvailability(operation: Operation, context: ExecutionContextRecord) {
@@ -321,6 +353,10 @@ export class ZmqControlEngine {
       ("speedLimitMps" in p && p.speedLimitMps > s.maxSpeedMps) ||
       ("yaw_rad" in p && (p.yaw_rad < s.minYawRad || p.yaw_rad > s.maxYawRad)) ||
       ("pitch_rad" in p && (p.pitch_rad < s.minPitchRad || p.pitch_rad > s.maxPitchRad)) ||
+      ("yaw_speed_rad_s" in p && p.yaw_speed_rad_s > s.maxYawRateRadS) ||
+      ("yaw_center_rad" in p &&
+        p.yaw_center_rad !== null &&
+        (p.yaw_center_rad < s.minYawRad || p.yaw_center_rad > s.maxYawRad)) ||
       ("zoom_ratio" in p && (p.zoom_ratio < s.minZoom || p.zoom_ratio > s.maxZoom)) ||
       ("yaw_rate_rad_s" in p &&
         (Math.abs(p.yaw_rate_rad_s) > s.maxYawRateRadS ||
@@ -345,7 +381,9 @@ export class ZmqControlEngine {
       if (!this.clockHealthy()) throw Error("ZMQ_CLOCK_DISCONTINUITY");
       if (
         request.resourceId !== this.scope.profile.providerBinding.resourceId ||
-        request.executionContext.simulationId !== this.scope.profile.executionDomain.simulationId
+        (request.executionContext.simulationId || null) !==
+          this.scope.profile.executionDomain.simulationId ||
+        request.executionContext.executionMode !== this.scope.profile.executionDomain.mode
       )
         throw Error("ZMQ_EXECUTION_IDENTITY_MISMATCH");
       const available = this.availability(request.operation);
@@ -430,6 +468,11 @@ export class ZmqControlEngine {
           latestEvidence: [],
           missingEvidence: [
             "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+            ...(component === "chassis" &&
+            this.scope.settings.mode === "site_control" &&
+            !this.latest("chassis", "missionState")
+              ? ["CHASSIS_INITIAL_MISSION_STATE_NOT_OBSERVED"]
+              : []),
             ...(component === "chassis"
               ? ["CHASSIS_FEEDBACK_UNCORRELATED", "MODE_PUBLICATION_ORDER_UNVERIFIED"]
               : []),
@@ -453,6 +496,13 @@ export class ZmqControlEngine {
       }
       const accepted = structuredClone(e);
       this.#active.set(component, e);
+      if (e.zmqInspection) {
+        this.#inspectionSources.set(e.taskId, e);
+        if (this.#inspectionSources.size > 8) {
+          const oldest = this.#inspectionSources.keys().next().value;
+          if (oldest) this.#inspectionSources.delete(oldest);
+        }
+      }
       if (component === "simulationEffect") {
         this.#watchedEffects.set(e.taskId, e);
         if (this.#watchedEffects.size > 128) {
@@ -495,6 +545,9 @@ export class ZmqControlEngine {
     await this.reloadResultHead(e);
     return {
       ...inspectionReport(e.zmqInspection, (this.#pendingReports.get(e.taskId) ?? 0) > 0),
+      ...(this.scope.settings.mode === "site_control"
+        ? { schemaVersion: "ugv.zmq-inspection-result/2" }
+        : {}),
       identity,
       page,
     };
@@ -518,7 +571,10 @@ export class ZmqControlEngine {
     if (object(e.zmqEffect.latest?.nativeTask).effect === "unknown")
       missing.add("SIMULATION_EFFECT_UNKNOWN");
     return {
-      schemaVersion: "ugv.zmq-effect-query/1",
+      schemaVersion:
+        this.scope.settings.mode === "site_control"
+          ? "ugv.zmq-effect-query/2"
+          : "ugv.zmq-effect-query/1",
       identity,
       originalTask: {
         state: e.state,
@@ -552,6 +608,19 @@ export class ZmqControlEngine {
     }
     e.zmqInspection?.missingEvidence.push("LOCAL_SUMMARY_REBUILD_LIMIT_USE_PAGES");
     if (e.zmqEffect) throw Error("ZMQ_RESULT_SUMMARY_REBUILD_LIMIT_USE_PAGES");
+  }
+  async currentEffectCandidates(context: ExecutionContextRecord) {
+    const values = [];
+    for (const e of this.#inspectionSources.values()) {
+      if (
+        e.executionContext.authorizationContextHash !== context.authorizationContextHash ||
+        e.executionContext.executionMode !== context.executionMode ||
+        e.executionContext.simulationId !== context.simulationId
+      )
+        continue;
+      values.push(...(await this.effectCandidates(resultIdentity(e), context)));
+    }
+    return values.slice(0, 256);
   }
   async effectCandidates(identity: ResultIdentity, context: ExecutionContextRecord) {
     const source = await this.get(identity.taskId, context);
@@ -710,8 +779,14 @@ export class ZmqControlEngine {
     operation: Extract<Operation, { name: "simulation.applyEffect" }>,
     context: ExecutionContextRecord,
   ) {
-    const p = operation.params,
-      source = await this.get(p.observation.taskId, context);
+    const p = operation.params;
+    if (p.targetSource === "manual") {
+      if (this.scope.settings.mode !== "site_control" || !p.sourceNote || p.observation)
+        throw Error("ZMQ_MANUAL_TARGET_NOT_AUTHORIZED");
+      return;
+    }
+    if (!p.observation) throw Error("ZMQ_EFFECT_GEO_OBSERVATION_REQUIRED");
+    const source = await this.get(p.observation.taskId, context);
     if (
       !source?.zmqInspection ||
       source.externalExecutionId !== p.observation.externalExecutionId ||
@@ -822,7 +897,10 @@ export class ZmqControlEngine {
         content: {
           nativeTask: task,
           nativeRequestId: command.requestId,
-          sourceBinding: "isolated_simulation_referee",
+          sourceBinding:
+            this.scope.settings.mode === "site_control"
+              ? "configured_site_simulation_referee"
+              : "isolated_simulation_referee",
           sourceProducerEpoch: null,
           publishedAt: new Date(Number(value.receipt.observation?.sourceTime.value)).toISOString(),
           late: !!e.terminalAt,
@@ -861,9 +939,28 @@ export class ZmqControlEngine {
     const latest = e.zmqEffect?.latest,
       task = object(latest?.nativeTask);
     return structuredClone({
-      schemaVersion: "ugv.zmq-effect-result/1",
-      qualification: "isolated_simulator_only",
-      runtimeAdmission: e.zmqAdmission ? "isolated_runtime" : "not_published",
+      schemaVersion:
+        this.scope.settings.mode === "site_control"
+          ? "ugv.zmq-effect-result/2"
+          : "ugv.zmq-effect-result/1",
+      qualification:
+        this.scope.settings.mode === "site_control" ? "site_control" : "isolated_simulator_only",
+      runtimeAdmission:
+        this.scope.settings.mode === "site_control"
+          ? "site_runtime"
+          : e.zmqAdmission
+            ? "isolated_runtime"
+            : "not_published",
+      ...(this.scope.settings.mode === "site_control"
+        ? {
+            targetProvenance: {
+              kind: object(object(e.arguments.operation).params).targetSource ?? "observation",
+              sourceNote: object(object(e.arguments.operation).params).sourceNote ?? null,
+              authorizationContextHash: e.executionContext.authorizationContextHash,
+              correlationId: e.executionContext.correlationId,
+            },
+          }
+        : {}),
       requestAccepted: e.zmqControl.commands.some(
         (c) => c.action === "effect" && c.status === "accepted",
       ),
@@ -990,6 +1087,100 @@ export class ZmqControlEngine {
         return structuredClone(e);
       }, action === "cancel")
       .finally(() => this.#commandReservations.delete(identity.commandId));
+  }
+  async reconcileComponent(
+    input: { component: ControlComponent; taskId: string; commandId: string; reason: string },
+    context: ExecutionContextRecord,
+  ) {
+    if (this.scope.settings.mode !== "site_control" || !input.reason.trim())
+      throw Error("ZMQ_RECONCILIATION_INVALID");
+    return this.#lanes[input.component].enqueue(async () => {
+      await this.repository.assertWriter();
+      const e = await this.get(input.taskId, context);
+      if (e?.zmqControl.component !== input.component || !e.terminalAt)
+        throw Error("ZMQ_RECONCILIATION_TASK_NOT_TERMINAL");
+      const active = this.#active.get(input.component);
+      if (active && active.taskId !== e.taskId) throw Error("ZMQ_COMPONENT_BUSY");
+      const s = e.zmqControl;
+      const prior = (s as unknown as { reconciliation?: { commandId: string; reason: string } })
+        .reconciliation;
+      if (prior) {
+        if (prior.commandId !== input.commandId || prior.reason !== input.reason)
+          throw Error("ZMQ_RECONCILIATION_CONFLICT");
+        return structuredClone(e);
+      }
+      if (s.occupancy !== "held") throw Error("ZMQ_RECONCILIATION_NOT_REQUIRED");
+      const state = this.latest(
+        input.component,
+        input.component === "chassis" ? "systemState" : "device_status",
+      );
+      if (!state) throw Error("ZMQ_STATE_STALE_OR_DISCONNECTED");
+      const d = this.data(state);
+      const refs = [state.ref];
+      if (input.component === "chassis") {
+        const position = this.latest("chassis", "localization"),
+          mission = this.latest("chassis", "missionState");
+        const velocity = this.data(position).velocityEnu;
+        if (
+          d.runState !== 1 ||
+          !Array.isArray(d.errorCodes) ||
+          d.errorCodes.length ||
+          !position ||
+          !mission ||
+          ![0, 3, 4, 5].includes(Number(this.data(mission).state)) ||
+          !Array.isArray(velocity) ||
+          velocity.some(
+            (v) => typeof v !== "number" || Math.abs(v) > this.scope.settings.stationarySpeedMps,
+          )
+        )
+          throw Error("ZMQ_RECONCILIATION_IDLE_UNCONFIRMED");
+        const stationary = this.#positionWindow.filter((v) => {
+          const age = this.clock.monotonicMs() - Number(BigInt(v.receipt.monotonicNs) / 1000000n),
+            speed = this.data(v).velocityEnu;
+          return (
+            age >= 0 &&
+            age <= this.scope.settings.stateFreshForMs &&
+            Array.isArray(speed) &&
+            speed.every(
+              (n) => typeof n === "number" && Math.abs(n) <= this.scope.settings.stationarySpeedMps,
+            )
+          );
+        });
+        if (
+          stationary.length < 2 ||
+          Number(
+            BigInt(stationary.at(-1)?.receipt.monotonicNs ?? "0") -
+              BigInt(stationary[0]?.receipt.monotonicNs ?? "0"),
+          ) < 100000000
+        )
+          throw Error("ZMQ_RECONCILIATION_IDLE_UNCONFIRMED");
+        refs.push(position.ref, mission.ref, ...stationary.slice(0, 1).map((v) => v.ref));
+      } else if (
+        d.ready !== true ||
+        d.mode !== "idle" ||
+        d.active_task_id !== null ||
+        object(d.telecontrol).state === "running"
+      ) {
+        throw Error("ZMQ_RECONCILIATION_IDLE_UNCONFIRMED");
+      }
+      Object.assign(s, {
+        reconciliation: {
+          ...input,
+          at: this.at(),
+          sourceRefs: refs,
+          authorizationContextHash: context.authorizationContextHash,
+        },
+      });
+      s.occupancy = "released";
+      s.stage = "terminal";
+      await this.save(e);
+      this.#active.delete(input.component);
+      this.#watchedEffects.delete(e.taskId);
+      this.#healthy = true;
+      this.#sourceInterrupted.delete(e.taskId);
+      this.#blocked.delete(input.component);
+      return structuredClone(e);
+    }, true);
   }
   pulse(): void {
     if (this.#observer && this.#observer.health.status !== "running") {
@@ -1872,9 +2063,18 @@ export class ZmqControlEngine {
     const s = e.zmqControl;
     if (e.zmqEffect) return this.effectResult(e);
     return structuredClone({
-      schemaVersion: "ugv.zmq-control-result/1",
-      qualification: "isolated_simulator_only",
-      runtimeAdmission: e.zmqAdmission ? "isolated_runtime" : "not_published",
+      schemaVersion:
+        this.scope.settings.mode === "site_control"
+          ? "ugv.zmq-control-result/2"
+          : "ugv.zmq-control-result/1",
+      qualification:
+        this.scope.settings.mode === "site_control" ? "site_control" : "isolated_simulator_only",
+      runtimeAdmission:
+        this.scope.settings.mode === "site_control"
+          ? "site_runtime"
+          : e.zmqAdmission
+            ? "isolated_runtime"
+            : "not_published",
       nativeTaskId: s.nativeTaskId,
       nativeOutcome: s.nativeOutcome,
       nativeReason: s.nativeReason,
@@ -1890,6 +2090,9 @@ export class ZmqControlEngine {
             },
             (this.#pendingReports.get(e.taskId) ?? 0) > 0,
           )
+        : {}),
+      ...(this.scope.settings.mode === "site_control" && e.zmqInspection
+        ? { schemaVersion: "ugv.zmq-inspection-result/2" }
         : {}),
     });
   }

@@ -6,7 +6,7 @@ import {
   encodeChassisFrame,
   EoRequest,
   SimulationEffectRequest,
-  type DeploymentProfile,
+  DeploymentProfile,
 } from "../../packages/vehicle-zmq-contract/src/index.js";
 import {
   device,
@@ -34,9 +34,12 @@ export class SimulatedZmqDevices {
   readonly eoPub = new Publisher({ linger: 0 });
   readonly effectRep = new Reply({ receiveTimeout: 100, sendTimeout: 100, linger: 0 });
   readonly effectPub = new Publisher({ linger: 0 });
+  readonly rawChassisFrames: Buffer[] = [];
   readonly commands: { component: string; at: number; request: Record<string, unknown> }[] = [];
   readonly seen = new Map<string, Record<string, unknown>>();
   readonly errors: unknown[] = [];
+  controllerSystemId = "18446744073709551614";
+  positionOverride: { longitude: number; latitude: number } | undefined;
   mode = 0;
   missionId: string | null = null;
   missionType = 1;
@@ -102,7 +105,7 @@ export class SimulatedZmqDevices {
         void this.position().catch((e: unknown) => this.errors.push(e));
       }, 10),
     );
-    return profile;
+    return DeploymentProfile.parse(profile);
   }
   private async effectLoop() {
     while (!this.#stopped) {
@@ -239,9 +242,10 @@ export class SimulatedZmqDevices {
         const frames = await this.chassisCommands.receive();
         if (!frames[0]) continue;
         const parsed = decodeChassisFrame(frames[0], {
-          systemId: "18446744073709551614",
+          systemId: this.controllerSystemId,
           targetSystemId: "1",
         });
+        this.rawChassisFrames.push(Buffer.from(frames[0]));
         const r = parsed.body;
         this.commands.push({ component: "chassis", at: Date.now(), request: r });
         if (r.type === "mode") {
@@ -397,6 +401,10 @@ export class SimulatedZmqDevices {
       original = frames[0] ?? Buffer.alloc(0),
       offset = original.indexOf(0x3a) + 1;
     const payload = Buffer.from(original.subarray(offset + 24));
+    if (this.positionOverride) {
+      payload.writeDoubleLE(this.positionOverride.longitude, 25);
+      payload.writeDoubleLE(this.positionOverride.latitude, 33);
+    }
     payload.writeDoubleLE(this.moving ? 0.5 : 0, 49);
     payload.writeDoubleLE(0, 57);
     payload.writeDoubleLE(0, 65);

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ResultIdentity } from "./results.js";
+import { LegacyResultIdentity as ResultIdentity } from "./results.js";
 import { RESERVED_RESULT_FIELDS } from "../../domain/src/index.js";
 const digest = z.string().regex(/^[a-f0-9]{64}$/),
   missing = z.array(z.string()).max(256);

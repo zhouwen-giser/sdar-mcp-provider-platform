@@ -6,6 +6,8 @@ export {
   SITE_PROFILE,
   PLAN_ROUTE,
   siteReadonlyTools,
+  siteControlTools,
+  SITE_CONTROL_PROFILE,
 } from "./zmq-native.js";
 import { parseCoordinates, validatePolygon } from "./coordinates.js";
 import { array, record, text, taskProfile, type Json, type Tool } from "./model.js";
@@ -122,7 +124,9 @@ export const isZmqControl = (name: string) =>
 export function zmqToolReason(tool: Tool | undefined, resourceId: string): string | null {
   if (!tool) return "TOOL_UNPUBLISHED";
   if (
-    record(tool._meta?.["io.sdar/ugvZmq"]).qualification === "site_readonly" ||
+    ["site_readonly", "site_control"].includes(
+      text(record(tool._meta?.["io.sdar/ugvZmq"]).qualification),
+    ) ||
     NATIVE_CONTROL_TOOLS.includes(tool.name)
   ) {
     return nativeToolReason(tool, resourceId);

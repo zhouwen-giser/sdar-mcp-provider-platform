@@ -1,3 +1,4 @@
+import controlCatalog from "./zmq-site-control-catalog.json" with { type: "json" };
 import siteCatalog from "./zmq-site-catalog.json" with { type: "json" };
 import nativeCatalog from "./zmq-native-catalog.json" with { type: "json" };
 import { record, taskProfile, type Tool } from "./model.js";
@@ -20,6 +21,12 @@ export const NATIVE_CONTROL_TOOLS = [
   "vehicle_zmq_circular_recon",
   "vehicle_zmq_camera",
 ];
+export const SITE_CONTROL_PROFILE = "zmq_v1_2_0_site_control_13";
+export function siteControlTools(tools: readonly Tool[]) {
+  return tools.some(
+    (t) => record(t._meta?.["io.sdar/ugvZmq"]).catalogProfile === SITE_CONTROL_PROFILE,
+  );
+}
 export const SITE_PROFILE = "zmq_v1_1_0_readonly_13";
 export const PLAN_ROUTE = "vehicle_zmq_plan_route";
 export function siteReadonlyTools(tools: readonly Tool[]) {
@@ -31,11 +38,13 @@ export function nativeContract(
   profile = nativeCatalog.profile,
 ): Tool | undefined {
   const catalog =
-    profile === SITE_PROFILE
-      ? siteCatalog
-      : profile === nativeCatalog.profile
-        ? nativeCatalog
-        : undefined;
+    profile === SITE_CONTROL_PROFILE
+      ? controlCatalog
+      : profile === SITE_PROFILE
+        ? siteCatalog
+        : profile === nativeCatalog.profile
+          ? nativeCatalog
+          : undefined;
   const raw = catalog?.tools.find((t) => t.name === name);
   if (!raw) return undefined;
   const tool = structuredClone(raw) as unknown as Tool;
@@ -68,10 +77,15 @@ export function nativeToolReason(tool: Tool, resourceId: string): string | null 
 /** Formal native Providers must expose the whole reviewed catalog before any read or control. */
 export function nativeCatalogReason(tools: readonly Tool[], resourceId: string): string | null {
   const site = siteReadonlyTools(tools),
-    catalog = site ? siteCatalog : nativeCatalog;
+    control = siteControlTools(tools),
+    catalog = control ? controlCatalog : site ? siteCatalog : nativeCatalog;
   if (
-    site &&
-    tools.some((t) => record(t._meta?.["io.sdar/ugvZmq"]).catalogProfile !== SITE_PROFILE)
+    (site || control) &&
+    tools.some(
+      (t) =>
+        record(t._meta?.["io.sdar/ugvZmq"]).catalogProfile !==
+        (control ? SITE_CONTROL_PROFILE : SITE_PROFILE),
+    )
   )
     return "ZMQ_NATIVE_CONTRACT_MISMATCH";
   if (
