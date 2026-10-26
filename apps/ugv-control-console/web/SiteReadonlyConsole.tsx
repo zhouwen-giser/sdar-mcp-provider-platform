@@ -286,7 +286,7 @@ export function SiteReadonlyConsole({
                     </summary>
                     <ul>
                       {array(t.blockers).map((code) => (
-                        <li key={text(code)}>{text(code)}</li>
+                        <li key={text(code)}>{describe(Error(text(code)))}</li>
                       ))}
                     </ul>
                   </details>

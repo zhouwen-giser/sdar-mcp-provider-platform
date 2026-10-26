@@ -11,7 +11,7 @@ services:
     volumes:
       - ${SITE_PROVIDER_CONFIG:?private site_readonly configuration}:/run/secrets/provider.json:ro
       - ${SITE_GOWM_URL_FILE:?existing restricted owner URL}:/run/secrets/gowm.url:ro
-    tmpfs: [/tmp:size=16m, mode=1777]
+    tmpfs: ["/tmp:size=16m,mode=1777"]
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
   runtime:
@@ -23,7 +23,7 @@ services:
     env_file: ${SITE_RUNTIME_ENV:?private Runtime environment}
     volumes:
       - ${SITE_GOWM_URL_FILE:?existing restricted owner URL}:/run/secrets/gowm.url:ro
-    tmpfs: [/tmp:size=16m, mode=1777]
+    tmpfs: ["/tmp:size=16m,mode=1777"]
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
   console:
@@ -36,6 +36,6 @@ services:
     volumes:
       - ${SITE_CONSOLE_DATABASE_URL_FILE:?preserved console database URL}:/run/secrets/console-database.url:ro
       - ${SITE_CONSOLE_CREDENTIALS_FILE:?preserved operator credentials}:/run/secrets/credentials.json:ro
-    tmpfs: [/tmp:size=16m, mode=1777]
+    tmpfs: ["/tmp:size=16m,mode=1777"]
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
