@@ -74,7 +74,7 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
     readonly profile: DeploymentProfile,
     readonly observer: ZmqObservationObserver,
     readonly store: PostgresProviderStore,
-    readonly business: ReturnType<typeof zmqBusiness>,
+    readonly business: Pick<ReturnType<typeof zmqBusiness>, "service">,
     readonly planner?: SiteRoutePlanner,
   ) {
     if (!profile.providerBinding.providerId || !profile.providerBinding.resourceId)

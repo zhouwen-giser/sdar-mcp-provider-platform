@@ -13,6 +13,11 @@ import {
 import { canonical, sha256 } from "../../../packages/vehicle-zmq-observer/src/index.js";
 import { protoStructToJson } from "../../../packages/adapter-protocol/src/index.js";
 import type { ProviderExecution } from "../../../packages/provider-adapter-kit/src/index.js";
+import {
+  BoundExecutionScope,
+  PostgresTaskBusinessStore,
+} from "../../../packages/provider-adapter-kit/src/index.js";
+import { UgvTaskBusinessContextService } from "../../ugv-provider-adapter/src/task-business-service.js";
 const file = process.env.SMPP_ZMQ_TEST_CONFIG_FILE;
 let f: Awaited<ReturnType<typeof siteFixture>>;
 describe.skipIf(!file)("retained native reports through site read-only storage", () => {
@@ -169,6 +174,58 @@ describe.skipIf(!file)("retained native reports through site read-only storage",
     });
     expect(result.missingEvidence).toContain("SIMULATION_IDLE_STATE_UNCONFIRMED");
     expect(JSON.stringify(await f.provider.store.getExecution(e.taskId))).toBe(before);
+    expect(f.devices.commands).toHaveLength(0);
+  });
+  it("reads a legacy Context without finalizing or repairing its historical projection", async () => {
+    const { e } = await seeded("inspection");
+    const execution: ProviderExecution = {
+      ...e,
+      taskId: randomUUID(),
+      externalExecutionId: randomUUID(),
+      operationName: "vehicle_area_recon",
+      arguments: {
+        resourceId: f.resourceId,
+        scanMode: "area",
+        area: {
+          polygon: [
+            { longitude: 106, latitude: 29 },
+            { longitude: 106.001, latitude: 29 },
+            { longitude: 106.001, latitude: 29.001 },
+            { longitude: 106, latitude: 29.001 },
+          ],
+        },
+      },
+      state: "RUNNING",
+      taskBusinessContextExpected: true,
+    };
+    delete execution.terminalAt;
+    delete execution.result;
+    await f.provider.store.putExecution(execution);
+    const business = new PostgresTaskBusinessStore(f.provider.store.pool);
+    const old = new UgvTaskBusinessContextService(
+      f.provider.store,
+      business,
+      execution.providerId ?? "",
+      f.resourceId,
+      () => undefined,
+    );
+    await old.ensureForCreatedExecution(execution.taskId);
+    const scope = BoundExecutionScope.fromExecution(execution),
+      before = JSON.stringify(await business.getContext(scope));
+    execution.state = "SUCCEEDED";
+    execution.terminalAt = new Date().toISOString();
+    await f.provider.store.putExecution(execution);
+    await f.provider.runtime.getBusinessContext(
+      {
+        taskId: execution.taskId,
+        externalExecutionId: execution.externalExecutionId,
+        executionContext: context,
+      },
+      65536,
+      "",
+    );
+    expect(JSON.stringify(await business.getContext(scope))).toBe(before);
+    expect((await business.getContext(scope))?.summary.status).toBe("in_progress");
     expect(f.devices.commands).toHaveLength(0);
   });
 });

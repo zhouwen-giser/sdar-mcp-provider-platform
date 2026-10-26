@@ -12,8 +12,34 @@ import {
 import { ZMQ_CONTROL_TOOLS } from "../../../packages/vehicle-zmq-control/src/catalog.js";
 import type {
   PostgresProviderStore,
+  ProviderExecution,
   TaskBusinessStore,
 } from "../../../packages/provider-adapter-kit/src/index.js";
+
+/** The ordinary helper finalizes terminal executions while resolving reads. A site reader
+ * must retain the stored Context, including unfinished historical projections. */
+export class SiteReadonlyBusinessService extends UgvTaskBusinessContextService {
+  override supports(operationName: string): boolean {
+    return super.supports(operationName) || ZMQ_CONTROL_TOOLS.has(operationName);
+  }
+  override finalizeForTerminalExecution(execution: ProviderExecution): Promise<void> {
+    void execution;
+    return Promise.resolve();
+  }
+}
+
+export function siteReadonlyBusiness(
+  store: PostgresProviderStore,
+  business: TaskBusinessStore,
+  providerId: string,
+  resourceId: string,
+) {
+  return {
+    service: new SiteReadonlyBusinessService(store, business, providerId, resourceId, () => {
+      throw Error("ZMQ_SITE_READONLY_CONTROL_DISABLED");
+    }),
+  };
+}
 
 /** Separate simulated Provider event lane. The legacy physical/referee sanitizer stays intact. */
 export class ZmqBusinessEvents {

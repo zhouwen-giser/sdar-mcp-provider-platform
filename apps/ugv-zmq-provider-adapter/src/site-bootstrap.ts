@@ -26,7 +26,7 @@ import {
   SITE_PROFILE,
   siteManifest,
 } from "../../../packages/vehicle-zmq-control/src/site-catalog.js";
-import { ZmqBusinessEvents, zmqBusiness } from "./business.js";
+import { ZmqBusinessEvents, siteReadonlyBusiness } from "./business.js";
 import { SiteReadonlyRuntime } from "./site-runtime.js";
 import { SiteRoutePlanner } from "./site-planner.js";
 
@@ -112,12 +112,11 @@ export async function openSiteReadonlyProvider(options: SiteReadonlyOptions) {
     if (!options.gowm) await verifyNativeTaskBusinessSchema(store.pool);
     store.enableTaskBusinessSource(businessStore);
     const events = new ZmqBusinessEvents(store),
-      business = zmqBusiness(
+      business = siteReadonlyBusiness(
         store,
         businessStore,
         profile.providerBinding.providerId,
         profile.providerBinding.resourceId,
-        events,
       );
     const planner =
       profile.planner.policy === "retain" && profile.planner.endpoint && options.plannerFrame
