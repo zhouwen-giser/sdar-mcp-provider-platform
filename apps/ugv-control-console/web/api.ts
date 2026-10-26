@@ -26,6 +26,7 @@ export async function api<T = unknown>(path: string, body?: unknown): Promise<T>
     throw new ApiError(
       text(record(value).reasonCode) ||
         text(record(record(value).response).reasonCode) ||
+        text(record(record(record(value).response).structuredContent).reasonCode) ||
         "请求未受理",
       value,
       response.status,

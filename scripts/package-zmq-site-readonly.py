@@ -70,11 +70,16 @@ with tempfile.TemporaryDirectory(prefix='site-package-', dir=output.parent) as t
         images.append({'role': role, 'tag': tag, 'id': identity['Id'], 'revision': identity['Config'].get('Labels', {}).get('org.opencontainers.image.revision')})
     image_file = Path(temp) / 'images.tar'
     subprocess.run(['docker', 'save', '-o', str(image_file), args.provider_image, args.runtime_image, args.console_image], check=True)
+    subprocess.run(['docker', 'load', '-i', str(image_file)], check=True, stdout=subprocess.PIPE)
+    for image in images:
+        restored = json.loads(subprocess.check_output(['docker', 'image', 'inspect', image['tag']]))[0]
+        if restored['Id'] != image['id']:
+            raise SystemExit('SITE_IMAGE_ROUND_TRIP_IDENTITY_CHANGED')
     entries.append(('images/images.tar', image_file))
     records = [{'path': name, 'bytes': path.stat().st_size, 'sha256': digest(path), 'mode': 0o755 if path.stat().st_mode & 0o111 else 0o644} for name, path in entries]
     commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root).decode().strip()
     manifest = {'schemaVersion': 'ugv.zmq-site-readonly-bundle/1', 'sourceCommit': commit,
-                'profile': 'zmq_v1_1_0_readonly_13', 'controlQualified': False, 'automaticDeployment': False,
+                'profile': 'zmq_v1_1_0_readonly_13', 'controlQualified': False, 'automaticDeployment': False, 'imageRoundTripVerified': True,
                 'sourceAuthority': 'exact_tracked_files_by_sha256', 'images': images, 'files': records}
     meta = (json.dumps(manifest, ensure_ascii=False, indent=2) + '\n').encode()
     sums = ''.join(f"{r['sha256']}  {r['path']}\n" for r in records).encode()
@@ -108,6 +113,6 @@ with tempfile.TemporaryDirectory(prefix='site-package-', dir=output.parent) as t
     if expected:
         raise SystemExit('SITE_PACKAGE_MEMBER_MISSING')
 receipt = {'schemaVersion': manifest['schemaVersion'], 'sourceCommit': commit, 'fileCount': len(records),
-           'path': str(output), 'bytes': output.stat().st_size, 'sha256': digest(output), 'images': images, 'controlQualified': False}
+           'path': str(output), 'bytes': output.stat().st_size, 'sha256': digest(output), 'images': images, 'controlQualified': False, 'imageRoundTripVerified': True}
 output.with_name(output.name + '.receipt.json').write_text(json.dumps(receipt, ensure_ascii=False, indent=2) + '\n')
 print(json.dumps(receipt, ensure_ascii=False))

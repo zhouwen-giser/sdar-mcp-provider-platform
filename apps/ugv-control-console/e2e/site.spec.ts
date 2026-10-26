@@ -51,3 +51,28 @@ test("preserves login, same-origin checks, rejected mutations and shared history
   await expect(other.getByRole("button", { name: "■ 停止不可用 · 只读模式" })).toBeDisabled();
   await other.close();
 });
+test("explains a nested MCP planner rejection without drawing a replacement route", async ({
+  page,
+}) => {
+  await page.route("**/api/commands", async (route) => {
+    if (route.request().method() !== "POST") return route.continue();
+    await route.fulfill({
+      status: 409,
+      contentType: "application/json",
+      body: JSON.stringify({
+        status: "rejected",
+        response: {
+          isError: true,
+          structuredContent: { reasonCode: "UGV_PLANNER_TIMEOUT" },
+        },
+      }),
+    });
+  });
+  await page.getByLabel("预览起点").fill(start);
+  await page.getByLabel("预览目的地与途经点").fill(destination);
+  await page.getByRole("button", { name: "预览路线", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("三秒内未收到匹配起点及途经点的路线");
+  await expect(page.getByRole("alert")).toContainText("UGV_PLANNER_TIMEOUT");
+  await expect(page.getByRole("button", { name: "下载预览报告" })).toBeDisabled();
+  await expect(page.getByText("规划路线预览 · 尚未采用", { exact: true })).toHaveCount(0);
+});

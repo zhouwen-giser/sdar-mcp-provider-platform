@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { api, ApiError, describe, download } from "./api.js";
+import { api, describe, download } from "./api.js";
 import { newCommandId } from "./command-id.js";
 import { Diagram } from "./Diagram.js";
 import { parseCoordinates, type Point } from "../shared/coordinates.js";
@@ -98,17 +98,17 @@ export function SiteReadonlyConsole({
       });
       const result = record(row.response);
       if (row.status !== "completed" || result.isError === true)
-        throw Error(text(result.reasonCode) || "UGV_PLANNER_PREVIEW_UNCONFIRMED");
+        throw Error(
+          text(result.reasonCode) ||
+            text(record(result.structuredContent).reasonCode) ||
+            "UGV_PLANNER_PREVIEW_UNCONFIRMED",
+        );
       const value = record(result.structuredContent);
       if (value.adoption !== "preview_only" || value.schemaVersion !== "ugv.zmq-route-preview/1")
         throw Error("UGV_PLANNER_PREVIEW_UNCONFIRMED");
       setPreview(value);
     } catch (e) {
-      setError(
-        e instanceof ApiError && record(e.payload).response
-          ? Error(text(record(record(e.payload).response).reasonCode) || e.code)
-          : e,
-      );
+      setError(e);
     } finally {
       setBusy(false);
       refresh();
