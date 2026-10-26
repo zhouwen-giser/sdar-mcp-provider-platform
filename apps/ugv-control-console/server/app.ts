@@ -29,7 +29,8 @@ function containsTask(value: unknown, taskId: string, depth = 0): boolean {
   );
 }
 export function createApp(config: Config, service: Service) {
-  const cookieName = config.secure ? "ugv_session" : "ugv_session_http";
+  const cookieName =
+    config.sessionCookieName ?? (config.secure ? "ugv_session" : "ugv_session_http");
   const app = Fastify({
     ...(config.tls ? { https: config.tls } : {}),
     bodyLimit: 1048576,

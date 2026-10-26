@@ -20,7 +20,12 @@ import {
 
 export const profile = () =>
   DeploymentProfile.parse(
-    JSON.parse(readFileSync("deploy/ugv-zmq/deployment.candidate.json", "utf8")) as unknown,
+    JSON.parse(
+      readFileSync(
+        new URL("../../deploy/ugv-zmq/deployment.candidate.json", import.meta.url),
+        "utf8",
+      ),
+    ) as unknown,
   );
 export const settings = (override: Partial<ObserverSettings> = {}) =>
   ObserverSettings.parse({
@@ -37,7 +42,13 @@ export const clock = (n = 1, utc = 1792800000000): ClockStamp => ({
 });
 const capture = PassiveCapture.parse(
   JSON.parse(
-    readFileSync("reports/ugv-zmq-phase1/raw/passive-publications-20261023.json", "utf8"),
+    readFileSync(
+      new URL(
+        "../../reports/ugv-zmq-phase1/raw/passive-publications-20261023.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
   ) as unknown,
 );
 export function sourceFrames(component: Component, key?: string): Buffer[] {

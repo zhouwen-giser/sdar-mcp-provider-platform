@@ -5,6 +5,8 @@ import { api, ApiError, describe, download } from "./api.js";
 import { newCommandId } from "./command-id.js";
 import { AvailabilityNotice } from "./AvailabilityNotice.js";
 import { Diagram, visibleGeometryObjects } from "./Diagram.js";
+import { SiteReadonlyConsole } from "./SiteReadonlyConsole.js";
+import { siteReadonlyTools } from "../shared/zmq-native.js";
 import { ZmqResults } from "./ZmqResults.js";
 import {
   NATIVE_CONTROL_TOOLS,
@@ -415,6 +417,30 @@ function Console() {
         onLogin={() => {
           void qc.invalidateQueries();
         }}
+      />
+    );
+  if (siteReadonlyTools(tools))
+    return (
+      <SiteReadonlyConsole
+        device={d}
+        session={session.data}
+        commands={commands.data ?? []}
+        tasks={tasks.data ?? []}
+        refresh={() => {
+          void device.refetch();
+          refresh();
+        }}
+        renderTask={(id) => (
+          <TaskDetail
+            taskId={id}
+            operationName={tasks.data?.find((t) => t.taskId === id)?.operation ?? ""}
+            tools={tools}
+            resourceId={resourceId}
+            position={point}
+            sending={false}
+            submit={(command) => submit(command)}
+          />
+        )}
       />
     );
   const controls = Object.keys(labels).filter((name) => name !== "vehicle_emergency_stop");
@@ -1285,7 +1311,8 @@ function TaskDetail({
   const tool = tools.find((t) => t.name === operation),
     profile = taskProfile(tool),
     status = classifyTask(snapshot),
-    active = ["working", "input_required"].includes(text(snapshot.status));
+    active =
+      !siteReadonlyTools(tools) && ["working", "input_required"].includes(text(snapshot.status));
   const result = record(snapshot.result),
     content = record(result.structuredContent),
     report = record(content.inspectionReport),

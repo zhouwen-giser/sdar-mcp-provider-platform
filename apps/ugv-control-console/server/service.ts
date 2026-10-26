@@ -21,6 +21,8 @@ import {
   EFFECT_RESULT,
   zmqToolReason,
   nativeCatalogReason,
+  PLAN_ROUTE,
+  siteReadonlyTools,
   validateZmqGeometry,
 } from "../shared/zmq.js";
 import { businessSnapshot, readArtifact } from "./business.js";
@@ -135,6 +137,7 @@ export class Service {
     if (reason) throw Error(reason);
     if (
       (isZmqControl(name) || [INSPECTION_RESULT, EFFECT_RESULT].includes(name)) &&
+      !siteReadonlyTools(c.tools) &&
       (this.mcp.headers["x-sdar-execution-mode"] !== "simulation" ||
         !this.mcp.headers["x-sdar-simulation-id"])
     )
@@ -200,6 +203,7 @@ export class Service {
     return { ...check, catalogHash: catalog.catalogHash };
   }
   async readTool(name: string, args: Json) {
+    if (name === PLAN_ROUTE) throw Error("USE_COMMAND_PREVIEW_ROUTE");
     if ([INSPECTION_RESULT, EFFECT_RESULT].includes(name))
       throw Error("USE_IMPORTED_TASK_RESULT_ROUTE");
     const c = await this.catalog();
@@ -348,10 +352,16 @@ export class Service {
       const catalog = await this.catalog();
       if (catalog.catalogHash !== request.catalogHash)
         throw Error("CATALOG_CHANGED_REFRESH_REQUIRED");
+      if (
+        siteReadonlyTools(catalog.tools) &&
+        (request.kind !== "tool" ||
+          (CONTROL_TOOLS as readonly string[]).includes(request.tool ?? ""))
+      )
+        throw Error("ZMQ_SITE_READONLY_CONTROL_DISABLED");
       let method: string, params: Json;
       if (request.kind === "tool") {
         const name = request.tool ?? "";
-        if (!(CONTROL_TOOLS as readonly string[]).includes(name))
+        if (!(CONTROL_TOOLS as readonly string[]).includes(name) && name !== PLAN_ROUTE)
           throw Error("CONTROL_TOOL_REQUIRED");
         const tool = this.validateTool(catalog, name, request.arguments);
         if (
@@ -512,7 +522,7 @@ export class Service {
       const rejected = result.isError === true;
       const finished = await this.store.finish(
         request.commandId,
-        rejected ? "rejected" : "accepted",
+        rejected ? "rejected" : request.tool === PLAN_ROUTE ? "completed" : "accepted",
         result,
         taskId,
       );

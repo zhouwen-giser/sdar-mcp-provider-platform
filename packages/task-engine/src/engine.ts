@@ -1,3 +1,4 @@
+import { SITE_READONLY_REASON } from "../../vehicle-zmq-control/src/site-catalog.js";
 import { createHash, randomUUID } from "node:crypto";
 import { Ajv2020 } from "ajv/dist/2020.js";
 import { z } from "zod";
@@ -103,6 +104,16 @@ export class TaskEngine {
     this.#operationSnapshots = operationSnapshots;
   }
 
+  get controlDenialReason(): string | undefined {
+    return this.manifest.providerType === "isr.vehicle.ugv.zmq" &&
+      this.manifest.providerVersion === "1.1.0"
+      ? SITE_READONLY_REASON
+      : undefined;
+  }
+  private assertControlAdmission(): void {
+    if (this.controlDenialReason) throw new InvalidParamsError(this.controlDenialReason);
+  }
+
   async loadOperationSnapshot(snapshotId: string): Promise<ValidatedOperation> {
     return (await this.resolveTaskOperation(snapshotId)).operation;
   }
@@ -135,6 +146,21 @@ export class TaskEngine {
     timing: TaskExecutionTiming = defaultTiming,
     reservationRef?: string,
   ): Promise<ToolInvocationResult> {
+    if (
+      this.controlDenialReason &&
+      (operation.execution !== "SYNCHRONOUS" ||
+        !this.manifest.operations.some(
+          (candidate) => candidate.name === operation.name && candidate.execution === "SYNCHRONOUS",
+        ))
+    )
+      return {
+        kind: "result",
+        result: rejectionResult({
+          reasonCode: this.controlDenialReason,
+          message: this.controlDenialReason,
+          retryable: false,
+        }),
+      };
     const startedAt = performance.now();
     try {
       if (
@@ -637,6 +663,13 @@ export class TaskEngine {
     authorization: AuthorizationContext,
   ): Promise<Record<string, unknown>> {
     let task = await this.#repository.getAuthorized(taskId, authorization);
+    if (this.controlDenialReason)
+      return detailedTask(
+        task,
+        await this.#repository.listInputRequests(taskId),
+        await this.#repository.listObservationPage(taskId),
+        { snapshotFreshness: "stale", degradedReasonCode: "ZMQ_SITE_READONLY_HISTORY_SNAPSHOT" },
+      );
     const operation = await this.loadOperationSnapshot(task.operationSnapshotId);
     if (
       !isTerminalState(task.internalState) &&
@@ -732,6 +765,7 @@ export class TaskEngine {
     taskId: string,
     authorization: AuthorizationContext,
   ): Promise<void> {
+    this.assertControlAdmission();
     const task = await this.#repository.getAuthorized(taskId, authorization);
     if (isTerminalState(task.internalState)) return;
     const operation = await this.loadOperationSnapshot(task.operationSnapshotId);
@@ -766,6 +800,7 @@ export class TaskEngine {
     admission: AdmissionIntentRecord,
     resolvedOperation?: ValidatedOperation,
   ): Promise<ToolInvocationResult> {
+    this.assertControlAdmission();
     const operation =
       resolvedOperation ?? (await this.loadOperationSnapshot(admission.operationSnapshotId));
     return this.#executeOperation(
@@ -792,6 +827,7 @@ export class TaskEngine {
     task: TaskRecord,
     resolvedOperation?: ValidatedOperation,
   ): Promise<"found" | "not_found" | "deferred"> {
+    if (this.controlDenialReason) return "deferred";
     if (task.internalState === "STARTING" && task.externalExecutionId === null) {
       await this.#repository.recordReconciliationResult(
         task.taskId,
@@ -932,6 +968,7 @@ export class TaskEngine {
     taskId: string,
     authorization: AuthorizationContext,
   ): Promise<Record<string, unknown>> {
+    this.assertControlAdmission();
     this.metrics?.increment("sdar_cancel_requests_total", {
       executionMode: authorization.executionMode,
     });
@@ -966,6 +1003,7 @@ export class TaskEngine {
     answers: Record<string, unknown>,
     authorization: AuthorizationContext,
   ): Promise<Record<string, unknown>> {
+    this.assertControlAdmission();
     const task = await this.#repository.getAuthorized(taskId, authorization);
     const operation = await this.loadOperationSnapshot(task.operationSnapshotId);
     if (!operation.capabilities.inputRequired) {
@@ -1027,6 +1065,7 @@ export class TaskEngine {
     inputResponses: Record<string, { action: "accept" | "decline" | "cancel"; content?: unknown }>,
     authorization: AuthorizationContext,
   ): Promise<void> {
+    this.assertControlAdmission();
     const task = await this.#repository.getAuthorized(taskId, authorization);
     const operation = await this.loadOperationSnapshot(task.operationSnapshotId);
     if (!operation.capabilities.inputRequired) {
@@ -1066,6 +1105,7 @@ export class TaskEngine {
     candidate: RuntimeInterventionCommand,
     authorization: AuthorizationContext,
   ): Promise<Record<string, unknown>> {
+    this.assertControlAdmission();
     const command = RuntimeInterventionCommandSchema.parse(candidate);
     const task = await this.#repository.getAuthorized(command.taskId, authorization);
     const operation = await this.loadOperationSnapshot(task.operationSnapshotId);
@@ -1119,6 +1159,7 @@ export class TaskEngine {
     commandType: "PAUSE" | "RESUME",
     authorization: AuthorizationContext,
   ): Promise<Record<string, unknown>> {
+    this.assertControlAdmission();
     const task = await this.#repository.getAuthorized(taskId, authorization);
     const operation = await this.loadOperationSnapshot(task.operationSnapshotId);
     if (!operation.capabilities.pauseResume) {

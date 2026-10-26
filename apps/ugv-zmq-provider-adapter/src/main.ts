@@ -1,4 +1,5 @@
 import { readFileSync, statSync } from "node:fs";
+import { openSiteReadonlyProvider } from "./site-bootstrap.js";
 import { openZmqProvider } from "./bootstrap.js";
 import { loadGowmStorageConfig } from "../../../packages/gowm-shared-storage-adapter/src/index.js";
 const path = process.env.UGV_ZMQ_PROVIDER_CONFIG_FILE;
@@ -14,6 +15,9 @@ if (
         "profile",
         "observerSettings",
         "controlSettings",
+        "mode",
+        "contractSha256",
+        "plannerFrame",
         "host",
         "port",
       ].includes(k),
@@ -21,17 +25,28 @@ if (
 )
   throw Error("ZMQ_PROVIDER_CONFIG_FIELD_UNKNOWN");
 const gowm = loadGowmStorageConfig(process.env);
-const app = await openZmqProvider({ ...value, ...(gowm ? { gowm } : {}) } as Parameters<
-  typeof openZmqProvider
->[0]);
+if (value.mode !== undefined && value.mode !== "site_readonly")
+  throw Error("ZMQ_PROVIDER_MODE_INVALID");
+if (value.mode === "site_readonly" && value.controlSettings !== undefined)
+  throw Error("ZMQ_SITE_CONTROL_SETTINGS_FORBIDDEN");
+const app =
+  value.mode === "site_readonly"
+    ? await openSiteReadonlyProvider({ ...value, ...(gowm ? { gowm } : {}) } as Parameters<
+        typeof openSiteReadonlyProvider
+      >[0])
+    : await openZmqProvider({ ...value, ...(gowm ? { gowm } : {}) } as Parameters<
+        typeof openZmqProvider
+      >[0]);
 process.stdout.write(
   JSON.stringify({
     event: "zmq_provider_started",
-    providerId: app.scope.profile.providerBinding.providerId,
+    providerId:
+      "profile" in app
+        ? app.profile.providerBinding.providerId
+        : app.scope.profile.providerBinding.providerId,
     resourceId: app.runtime.resourceId,
     port: app.port,
-    qualification: "isolated_simulator_only",
-    controlScopeHash: app.scope.hash,
+    qualification: "mode" in app ? app.mode : "isolated_simulator_only",
   }) + "\n",
 );
 for (const signal of ["SIGINT", "SIGTERM"] as const)

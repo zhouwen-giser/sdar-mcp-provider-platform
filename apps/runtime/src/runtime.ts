@@ -656,8 +656,14 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
   }
 
   async function initialize(): Promise<ProviderManifest> {
+    let ownerManifest: ProviderManifest | undefined;
     try {
       if (config.gowmStorage) {
+        ownerManifest = await gateway.describeProvider();
+        const ownerCatalog = new OperationRegistry().validate(ownerManifest);
+        const ownerReadonly =
+          ownerCatalog.providerType === "isr.vehicle.ugv.zmq" &&
+          ownerCatalog.providerVersion === "1.1.0";
         await verifyGowmStorage(pool, config.gowmStorage);
         await resolveDeviceContext(
           pool,
@@ -665,7 +671,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
           { providerId: config.PROVIDER_ID },
           false,
         );
-        await inTransaction(pool, reconcileMcpExecutionLinks);
+        if (!ownerReadonly) await inTransaction(pool, reconcileMcpExecutionLinks);
       } else await runMigrations(pool);
       await pool.query("SELECT 1 AS runtime_database_ready");
       dependencies.database = "ready";
@@ -675,11 +681,13 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
     }
 
     try {
-      manifest = await gateway.describeProvider();
+      manifest = ownerManifest ?? (await gateway.describeProvider());
       providerIdentity = verifyRuntimeProviderIdentity(config.PROVIDER_ID, manifest.providerId);
       assertRuntimeProviderIdentity(providerIdentity);
       const validated = new OperationRegistry().validate(manifest);
       validatedManifest = validated;
+      const siteReadonly =
+        validated.providerType === "isr.vehicle.ugv.zmq" && validated.providerVersion === "1.1.0";
       assertTaskBusinessEventReadiness(validated, config.BUSINESS_EVENTS_ENABLED);
       if (config.BUSINESS_EVENTS_ENABLED && validated.businessEventSources.length === 0) {
         throw new Error("BUSINESS_EVENTS_ENABLED_REQUIRES_SOURCE");
@@ -706,7 +714,9 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
           ) {
             throw new Error("BUSINESS_EVENT_SOURCE_RETENTION_INSUFFICIENT");
           }
-          dependencies.businessEventAdapterSources[source.sourceId] = "starting";
+          dependencies.businessEventAdapterSources[source.sourceId] = siteReadonly
+            ? "disabled"
+            : "starting";
         }
       }
       initializeProviderTelemetry(validated);
@@ -770,7 +780,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
             businessEventMetrics,
           )
         : undefined;
-      if (config.BUSINESS_EVENTS_ENABLED) {
+      if (config.BUSINESS_EVENTS_ENABLED && !siteReadonly) {
         for (const source of validated.businessEventSources) {
           const worker = new AdapterBusinessEventSourceClient(businessEventRepository, gateway, {
             providerId: validated.providerId,
@@ -1034,7 +1044,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
         },
       );
       const recoveryStartedAt = performance.now();
-      const recovered = await recovery.scan();
+      const recovered = siteReadonly ? null : await recovery.scan();
       telemetry?.metric(
         "recovery_duration",
         performance.now() - recoveryStartedAt,
@@ -1042,26 +1052,28 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
         "histogram",
       );
       metrics.increment("sdar_recovery_total", { outcome: "scan" });
-      dependencies.recovery = "ready";
+      dependencies.recovery = "ready"; // Readiness includes the validated no-work policy for a read-only catalog.
       logger.info(
         { recovery: recovered, providerId: validated.providerId },
         "startup recovery scanned",
       );
-      await scheduler.tick();
-      dependencies.scheduler = "ready";
-      await commandDispatcher.tick();
-      dependencies.commandDispatcher = "ready";
-      await outboxCleaner.tick();
-      dependencies.outboxCleaner = "ready";
-      await ttlCleaner.tick();
-      dependencies.ttlCleaner = "ready";
-      await outboxPublisher.tick();
-      dependencies.outboxPublisher = "ready";
-      await providerOpsPublisher.tick().catch((error: unknown) => {
-        logger.warn({ err: error }, "Provider telemetry delivery deferred");
-      });
+      if (!siteReadonly) await scheduler.tick();
+      dependencies.scheduler = "ready"; // Readiness includes the validated no-work policy for a read-only catalog.
+      if (!siteReadonly) await commandDispatcher.tick();
+      dependencies.commandDispatcher = "ready"; // Readiness includes the validated no-work policy for a read-only catalog.
+      if (!siteReadonly) await outboxCleaner.tick();
+      dependencies.outboxCleaner = "ready"; // Readiness includes the validated no-work policy for a read-only catalog.
+      if (!siteReadonly) await ttlCleaner.tick();
+      dependencies.ttlCleaner = "ready"; // Readiness includes the validated no-work policy for a read-only catalog.
+      if (!siteReadonly) await outboxPublisher.tick();
+      dependencies.outboxPublisher = "ready"; // Readiness includes the validated no-work policy for a read-only catalog.
+      if (!siteReadonly)
+        await providerOpsPublisher.tick().catch((error: unknown) => {
+          logger.warn({ err: error }, "Provider telemetry delivery deferred");
+        });
       await updateOperationalGauges(pool, telemetry);
       schedulerTimer = setInterval(() => {
+        if (siteReadonly) return;
         if (schedulerTicking) return;
         schedulerTicking = true;
         void scheduler
@@ -1080,6 +1092,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       }, config.SCHEDULER_POLL_MS);
       schedulerTimer.unref();
       commandDispatcherTimer = setInterval(() => {
+        if (siteReadonly) return;
         if (commandDispatcherTicking) return;
         commandDispatcherTicking = true;
         void commandDispatcher
@@ -1097,6 +1110,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       }, config.SCHEDULER_POLL_MS);
       commandDispatcherTimer.unref();
       outboxCleanerTimer = setInterval(() => {
+        if (siteReadonly) return;
         if (outboxCleanerTicking) return;
         outboxCleanerTicking = true;
         void outboxCleaner
@@ -1114,6 +1128,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       }, config.OUTBOX_CLEANER_POLL_MS);
       outboxCleanerTimer.unref();
       ttlCleanerTimer = setInterval(() => {
+        if (siteReadonly) return;
         if (ttlCleanerTicking) return;
         ttlCleanerTicking = true;
         void ttlCleaner
@@ -1131,6 +1146,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       }, config.TTL_CLEANER_POLL_MS);
       ttlCleanerTimer.unref();
       outboxPublisherTimer = setInterval(() => {
+        if (siteReadonly) return;
         if (outboxPublisherTicking) return;
         outboxPublisherTicking = true;
         void outboxPublisher
@@ -1148,6 +1164,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       }, config.OUTBOX_POLL_MS);
       outboxPublisherTimer.unref();
       providerOpsPublisherTimer = setInterval(() => {
+        if (siteReadonly) return;
         if (providerOpsPublisherTicking) return;
         providerOpsPublisherTicking = true;
         void providerOpsPublisher
@@ -1161,6 +1178,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       }, config.OUTBOX_POLL_MS);
       providerOpsPublisherTimer.unref();
       recoveryTimer = setInterval(() => {
+        if (siteReadonly) return;
         if (recoveryTicking) return;
         recoveryTicking = true;
         void recovery

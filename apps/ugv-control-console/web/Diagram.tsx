@@ -86,16 +86,21 @@ export function Diagram({
   draft,
   objects,
   draftClosed = false,
+  previewRoute = [],
 }: {
   position?: Point;
   draft: Point[];
   objects: Json[];
   draftClosed?: boolean;
+  previewRoute?: Point[];
 }) {
   const [zoom, setZoom] = useState(1),
     [pan, setPan] = useState({ x: 0, y: 0 });
   const layers: Layer[] = [
     ...geometryLayers(objects),
+    ...(previewRoute.length
+      ? [{ name: "规划路线预览 · 尚未采用", color: "#739eff", points: previewRoute }]
+      : []),
     ...(draft.length
       ? [
           {

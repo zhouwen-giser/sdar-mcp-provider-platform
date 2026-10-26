@@ -26,6 +26,7 @@ export const CONTROL_TOOLS = [
   "simulation_apply_effect",
 ] as const;
 export const READ_TOOLS = [
+  "vehicle_zmq_plan_route",
   "vehicle_get_state",
   "vehicle_get_capabilities",
   "vehicle_get_payload_status",

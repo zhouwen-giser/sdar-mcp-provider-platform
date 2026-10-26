@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { SITE_TOOLS, siteTool } from "../../vehicle-zmq-control/src/site-catalog.js";
 import { ZMQ_PROVIDER_TOOLS, zmqTool } from "../../vehicle-zmq-control/src/catalog.js";
 import { Ajv2020 } from "ajv/dist/2020.js";
 import {
@@ -125,10 +126,12 @@ export class OperationRegistry {
 
   #validate(manifest: ProviderManifest, verifyBusinessSource: boolean): ValidatedManifest {
     const zmq = manifest.providerType === "isr.vehicle.ugv.zmq";
+    const site = zmq && manifest.providerVersion === "1.1.0";
+    const nativeTool = site ? siteTool : zmqTool;
     if (
       zmq &&
       canonicalize(manifest.operations.map((o) => o.name).sort()) !==
-        canonicalize([...ZMQ_PROVIDER_TOOLS].sort())
+        canonicalize([...(site ? SITE_TOOLS : ZMQ_PROVIDER_TOOLS)].sort())
     )
       throw Error("ZMQ_CATALOG_TOOL_SET_MISMATCH");
     if (manifest.adapterProtocolVersion !== "1.0") throw new Error("UNSUPPORTED_ADAPTER_PROTOCOL");
@@ -194,7 +197,7 @@ export class OperationRegistry {
         )
           throw Error("ZMQ_CATALOG_RESOURCE_INVALID");
         zmqResource = resource;
-        const expected = zmqTool(operation.name, resource),
+        const expected = nativeTool(operation.name, resource),
           profile = expected._meta["io.sdar/taskExecution"];
         const expectedCaps = {
           availability: true,
@@ -281,7 +284,7 @@ export class OperationRegistry {
             _meta: {
               ...(zmq
                 ? {
-                    "io.sdar/tool-execution-semantics": zmqTool(
+                    "io.sdar/tool-execution-semantics": nativeTool(
                       operation.name,
                       String(
                         (operation.inputSchema.properties as Record<string, { const: unknown }>)
@@ -292,7 +295,7 @@ export class OperationRegistry {
                 : {}),
               ...(zmq
                 ? {
-                    "io.sdar/ugvZmq": zmqTool(
+                    "io.sdar/ugvZmq": nativeTool(
                       operation.name,
                       String(
                         (operation.inputSchema.properties as Record<string, { const: unknown }>)

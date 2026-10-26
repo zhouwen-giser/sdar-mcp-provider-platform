@@ -18,6 +18,7 @@ export interface Config {
   domain: string;
   webRoot: string;
   secure: boolean;
+  sessionCookieName?: string;
   tls?: { key: Buffer; cert: Buffer };
 }
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
@@ -74,6 +75,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     const u = new URL(origin);
     if (u.origin !== origin || u.protocol !== `${protocol}:`) throw Error("CONSOLE_ORIGIN_INVALID");
   }
+  const sessionCookieName = env.UGV_CONSOLE_SESSION_COOKIE_NAME;
+  if (sessionCookieName !== undefined && !/^[A-Za-z0-9_-]{1,64}$/.test(sessionCookieName))
+    throw Error("CONSOLE_COOKIE_NAME_INVALID");
   const tls = secure
     ? {
         key: readFileSync(env.UGV_CONSOLE_TLS_KEY_FILE ?? "/run/secrets/tls.key"),
@@ -91,6 +95,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     domain: createHash("sha256").update(JSON.stringify({ mcpUrl, upstreamHeaders })).digest("hex"),
     webRoot: resolve(env.UGV_CONSOLE_WEB_ROOT ?? "dist"),
     secure,
+    ...(sessionCookieName ? { sessionCookieName } : {}),
     ...(tls ? { tls } : {}),
   };
 }
