@@ -1,0 +1,14 @@
+{
+  "width": {
+    "document": 405,
+    "viewport": 390
+  },
+  "errors": [],
+  "overflow": [
+    {
+      "tag": "BUTTON",
+      "className": "stop",
+      "text": "■ 停止不可用 · 只读模式"
+    }
+  ]
+}

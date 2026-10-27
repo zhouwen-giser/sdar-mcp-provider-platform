@@ -1,0 +1,310 @@
+{
+  "schemaVersion": "ugv.zmq-site-delivery-evidence/1",
+  "at": "2026-10-27T04:14:11.546371+00:00",
+  "coreCommit": "8345102d41a84c68a773bafa45c63134827c87ad",
+  "consoleCommit": "25778fa06548ac745779a41aba26091a8e127fb6",
+  "files": [
+    {
+      "path": "raw/candidate-browser-plan.json",
+      "bytes": 7497,
+      "sha256": "ff8cbf76bdcbd39e1342b2c8b31eee403ded3356b73a9681ba8b15918b378635"
+    },
+    {
+      "path": "raw/candidate-browser.json",
+      "bytes": 6482,
+      "sha256": "58899a4947ba49bc9b9449a2708b03910d705317d1912ef3703de644fad73e63"
+    },
+    {
+      "path": "raw/candidate-capacity-idle-check.json",
+      "bytes": 120,
+      "sha256": "51721e15ab396c3342b6a3cb7413dd0eb2f5c9ae823c60cff009979896c44ec1"
+    },
+    {
+      "path": "raw/candidate-catalog.json",
+      "bytes": 249067,
+      "sha256": "ec06c47d53a1517d8c9f578e71e6d2071496c165e013c8a29f4744f0aa3b48dd"
+    },
+    {
+      "path": "raw/candidate-desktop.png",
+      "bytes": 362086,
+      "sha256": "2348e81ff207783347353fe4500d59c7cdcb1c511d28d88b9ef9b29b26b6f6ff"
+    },
+    {
+      "path": "raw/candidate-mobile.png",
+      "bytes": 336486,
+      "sha256": "17ae1179395eb33e8f133f841694e9916b17f62c8f3d44b6e53487e1b9e2e7fc"
+    },
+    {
+      "path": "raw/candidate-observations.json",
+      "bytes": 11993,
+      "sha256": "ae9c74c2c1b6ebfdf63dc9389204ab39df2bdf861a61c32b4f08293b6b353f2e"
+    },
+    {
+      "path": "raw/console-mobile-deploy.json",
+      "bytes": 945,
+      "sha256": "6e2f2c90e691789d08ab549c96ec4a591b7b9803b96e68e60154728ce7b75be5"
+    },
+    {
+      "path": "raw/console-nat-cleanup.json",
+      "bytes": 889,
+      "sha256": "da5e991c05eb8868db0fb50c9e3df72795a5ea684b6a7a912fabd2a593995927"
+    },
+    {
+      "path": "raw/container-deployment.json",
+      "bytes": 5416,
+      "sha256": "71a7ea82afa88d5ab987ff8658dda545512254472004507457057b7a139a1951"
+    },
+    {
+      "path": "raw/deployment-checks.json",
+      "bytes": 1465,
+      "sha256": "9b2096ebaa811ef20bc2e00a9d5e95d2e34d374541042ac11d63bf6d99e9c45c"
+    },
+    {
+      "path": "raw/formal-readonly-catalog.json",
+      "bytes": 201841,
+      "sha256": "c017992e46fac9d2e8272e9d51d2d4ac3f8675dc84bf548016afa585e6717584"
+    },
+    {
+      "path": "raw/formal-readonly-desktop.png",
+      "bytes": 355643,
+      "sha256": "85244cb4e975b35f599ef7bfaa85e40e4b5dc99cd3bfbc5a4c8bc54db9488093"
+    },
+    {
+      "path": "raw/formal-readonly-mobile.png",
+      "bytes": 333609,
+      "sha256": "1e2a572a607855f0c0db0fb5cc42b56063cb286606a2adb4a6022ff717ef3dab"
+    },
+    {
+      "path": "raw/formal-readonly-observations.json",
+      "bytes": 11983,
+      "sha256": "2590ecf8cd6d5283eef262e8e1e242818e27a276d658d5e9a58a55319f6a64fd"
+    },
+    {
+      "path": "raw/handoff-final-verify.log",
+      "bytes": 85,
+      "sha256": "e1cd3b2274f81e3a0f7e61982f67cdbddccbca1b09066c9bea9cba147503ce4e"
+    },
+    {
+      "path": "raw/handoff-receipt.json",
+      "bytes": 1103,
+      "sha256": "f90650058c97970c4eddbab750a4f1294374e46d00af9b7040151b34371f87d6"
+    },
+    {
+      "path": "raw/immutable-history.json",
+      "bytes": 1781,
+      "sha256": "e16182f2d03c957ad40006211f5a5ab1f2404b2afdc503ca63652a1b00d055db"
+    },
+    {
+      "path": "raw/mobile-before-fix-8345102.json",
+      "bytes": 213,
+      "sha256": "476daf60dbe01c178a0beedbc90b9bf77c1ff665cf1420a77a66c631d5dff4c6"
+    },
+    {
+      "path": "raw/native-dispatch-status.json",
+      "bytes": 591,
+      "sha256": "a70108fe4ff87ea8d9bab8056ff3b970c441b02d72b4943db04ff1bd8d315722"
+    },
+    {
+      "path": "raw/old-writer-stop-proof.json",
+      "bytes": 1584,
+      "sha256": "d625ff156442280f237c296beefec37a17982726a30e4305d3c80fbb15020450"
+    },
+    {
+      "path": "raw/pms-catalog-auth-read.json",
+      "bytes": 56,
+      "sha256": "f80dc239c931001d499ddf2603a7babe415a10f12f55091899ebf9726c13b591"
+    },
+    {
+      "path": "raw/pms-network-repair.json",
+      "bytes": 3067,
+      "sha256": "88cd8153f9e374a96e59654cd1a4adb939548a085e25001985577b2f5c3e8163"
+    },
+    {
+      "path": "raw/pms-registration-final.json",
+      "bytes": 370,
+      "sha256": "76ee8244f2f226746e3f9a7169b850447f782f7c1919f0e63e5c5cb107a81821"
+    },
+    {
+      "path": "raw/private-material-scan.json",
+      "bytes": 199,
+      "sha256": "f135aa8387d06b5c9b3b229005f750aa32f8cdd6daa9ec8f36e1710e30242017"
+    },
+    {
+      "path": "raw/retired-command-status.json",
+      "bytes": 834,
+      "sha256": "970d3de2a49f4af6b243c875888b3bbd8ade5ff525d7c40fb70938f5586ddf55"
+    },
+    {
+      "path": "raw/site-read-verification.json",
+      "bytes": 8355,
+      "sha256": "1e21f312370f96156b765c503979a693eee93f517e31dee5e060d3edb1313e09"
+    },
+    {
+      "path": "software/browser-legacy.log",
+      "bytes": 853,
+      "sha256": "bbdc3bae510fd3ea941d4e58850ef08f8bfe8a8c185b2b1424c482430787d4e6"
+    },
+    {
+      "path": "software/browser-site-control.log",
+      "bytes": 534,
+      "sha256": "239d4bf465400b875e3d2c29f46d7f0b538f5396d82dc2a6f285e4b8bdc56912"
+    },
+    {
+      "path": "software/browser-site.log",
+      "bytes": 760,
+      "sha256": "7d59abc70878691d078444e34da1b3220375f585f7df35133873df2b162d6093"
+    },
+    {
+      "path": "software/build.log",
+      "bytes": 86,
+      "sha256": "536cc4f74bc927dcd4e9e023fc52b0871374c6ac34ebbfec8258499cfd7b634f"
+    },
+    {
+      "path": "software/catalog.log",
+      "bytes": 63,
+      "sha256": "0a97c8a784671bc46108093f268b32c8bbd0ede15a710ea98c55ed793d4a3d80"
+    },
+    {
+      "path": "software/console-build.log",
+      "bytes": 799,
+      "sha256": "c8c3aadd47d6d35f9432f44eb6cd755e7e776c8722aecb8b45ac1cfa4fdcb649"
+    },
+    {
+      "path": "software/console-typecheck.log",
+      "bytes": 32,
+      "sha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39"
+    },
+    {
+      "path": "software/console.log",
+      "bytes": 312,
+      "sha256": "43d2e000f3d694d4d8b1f5e937d949f29f04b1c0917e0612c49f713c8772fd14"
+    },
+    {
+      "path": "software/contract-lock.log",
+      "bytes": 1073,
+      "sha256": "1bc3618e95d59aa833e15b784be76aacc117f01f421548cee8091e640935343b"
+    },
+    {
+      "path": "software/format-changed.log",
+      "bytes": 66,
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    {
+      "path": "software/frozen-74.log",
+      "bytes": 274,
+      "sha256": "df1991bcf41a5f6330eb2e3eeaf2aee5e911ffc534cc5781f44d4fadf739bcda"
+    },
+    {
+      "path": "software/lint-source.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "software/native-and-lifecycle.log",
+      "bytes": 289,
+      "sha256": "214ea38404ca4e382e4a84cee47582b3e12473e98a443b8648d0a2dcc2182e69"
+    },
+    {
+      "path": "software/native-wire.json",
+      "bytes": 11081,
+      "sha256": "2c55bb8b63a097d92b149b91eac83ea4c12308a19821941dee5b8e804c8fa4f0"
+    },
+    {
+      "path": "software/protocol.log",
+      "bytes": 610,
+      "sha256": "b211fded711fc0109091affb9a8bcc281769bdd5f30159cdbbd4e0f9196b9434"
+    },
+    {
+      "path": "software/site-control-catalog.log",
+      "bytes": 67,
+      "sha256": "768dfdad614e10fb53fc3b0e68796633dab3cb8bc7464916eec8e4efc456deae"
+    },
+    {
+      "path": "software/source.json",
+      "bytes": 335558,
+      "sha256": "5219a60f407ddfb86a015f4c4273a6c60db6a915e7e75db06ad26a41e31ffb1d"
+    },
+    {
+      "path": "software/typecheck.log",
+      "bytes": 32,
+      "sha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39"
+    },
+    {
+      "path": "software/unit-and-contract.log",
+      "bytes": 5313,
+      "sha256": "3ddaa5263aa0d042fe60bd6fba340cdb48d889fb1170e43b0c177fe775b5eec4"
+    },
+    {
+      "path": "software/verification.json",
+      "bytes": 12925,
+      "sha256": "61bd96b0c2ef38085b471696225c1a2ab6b813f2e1765da992e58e2b9c6684fe"
+    },
+    {
+      "path": "console-mobile/browser-legacy.log",
+      "bytes": 853,
+      "sha256": "8bf77d9eb608f4fbfc021b7ff80774a10d73e8b6043c5b024bcc5516b8aeafc2"
+    },
+    {
+      "path": "console-mobile/browser-site-control.log",
+      "bytes": 534,
+      "sha256": "313ce7a712165183b2496f2954bf4b10c481c4bc6cb18098554160296c0b85f2"
+    },
+    {
+      "path": "console-mobile/browser-site.log",
+      "bytes": 847,
+      "sha256": "339b26a62f11b1b428264c60b1a6d84f601c6acfab81752a17ca585e30917e56"
+    },
+    {
+      "path": "console-mobile/console-build.log",
+      "bytes": 799,
+      "sha256": "c49d2fd521c4037f0629fc5de0e281742efde31bfa357a472f9b6c8520d4d9f4"
+    },
+    {
+      "path": "console-mobile/console-typecheck.log",
+      "bytes": 32,
+      "sha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39"
+    },
+    {
+      "path": "console-mobile/format.log",
+      "bytes": 66,
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    {
+      "path": "console-mobile/lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "console-mobile/source.json",
+      "bytes": 8847,
+      "sha256": "f331a033180908ff05cb709cb9742589153e331cabfc7acd7d3d04eb1611e1b7"
+    },
+    {
+      "path": "console-mobile/verification.json",
+      "bytes": 3988,
+      "sha256": "d74ffe0731dcabb443e8198090da71f66570dc477db6fb660bd605b3f0d09598"
+    },
+    {
+      "path": "build/commands.json",
+      "bytes": 1269,
+      "sha256": "7c9e33c756f12208f8c8b263b316be1fd11a3c88611121f4f794340602e748c1"
+    },
+    {
+      "path": "build/console.log",
+      "bytes": 7583,
+      "sha256": "ddc56bcc6d535f35dff77b785db84885e7fd1380cec6a5b8cffc27fba15bd5ac"
+    },
+    {
+      "path": "build/provider.log",
+      "bytes": 16918,
+      "sha256": "079bf40c627dc2ae18b2e91cb5ea14596ff0985b5d573651a086f00d291831ce"
+    },
+    {
+      "path": "build/runtime.log",
+      "bytes": 10932,
+      "sha256": "9269550db66c6c1cff0648fc95246581875591cff4c8fba806ed6f2c1f56e943"
+    }
+  ],
+  "siteActions": "not_run_pending_operator",
+  "formalControlCutover": "not_run_pending_field_acceptance"
+}

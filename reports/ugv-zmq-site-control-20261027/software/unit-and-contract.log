@@ -1,0 +1,28 @@
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+{"level":30,"time":1793070353446,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"GET","url":"/health/live","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1793070353467,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"POST","url":"/mcp","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1793070353452,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":200},"responseTime":4.235103999999865,"msg":"request completed"}
+{"level":30,"time":1793070353453,"service":"sdar-mcp-tasks-runtime","reqId":"req-2","req":{"method":"GET","url":"/health/ready","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1793070353453,"service":"sdar-mcp-tasks-runtime","reqId":"req-2","res":{"statusCode":503},"responseTime":0.5340150000001813,"msg":"request completed"}
+{"level":30,"time":1793070353468,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":413},"err":{"type":"FastifyError","message":"Request body is too large","stack":"FastifyError: Request body is too large\n    at rawBody (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.12.2/node_modules/fastify/lib/content-type-parser.js:245:10)\n    at ContentTypeParser.run (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.12.2/node_modules/fastify/lib/content-type-parser.js:209:5)\n    at Object.handleRequest (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.12.2/node_modules/fastify/lib/handle-request.js:87:46)\n    at runPreParsing (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.12.2/node_modules/fastify/lib/route.js:661:19)\n    at next (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.12.2/node_modules/fastify/lib/hooks.js:236:9)\n    at handleResolve (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/node_modules/.pnpm/fastify@5.12.2/node_modules/fastify/lib/hooks.js:253:7)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)","code":"FST_ERR_CTP_BODY_TOO_LARGE","name":"FastifyError","statusCode":413},"msg":"Request body is too large"}
+{"level":30,"time":1793070353471,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":413},"responseTime":3.465499000000136,"msg":"request completed"}
+{"level":30,"time":1793070354672,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"GET","url":"/v1/diagnostics/capabilities","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1793070354699,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"GET","url":"/v1/diagnostics/capabilities/SMPP-MISSION-RELATION","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1793070354712,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"GET","url":"/v1/diagnostics/capabilities/PV-LATEST-TASK","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1793070354679,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":200},"responseTime":5.4243300000000545,"msg":"request completed"}
+{"level":30,"time":1793070354700,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":200},"responseTime":0.5732990000001337,"msg":"request completed"}
+{"level":30,"time":1793070354712,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":404},"responseTime":0.452007999999978,"msg":"request completed"}
+{"level":30,"time":1793070355924,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"POST","url":"/v1/diagnostics/response-loss","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1793070355932,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":400},"responseTime":7.433843999999908,"msg":"request completed"}
+{"level":30,"time":1793070355933,"service":"sdar-mcp-tasks-runtime","reqId":"req-2","req":{"method":"POST","url":"/v1/diagnostics/provider-business-success","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1793070355935,"service":"sdar-mcp-tasks-runtime","reqId":"req-2","res":{"statusCode":400},"responseTime":1.7951450000000477,"msg":"request completed"}
+{"level":30,"time":1793070355935,"service":"sdar-mcp-tasks-runtime","reqId":"req-3","req":{"method":"GET","url":"/internal/provider-identity","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1793070355936,"service":"sdar-mcp-tasks-runtime","reqId":"req-3","res":{"statusCode":200},"responseTime":0.45495600000003833,"msg":"request completed"}
+
+ Test Files  97 passed (97)
+      Tests  698 passed (698)
+   Start at  11:05:18
+   Duration  80.98s (transform 3.64s, setup 0ms, import 40.62s, tests 23.50s, environment 12ms)
+

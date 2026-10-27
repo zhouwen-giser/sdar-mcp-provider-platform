@@ -1,0 +1,10 @@
+{
+  "fresh": true,
+  "revision": 75115,
+  "checkedAt": "2026-10-27T04:13:17.252506+00:00",
+  "expiresAt": "2026-10-27T04:13:41.163+00:00",
+  "deploymentId": "gowm-analysis-dev-f3dc6f4b8e-smpp",
+  "registeredAt": "2026-10-27T03:40:38.895+00:00",
+  "lastHeartbeatAt": "2026-10-27T04:13:11.163+00:00",
+  "runtimeInstanceId": "gowm-analysis-dev-f3dc6f4b8e-smpp-runtime-1"
+}

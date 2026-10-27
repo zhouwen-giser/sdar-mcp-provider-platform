@@ -1,0 +1,132 @@
+{
+  "schemaVersion": "ugv.zmq-pms-database-network-repair/1",
+  "at": "2026-10-27T03:37:21.900082+00:00",
+  "network": "sdar-site-pms_default",
+  "bridge": "br-118c28185831",
+  "containers": [
+    {
+      "name": "sdar-site-pms-pms-api-1",
+      "id": "7b1d4b16a6e931201422562d1465bf10530eb23161a1b6cbd22b1525b23126d7",
+      "image": "sha256:a14866758ed98d9bbfb17811b31b62655a5763748e834d6c412dfebfd8bb28c9",
+      "ip": "172.23.0.4"
+    },
+    {
+      "name": "sdar-site-pms-pms-worker-1",
+      "id": "7ef4693c84a21fe5f9099fb3a9bd3e1771b00d7c19909b1e0aa6f170b0049733",
+      "image": "sha256:cdf133ec717e94baf97a50c6f0db542878450e15195a3b09cdf1d909edc2bab5",
+      "ip": "172.23.0.3"
+    },
+    {
+      "name": "sdar-site-pms-pms-postgres-1",
+      "id": "ce1e90ab54399971ef985fe97b5e359cd3d420d349b666cb05630fc820f33f59",
+      "image": "sha256:2ba644623bf56f657a43ed40ea50a0fc54fbe0613db7f65ae2ebb90880615675",
+      "ip": "172.23.0.2"
+    }
+  ],
+  "addedRules": [
+    {
+      "rule": [
+        "-i",
+        "br-118c28185831",
+        "-o",
+        "br-118c28185831",
+        "-s",
+        "172.23.0.4/32",
+        "-d",
+        "172.23.0.2/32",
+        "-p",
+        "tcp",
+        "--dport",
+        "5432",
+        "-m",
+        "comment",
+        "--comment",
+        "smpp-zmq-site-pms-20261027",
+        "-j",
+        "ACCEPT"
+      ],
+      "exitCode": 0
+    },
+    {
+      "rule": [
+        "-i",
+        "br-118c28185831",
+        "-o",
+        "br-118c28185831",
+        "-s",
+        "172.23.0.2/32",
+        "-d",
+        "172.23.0.4/32",
+        "-p",
+        "tcp",
+        "--sport",
+        "5432",
+        "-m",
+        "conntrack",
+        "--ctstate",
+        "ESTABLISHED,RELATED",
+        "-m",
+        "comment",
+        "--comment",
+        "smpp-zmq-site-pms-20261027",
+        "-j",
+        "ACCEPT"
+      ],
+      "exitCode": 0
+    },
+    {
+      "rule": [
+        "-i",
+        "br-118c28185831",
+        "-o",
+        "br-118c28185831",
+        "-s",
+        "172.23.0.3/32",
+        "-d",
+        "172.23.0.2/32",
+        "-p",
+        "tcp",
+        "--dport",
+        "5432",
+        "-m",
+        "comment",
+        "--comment",
+        "smpp-zmq-site-pms-20261027",
+        "-j",
+        "ACCEPT"
+      ],
+      "exitCode": 0
+    },
+    {
+      "rule": [
+        "-i",
+        "br-118c28185831",
+        "-o",
+        "br-118c28185831",
+        "-s",
+        "172.23.0.2/32",
+        "-d",
+        "172.23.0.3/32",
+        "-p",
+        "tcp",
+        "--sport",
+        "5432",
+        "-m",
+        "conntrack",
+        "--ctstate",
+        "ESTABLISHED,RELATED",
+        "-m",
+        "comment",
+        "--comment",
+        "smpp-zmq-site-pms-20261027",
+        "-j",
+        "ACCEPT"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "existingRulesAndPoliciesUnchanged": true,
+  "beforeSha256": "02494791a35e3854ad51bc5dbd31636b0262d6ce2f13487c8013f7281d858476",
+  "afterSha256": "4605485e5364c58f03975c48a1f5a895267328e34e9715235551aca4f21bcd1a",
+  "persistence": "current container identities; revalidate after PMS recreation"
+}

@@ -1,0 +1,256 @@
+[
+  {
+    "at": "2026-10-27T04:06:02.755Z",
+    "name": "candidate",
+    "base": "http://127.0.0.1:19111",
+    "checkLocation": "host; formal uses actual LAN address, independent remote client not tested",
+    "provider": {
+      "providerId": "isr.vehicle.ugv.ugv",
+      "providerType": "isr.vehicle.ugv.zmq",
+      "providerVersion": "1.2.0",
+      "manifestHash": "82a0308d62339933728985aa0ad73ec7bf07604d38b4de508ebc23cbd7c78913"
+    },
+    "tools": [
+      "vehicle_get_state",
+      "vehicle_get_capabilities",
+      "vehicle_get_payload_status",
+      "vehicle_get_targets",
+      "vehicle_zmq_navigate",
+      "vehicle_zmq_area_recon",
+      "vehicle_zmq_circular_recon",
+      "vehicle_zmq_camera",
+      "vehicle_zmq_inspect_area",
+      "simulation_apply_effect",
+      "vehicle_get_inspection_result",
+      "simulation_get_effect_result",
+      "vehicle_zmq_plan_route"
+    ],
+    "anonymousDenied": true,
+    "controlAdmission": "per_operation",
+    "channels": {
+      "chassis": {
+        "state": "connected",
+        "lastReceptionAt": "2026-10-27T04:06:00.570Z",
+        "lastValidCommittedAt": "2026-10-27T04:06:00.570Z",
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "SOURCE_TIMEBASE_UNCONFIRMED"
+        ]
+      },
+      "eo": {
+        "state": "connected",
+        "lastReceptionAt": "2026-10-27T04:06:00.047Z",
+        "lastValidCommittedAt": "2026-10-27T04:06:00.047Z",
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+        ]
+      },
+      "simulationEffect": {
+        "state": "connected",
+        "lastReceptionAt": "2026-10-27T04:06:00.518Z",
+        "lastValidCommittedAt": "2026-10-27T04:06:00.518Z",
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+        ]
+      }
+    },
+    "archive": {
+      "status": "running",
+      "pendingRecords": 1,
+      "pendingBytes": 2220,
+      "committedEvents": 33463,
+      "receivedMessages": 33458,
+      "committedReceptions": 33457,
+      "unconfirmedReceptions": 0,
+      "locallyDiscardedMessages": 0,
+      "failureCode": null,
+      "failureRecorded": null
+    },
+    "history": [
+      {
+        "taskId": "ac1fb94e-f92b-45d7-b7ae-8564a3a66504",
+        "status": 200,
+        "businessReadable": true,
+        "reasonCode": null,
+        "responseSha256": "d03dfcf697234973d080f0066349b0d080aa0fe779466942c1b6f7d6d8453917"
+      },
+      {
+        "taskId": "ed90ab34-2c7b-4508-8a33-5b7c54d59c51",
+        "status": 200,
+        "businessReadable": true,
+        "reasonCode": null,
+        "responseSha256": "d77d62a8b0db8e760653a83bb8eaa2b8a94ccaa1618042e986156c8c714eef7c"
+      },
+      {
+        "taskId": "9095714b-c2e9-4c28-b25b-72e9e31cfebc",
+        "status": 409,
+        "businessReadable": false,
+        "reasonCode": "TASK_EXPIRED",
+        "responseSha256": "88375ba427dd292047bd1997b7d16cd2ee55309d77bbae6eda243b96fe55d69b"
+      },
+      {
+        "taskId": "91a19558-451b-4fd5-a551-cc166403476b",
+        "status": 409,
+        "businessReadable": false,
+        "reasonCode": "TASK_EXPIRED",
+        "responseSha256": "c63a731846887e70eca08e9ff60689afc75ac66a81450375a9924d0557f67fab"
+      },
+      {
+        "taskId": "20e65daa-006c-48a6-9c68-d91f1ed58463",
+        "status": 409,
+        "businessReadable": false,
+        "reasonCode": "TASK_EXPIRED",
+        "responseSha256": "4bb713f47ff25f011ec22abc7f02141da9222e262bf9c7f8a74d521255bb753b"
+      },
+      {
+        "taskId": "f1e23705-5bb9-4e24-a4b7-7bb7bc7e79bb",
+        "status": 409,
+        "businessReadable": false,
+        "reasonCode": "TASK_EXPIRED",
+        "responseSha256": "41aeaaca4e6cef5b021ab73b620c1ba8598b436c11776cbeb207b1dce8920378"
+      }
+    ],
+    "width": {
+      "document": 390,
+      "viewport": 390
+    },
+    "pageErrors": [],
+    "deviceCommandsSentByProbe": 0
+  },
+  {
+    "at": "2026-10-27T04:06:04.813Z",
+    "name": "formal-readonly",
+    "base": "http://17.26.1.20:19101",
+    "checkLocation": "host; formal uses actual LAN address, independent remote client not tested",
+    "provider": {
+      "providerId": "isr.vehicle.ugv.ugv",
+      "providerType": "isr.vehicle.ugv.zmq",
+      "providerVersion": "1.1.0",
+      "manifestHash": "c972bc0eb13d642d9b73752f9a5f79fda51fb495164576a74e50e08ec17b5006"
+    },
+    "tools": [
+      "vehicle_get_state",
+      "vehicle_get_capabilities",
+      "vehicle_get_payload_status",
+      "vehicle_get_targets",
+      "vehicle_zmq_navigate",
+      "vehicle_zmq_area_recon",
+      "vehicle_zmq_circular_recon",
+      "vehicle_zmq_camera",
+      "vehicle_zmq_inspect_area",
+      "simulation_apply_effect",
+      "vehicle_get_inspection_result",
+      "simulation_get_effect_result",
+      "vehicle_zmq_plan_route"
+    ],
+    "anonymousDenied": true,
+    "controlAdmission": "disabled",
+    "channels": {
+      "chassis": {
+        "state": "connected",
+        "lastReceptionAt": "2026-10-27T04:06:02.831Z",
+        "lastValidCommittedAt": "2026-10-27T04:06:02.831Z",
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "SOURCE_TIMEBASE_UNCONFIRMED"
+        ]
+      },
+      "eo": {
+        "state": "connected",
+        "lastReceptionAt": "2026-10-27T04:06:02.062Z",
+        "lastValidCommittedAt": "2026-10-27T04:06:02.062Z",
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+        ]
+      },
+      "simulationEffect": {
+        "state": "connected",
+        "lastReceptionAt": "2026-10-27T04:06:02.526Z",
+        "lastValidCommittedAt": "2026-10-27T04:06:02.526Z",
+        "receiptFresh": true,
+        "sourceFreshness": "unverified",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+        ]
+      }
+    },
+    "archive": {
+      "status": "running",
+      "pendingRecords": 1,
+      "pendingBytes": 2220,
+      "committedEvents": 56355,
+      "receivedMessages": 56182,
+      "committedReceptions": 56181,
+      "unconfirmedReceptions": 0,
+      "locallyDiscardedMessages": 0,
+      "failureCode": null,
+      "failureRecorded": null
+    },
+    "history": [
+      {
+        "taskId": "ac1fb94e-f92b-45d7-b7ae-8564a3a66504",
+        "status": 200,
+        "businessReadable": true,
+        "reasonCode": null,
+        "responseSha256": "f38f5fa9fe1b152a9ac2eca5d47814d3e3550ebf8259e75273f066f14761c32e"
+      },
+      {
+        "taskId": "ed90ab34-2c7b-4508-8a33-5b7c54d59c51",
+        "status": 200,
+        "businessReadable": true,
+        "reasonCode": null,
+        "responseSha256": "52723cc61da5ef74b7835ecb02860d93b31cb056312807caec431fa7fd1da4be"
+      },
+      {
+        "taskId": "9095714b-c2e9-4c28-b25b-72e9e31cfebc",
+        "status": 409,
+        "businessReadable": false,
+        "reasonCode": "TASK_EXPIRED",
+        "responseSha256": "c63a731846887e70eca08e9ff60689afc75ac66a81450375a9924d0557f67fab"
+      },
+      {
+        "taskId": "91a19558-451b-4fd5-a551-cc166403476b",
+        "status": 409,
+        "businessReadable": false,
+        "reasonCode": "TASK_EXPIRED",
+        "responseSha256": "4bb713f47ff25f011ec22abc7f02141da9222e262bf9c7f8a74d521255bb753b"
+      },
+      {
+        "taskId": "20e65daa-006c-48a6-9c68-d91f1ed58463",
+        "status": 409,
+        "businessReadable": false,
+        "reasonCode": "TASK_EXPIRED",
+        "responseSha256": "41aeaaca4e6cef5b021ab73b620c1ba8598b436c11776cbeb207b1dce8920378"
+      },
+      {
+        "taskId": "f1e23705-5bb9-4e24-a4b7-7bb7bc7e79bb",
+        "status": 409,
+        "businessReadable": false,
+        "reasonCode": "TASK_EXPIRED",
+        "responseSha256": "8d9e848256434062d8a5c0e0868111c2b2865444c615162c8d2664b8024b0dce"
+      }
+    ],
+    "width": {
+      "document": 390,
+      "viewport": 390
+    },
+    "pageErrors": [],
+    "deviceCommandsSentByProbe": 0
+  }
+]

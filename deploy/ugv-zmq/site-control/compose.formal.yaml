@@ -1,19 +1,44 @@
-# Shared network namespace preserves the existing PMS endpoint and keeps Provider/management on loopback.
+# Native ZMQ uses the verified host-network path; PMS retains its original Docker DNS endpoint.
 services:
-  runtime:
+  pms-gateway:
     container_name: ${SITE_RUNTIME_CONTAINER_NAME:?preserved PMS logical instance name}
     image: ${SITE_RUNTIME_IMAGE:?pin the verified Runtime image}
     init: true
     read_only: true
     restart: unless-stopped
-    env_file: ${SITE_RUNTIME_ENV:?formal private Runtime environment}
-    extra_hosts: ["adapter:127.0.0.1"]
-    ports: ["19100:8080", "19101:19101"]
+    extra_hosts: ["host.docker.internal:${SITE_HOST_GATEWAY_IP:?existing Runtime network gateway}"]
+    entrypoint: ["node", "--input-type=module", "-e"]
+    command:
+      - |
+        import net from 'node:net';
+        const server = net.createServer((client) => {
+          const upstream = net.connect({ host: 'host.docker.internal', port: 19100 });
+          const close = () => { client.destroy(); upstream.destroy(); };
+          upstream.setTimeout(5000, () => { if (upstream.connecting) close(); });
+          upstream.on('connect', () => upstream.setTimeout(0));
+          client.on('error', close); upstream.on('error', close);
+          client.on('close', () => upstream.destroy()); upstream.on('close', () => client.destroy());
+          client.pipe(upstream).pipe(client);
+        });
+        server.listen(8080, '0.0.0.0', () => console.log('pms_runtime_gateway_ready'));
+        process.once('SIGTERM', () => server.close(() => process.exit(0)));
     networks:
       runtime_network:
         aliases: ["${SITE_RUNTIME_CONTAINER_NAME}"]
       owner_network:
         aliases: ["${SITE_RUNTIME_CONTAINER_NAME}"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+  runtime:
+    image: ${SITE_RUNTIME_IMAGE:?pin the verified Runtime image}
+    network_mode: host
+    init: true
+    read_only: true
+    restart: unless-stopped
+    env_file: ${SITE_RUNTIME_ENV:?formal private Runtime environment}
+    extra_hosts:
+      - "adapter:127.0.0.1"
+      - "pms-api:${SITE_PMS_API_ADDRESS:?preserved actual PMS API address}"
     volumes:
       - ${SITE_GOWM_URL_FILE:?existing restricted owner URL}:/run/secrets/gowm.url:ro
       - ${SITE_RUNTIME_CONFIG_DIR:?preserved PMS token directory}:/run/config:ro
@@ -23,8 +48,7 @@ services:
     security_opt: [no-new-privileges:true]
   provider:
     image: ${SITE_PROVIDER_IMAGE:?pin the verified Provider image}
-    network_mode: service:runtime
-    depends_on: [runtime]
+    network_mode: host
     read_only: true
     init: true
     restart: unless-stopped
@@ -32,7 +56,7 @@ services:
     environment:
       UGV_ZMQ_PROVIDER_CONFIG_FILE: /run/secrets/provider.json
     volumes:
-      - ${SITE_PROVIDER_CONFIG:?formal site_control configuration with port 7010}:/run/secrets/provider.json:ro
+      - ${SITE_PROVIDER_CONFIG:?formal configuration with port 7010}:/run/secrets/provider.json:ro
       - ${SITE_GOWM_URL_FILE:?existing restricted owner URL}:/run/secrets/gowm.url:ro
       - ${SITE_HANDOFF_GRANT_FILE:?verified handoff grant}:/run/secrets/handoff.json:ro
       - ${SITE_JWT_SECRET_FILE:?server management JWT secret}:/run/secrets/site-jwt.key:ro
@@ -41,8 +65,7 @@ services:
     security_opt: [no-new-privileges:true]
   console:
     image: ${SITE_CONSOLE_IMAGE:?pin the verified console image}
-    network_mode: service:runtime
-    depends_on: [runtime]
+    network_mode: host
     read_only: true
     init: true
     restart: unless-stopped

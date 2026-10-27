@@ -1,0 +1,226 @@
+{
+  "commit": "25778fa06548ac745779a41aba26091a8e127fb6",
+  "sha256": "9abd59533d3fe8cfeeb8597429d7caed1212fadf4539599bd4a2a7b99de0ca0f",
+  "files": [
+    {
+      "path": "apps/ugv-control-console/e2e/console.spec.ts",
+      "sha256": "d7074949ced4ae3d47e70e3e4d2a408a151265328b45a1ea89eb64307d044a1d"
+    },
+    {
+      "path": "apps/ugv-control-console/e2e/server.ts",
+      "sha256": "d3f2c6be4b771a958b179cfa0c209dc95782062728af61d13e60cb7487241e27"
+    },
+    {
+      "path": "apps/ugv-control-console/e2e/site-control-server.ts",
+      "sha256": "92af163812206e81b165e178460436dbae76536a6e23a5d06e5f377fa42a51f4"
+    },
+    {
+      "path": "apps/ugv-control-console/e2e/site-control.spec.ts",
+      "sha256": "a66f9ea50c6ff1093dfa41cbadedc753cfd181cf9c6ce115715e711767252f27"
+    },
+    {
+      "path": "apps/ugv-control-console/e2e/site-server.ts",
+      "sha256": "dec983b27ea6c1fc0377880aa4dca186a5a2740477fad6d1a8d1ab47e40e38a0"
+    },
+    {
+      "path": "apps/ugv-control-console/e2e/site.spec.ts",
+      "sha256": "305699c38afcc95b08ddb93c4c2423d96919a654eb9f931a45506e312d701b2d"
+    },
+    {
+      "path": "apps/ugv-control-console/e2e/zmq-server.ts",
+      "sha256": "42e2fa4e34b7752b6271d7222bd2def7378dc06ee7abcf7960a139a903fc00fd"
+    },
+    {
+      "path": "apps/ugv-control-console/e2e/zmq.spec.ts",
+      "sha256": "0502c977b0ec50b3a5e918669c02ffb034b21486a8e9fa594b4badf0c2429a60"
+    },
+    {
+      "path": "apps/ugv-control-console/index.html",
+      "sha256": "ee58507d98e09b801a526fec8dd7a41adbfde57983bd97cdcb1d575c4c31b07e"
+    },
+    {
+      "path": "apps/ugv-control-console/package.json",
+      "sha256": "1ea43209902558c2fee8dc7f91a0b3e88f5056db9f6a2173f5b31e34e065df24"
+    },
+    {
+      "path": "apps/ugv-control-console/playwright.config.ts",
+      "sha256": "58e55b314a996835391d072dd69b0c28ec0e7daa5b7ac3a9ec26e90c0ddfd355"
+    },
+    {
+      "path": "apps/ugv-control-console/playwright.site-control.config.ts",
+      "sha256": "9a3d6c3988f72b7db5908b52e97eedfa9cc1727b24933bde8fb78f0e1b38c5ec"
+    },
+    {
+      "path": "apps/ugv-control-console/playwright.site.config.ts",
+      "sha256": "313fb49fe6b6c9c715fd85607aa1b4df54983e975527c068ea961996ac877e6d"
+    },
+    {
+      "path": "apps/ugv-control-console/playwright.zmq.config.ts",
+      "sha256": "f5b5969635b2de6e35487061f4fd130e8d5acd41a7cd69813a4110a929bdfc15"
+    },
+    {
+      "path": "apps/ugv-control-console/server/app.ts",
+      "sha256": "3369a6fda3efb9f1405e904bde21dca445adebf8dd489468e998ece7727d0a43"
+    },
+    {
+      "path": "apps/ugv-control-console/server/business.ts",
+      "sha256": "7e608c282f14b7c5ee694aa0dadfe69244f5ce1f36f39119de645fd1585c635b"
+    },
+    {
+      "path": "apps/ugv-control-console/server/config.ts",
+      "sha256": "3fab99ca591fea533bdcccc3da71db08ed19f19aa0a29dc96065f2d2b286df90"
+    },
+    {
+      "path": "apps/ugv-control-console/server/main.ts",
+      "sha256": "b1ee72944787507bf48513724ee1469c8c97a959979a0da8a8b5f159798e1b8d"
+    },
+    {
+      "path": "apps/ugv-control-console/server/mcp.ts",
+      "sha256": "865f23532c0149d5263d5ea6264f27016b88f662bfcd15b529b37bacb29f6c83"
+    },
+    {
+      "path": "apps/ugv-control-console/server/security.ts",
+      "sha256": "738308cdbfa5505ef343a73acdee39e129c258dbbbec258669f5a3a23ac0c372"
+    },
+    {
+      "path": "apps/ugv-control-console/server/service.ts",
+      "sha256": "ae0af81fdd38b00746f8ec70bfc4b73ca64535486d1955dee6ca43f0fb69a955"
+    },
+    {
+      "path": "apps/ugv-control-console/server/store.ts",
+      "sha256": "fed0c14f358006d31694622ca0a482a00a31aeb63de8960dfce4cbdf83efc19f"
+    },
+    {
+      "path": "apps/ugv-control-console/shared/coordinates.ts",
+      "sha256": "a3ebbee090684f396aad6ec6540bb699f0617791d9af5983813ed0a3fc34919e"
+    },
+    {
+      "path": "apps/ugv-control-console/shared/model.ts",
+      "sha256": "075fe3ee4b202bdef47a470e7b051ba0cbad5c54e5b8be37d8bb273ea3160b80"
+    },
+    {
+      "path": "apps/ugv-control-console/shared/zmq-native-catalog.json",
+      "sha256": "eef64a78eb8a5ffad63a1efe30c0bc15f711cfb6602eff3ebe5e8e84d1369e13"
+    },
+    {
+      "path": "apps/ugv-control-console/shared/zmq-native.ts",
+      "sha256": "40d433e1b7f8e61b3a682f130f804ceff6305835a516316079e316d440a7641f"
+    },
+    {
+      "path": "apps/ugv-control-console/shared/zmq-site-catalog.json",
+      "sha256": "f54d9eb2c9bc2b05749010b55e5e4f18a2d7c39dde9a7ae5e8d825c76cc6f950"
+    },
+    {
+      "path": "apps/ugv-control-console/shared/zmq-site-control-catalog.json",
+      "sha256": "f36936dc9eda5c5ff5ad15f975c6dc00ec2cc0711aed6c381fc877d142e4584d"
+    },
+    {
+      "path": "apps/ugv-control-console/shared/zmq.ts",
+      "sha256": "005d7dc0e4ca71531bb70beb4483a95be06f989cdc2f6ab1a72962c63d6c587f"
+    },
+    {
+      "path": "apps/ugv-control-console/test/api.test.ts",
+      "sha256": "27ad51ebf6448331a848042ebfee2224e1e6148b92c7b0ad36a35f88f55dba22"
+    },
+    {
+      "path": "apps/ugv-control-console/test/business.test.ts",
+      "sha256": "cca40afd511e63c4c8073f9d78743b3c1a7389ecfb2957bdc4cddb2ce7ed1dc9"
+    },
+    {
+      "path": "apps/ugv-control-console/test/config.test.ts",
+      "sha256": "e44f699d890d2ae57a6d3b1d27619fe719ab3d978164a11b9301ff454395475e"
+    },
+    {
+      "path": "apps/ugv-control-console/test/coordinates.test.ts",
+      "sha256": "a9766975e97a4e0362ebb797afff4326bb88eb101d243ab67aceccb2b4d96af2"
+    },
+    {
+      "path": "apps/ugv-control-console/test/diagram.test.ts",
+      "sha256": "605b9511f24711ecf621f7b054f532f6a586354a24e8f31ed93900b748d92385"
+    },
+    {
+      "path": "apps/ugv-control-console/test/fixture.ts",
+      "sha256": "99cc940f7182d2b062466c89e5b9203f6da0b64e8db418267bdbf606ab0dcb60"
+    },
+    {
+      "path": "apps/ugv-control-console/test/runtime.test.ts",
+      "sha256": "18637b94ce7cc7cc3cfe4f759ac4d9e02b40f05f3b7466ac3911456d05302e87"
+    },
+    {
+      "path": "apps/ugv-control-console/test/setup.ts",
+      "sha256": "f6c4298f9d8192af7d314c0d71a12bf8f404782278ceb529eaa7c7fafc547cc0"
+    },
+    {
+      "path": "apps/ugv-control-console/test/site-control.test.ts",
+      "sha256": "5142f94c727efb21e8df3e31ccf3ba75e7b533e42414ee87fd288131047f8eae"
+    },
+    {
+      "path": "apps/ugv-control-console/test/site-history.test.ts",
+      "sha256": "d0f51c36d2448848e26c60145e9280729a76378e58cb27f3d6788b2b91997f13"
+    },
+    {
+      "path": "apps/ugv-control-console/test/site-readonly.test.ts",
+      "sha256": "d693473f21d756c1bc51023b1050aca570be21cb6868cfb5cc16041f59b4e091"
+    },
+    {
+      "path": "apps/ugv-control-console/test/zmq.test.ts",
+      "sha256": "bb176621651554fa19adca78e746bd617037fcefd957b13c6cba7500407f7f9a"
+    },
+    {
+      "path": "apps/ugv-control-console/tsconfig.build.json",
+      "sha256": "19608d73fe6c5fb3021436e242591c4bba1e33cbacede4a95a59c1ae67f6c86b"
+    },
+    {
+      "path": "apps/ugv-control-console/tsconfig.json",
+      "sha256": "c6b92df27fe1a4c12e8ebc6effee62c3e279bb237e4d537a41525f0dd6f03ad4"
+    },
+    {
+      "path": "apps/ugv-control-console/tsconfig.server.json",
+      "sha256": "db2e9ea449153f5012519bc95d8dfa3670359a40504d1452bf0fced73bf02235"
+    },
+    {
+      "path": "apps/ugv-control-console/vite.config.ts",
+      "sha256": "875dbda4feb1419ed3cd93828b88e8aa656a8ebf043ee035ee08defa4532f410"
+    },
+    {
+      "path": "apps/ugv-control-console/vitest.config.ts",
+      "sha256": "0315a2ba6206e4cb3ce456f5956db69f832661c1021992cae84589adf35225f6"
+    },
+    {
+      "path": "apps/ugv-control-console/web/AvailabilityNotice.tsx",
+      "sha256": "faa83c0c6b3206a1b52ec0eb9fee204ae983309c489e0bd0f2a3b31937b03085"
+    },
+    {
+      "path": "apps/ugv-control-console/web/Diagram.tsx",
+      "sha256": "f5914cd6763c3745974e5f61143ce157c00c41c7ed372f90d5704c30a781fbb0"
+    },
+    {
+      "path": "apps/ugv-control-console/web/SiteControlConsole.tsx",
+      "sha256": "c2cb37d4952824acd210ea6b96e71579af4b36340484a892aa172d151175e80a"
+    },
+    {
+      "path": "apps/ugv-control-console/web/SiteReadonlyConsole.tsx",
+      "sha256": "b6ce6e5380f2e8fddea5ef4bb7e3936d045eb15bedcd516329f8d664294fdea8"
+    },
+    {
+      "path": "apps/ugv-control-console/web/ZmqResults.tsx",
+      "sha256": "16373f293b9b7bac5b295afb23f2023077f17791502928071bc716b5d66fe7c2"
+    },
+    {
+      "path": "apps/ugv-control-console/web/api.ts",
+      "sha256": "0af5cd668038375516ce681084c61f870ee5b1d431a11b4f967c67ed4a9d8e20"
+    },
+    {
+      "path": "apps/ugv-control-console/web/command-id.ts",
+      "sha256": "5c56cbaa3a6bb0525e79bf85dc206da25e383810d470f601d4c79c5acf545ef2"
+    },
+    {
+      "path": "apps/ugv-control-console/web/main.tsx",
+      "sha256": "c84239a4f7894f5720bc624ce58b9c43de761557ee3541ac24f771916c94828e"
+    },
+    {
+      "path": "apps/ugv-control-console/web/styles.css",
+      "sha256": "e71b004859a63d1a477fd09411a92ee63f9ee971aa320903de87c6defe0b2902"
+    }
+  ]
+}

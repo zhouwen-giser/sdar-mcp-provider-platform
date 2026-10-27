@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "ugv.console-retired-nat-cleanup/1",
+  "at": "2026-10-27T03:29:11.279816+00:00",
+  "retiredConsoleId": "7f62a54ed808c236f9ecfb1ec19ed6576ad10e1f5cb4f3f97ce5ae4b8f92eb0f",
+  "onlyExactOwnedRulesRemoved": true,
+  "commands": [
+    {
+      "ruleRemoved": "-A OUTPUT -d 127.0.0.1/32 -p 6 -m tcp --dport 19101 -m comment --comment smpp-ugv-control-console -j DNAT --to-destination 10.252.244.2:19101",
+      "exitCode": 0
+    },
+    {
+      "ruleRemoved": "-A POSTROUTING -s 127.0.0.0/8 -d 10.252.244.2/32 -p 6 -m tcp --dport 19101 -m comment --comment smpp-ugv-control-console -j MASQUERADE",
+      "exitCode": 0
+    }
+  ],
+  "beforeSha256": "47089edbcedaea59d1152aaf1b8c5049b556aca60bb008d316c29864bf550b80",
+  "afterSha256": "d45457360b8540ceae7d5c441b1d0ceaaff100574101962374b7edf40b5c91e6",
+  "persistentRuleSourcesFound": false,
+  "allOtherNatRulesUnchanged": true
+}

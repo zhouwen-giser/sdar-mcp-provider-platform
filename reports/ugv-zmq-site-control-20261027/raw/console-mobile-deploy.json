@@ -1,0 +1,46 @@
+[
+  {
+    "argv": [
+      "docker",
+      "compose",
+      "--env-file",
+      "/home/sz/.smpp-debug/zmq-site-control-20261026/site-images.env",
+      "-p",
+      "smpp-zmq-site-control",
+      "-f",
+      "deploy/ugv-zmq/site-control/compose.yaml",
+      "up",
+      "-d",
+      "--no-deps",
+      "--force-recreate",
+      "--no-build",
+      "--pull",
+      "never",
+      "console"
+    ],
+    "exitCode": 0,
+    "at": "2026-10-27T04:04:11.068730+00:00"
+  },
+  {
+    "argv": [
+      "docker",
+      "compose",
+      "--env-file",
+      "/home/sz/.smpp-debug/zmq-site-control-20261026/formal-readonly/site-images.env",
+      "-p",
+      "smpp-zmq-site-formal",
+      "-f",
+      "deploy/ugv-zmq/site-control/compose.formal.yaml",
+      "up",
+      "-d",
+      "--no-deps",
+      "--force-recreate",
+      "--no-build",
+      "--pull",
+      "never",
+      "console"
+    ],
+    "exitCode": 0,
+    "at": "2026-10-27T04:04:12.434656+00:00"
+  }
+]

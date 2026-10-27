@@ -1,0 +1,61 @@
+{
+  "at": "2026-10-27T04:10:03.797573+00:00",
+  "coreSourceMatches8345102": true,
+  "baseGateCommands": 17,
+  "consoleDeltaCommands": 7,
+  "softwareLogHashesVerified": true,
+  "siteReadProbe": {
+    "argv": [
+      "node",
+      "--import",
+      "tsx",
+      "reports/ugv-zmq-site-control-20261027/site-read-verify.mjs"
+    ],
+    "exitCode": 0,
+    "deviceCommandsSent": 0
+  },
+  "commands": [
+    {
+      "id": "candidate-compose-check",
+      "argv": [
+        "docker",
+        "compose",
+        "--env-file",
+        "/home/sz/.smpp-debug/zmq-site-control-20261026/site-images.env",
+        "-f",
+        "deploy/ugv-zmq/site-control/compose.yaml",
+        "config",
+        "--quiet"
+      ],
+      "exitCode": 0
+    },
+    {
+      "id": "formal-readonly-compose-check",
+      "argv": [
+        "docker",
+        "compose",
+        "--env-file",
+        "/home/sz/.smpp-debug/zmq-site-control-20261026/formal-readonly/site-images.env",
+        "-f",
+        "deploy/ugv-zmq/site-control/compose.formal.yaml",
+        "config",
+        "--quiet"
+      ],
+      "exitCode": 0
+    },
+    {
+      "id": "formal-control-not-started-compose-check",
+      "argv": [
+        "docker",
+        "compose",
+        "--env-file",
+        "/home/sz/.smpp-debug/zmq-site-control-20261026/formal-control/site-images.env",
+        "-f",
+        "deploy/ugv-zmq/site-control/compose.formal.yaml",
+        "config",
+        "--quiet"
+      ],
+      "exitCode": 0
+    }
+  ]
+}

@@ -1,0 +1,146 @@
+{
+  "at": "2026-10-27T04:10:03.516160+00:00",
+  "containers": [
+    {
+      "name": "smpp-zmq-site-control-provider-1",
+      "id": "30f3d29e9572344efb146f1add61f9dd267f604ee8bae0685592b8ae1d0666b2",
+      "image": "sha256:387161630b292f86d902c31d5ba71f9844554091f9001fe970ecdf88b1a3ab16",
+      "networkMode": "host",
+      "status": "running",
+      "health": null,
+      "restartPolicy": "unless-stopped",
+      "sourceCommit": "8345102d41a84c68a773bafa45c63134827c87ad",
+      "mountDestinations": [
+        "/run/secrets/provider.json",
+        "/run/secrets/gowm.url",
+        "/run/secrets/handoff.json",
+        "/run/secrets/site-jwt.key"
+      ]
+    },
+    {
+      "name": "smpp-zmq-site-control-runtime-1",
+      "id": "82b84ebaaae7ea8df0260f1d1bcc9bd101eb903a6aa96cdb65cbb499a78571c7",
+      "image": "sha256:42b13a4883c1015b4759db22fea370f0ce592673b263f3aebeb00f3f3a9326d4",
+      "networkMode": "host",
+      "status": "running",
+      "health": null,
+      "restartPolicy": "unless-stopped",
+      "sourceCommit": "8345102d41a84c68a773bafa45c63134827c87ad",
+      "mountDestinations": [
+        "/run/secrets/gowm.url"
+      ]
+    },
+    {
+      "name": "smpp-zmq-site-control-console-1",
+      "id": "a9009b85e6c65bad8d23f00e1d4339da98cdc6c40c1459bb79a5c8d0f326571d",
+      "image": "sha256:09df2d0270f345ff80e4c3585db793042d0564d497b17bf2c34c4109c499fc12",
+      "networkMode": "host",
+      "status": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "sourceCommit": "25778fa06548ac745779a41aba26091a8e127fb6",
+      "mountDestinations": [
+        "/run/secrets/console-database.url",
+        "/run/secrets/credentials.json",
+        "/run/secrets/upstream-authorization"
+      ]
+    },
+    {
+      "name": "smpp-zmq-site-formal-provider-1",
+      "id": "e8cde73acb59f94e8d110892ed9bd734d26fc22b66491a628f80cfa36330fd85",
+      "image": "sha256:387161630b292f86d902c31d5ba71f9844554091f9001fe970ecdf88b1a3ab16",
+      "networkMode": "host",
+      "status": "running",
+      "health": null,
+      "restartPolicy": "unless-stopped",
+      "sourceCommit": "8345102d41a84c68a773bafa45c63134827c87ad",
+      "mountDestinations": [
+        "/run/secrets/provider.json",
+        "/run/secrets/gowm.url",
+        "/run/secrets/handoff.json",
+        "/run/secrets/site-jwt.key"
+      ]
+    },
+    {
+      "name": "smpp-zmq-site-formal-runtime-1",
+      "id": "60b67708b868a44f1e49334802a483083007d3a05731c7736122df42f9fa449a",
+      "image": "sha256:42b13a4883c1015b4759db22fea370f0ce592673b263f3aebeb00f3f3a9326d4",
+      "networkMode": "host",
+      "status": "running",
+      "health": null,
+      "restartPolicy": "unless-stopped",
+      "sourceCommit": "8345102d41a84c68a773bafa45c63134827c87ad",
+      "mountDestinations": [
+        "/var/lib/sdar",
+        "/run/secrets/gowm.url",
+        "/run/config"
+      ]
+    },
+    {
+      "name": "smpp-zmq-site-formal-console-1",
+      "id": "69b91f7bd9aa0aaf57f289c518f00059f302e08fdd976f938301d29167fcdbc0",
+      "image": "sha256:09df2d0270f345ff80e4c3585db793042d0564d497b17bf2c34c4109c499fc12",
+      "networkMode": "host",
+      "status": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "sourceCommit": "25778fa06548ac745779a41aba26091a8e127fb6",
+      "mountDestinations": [
+        "/run/secrets/console-database.url",
+        "/run/secrets/credentials.json",
+        "/run/secrets/upstream-authorization"
+      ]
+    },
+    {
+      "name": "gowm-analysis-dev-f3dc6f4b8e-smpp-runtime-1",
+      "id": "7b5b7ddf531afc54c37eb3bf0020deffa768c9f4ea64fde23c639106036ea4a8",
+      "image": "sha256:42b13a4883c1015b4759db22fea370f0ce592673b263f3aebeb00f3f3a9326d4",
+      "networkMode": "gowm-analysis-dev-f3dc6f4b8e_default",
+      "status": "running",
+      "health": null,
+      "restartPolicy": "unless-stopped",
+      "sourceCommit": "8345102d41a84c68a773bafa45c63134827c87ad",
+      "mountDestinations": []
+    },
+    {
+      "name": "sdar-site-pms-pms-api-1",
+      "id": "7b1d4b16a6e931201422562d1465bf10530eb23161a1b6cbd22b1525b23126d7",
+      "image": "sha256:a14866758ed98d9bbfb17811b31b62655a5763748e834d6c412dfebfd8bb28c9",
+      "networkMode": "sdar-site-pms_default",
+      "status": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "sourceCommit": "cfda8c7f2f651a2c81db3c0e5f169e09100a911f",
+      "mountDestinations": [
+        "/run/pms-site"
+      ]
+    },
+    {
+      "name": "sdar-site-pms-pms-worker-1",
+      "id": "7ef4693c84a21fe5f9099fb3a9bd3e1771b00d7c19909b1e0aa6f170b0049733",
+      "image": "sha256:cdf133ec717e94baf97a50c6f0db542878450e15195a3b09cdf1d909edc2bab5",
+      "networkMode": "sdar-site-pms_default",
+      "status": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "sourceCommit": "cfda8c7f2f651a2c81db3c0e5f169e09100a911f",
+      "mountDestinations": [
+        "/run/pms-site",
+        "/var/lib/sdar"
+      ]
+    },
+    {
+      "name": "smpp-zmq-site-observation",
+      "id": "5df428342cd8bcac49030277020f1b1d9289623399081b142ce97d791fbb816b",
+      "image": "sha256:8189a1f6e40904781fc9e2612687877791d21679866db58b1de996b31fc312e4",
+      "networkMode": "bridge",
+      "status": "running",
+      "health": null,
+      "restartPolicy": "unless-stopped",
+      "sourceCommit": null,
+      "mountDestinations": [
+        "/var/lib/postgresql/data"
+      ]
+    }
+  ]
+}

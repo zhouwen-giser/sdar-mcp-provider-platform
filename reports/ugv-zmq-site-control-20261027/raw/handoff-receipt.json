@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "ugv.zmq-handoff-public-receipt/1",
+  "commandId": "56989c0c-9216-449c-8cfc-c1605c76b308",
+  "createdAt": "2026-10-27T02:55:26.726Z",
+  "grantSha256": "f18c17d1e24818348296e27f4f43eb19e2c4171b7681f8f17f32dbf40643f89a",
+  "planSha256": "3344e404fed852196a8108a69f4c25aae304e74829a3bea4a8ebe5b7bd308542",
+  "planHash": "3d87c872d791a0bef46970f8f25d508eaf6e78b4ee7799cf073673a5e1104533",
+  "retiredTasks": [
+    "ac1fb94e-f92b-45d7-b7ae-8564a3a66504",
+    "ed90ab34-2c7b-4508-8a33-5b7c54d59c51"
+  ],
+  "pendingCommandsBefore": [
+    {
+      "taskId": "15b414d9-4610-48e4-bb86-d2b14031ed08",
+      "sequence": "1",
+      "state": "EXHAUSTED"
+    },
+    {
+      "taskId": "f8aaa4df-509c-43cf-9479-e57a31df6e20",
+      "sequence": "1",
+      "state": "EXHAUSTED"
+    }
+  ],
+  "physicalOutcome": "unknown",
+  "firstAttempt": {
+    "exitCode": 1,
+    "reason": "owner snapshot required source_session_key and channel; transaction rolled back"
+  },
+  "committedAttempt": {
+    "sourceCommit": "8345102d41a84c68a773bafa45c63134827c87ad",
+    "applyExitCode": 0,
+    "verifyExitCode": 0
+  }
+}

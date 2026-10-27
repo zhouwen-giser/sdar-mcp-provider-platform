@@ -84,15 +84,26 @@ docker compose --env-file /private/site-images.env -p smpp-zmq-site-control -f d
 
 ### 保留 PMS 地址的正式编排
 
-`compose.yaml` 用于回环候选。正式使用 `compose.formal.yaml`：Runtime/Provider/面板共享网络命名空间，
-只发布 19100→8080、19101→19101。Provider 绑定 127.0.0.1:7010，管理绑定 127.0.0.1:19108；
-Runtime 保留原 `adapter:7010` 字符串并通过容器 hosts 解析到本地。
-保留原 Runtime 容器逻辑名及两个既有网络，使 PMS 的 direct_container 地址不变。
-已停止的旧 Runtime 只更名保留；交接 CLI 配置改用其不可变容器 ID，证明仍指向旧容器。
-正式环境数据库 URL 使用原 Docker 网络地址，观测库加入既有网络；保留原账号和卷。
+`compose.yaml` 用于回环候选。正式使用 `compose.formal.yaml`，三项应用使用已验证的宿主网络。
+Runtime 绑定 0.0.0.0:19100，面板绑定 0.0.0.0:19101；Provider 仅绑定 127.0.0.1:7010，
+管理入口仅绑定 127.0.0.1:19108。Runtime 通过本地 hosts 保留 `adapter:7010`。
 
-保留 PMS deployment、instance、注册令牌和其他配置。该实例原来使用匿名目录读取，启用 Runtime JWT 后需为
-这一个 direct_container 实例补充服务器端目录凭据。使用现有 PMS `file_credentials` 机制，描述符精确绑定
-provider/deployment/instance，签名密钥只挂载到私有凭据目录；不得向浏览器传递。
-若存在其他 external 实例，必须为其保留原凭据，不能以全局变更使其他目录失效。
-面板 JWT 的有效期由私有部署记录保存；轮换时保持 authority key/tenant/subject，更新服务器文件并重启面板。
+原生 ZMQ 在当前宿主网络可达，Docker 桥接路径无法接收三路发布；不能只凭 HTTP 就绪就判为接入成功。
+正式使用与候选相同的宿主机数据库入口和观测库入口，保留原账号、卷和来源身份。
+原 Runtime 容器更名保留后，由独立 `pms-gateway` 保留原逻辑容器名及两个既有网络。
+该网关只将内部 8080 原样转发至宿主机的 JWT Runtime 19100，不发布局域网端口，不保存凭据。
+`SITE_HOST_GATEWAY_IP` 固定为已验证的原 Runtime 网桥网关。
+PMS 的 direct_container 访问地址、deployment、instance、注册 URL 及注册令牌保持原值。
+`SITE_PMS_API_ADDRESS` 记录原 PMS API 在 Runtime 网桥上的实际地址，Runtime 通过容器 hosts 解析原 `pms-api` 名称。
+交接 CLI 始终使用旧写端不可变容器 ID，容器更名不会改变停止证明。
+
+保留原 Runtime 的 `/run/config` 令牌目录及 `/var/lib/sdar` 轨迹签名密钥。
+该实例原来使用匿名目录读取，启用 Runtime JWT 后需为这一个 direct_container 实例补充服务器端目录凭据。
+使用现有 PMS `file_credentials` 机制，描述符精确绑定 provider/deployment/instance；
+签名密钥只挂载到私有凭据目录，不向浏览器传递。
+若存在其他 external 实例，必须保留其原凭据。
+面板 JWT 有效期记录在私有部署记录中；轮换时保持 authority key/tenant/subject，更新服务器文件并重启面板。
+
+现场观测原始档案按分区计量；原默认 1 GiB 档案已满时会停止接收并报告
+`ZMQ_ARCHIVE_PAYLOAD_BUDGET_EXHAUSTED`。本次正式配置为每分区 64 GiB，保留历史数据。
+后续应结合磁盘容量核实 `archive_partition.canonical_bytes`，在上限前安排容量或归档。

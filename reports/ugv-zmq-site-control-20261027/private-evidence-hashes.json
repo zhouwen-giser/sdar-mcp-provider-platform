@@ -1,0 +1,116 @@
+[
+  {
+    "privateFile": "handoff-plan-fenced.json",
+    "bytes": 29621,
+    "sha256": "3344e404fed852196a8108a69f4c25aae304e74829a3bea4a8ebe5b7bd308542",
+    "includedInPublicDelivery": false
+  },
+  {
+    "privateFile": "handoff-grant.json",
+    "bytes": 1194,
+    "sha256": "f18c17d1e24818348296e27f4f43eb19e2c4171b7681f8f17f32dbf40643f89a",
+    "includedInPublicDelivery": false
+  },
+  {
+    "privateFile": "handoff-apply-rejected-1.log",
+    "bytes": 1484,
+    "sha256": "e3048ab058f1ef0bdfcdb79ac991656432baa022c1258fc84661982fccd4c60b",
+    "includedInPublicDelivery": false
+  },
+  {
+    "privateFile": "handoff-commands.json",
+    "bytes": 2633,
+    "sha256": "63b7df06459c92a72890d4110ccd51c0ac99e439b3b43adda25b248faaa2f101",
+    "includedInPublicDelivery": false
+  },
+  {
+    "privateFile": "immutable-before.json",
+    "bytes": 65030514,
+    "sha256": "ba741c618147137a706978ce7cd4e6fa5be897cd9e4ebf4fc6b88e27f298c57e",
+    "includedInPublicDelivery": false
+  },
+  {
+    "privateFile": "immutable-after-summary.json",
+    "bytes": 1781,
+    "sha256": "e16182f2d03c957ad40006211f5a5ab1f2404b2afdc503ca63652a1b00d055db",
+    "includedInPublicDelivery": false
+  },
+  {
+    "privateFile": "old-runtime-private-inspect.json",
+    "bytes": 16366,
+    "sha256": "d679c1357f585ab1f739d1a5174c09437494307343a2791f465979a203793f25",
+    "includedInPublicDelivery": false
+  },
+  {
+    "privateFile": "old-adapter-private-inspect.json",
+    "bytes": 15232,
+    "sha256": "2caa3e73f80cb10967a997bb6c0c1fb6755048eb3ad16573e5b80deb4e52d200",
+    "includedInPublicDelivery": false
+  },
+  {
+    "privateFile": "old-console-private-inspect.json",
+    "bytes": 13062,
+    "sha256": "e427a071772618eb9f2288a9baad2ade668095f9fdaf8165363b7320fbf1fafa",
+    "includedInPublicDelivery": false
+  },
+  {
+    "privateFile": "legacy-compose-original.json",
+    "bytes": 11228,
+    "sha256": "00d8b66767e2c624e9d9c2d81380c275258d3788df07d31db57bdbe5929e933d",
+    "includedInPublicDelivery": false
+  },
+  {
+    "privateFile": "orchestration-review.json",
+    "bytes": 1105,
+    "sha256": "6a369610b8a83656fb4fc2dd0395390e29d530ca265c89fde3a75a792a12def8",
+    "includedInPublicDelivery": false
+  },
+  {
+    "privateFile": "pms-compose-original.json",
+    "bytes": 3302,
+    "sha256": "91507481c2d4e20ccb3e7036b6bf7af9f3941f164fa944aff83c5d2cb1c0d8d8",
+    "includedInPublicDelivery": false
+  },
+  {
+    "privateFile": "pms-catalog-auth-audit.json",
+    "bytes": 694,
+    "sha256": "b628928cf4bace5de9ebc0ae3d90eedcddcd4dffe4a10ba38d4138680c6557f5",
+    "includedInPublicDelivery": false
+  },
+  {
+    "privateFile": "pms-api-restart.json",
+    "bytes": 403,
+    "sha256": "8a8064ef0ad189e59c4c08056407a728077fcd80e84c90723894aeabe60a42ca",
+    "includedInPublicDelivery": false
+  },
+  {
+    "privateFile": "candidate-deploy-commands.json",
+    "bytes": 1046,
+    "sha256": "18d683fed333ecfde864f07fd7282b2f9fa382be7134ed96c4ece00aeb97b494",
+    "includedInPublicDelivery": false
+  },
+  {
+    "privateFile": "netfilter-nat-before.txt",
+    "bytes": 3906,
+    "sha256": "47089edbcedaea59d1152aaf1b8c5049b556aca60bb008d316c29864bf550b80",
+    "includedInPublicDelivery": false
+  },
+  {
+    "privateFile": "netfilter-nat-after.txt",
+    "bytes": 3629,
+    "sha256": "d45457360b8540ceae7d5c441b1d0ceaaff100574101962374b7edf40b5c91e6",
+    "includedInPublicDelivery": false
+  },
+  {
+    "privateFile": "netfilter-filter-before.txt",
+    "bytes": 5585,
+    "sha256": "02494791a35e3854ad51bc5dbd31636b0262d6ce2f13487c8013f7281d858476",
+    "includedInPublicDelivery": false
+  },
+  {
+    "privateFile": "netfilter-filter-after.txt",
+    "bytes": 6351,
+    "sha256": "4605485e5364c58f03975c48a1f5a895267328e34e9715235551aca4f21bcd1a",
+    "includedInPublicDelivery": false
+  }
+]

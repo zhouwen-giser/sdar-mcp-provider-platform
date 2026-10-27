@@ -1,0 +1,24 @@
+{
+  "at": "2026-10-27T03:32:40.881Z",
+  "nativeTasks": [],
+  "retiredCommands": [
+    {
+      "task_id": "ac1fb94e-f92b-45d7-b7ae-8564a3a66504",
+      "command_sequence": "2",
+      "state": "ACKNOWLEDGED",
+      "last_error_code": null
+    },
+    {
+      "task_id": "ac1fb94e-f92b-45d7-b7ae-8564a3a66504",
+      "command_sequence": "1",
+      "state": "REJECTED",
+      "last_error_code": "UGV_DEVICE_TOOL_REJECTED"
+    },
+    {
+      "task_id": "ed90ab34-2c7b-4508-8a33-5b7c54d59c51",
+      "command_sequence": "1",
+      "state": "ACKNOWLEDGED",
+      "last_error_code": null
+    }
+  ]
+}

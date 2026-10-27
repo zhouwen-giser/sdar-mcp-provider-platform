@@ -1,0 +1,53 @@
+[
+  {
+    "id": "provider",
+    "argv": [
+      "docker",
+      "build",
+      "--target",
+      "ugv-zmq-site-control",
+      "--build-arg",
+      "VCS_REF=8345102d41a84c68a773bafa45c63134827c87ad",
+      "-t",
+      "smpp/ugv-zmq-provider:site-control-20261026-8345102",
+      "."
+    ],
+    "exitCode": 0,
+    "log": "provider.log",
+    "logSha256": "079bf40c627dc2ae18b2e91cb5ea14596ff0985b5d573651a086f00d291831ce"
+  },
+  {
+    "id": "runtime",
+    "argv": [
+      "docker",
+      "build",
+      "--target",
+      "ugv-real-runtime",
+      "--build-arg",
+      "VCS_REF=8345102d41a84c68a773bafa45c63134827c87ad",
+      "-t",
+      "smpp/runtime:site-control-20261026-8345102",
+      "."
+    ],
+    "exitCode": 0,
+    "log": "runtime.log",
+    "logSha256": "9269550db66c6c1cff0648fc95246581875591cff4c8fba806ed6f2c1f56e943"
+  },
+  {
+    "id": "console",
+    "argv": [
+      "docker",
+      "build",
+      "-f",
+      "deploy/ugv-control-console/Dockerfile",
+      "--build-arg",
+      "VCS_REF=25778fa06548ac745779a41aba26091a8e127fb6",
+      "-t",
+      "smpp/ugv-control-console:site-control-20261026-25778fa",
+      "."
+    ],
+    "exitCode": 0,
+    "log": "console.log",
+    "logSha256": "ddc56bcc6d535f35dff77b785db84885e7fd1380cec6a5b8cffc27fba15bd5ac"
+  }
+]

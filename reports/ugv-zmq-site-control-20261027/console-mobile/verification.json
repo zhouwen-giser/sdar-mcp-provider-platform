@@ -1,0 +1,128 @@
+{
+  "source": "25778fa06548ac745779a41aba26091a8e127fb6",
+  "initialAttempt": {
+    "reason": "isolated test config not provided to browser server",
+    "exitCode": 1,
+    "logSha256": "44c9b99cea2a0e6bd735948e782e15dc0a6fd2728b6b6509be06b497de7aca4e"
+  },
+  "commands": [
+    {
+      "id": "console-typecheck",
+      "argv": [
+        "pnpm",
+        "--filter",
+        "@sdar/ugv-control-console",
+        "typecheck"
+      ],
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "startedAt": "2026-10-27T03:58:45.656305+00:00",
+      "exitCode": 0,
+      "log": "console-typecheck.log",
+      "logSha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39",
+      "sourceUnchanged": true
+    },
+    {
+      "id": "lint",
+      "argv": [
+        "pnpm",
+        "exec",
+        "eslint",
+        "apps/ugv-control-console/e2e/site.spec.ts"
+      ],
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "startedAt": "2026-10-27T03:58:58.580907+00:00",
+      "exitCode": 0,
+      "log": "lint.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourceUnchanged": true
+    },
+    {
+      "id": "format",
+      "argv": [
+        "pnpm",
+        "exec",
+        "prettier",
+        "--check",
+        "apps/ugv-control-console/web/styles.css",
+        "apps/ugv-control-console/e2e/site.spec.ts"
+      ],
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "startedAt": "2026-10-27T03:59:04.694031+00:00",
+      "exitCode": 0,
+      "log": "format.log",
+      "logSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "sourceUnchanged": true
+    },
+    {
+      "id": "console-build",
+      "argv": [
+        "pnpm",
+        "--filter",
+        "@sdar/ugv-control-console",
+        "build"
+      ],
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "startedAt": "2026-10-27T03:59:05.968593+00:00",
+      "exitCode": 0,
+      "log": "console-build.log",
+      "logSha256": "c49d2fd521c4037f0629fc5de0e281742efde31bfa357a472f9b6c8520d4d9f4",
+      "sourceUnchanged": true
+    },
+    {
+      "id": "browser-site",
+      "argv": [
+        "pnpm",
+        "--filter",
+        "@sdar/ugv-control-console",
+        "exec",
+        "playwright",
+        "test",
+        "--config",
+        "playwright.site.config.ts"
+      ],
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "startedAt": "2026-10-27T04:01:28.563480+00:00",
+      "exitCode": 0,
+      "log": "browser-site.log",
+      "logSha256": "339b26a62f11b1b428264c60b1a6d84f601c6acfab81752a17ca585e30917e56",
+      "sourceUnchanged": true
+    },
+    {
+      "id": "browser-site-control",
+      "argv": [
+        "pnpm",
+        "--filter",
+        "@sdar/ugv-control-console",
+        "exec",
+        "playwright",
+        "test",
+        "--config",
+        "playwright.site-control.config.ts"
+      ],
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "startedAt": "2026-10-27T04:01:42.978874+00:00",
+      "exitCode": 0,
+      "log": "browser-site-control.log",
+      "logSha256": "313ce7a712165183b2496f2954bf4b10c481c4bc6cb18098554160296c0b85f2",
+      "sourceUnchanged": true
+    },
+    {
+      "id": "browser-legacy",
+      "argv": [
+        "pnpm",
+        "--filter",
+        "@sdar/ugv-control-console",
+        "exec",
+        "playwright",
+        "test"
+      ],
+      "cwd": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform",
+      "startedAt": "2026-10-27T04:01:56.900598+00:00",
+      "exitCode": 0,
+      "log": "browser-legacy.log",
+      "logSha256": "8bf77d9eb608f4fbfc021b7ff80774a10d73e8b6043c5b024bcc5516b8aeafc2",
+      "sourceUnchanged": true
+    }
+  ],
+  "passed": true
+}

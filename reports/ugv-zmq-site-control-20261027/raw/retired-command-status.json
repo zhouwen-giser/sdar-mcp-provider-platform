@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-27T03:39:01.656Z",
+  "commands": [
+    {
+      "task_id": "15b414d9-4610-48e4-bb86-d2b14031ed08",
+      "command_sequence": "1",
+      "state": "REJECTED",
+      "last_error_code": "ZMQ_LEGACY_RETIRED_OUTCOME_UNKNOWN",
+      "adapter_ack": {
+        "accepted": false,
+        "reasonCode": "ZMQ_LEGACY_RETIRED_OUTCOME_UNKNOWN",
+        "handoffCommandId": "56989c0c-9216-449c-8cfc-c1605c76b308"
+      }
+    },
+    {
+      "task_id": "f8aaa4df-509c-43cf-9479-e57a31df6e20",
+      "command_sequence": "1",
+      "state": "REJECTED",
+      "last_error_code": "ZMQ_LEGACY_RETIRED_OUTCOME_UNKNOWN",
+      "adapter_ack": {
+        "accepted": false,
+        "reasonCode": "ZMQ_LEGACY_RETIRED_OUTCOME_UNKNOWN",
+        "handoffCommandId": "56989c0c-9216-449c-8cfc-c1605c76b308"
+      }
+    }
+  ],
+  "allRejected": true
+}

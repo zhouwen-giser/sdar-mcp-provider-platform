@@ -1,0 +1,106 @@
+{
+  "schemaVersion": "ugv.zmq-site-control-acceptance/1",
+  "at": "2026-10-27T03:50:02.061324+00:00",
+  "applicationCommit": "25778fa06548ac745779a41aba26091a8e127fb6",
+  "catalogVersion": "1.2.0",
+  "profile": "zmq_v1_2_0_site_control_13",
+  "software": "passed",
+  "softwareSourceFingerprint": "a6b226703f28b1a4db99ee1d275323a126a2179fc2b7a34223aeab9f711712c2",
+  "siteSubscriptions": "passed",
+  "siteRoutePreview": {
+    "status": "passed",
+    "commandId": "be9d7f7e-4d65-49b3-aee7-a577067fae03",
+    "points": 24,
+    "adopted": false
+  },
+  "legacyHandoff": "passed_outcome_unknown_preserved",
+  "capabilities": [
+    {
+      "tool": "vehicle_zmq_navigate",
+      "variants": [
+        "navigation.point",
+        "navigation.route",
+        "navigation.returnHome"
+      ],
+      "software": "passed_isolated_native_zmq_postgresql_jwt_mcp_browser",
+      "siteAction": "pending_operator_action",
+      "siteResult": "not_run",
+      "taskIds": []
+    },
+    {
+      "tool": "vehicle_zmq_camera",
+      "variants": [
+        "camera.position",
+        "camera.zoom",
+        "camera.velocity"
+      ],
+      "software": "passed_isolated_native_zmq_postgresql_jwt_mcp_browser",
+      "siteAction": "pending_operator_action",
+      "siteResult": "not_run",
+      "taskIds": []
+    },
+    {
+      "tool": "vehicle_zmq_area_recon",
+      "variants": [
+        "recon.area"
+      ],
+      "software": "passed_isolated_native_zmq_postgresql_jwt_mcp_browser",
+      "siteAction": "pending_operator_action",
+      "siteResult": "not_run",
+      "taskIds": []
+    },
+    {
+      "tool": "vehicle_zmq_circular_recon",
+      "variants": [
+        "recon.circular"
+      ],
+      "software": "passed_isolated_native_zmq_postgresql_jwt_mcp_browser",
+      "siteAction": "pending_operator_action",
+      "siteResult": "not_run",
+      "taskIds": []
+    },
+    {
+      "tool": "vehicle_zmq_inspect_area",
+      "variants": [
+        "inspection.complete"
+      ],
+      "software": "passed_isolated_native_zmq_postgresql_jwt_mcp_browser",
+      "siteAction": "pending_operator_action",
+      "siteResult": "not_run",
+      "taskIds": [],
+      "scanExecution": "not_run",
+      "completeInspectionReport": "not_run"
+    },
+    {
+      "tool": "simulation_apply_effect",
+      "variants": [
+        "observation",
+        "manual"
+      ],
+      "software": "passed_isolated_native_zmq_postgresql_jwt_mcp_browser",
+      "siteAction": "pending_operator_action",
+      "siteResult": "not_run",
+      "taskIds": []
+    }
+  ],
+  "independentLanClient": "not_tested",
+  "formalDeployment": {
+    "runtimePort": 19100,
+    "consolePort": 19101,
+    "mode": "site_readonly",
+    "catalogVersion": "1.1.0",
+    "siteControlCutover": "pending_field_acceptance"
+  },
+  "pendingOperatorInput": "Per-capability Task IDs and actual outcomes; confirmed ellipsoid height for area operations",
+  "protocolEvidenceGaps": [
+    "source producer epoch and continuity unverified",
+    "source timebase and acquisition freshness unconfirmed",
+    "upstream historical query/replay unavailable",
+    "complete coverage footprint and actual trajectory evidence unavailable",
+    "target report stream not observed in read-only acceptance"
+  ],
+  "crossRepositorySdar": "unchanged; linked SDAR integration test not run",
+  "coreVerificationCommit": "8345102d41a84c68a773bafa45c63134827c87ad",
+  "consoleVerificationCommit": "25778fa06548ac745779a41aba26091a8e127fb6",
+  "consoleSourceFingerprint": "9abd59533d3fe8cfeeb8597429d7caed1212fadf4539599bd4a2a7b99de0ca0f"
+}

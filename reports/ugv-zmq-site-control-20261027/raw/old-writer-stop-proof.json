@@ -1,0 +1,62 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "docker",
+        "update",
+        "--restart=no",
+        "bde837e7b503ca7e17257486d0bdb627f97648d4e00a7a6e25d45bfb48eb68ed"
+      ],
+      "exitCode": 0,
+      "at": "2026-10-27T02:50:37.151071+00:00"
+    },
+    {
+      "argv": [
+        "docker",
+        "stop",
+        "--time",
+        "20",
+        "bde837e7b503ca7e17257486d0bdb627f97648d4e00a7a6e25d45bfb48eb68ed"
+      ],
+      "exitCode": 0,
+      "at": "2026-10-27T02:50:58.000778+00:00"
+    },
+    {
+      "argv": [
+        "docker",
+        "update",
+        "--restart=no",
+        "314ae9720af82f5d7c2c7e37dc6cffdeb377415e86eb7656b91aa9e52b114776"
+      ],
+      "exitCode": 0,
+      "at": "2026-10-27T02:50:58.062110+00:00"
+    },
+    {
+      "argv": [
+        "docker",
+        "stop",
+        "--time",
+        "20",
+        "314ae9720af82f5d7c2c7e37dc6cffdeb377415e86eb7656b91aa9e52b114776"
+      ],
+      "exitCode": 0,
+      "at": "2026-10-27T02:50:58.630301+00:00"
+    }
+  ],
+  "writers": [
+    {
+      "id": "bde837e7b503ca7e17257486d0bdb627f97648d4e00a7a6e25d45bfb48eb68ed",
+      "image": "sha256:82c1e79f6c56587b6b090cf144e6e0e0fa6f48c413ec8ccd33a7b115997cb632",
+      "running": false,
+      "restart": "no",
+      "finishedAt": "2026-10-27T02:50:57.400010509Z"
+    },
+    {
+      "id": "314ae9720af82f5d7c2c7e37dc6cffdeb377415e86eb7656b91aa9e52b114776",
+      "image": "sha256:f4f798e4b72bc4e18699bdb041ee6a9c3223de8f077b6c4cdcf1cafa34ebfb55",
+      "running": false,
+      "restart": "no",
+      "finishedAt": "2026-10-27T02:50:58.127800605Z"
+    }
+  ]
+}
