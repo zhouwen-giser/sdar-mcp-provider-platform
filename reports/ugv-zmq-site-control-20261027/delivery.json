@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "ugv.zmq-site-deployment-receipt/1",
+  "createdAt": "2026-10-27T04:19:14.877624+00:00",
+  "file": "ugv-zmq-site-control-20261027-5880f12.tar.gz",
+  "bytes": 342368650,
+  "sha256": "03d1f87b1997e8b9bb2f54fce5c0ddd458256f42488578b92fcdb482c18b9787",
+  "sourceCommit": "5880f127c747cb60a6a29d0acd50a965400ac4e7",
+  "coreCommit": "8345102d41a84c68a773bafa45c63134827c87ad",
+  "consoleCommit": "25778fa06548ac745779a41aba26091a8e127fb6",
+  "formalMode": "site_readonly",
+  "siteControlCutover": "pending_field_acceptance",
+  "images": [
+    {
+      "file": "images/site-control.tar.gz",
+      "bytes": 161070570,
+      "sha256": "19004467d3015aa8d1252b3363f1210c0e750f518e35ff3a3a8f14b1625e04d9",
+      "images": [
+        {
+          "tag": "smpp/ugv-zmq-provider:site-control-20261026-8345102",
+          "id": "sha256:387161630b292f86d902c31d5ba71f9844554091f9001fe970ecdf88b1a3ab16",
+          "sourceCommit": "8345102d41a84c68a773bafa45c63134827c87ad"
+        },
+        {
+          "tag": "smpp/runtime:site-control-20261026-8345102",
+          "id": "sha256:42b13a4883c1015b4759db22fea370f0ce592673b263f3aebeb00f3f3a9326d4",
+          "sourceCommit": "8345102d41a84c68a773bafa45c63134827c87ad"
+        },
+        {
+          "tag": "smpp/ugv-control-console:site-control-20261026-25778fa",
+          "id": "sha256:09df2d0270f345ff80e4c3585db793042d0564d497b17bf2c34c4109c499fc12",
+          "sourceCommit": "25778fa06548ac745779a41aba26091a8e127fb6"
+        }
+      ],
+      "exitCode": 0,
+      "at": "2026-10-27T04:06:08.309133+00:00"
+    },
+    {
+      "file": "images/rollback-readonly-1.1.0.tar.gz",
+      "bytes": 160995703,
+      "sha256": "957f139f9024195b94eba5338ad82fd9c25471bf0677a4e5e832db9a1411a981",
+      "images": [
+        {
+          "tag": "smpp/ugv-zmq-provider:site-readonly-20261026-d7824dc",
+          "id": "sha256:aba3d3969cec1b3b204962f4831d10f506c4aa5c891259a8c980052d6db29bef",
+          "sourceCommit": "d7824dcd9b66493d0f16a6f46092e35bf4ca92bf"
+        },
+        {
+          "tag": "smpp/runtime:site-readonly-20261026-8af8f25",
+          "id": "sha256:9f3e6ae6b876f4fc34848a4c65f7a16af3d28f7c947dfc4ba4a0b5b4e26c2d79",
+          "sourceCommit": "8af8f25c050f9ff4315e48254f44907b0f5dbb04"
+        },
+        {
+          "tag": "smpp/ugv-control-console:site-readonly-20261026-8243c22",
+          "id": "sha256:b248a516be983a603346fb2a5870af6f6fe6a2302f15cd7569a1854e623b361c",
+          "sourceCommit": "8243c22"
+        }
+      ],
+      "exitCode": 0,
+      "archiveManifestVerified": true,
+      "at": "2026-10-27T03:27:52.718005+00:00"
+    }
+  ],
+  "fileCount": 83,
+  "verification": "passed",
+  "validation": {
+    "at": "2026-10-27T04:23:21.284672+00:00",
+    "exitCode": 0,
+    "archiveFilesChecked": 83,
+    "sha256EntriesVerified": 82,
+    "sourceFilesScannedForPrivateValues": 2039,
+    "publicFilesScannedForPrivateValues": 83,
+    "privateValuesChecked": 16,
+    "imageManifestsAndRevisionsVerified": 6,
+    "safeArchivePaths": true,
+    "privateMaterialMatches": 0
+  },
+  "branch": "codex/ugv-zmq-site-control-20261026",
+  "sourcePublication": "source commit verified on remote branch",
+  "completionStatus": "software_and_deployment_artifacts_delivered_field_acceptance_pending",
+  "remaining": [
+    "operator per-capability actions and actual results",
+    "independent LAN client verification",
+    "formal site_control cutover"
+  ]
+}
