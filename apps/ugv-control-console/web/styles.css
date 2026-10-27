@@ -902,6 +902,10 @@ button {
   white-space: nowrap;
 }
 
+.site-console .topbar-right {
+  flex-wrap: wrap;
+}
+
 .site-console .panel button,
 .site-console .panel summary,
 .site-console .panel p {

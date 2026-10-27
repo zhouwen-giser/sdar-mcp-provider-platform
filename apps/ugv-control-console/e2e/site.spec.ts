@@ -8,6 +8,16 @@ test.beforeEach(async ({ page }) => {
   await page.getByRole("button", { name: "进入控制台 →" }).click();
   await expect(page.getByRole("heading", { name: "设备观测与路线预览" })).toBeVisible();
 });
+test("keeps the read-only stop status visible at phone width", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const stop = page.getByRole("button", { name: "■ 停止不可用 · 只读模式" });
+  await expect(stop).toBeDisabled();
+  await expect(stop).toBeInViewport();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  const bounds = await stop.boundingBox();
+  expect(bounds).not.toBeNull();
+  expect((bounds?.x ?? 390) + (bounds?.width ?? 1)).toBeLessThanOrEqual(390);
+});
 test("previews a real fixture planner route, downloads provenance and keeps controls disabled", async ({
   page,
 }) => {
