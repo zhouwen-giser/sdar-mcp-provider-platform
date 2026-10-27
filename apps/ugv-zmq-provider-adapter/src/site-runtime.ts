@@ -6,7 +6,7 @@ import { z } from "zod";
 import type { ControlDeploymentProfile as DeploymentProfile } from "../../../packages/vehicle-zmq-contract/src/site-profile.js";
 import type { ZmqObservationObserver } from "../../../packages/vehicle-zmq-observer/src/index.js";
 import { canonical, sha256 } from "../../../packages/vehicle-zmq-observer/src/index.js";
-import { scopePredicate } from "../../../packages/gowm-shared-storage-adapter/src/index.js";
+import { metadataPredicate } from "../../../packages/vehicle-zmq-control/src/metadata-scope.js";
 import { jsonToProtoStruct } from "../../../packages/adapter-protocol/src/index.js";
 import { RESERVED_RESULT_FIELDS } from "../../../packages/domain/src/index.js";
 import type {
@@ -238,7 +238,7 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
     const identity = resultIdentity(e);
     const retainedPage = async (after: number, limit: number) => {
       const rows = await this.store.pool.query<{ snapshot: ResultRecord }>(
-        `SELECT snapshot FROM ugv_state_snapshot WHERE (${scopePredicate(this.store.pool, "ugv_state_snapshot", "ugv_state_snapshot")}) AND snapshot->>'schemaVersion' IN ('ugv.zmq-result-record/1','ugv.zmq-result-record/2') AND snapshot->'identity'=$1::jsonb AND (snapshot->>'revision')::bigint>$2 ORDER BY (snapshot->>'revision')::bigint LIMIT $3`,
+        `SELECT snapshot FROM ugv_state_snapshot WHERE (${metadataPredicate(this.store.pool)}) AND snapshot->>'schemaVersion' IN ('ugv.zmq-result-record/1','ugv.zmq-result-record/2') AND snapshot->'identity'=$1::jsonb AND (snapshot->>'revision')::bigint>$2 ORDER BY (snapshot->>'revision')::bigint LIMIT $3`,
         [JSON.stringify(identity), after, limit + 1],
       );
       return resultPage(

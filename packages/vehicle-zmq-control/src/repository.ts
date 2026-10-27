@@ -1,8 +1,6 @@
 import {
   scopePredicate,
   deviceScopePredicate,
-  scopeColumns,
-  scopeValues,
   assertCurrentRoute,
   resolveDeviceContext,
 } from "../../gowm-shared-storage-adapter/src/index.js";
@@ -14,6 +12,7 @@ import type {
   MutationJournalState,
 } from "../../provider-adapter-kit/src/types.js";
 import { isZmqExecution, type ControlScope, type ZmqExecution } from "./model.js";
+import { metadataColumns, metadataValues, metadataPredicate } from "./metadata-scope.js";
 import {
   identityHash,
   resultHash,
@@ -170,7 +169,7 @@ export class PostgresControlRepository implements ControlRepository {
       await client.query("BEGIN");
       await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,790026))", [binding]);
       const existing = await client.query<{ snapshot: ResultRecord }>(
-        `SELECT snapshot FROM ugv_state_snapshot WHERE (${scopePredicate(this.pool, "ugv_state_snapshot", "ugv_state_snapshot")}) AND revision=$1`,
+        `SELECT snapshot FROM ugv_state_snapshot WHERE (${metadataPredicate(this.pool)}) AND revision=$1`,
         [key],
       );
       if (existing.rows[0]) {
@@ -180,7 +179,7 @@ export class PostgresControlRepository implements ControlRepository {
         return existing.rows[0].snapshot;
       }
       const latest = await client.query<{ revision: number }>(
-        `SELECT COALESCE(MAX((snapshot->>'revision')::bigint),0)::int revision FROM ugv_state_snapshot WHERE (${scopePredicate(this.pool, "ugv_state_snapshot", "ugv_state_snapshot")}) AND snapshot->>'schemaVersion' IN ('ugv.zmq-result-record/1','ugv.zmq-result-record/2') AND snapshot->'identity'=$1::jsonb`,
+        `SELECT COALESCE(MAX((snapshot->>'revision')::bigint),0)::int revision FROM ugv_state_snapshot WHERE (${metadataPredicate(this.pool)}) AND snapshot->>'schemaVersion' IN ('ugv.zmq-result-record/1','ugv.zmq-result-record/2') AND snapshot->'identity'=$1::jsonb`,
         [JSON.stringify(draft.identity)],
       );
       const record: ResultRecord = {
@@ -193,7 +192,7 @@ export class PostgresControlRepository implements ControlRepository {
         contentHash: hash,
       };
       await client.query(
-        `INSERT INTO ugv_state_snapshot(${scopeColumns(this.pool, "ugv_state_snapshot")}revision,observed_at,snapshot) VALUES(${scopeValues(this.pool, "ugv_state_snapshot")}$1,$2,$3)`,
+        `INSERT INTO ugv_state_snapshot(${metadataColumns(this.pool)}revision,observed_at,snapshot) VALUES(${metadataValues(this.pool)}$1,$2,$3)`,
         [key, draft.receivedAt, record],
       );
       await client.query("COMMIT");
@@ -209,7 +208,7 @@ export class PostgresControlRepository implements ControlRepository {
     resultPage(identity, [], afterRevision, limit);
     if (identity.scopeHash !== this.scope.hash) throw Error("ZMQ_EXECUTION_SCOPE_MISMATCH");
     const rows = await this.pool.query<{ snapshot: ResultRecord }>(
-      `SELECT snapshot FROM ugv_state_snapshot WHERE (${scopePredicate(this.pool, "ugv_state_snapshot", "ugv_state_snapshot")}) AND snapshot->>'schemaVersion' IN ('ugv.zmq-result-record/1','ugv.zmq-result-record/2') AND snapshot->'identity'=$1::jsonb AND (snapshot->>'revision')::bigint>$2 ORDER BY (snapshot->>'revision')::bigint LIMIT $3`,
+      `SELECT snapshot FROM ugv_state_snapshot WHERE (${metadataPredicate(this.pool)}) AND snapshot->>'schemaVersion' IN ('ugv.zmq-result-record/1','ugv.zmq-result-record/2') AND snapshot->'identity'=$1::jsonb AND (snapshot->>'revision')::bigint>$2 ORDER BY (snapshot->>'revision')::bigint LIMIT $3`,
       [JSON.stringify(identity), afterRevision, limit + 1],
     );
     return resultPage(

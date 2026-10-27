@@ -3,14 +3,13 @@ import { ZMQ_CONTROL_TOOLS } from "./catalog.js";
 import { z } from "zod";
 import { canonical, sha256 } from "../../vehicle-zmq-observer/src/config.js";
 import {
-  scopeColumns,
-  scopeValues,
   scopePredicate,
   assertCurrentRoute,
   resolveDeviceContext,
 } from "../../gowm-shared-storage-adapter/src/index.js";
 import type { PostgresProviderStore } from "../../provider-adapter-kit/src/index.js";
 import { SiteControlDeploymentProfile } from "../../vehicle-zmq-contract/src/site-profile.js";
+import { metadataColumns, metadataValues, metadataPredicate } from "./metadata-scope.js";
 export const RETIRE_REASON = "ZMQ_LEGACY_RETIRED_OUTCOME_UNKNOWN";
 const writer = z
   .object({
@@ -135,7 +134,7 @@ export async function verifySiteGrant(
   )
     throw Error("ZMQ_SITE_HANDOFF_GRANT_MISMATCH");
   const found = await store.pool.query<{ snapshot: unknown }>(
-    `SELECT snapshot FROM ugv_state_snapshot WHERE (${scopePredicate(store.pool, "ugv_state_snapshot", "ugv_state_snapshot")}) AND revision=$1`,
+    `SELECT snapshot FROM ugv_state_snapshot WHERE (${metadataPredicate(store.pool)}) AND revision=$1`,
     ["site-handoff:" + grant.commandId],
   );
   if (canonical(found.rows[0]?.snapshot ?? null) !== canonical(grant))
@@ -162,7 +161,7 @@ export async function applyHandoff(
     ]);
     if (store.gowm) await assertCurrentRoute(c, store.gowm);
     const previous = await c.query<{ snapshot: SiteHandoffGrant }>(
-      `SELECT snapshot FROM ugv_state_snapshot WHERE (${scopePredicate(store.pool, "ugv_state_snapshot", "ugv_state_snapshot")}) AND revision=$1`,
+      `SELECT snapshot FROM ugv_state_snapshot WHERE (${metadataPredicate(store.pool)}) AND revision=$1`,
       [key],
     );
     if (previous.rows[0]) {
@@ -253,7 +252,7 @@ export async function applyHandoff(
       );
     }
     await c.query(
-      `INSERT INTO ugv_state_snapshot(${scopeColumns(store.pool, "ugv_state_snapshot")}revision,observed_at,snapshot) VALUES(${scopeValues(store.pool, "ugv_state_snapshot")}$1,$2,$3)`,
+      `INSERT INTO ugv_state_snapshot(${metadataColumns(store.pool)}revision,observed_at,snapshot) VALUES(${metadataValues(store.pool)}$1,$2,$3)`,
       [key, grant.createdAt, grant],
     );
     await c.query("COMMIT");
