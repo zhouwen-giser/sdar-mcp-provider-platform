@@ -75,6 +75,32 @@ describe.skipIf(!file)("site read-only formal MCP and PostgreSQL", () => {
       expect(item).toMatchObject({ sourceFreshness: "unverified" });
     expect(f.provider.observer.snapshot().archive.committedReceptions).toBeGreaterThan(0);
   });
+  it("attests each synchronous report for native SDAR evidence gates without claiming physical coverage", async () => {
+    for (const name of ["vehicle_get_capabilities", "vehicle_get_state"]) {
+      const result = await f.mcp.tool(name, { resourceId: f.resourceId });
+      expect(result.isError).toBe(false);
+      const evidence = record(record(result._meta)["io.sdar/evidence"]);
+      expect(evidence.profileVersion).toBe("1.0");
+      const items = array(evidence.items);
+      expect(items).toHaveLength(1);
+      const item = record(items[0]);
+      expect(item.evidenceId).toMatch(/^[a-f0-9]{64}$/);
+      expect(typeof item.observedAt).toBe("string");
+      expect(Number.isFinite(Date.parse(String(item.observedAt)))).toBe(true);
+      expect(item).toMatchObject({
+        evidenceType: "ugv.zmq.retained_report",
+        subjectRef: f.resourceId,
+        payloadRef: { kind: "structured_content", jsonPointer: "" },
+      });
+      const report = toolContent(result);
+      expect(report).toMatchObject(
+        name === "vehicle_get_state"
+          ? { completeEvidence: false }
+          : { completeSpatialEvidence: false, controlAvailable: false },
+      );
+    }
+    expect(f.devices.commands).toHaveLength(0);
+  });
   it("rejects all controls and lifecycle entrypoints without native dispatch", async () => {
     const c = {
       authorizationContextHash: "d".repeat(64),

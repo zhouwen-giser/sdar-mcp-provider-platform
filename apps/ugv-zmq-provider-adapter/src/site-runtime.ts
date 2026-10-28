@@ -413,7 +413,30 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
       message: e.reasonCode,
       retryable: false,
       observedAt: protoTime(e.updatedAt),
-      evidence: e.evidence,
+      // Attest the returned report content, including its declared gaps. This
+      // synchronous read supplies no physical coverage or terminal-action proof.
+      evidence:
+        result && e.terminalAt
+          ? [
+              {
+                evidenceId: sha256(
+                  canonical({
+                    taskId: e.taskId,
+                    executionId: e.externalExecutionId,
+                    operation: e.operationName,
+                    resourceId: e.resourceId,
+                    context: e.executionContext,
+                    result,
+                  }),
+                ),
+                evidenceType: "ugv.zmq.retained_report",
+                observedAt: e.terminalAt,
+                subjectRef: e.resourceId,
+                payloadRef: { kind: "structured_content", jsonPointer: "" },
+                producer: [e.providerId, "ugv-zmq-provider-adapter"],
+              },
+            ]
+          : e.evidence,
       ...(result ? { result: jsonToProtoStruct(result) } : {}),
     };
   }

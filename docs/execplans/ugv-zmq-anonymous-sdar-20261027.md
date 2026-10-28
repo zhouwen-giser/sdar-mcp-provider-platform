@@ -113,3 +113,23 @@ binding successor requires explicit user direction. Seven trial production Expos
 Skills were suspended, original services restored and independent candidate kept separate.
 Formal integration, control promotion and physical action acceptance remain OPEN/NOT_RUN.
 No site device command was sent. Full receipts: /mnt/data/ugv-zmq-anonymous-patrol-20261028.
+
+## Authorized binding successor and task-history reset (2026-10-29)
+
+The user explicitly authorizes successor device bindings without retaining old bindings or task
+history. Owner administration stopped both SDAR consumer sets and both SMPP Runtime/Provider
+sets, rehearsed and committed an exact snapshot-guarded purge of 155,096 related rows (12 MCP
+Tasks, one failed SDAR Task and their dependent execution/report records). Foreign keys stayed
+enabled; two delete guards were restored inside the transaction. Non-target row hashes match.
+New owner binding `0ab6028b-f367-4953-819f-ecca220a9a71` authorizes stable Server `smpp-zmq-site`.
+Both SMPP configurations now pin it; old MQTT writers remain retired.
+
+Physical deletion of old binding anchors additionally requires removing about 31 million raw
+trajectory receptions (65 GB). This exceeds Task history; scope clarification is pending and raw
+observations remain intact. Old bindings are closed and grant no new admission.
+
+The actual restricted-role readonly Task now passes exact Server ownership and its MCP invocation
+succeeds, exposing a missing readonly report attestation. Add the same content-bound native
+report Evidence used by the control adapter to synchronous readonly responses. It attests returned
+content, never physical coverage or action success. Real PostgreSQL/MCP regression passes 9 tests
+and proves zero native commands; run the 19-command gate before building a fixed Provider image.
