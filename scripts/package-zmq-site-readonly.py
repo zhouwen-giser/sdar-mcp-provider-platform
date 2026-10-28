@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export the exact SMPP read-only source, evidence and three pinned Docker images."""
+"""Export exact SMPP site source, evidence and three pinned Docker images."""
 import argparse
 import gzip
 import hashlib
@@ -16,6 +16,8 @@ parser.add_argument('--provider-image', required=True)
 parser.add_argument('--runtime-image', required=True)
 parser.add_argument('--console-image', required=True)
 parser.add_argument('--evidence-root', type=Path, required=True)
+parser.add_argument('--catalog-profile', choices=['zmq_v1_1_0_readonly_13', 'zmq_v1_2_0_site_control_13'],
+                    default='zmq_v1_1_0_readonly_13')
 args = parser.parse_args()
 root = Path(__file__).resolve().parents[1]
 output = args.output.resolve()
@@ -78,8 +80,8 @@ with tempfile.TemporaryDirectory(prefix='site-package-', dir=output.parent) as t
     entries.append(('images/images.tar', image_file))
     records = [{'path': name, 'bytes': path.stat().st_size, 'sha256': digest(path), 'mode': 0o755 if path.stat().st_mode & 0o111 else 0o644} for name, path in entries]
     commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root).decode().strip()
-    manifest = {'schemaVersion': 'ugv.zmq-site-readonly-bundle/1', 'sourceCommit': commit,
-                'profile': 'zmq_v1_1_0_readonly_13', 'controlQualified': False, 'automaticDeployment': False, 'imageRoundTripVerified': True,
+    manifest = {'schemaVersion': 'ugv.zmq-site-readonly-bundle/1' if args.catalog_profile == 'zmq_v1_1_0_readonly_13' else 'ugv.zmq-site-control-bundle/1', 'sourceCommit': commit,
+                'profile': args.catalog_profile, 'controlQualified': False, 'automaticDeployment': False, 'imageRoundTripVerified': True,
                 'sourceAuthority': 'exact_tracked_files_by_sha256', 'images': images, 'files': records}
     meta = (json.dumps(manifest, ensure_ascii=False, indent=2) + '\n').encode()
     sums = ''.join(f"{r['sha256']}  {r['path']}\n" for r in records).encode()

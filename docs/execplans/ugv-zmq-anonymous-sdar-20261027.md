@@ -24,7 +24,7 @@ Native patrol has exactly two confirmed children, bounded by the original deadli
 - [x] Inspect worktrees and baseline instructions; preserve existing changes/evidence.
 - [x] Restore SDAR pinned dependencies offline without lockfile changes.
 - [x] Implement and test site_anonymous authentication and history compatibility (2026-10-28).
-- [ ] Repair tagged, service-specific network paths and verify two source refresh periods.
+- [x] Repair tagged, service-specific network paths and verify two source refresh periods.
 - [ ] Implement exact 1.1.0/1.2.0 profiles, live identity, governance and renewal.
 - [ ] Implement native single-area patrol, lifecycle and truthful evidence aggregation.
 - [ ] Run both repositories' required gates and isolated PostgreSQL/Redis/ZMQ task chains.
@@ -81,3 +81,18 @@ site result wrappers and native patrol are still under implementation in SDAR.
 No physical action, candidate image activation, formal cutover or field acceptance is claimed.
 Evidence: /mnt/data/ugv-zmq-anonymous-patrol-20261028/smpp-software-{1,2}/verification.json.
 Private network receipts are under /home/sz/.smpp-debug/zmq-anonymous-sdar-20261027/network/.
+
+## Candidate and readonly rollback update (2026-10-28)
+
+All 19 software commands passed on compiled source b910f937. Candidate Runtime, Provider and console
+use fixed images built from that commit. Idle check before replacement found runtimeActive=0,
+providerActive=0 and pendingCommands=0; all bind mount identities/modes remain unchanged. Actual
+anonymous discovery validates 13 tools at 19110 with the 1.2.0 profile. Browser HTTP login, real state
+and existing task report reads pass on candidate 19111 and LAN formal readonly 19101.
+
+Formal 19100 has received the anonymous Runtime authentication update while retaining readonly
+1.1.0 mode; it is the rollback target. Formal control has not been promoted. SDAR's isolated joint
+run c256fbc8 passes all six native controls, preview and patrol degradation/pause-resume/restart/
+cancel/timeout with no Authorization headers. Its complete gate and field acceptance remain open.
+The packaging CLI now explicitly selects the readonly/control catalog; controlQualified stays false
+until operator field acceptance, and a bundle never triggers automatic deployment.

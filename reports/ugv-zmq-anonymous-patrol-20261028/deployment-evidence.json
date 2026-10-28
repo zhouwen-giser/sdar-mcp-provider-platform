@@ -1,0 +1,90 @@
+{
+  "schemaVersion": "smpp.zmq-anonymous-deployment-evidence/1",
+  "compiledCodeCommit": "b910f93706d09b6f509167afcf905bdea2566cc5",
+  "softwareGate": "PASS_19_COMMANDS",
+  "candidateRollout": {
+    "schemaVersion": "smpp.zmq-anonymous-candidate-rollout/1",
+    "compiledCodeCommit": "b910f93706d09b6f509167afcf905bdea2566cc5",
+    "idleBeforeUpdate": {
+      "runtimeActive": 0,
+      "providerActive": 0,
+      "pendingCommands": 0,
+      "planHash": "9674ddfee8f0dac92cfc556533ef3cc33544d4c0d707ebea05cbc12dd6b06c79"
+    },
+    "containers": [
+      {
+        "role": "/smpp-zmq-site-control-provider-1",
+        "id": "af1e6dbad1fcfdd610bffcf5ee9573802859ec651f8c62919c9bb7089e3dba8e",
+        "image": "sha256:d38059ed193ad4ac7d174492a53a096b623332c8175ef88f7d54b5ea9214abef",
+        "running": true
+      },
+      {
+        "role": "/smpp-zmq-site-control-console-1",
+        "id": "c4da018783104af73a5ef9fd8bc8b9694ad976bebaa91532c8d35568fcb28a6e",
+        "image": "sha256:c384223bbba09aba0c6d1b688e596d59722b717eb264352d693a4424c79305fc",
+        "running": true
+      }
+    ],
+    "bindMountsPreserved": true,
+    "runtimeAuthentication": "site_anonymous",
+    "physicalToolInvocations": 0,
+    "formalControlPromotion": false
+  },
+  "httpBrowserSmoke": [
+    {
+      "name": "candidate",
+      "url": "http://127.0.0.1:19111",
+      "heading": "现场设备控制",
+      "deviceStatus": 200,
+      "resourceId": "vehicle:ugv",
+      "taskListStatus": 200,
+      "taskCount": 6,
+      "history": {
+        "taskId": "ac1fb94e-f92b-45d7-b7ae-8564a3a66504",
+        "status": 200
+      },
+      "errors": [],
+      "blockedMutations": [],
+      "screenshot": "/mnt/data/ugv-zmq-anonymous-patrol-20261028/candidate-http-console.png",
+      "physicalCommandsSubmitted": 0,
+      "browserProxy": "disabled_for_direct_lan_verification"
+    },
+    {
+      "name": "formal-lan",
+      "url": "http://17.26.1.20:19101",
+      "heading": "设备观测与路线预览",
+      "deviceStatus": 200,
+      "resourceId": "vehicle:ugv",
+      "taskListStatus": 200,
+      "taskCount": 6,
+      "history": {
+        "taskId": "ac1fb94e-f92b-45d7-b7ae-8564a3a66504",
+        "status": 200
+      },
+      "errors": [],
+      "blockedMutations": [],
+      "screenshot": "/mnt/data/ugv-zmq-anonymous-patrol-20261028/formal-lan-http-console.png",
+      "physicalCommandsSubmitted": 0,
+      "browserProxy": "disabled_for_direct_lan_verification"
+    }
+  ],
+  "formalCatalog": {
+    "schemaVersion": "sdar.zmq-smpp-catalog-verification/1",
+    "classification": "READ_ONLY_SITE_CATALOG_VERIFICATION",
+    "catalogProfile": "zmq_v1_1_0_readonly_13",
+    "authentication": "anonymous_no_credential_headers",
+    "provider": {
+      "providerId": "isr.vehicle.ugv.ugv",
+      "providerType": "isr.vehicle.ugv.zmq",
+      "providerVersion": "1.1.0",
+      "manifestHash": "c972bc0eb13d642d9b73752f9a5f79fda51fb495164576a74e50e08ec17b5006"
+    },
+    "resourceId": "vehicle:ugv",
+    "toolCount": 13,
+    "contractSha256": "46c8ba62c79ba1f90d1d70409716c591492b97c1cf44ace740f8ddd171f4c331",
+    "physicalInvocationCount": 0,
+    "sdarGovernancePublication": false
+  },
+  "fieldActions": "NOT_RUN",
+  "formalControlPromotion": "NOT_RUN"
+}
