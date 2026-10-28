@@ -1,0 +1,9 @@
+{
+  "path": "/mnt/data/ugv-zmq-anonymous-patrol-20261028/ugv-zmq-successor-joint-20261029.tar.gz",
+  "sha256": "abadaad9c1fa5c10090b49f9ec2af8aea676e58be53700f6fddcd4cfc2ea8169",
+  "bytes": 346789714,
+  "smppComponentSha256": "78370b4f4e48fb275bf78cc84098c6c9039f5b2f57e9465f7b5e9effb5d02a50",
+  "sdarComponentSha256": "5ff8ed07c62cf3799611d46cadf48b204dc770ae6f64184d3b0700509605ff2c",
+  "controlQualified": false,
+  "formalReadonlyQualified": true
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "ugv.zmq-successor-acceptance/1",
+  "date": "2026-10-29",
+  "smppSource": "a929d19fde0434ca017e01dd846a6a66067e241c",
+  "sdarSource": "a9e9ccd403a42414120e8f70c139271b603550d5",
+  "software": {
+    "smppCommandsPassed": 19,
+    "sdarCommandsPassed": 30,
+    "sdarRun": "sdar-verify-fc32df30-5083-4dd2-9285-abe53e9af4f4",
+    "sdarRuntimeInput": "8cdfcbc9c1e977e6116a9ffedd12ae3c0c01e1870201404375a2cdf0f0c8010e",
+    "sdarGateExit": 0,
+    "sdarCleanupExit": 0,
+    "jointRun": "zmqgov-20261028-bc511728",
+    "jointPassed": true
+  },
+  "ownerBindingId": "0ab6028b-f367-4953-819f-ecca220a9a71",
+  "serverId": "smpp-zmq-site",
+  "providerBindingId": "smpp-zmq-site-readonly-13",
+  "credentialRef": "unauthenticated://none",
+  "formalMode": "site_readonly",
+  "formalCatalogProfile": "zmq_v1_1_0_readonly_13",
+  "formalPublishedSkills": 7,
+  "formalReadonlyTaskIds": [
+    "ad9a4214-90f2-4ee7-aabe-7ff439668a78",
+    "cb1f9c20-9494-4811-bbf1-dcc1c1073f80"
+  ],
+  "oldTaskHistoryCleanup": {
+    "mcpTasks": 12,
+    "sdarTasks": 1,
+    "dependentRows": 155096,
+    "externalProjectionRows": 1,
+    "consoleCommands": 19,
+    "consoleTaskLinks": 10,
+    "consoleRelatedAuditRows": 38
+  },
+  "oldBindingAnchors": "CLOSED; physical deletion pending raw archive scope decision",
+  "rawObservationArchiveDeletion": "NOT_AUTHORIZED_PENDING_REPLY",
+  "fieldActions": "NOT_RUN",
+  "controlQualified": false,
+  "formalControlPromotion": "PENDING_OPERATOR_ACCEPTANCE",
+  "httpConsole": "http://17.26.1.20:19101/"
+}

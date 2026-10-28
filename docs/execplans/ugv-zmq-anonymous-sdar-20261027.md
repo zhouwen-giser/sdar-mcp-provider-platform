@@ -133,3 +133,40 @@ succeeds, exposing a missing readonly report attestation. Add the same content-b
 report Evidence used by the control adapter to synchronous readonly responses. It attests returned
 content, never physical coverage or action success. Real PostgreSQL/MCP regression passes 9 tests
 and proves zero native commands; run the 19-command gate before building a fixed Provider image.
+
+## Verified readonly successor closeout (2026-10-29)
+
+SMPP source a929d19 passes all 19 commands. SDAR source a9e9ccd4 passes all 30 frozen stages
+(run below), with unchanged runtime/baseline during the run and cleanup exit 0. The runtime
+input is `8cdfcbc9c1e977e6116a9ffedd12ae3c0c01e1870201404375a2cdf0f0c8010e`.
+Run: `sdar-verify-fc32df30-5083-4dd2-9285-abe53e9af4f4`. Joint bc511728 passes 21 isolated
+cases. No assertion, source guard or frozen migration was weakened. The first SMPP gate remains
+NOT_PASS (typed matcher lint and stop-visibility timeout); the corrected complete 19-command rerun
+passes, including every browser configuration.
+
+The authorized owner binding is active at 0ab6028b-f367-4953-819f-ecca220a9a71, Server
+smpp-zmq-site. Both old owner bindings are closed; old Node Control Bindings are removed and
+Runtime Servers disabled. The 155096-row Task-history cleanup, one additional external projection
+and 19 console commands / 10 Task links / 38 associated audits are removed. Accounts/sessions stay.
+Raw observations remain: physical removal of binding anchors would also remove approximately
+31 million raw trajectory receptions / 65 GB, and that additional scope question is still pending.
+
+Formal SMPP 19100/19101 remains anonymous readonly 1.1.0; formal SDAR 10998/10999/10091 now
+uses fixed image c6af383… and its original restricted GOWM role, storage, Redis scope and credentials.
+All three health endpoints return 200. Seventeen protected configuration values match the original.
+Only original formal consumers use production storage; the validation window is stopped. Independent
+control13 + patrol candidate remains separate at 11098/11099/10191. No site motion was dispatched.
+
+Formal PMS source sz-gowm-smpp is real revision 15 / checksum 94522d2d… with three distinct
+fresh sync observations; Binding smpp-zmq-site-readonly-13 is active/available, anonymous and exact
+13-tool readonly contract 2fe5e065…. Agent Card advertises exactly seven native readonly Skills.
+Formal A2A capability Task ad9a4214-90f2-4ee7-aabe-7ff439668a78 and state Task
+cb1f9c20-9494-4811-bbf1-dcc1c1073f80 complete with one persisted live anonymous MCP invocation each.
+HTTP LAN login, real device read and empty retained panel Task list pass at 17.26.1.20:19101.
+
+Package: /mnt/data/ugv-zmq-anonymous-patrol-20261028/ugv-zmq-successor-joint-20261029.tar.gz
+SHA256 abadaad9c1fa5c10090b49f9ec2af8aea676e58be53700f6fddcd4cfc2ea8169.
+This closes the successor binding, software repair and formal readonly chain only. Control promotion,
+six field actions and single-area patrol remain OPEN/NOT_RUN. Explicit polygon heights, entry point,
+speed and operator A2A confirmation are still required; incomplete spatial evidence stays degraded.
+Full receipts and command/output hashes are in reports/ugv-zmq-successor-20261029 and the package.

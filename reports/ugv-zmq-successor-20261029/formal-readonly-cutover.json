@@ -1,0 +1,16 @@
+{
+  "status": "FORMAL_READONLY_UPDATED",
+  "softwareGate": "sdar-verify-fc32df30-5083-4dd2-9285-abe53e9af4f4",
+  "image": "sha256:c6af383195b1cffda3cf09aeaba307457e51664f74ba0343e945780bf1d3ddf4",
+  "bindingId": "0ab6028b-f367-4953-819f-ecca220a9a71",
+  "localServerId": "smpp-zmq-site",
+  "protectedConfigurationFieldsUnchanged": 17,
+  "productionConsumers": "sdar-sz-gowm only",
+  "previousWindowStopped": true,
+  "health": {
+    "http://127.0.0.1:10998/api/v1/health": 200,
+    "http://127.0.0.1:10999/.well-known/agent-card.json": 200,
+    "http://127.0.0.1:10091/health/ready": 200
+  },
+  "physicalActions": "NOT_RUN"
+}

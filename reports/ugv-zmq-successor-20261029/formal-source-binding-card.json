@@ -1,0 +1,69 @@
+{
+  "sourceSnapshots": [
+    {
+      "httpStatus": 200,
+      "observedAt": "2026-10-28T17:49:50.884Z",
+      "source": {
+        "smppSourceId": "sz-gowm-smpp",
+        "status": "active",
+        "revision": 1,
+        "activeSnapshotRevision": 15,
+        "activeSnapshotChecksum": "94522d2dc3d511167fd735e6267ca32c03eff55b2ae20fb6cc12eb3e10172de9",
+        "activeSnapshotValidUntil": "2026-10-28T17:54:50.341Z",
+        "lastSyncAt": "2026-10-28T17:49:50.341Z"
+      }
+    },
+    {
+      "httpStatus": 200,
+      "observedAt": "2026-10-28T17:49:52.690Z",
+      "source": {
+        "smppSourceId": "sz-gowm-smpp",
+        "status": "active",
+        "revision": 1,
+        "activeSnapshotRevision": 15,
+        "activeSnapshotChecksum": "94522d2dc3d511167fd735e6267ca32c03eff55b2ae20fb6cc12eb3e10172de9",
+        "activeSnapshotValidUntil": "2026-10-28T17:54:52.340Z",
+        "lastSyncAt": "2026-10-28T17:49:52.340Z"
+      }
+    },
+    {
+      "httpStatus": 200,
+      "observedAt": "2026-10-28T17:49:54.494Z",
+      "source": {
+        "smppSourceId": "sz-gowm-smpp",
+        "status": "active",
+        "revision": 1,
+        "activeSnapshotRevision": 15,
+        "activeSnapshotChecksum": "94522d2dc3d511167fd735e6267ca32c03eff55b2ae20fb6cc12eb3e10172de9",
+        "activeSnapshotValidUntil": "2026-10-28T17:54:54.341Z",
+        "lastSyncAt": "2026-10-28T17:49:54.341Z"
+      }
+    }
+  ],
+  "binding": {
+    "bindingId": "smpp-zmq-site-readonly-13",
+    "localServerId": "smpp-zmq-site",
+    "originType": "smpp_registry",
+    "smppSourceId": "sz-gowm-smpp",
+    "externalServerId": "gowm-analysis-dev-f3dc6f4b8e-smpp-runtime-1",
+    "registryRevision": 15,
+    "registryChecksum": "94522d2dc3d511167fd735e6267ca32c03eff55b2ae20fb6cc12eb3e10172de9",
+    "catalogRevision": "2.0.0-rc.1:1",
+    "catalogChecksum": "2fe5e0658c9d1769838cbc1d4aafb7f629a7ec2fa7165ab4af0ebc7bc743090e",
+    "status": "active",
+    "availabilityStatus": "available",
+    "revision": 1,
+    "availabilityValidUntil": "2026-10-28T18:49:44.939Z",
+    "operationCount": 13
+  },
+  "agentCardSkills": [
+    "ugv.zmq.simulation_get_effect_result",
+    "ugv.zmq.vehicle_get_capabilities",
+    "ugv.zmq.vehicle_get_inspection_result",
+    "ugv.zmq.vehicle_get_payload_status",
+    "ugv.zmq.vehicle_get_state",
+    "ugv.zmq.vehicle_get_targets",
+    "ugv.zmq.vehicle_zmq_plan_route"
+  ],
+  "physicalActions": "NOT_RUN"
+}

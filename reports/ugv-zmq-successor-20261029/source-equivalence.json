@@ -1,0 +1,46 @@
+{
+  "runtimeInputsUnchanged": true,
+  "verifiedRuntimeInputSha256": "8cdfcbc9c1e977e6116a9ffedd12ae3c0c01e1870201404375a2cdf0f0c8010e",
+  "gateSourceRevision": "a9e9ccd403a42414120e8f70c139271b603550d5",
+  "postGateDocumentationChanges": [
+    {
+      "path": "CHANGELOG.md",
+      "classification": "status",
+      "gateSha256": "fcb5913ca7c019ee91f35bc49851b895e949394a61c15fec5c91f4d38384613a",
+      "currentSha256": "314f5696e89c797058e1e24c0a4e188c5a0d6d77bacfd378a5be23797f8b54c8"
+    },
+    {
+      "path": "PROJECT_STATUS.md",
+      "classification": "status",
+      "gateSha256": "5f21dfe8528ae815855ed5ce2e3702fda5dde2ad7549f3a7180bd56e90266199",
+      "currentSha256": "9b2317c062e4e15fcb18b89e21521142eee18e6932ea747d72ff8cb82e62a72e"
+    },
+    {
+      "path": "adr/ADR-168-zmq-site-anonymous-patrol.md",
+      "classification": "baseline",
+      "gateSha256": "2e21dfdcc623a32b86e9663deb241d01ab21332400a78fa60e9389363b511db3",
+      "currentSha256": "eafa382d595163febb39aa5fabf1dc699dd1133d16622ede13955d201d9b1943"
+    },
+    {
+      "path": "docs/17_TRACEABILITY_MATRIX.md",
+      "classification": "baseline",
+      "gateSha256": "990f9f6eed060bd5c1a470622c202d7a8a12d2f2f03239bd4cf5fe58d945e4f5",
+      "currentSha256": "f7efcdc5c9929f349bf6a377a25b9feab9b8be4874fe391e56f2efa731f99c4c"
+    },
+    {
+      "path": "docs/18_KNOWN_ASSUMPTIONS_AND_GAPS.md",
+      "classification": "baseline",
+      "gateSha256": "0f10bfa0cc3cbbd9c73d45f64f372ee587303a2f2f344be1d55c733eef4a9c91",
+      "currentSha256": "b7b13c692d469c17350c61a18c5a37cd0c31594328baaa5a8c5e46bedf1d7169"
+    },
+    {
+      "path": "execplans/ugv-zmq-site-patrol-20261027.md",
+      "classification": "status",
+      "gateSha256": "b1cf92b365b6538fe4b20c3e4eeb96e399c2bcea1be06b2f00f7efd91b935017",
+      "currentSha256": "8580bde071aa767d381ff6c95c8694ae8652ee02ec05a093aa8babea9f168878"
+    }
+  ],
+  "baselineChangesDeclared": true,
+  "gateBaselineUnchangedDuringRun": true,
+  "gateCleanupExitCode": 0
+}

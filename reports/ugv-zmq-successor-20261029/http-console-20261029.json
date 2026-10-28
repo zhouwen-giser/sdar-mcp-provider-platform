@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "url": "http://17.26.1.20:19101/",
+  "http": true,
+  "operatorLogin": true,
+  "taskListHttpStatus": 200,
+  "deviceHttpStatus": 200,
+  "oldTaskLinksCleared": true,
+  "physicalCommandsSubmitted": 0,
+  "screenshot": "/mnt/data/ugv-zmq-anonymous-patrol-20261028/binding-successor-20261029/http-console-20261029.png"
+}
