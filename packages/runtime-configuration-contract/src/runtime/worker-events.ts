@@ -24,7 +24,7 @@ const RuntimeWorkerEventsInputBaseSchema = z.object({
   PROVIDER_TELEMETRY_MAX_NODES: z.coerce.number().int().min(16).max(100_000).default(4_096),
   PROVIDER_TELEMETRY_RATE_LIMIT: z.coerce.number().int().min(1).max(100_000).default(600),
   AUTH_MODE: z
-    .enum(["development", "anonymous", "trusted_headers", "jwt_hs256"])
+    .enum(["development", "anonymous", "site_anonymous", "trusted_headers", "jwt_hs256"])
     .default("development"),
   MCP_LEGACY_ENDPOINT_ENABLED: BooleanEnvironmentSchema.default(false),
   BUSINESS_EVENTS_ENABLED: BooleanEnvironmentSchema.default(false),
@@ -163,8 +163,17 @@ const RuntimeWorkerEventsInputSchema = z
     ...RuntimeWorkerEventsInputBaseSchema.shape,
   })
   .superRefine((value, context) => {
-    if (value.AUTH_MODE === "jwt_hs256" && value.JWT_HS256_SECRET === undefined) {
-      context.addIssue({ code: "custom", message: "jwt_hs256 requires JWT_HS256_SECRET" });
+    if (
+      (value.AUTH_MODE === "jwt_hs256" || value.AUTH_MODE === "site_anonymous") &&
+      value.JWT_HS256_SECRET === undefined
+    ) {
+      context.addIssue({ code: "custom", message: `${value.AUTH_MODE} requires JWT_HS256_SECRET` });
+    }
+    if (value.AUTH_MODE === "site_anonymous" && !value.ALLOW_INSECURE_INTERNAL_TRANSPORT) {
+      context.addIssue({
+        code: "custom",
+        message: "site_anonymous requires explicit insecure internal transport",
+      });
     }
     if (
       value.PROVIDER_TELEMETRY_INGRESS_ENABLED &&

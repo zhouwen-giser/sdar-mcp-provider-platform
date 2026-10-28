@@ -63,6 +63,8 @@ const formatFiles = [...new Set([...changed, ...untracked])].filter(
 );
 const commands = [
   ["typecheck", ["pnpm", "typecheck"]],
+  ["security", ["pnpm", "test:security"]],
+  ["configuration-schema", ["pnpm", "config:schema:check"]],
   ["console-typecheck", ["pnpm", "--filter", "@sdar/ugv-control-console", "typecheck"]],
   ["lint-source", ["pnpm", "exec", "eslint", "apps", "packages", "scripts", "tests", "examples"]],
   ["format-changed", ["pnpm", "exec", "prettier", "--check", ...formatFiles]],
@@ -92,6 +94,7 @@ const commands = [
       "tests/ugv-zmq-provider/owner-route.postgres.test.ts",
       "tests/ugv-zmq-provider/site-control-contract.test.ts",
       "tests/ugv-zmq-provider/site-control.postgres.test.ts",
+      "tests/ugv-zmq-provider/site-anonymous.postgres.test.ts",
       "tests/ugv-zmq-provider/site-handoff.postgres.test.ts",
       "tests/ugv-zmq-control-postgres/",
       "tests/contract/ugv-navigation-planner.test.ts",

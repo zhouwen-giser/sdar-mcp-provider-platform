@@ -51,7 +51,7 @@ docker load -i images/rollback-readonly-1.1.0.tar.gz
 
 正式切换时依次关闭候选准入并停止候选三项应用，复核数据库空闲，释放原生端点租约。
 停止正式只读的 Runtime/Provider/面板，保留内部 PMS 网关；使用正式控制私有配置重建这三项应用。
-不得让两个控制 Provider 同时运行。启动后核实 JWT、精确目录、来源会话、三路新鲜状态、PMS 注册和历史报告。
+不得让两个控制 Provider 同时运行。启动后核实匿名访问、可选 JWT 严格验证、精确目录、来源会话、三路新鲜状态、PMS 注册和历史报告。
 
 ```sh
 docker compose --env-file /private/formal-control/site-images.env -p smpp-zmq-site-formal -f deploy/ugv-zmq/site-control/compose.formal.yaml config --quiet

@@ -7,7 +7,7 @@ export type AuthenticationOptions =
   | { mode: "anonymous" }
   | { mode: "trusted_headers" }
   | {
-      mode: "jwt_hs256";
+      mode: "jwt_hs256" | "site_anonymous";
       secret: string;
       issuer?: string;
       audience?: string;
@@ -26,8 +26,10 @@ interface AuthenticatedIdentity {
 export function createAuthorizationResolver(options: AuthenticationOptions): AuthorizationResolver {
   return (request) => {
     const identity =
-      options.mode === "jwt_hs256"
-        ? jwtIdentity(request, options)
+      options.mode === "jwt_hs256" || options.mode === "site_anonymous"
+        ? options.mode === "site_anonymous" && request.headers.authorization === undefined
+          ? { subject: "development-anonymous", tenant: "default" }
+          : jwtIdentity(request, options)
         : options.mode === "anonymous"
           ? anonymousIdentity()
           : trustedIdentity(request, options.mode === "development");
@@ -92,7 +94,7 @@ function trustedIdentity(
 
 function jwtIdentity(
   request: IncomingMessage,
-  options: Extract<AuthenticationOptions, { mode: "jwt_hs256" }>,
+  options: Extract<AuthenticationOptions, { secret: string }>,
 ): AuthenticatedIdentity {
   const authorization = header(request, "authorization");
   if (!authorization?.startsWith("Bearer ")) {

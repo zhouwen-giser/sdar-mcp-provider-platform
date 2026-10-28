@@ -148,6 +148,21 @@ const scoped = (actorType: string) =>
   );
 
 describe("Runtime business input responder boundary", () => {
+  it("rejects site anonymous operator claims before persisting a human answer", async () => {
+    const { engine, accepted } = fixture();
+    const resolve = createAuthorizationResolver({
+      mode: "site_anonymous",
+      secret: "test-site-secret-with-at-least-32-bytes",
+    });
+    const auth = resolve(
+      headerRequest({ "x-sdar-actor-type": "operator", "x-sdar-subject": "operator" }),
+    );
+    await expect(
+      engine.updateTaskInputResponses("task-a", { "decision-a": response }, auth),
+    ).rejects.toMatchObject({ reasonCode: "RESPONDER_NOT_AUTHORIZED" });
+    expect(accepted).toEqual([]);
+  });
+
   it("accepts a declared user request only from a verified user context", async () => {
     const { engine, accepted } = fixture();
     await engine.updateTaskInputResponses("task-a", { "decision-a": response }, scoped("user"));

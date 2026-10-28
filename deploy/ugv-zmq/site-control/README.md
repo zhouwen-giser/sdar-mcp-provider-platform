@@ -37,8 +37,11 @@ controlSettings 使用现有 `ugv.zmq-control-settings/1`，mode=site_control；
 先取得端点锁再建立命令 socket；每次发送重新核实身份、租约、期限及组件状态。
 运行源时钟未确认不禁止所有操作；具体所需状态缺失、过期或外部占用会返回对应原因。
 
-Runtime 必须 AUTH_MODE=jwt_hs256，JWT_HS256_SECRET 由私有环境注入。
-签名 JWT 必须保留既有 tenant/subject，使原 authorizationContextHash 不变。
+Runtime 支持 AUTH_MODE=jwt_hs256，或显式 AUTH_MODE=site_anonymous。
+site_anonymous 必须同时开启 ALLOW_INSECURE_INTERNAL_TRANSPORT=true，并保留 JWT_HS256_SECRET 验证可选令牌。
+无凭据请求固定 tenant=default、subject=development-anonymous，忽略客户端身份头；历史 authorizationContextHash 不变。
+匿名请求不获得操作员身份；人工答复仍由已登录面板的服务端 JWT 提交。携带无效 JWT 时拒绝，不回退匿名。
+内部管理接口的独立认证保持不变。
 live 不携带 simulation header。令牌及签名密钥只保留在服务器，禁止写入浏览器或交付包。
 禁用候选 PMS 自动注册；保留正式实例配置与轨迹签名密钥。
 建议 SCHEDULER_POLL_MS=100、RECOVERY_POLL_MS=500；六项控制默认立即开始、60 秒启动容差、300 秒执行上限。
@@ -91,14 +94,15 @@ Runtime 绑定 0.0.0.0:19100，面板绑定 0.0.0.0:19101；Provider 仅绑定 1
 原生 ZMQ 在当前宿主网络可达，Docker 桥接路径无法接收三路发布；不能只凭 HTTP 就绪就判为接入成功。
 正式使用与候选相同的宿主机数据库入口和观测库入口，保留原账号、卷和来源身份。
 原 Runtime 容器更名保留后，由独立 `pms-gateway` 保留原逻辑容器名及两个既有网络。
-该网关只将内部 8080 原样转发至宿主机的 JWT Runtime 19100，不发布局域网端口，不保存凭据。
+该网关只将内部 8080 原样转发至宿主机的 Runtime 19100，不发布局域网端口，不保存凭据。
 `SITE_HOST_GATEWAY_IP` 固定为已验证的原 Runtime 网桥网关。
 PMS 的 direct_container 访问地址、deployment、instance、注册 URL 及注册令牌保持原值。
 `SITE_PMS_API_ADDRESS` 记录原 PMS API 在 Runtime 网桥上的实际地址，Runtime 通过容器 hosts 解析原 `pms-api` 名称。
 交接 CLI 始终使用旧写端不可变容器 ID，容器更名不会改变停止证明。
 
 保留原 Runtime 的 `/run/config` 令牌目录及 `/var/lib/sdar` 轨迹签名密钥。
-该实例原来使用匿名目录读取，启用 Runtime JWT 后需为这一个 direct_container 实例补充服务器端目录凭据。
+site_anonymous 下 SDAR Binding 固定使用 unauthenticated://none，不配置或发送 JWT。
+原 direct_container 目录的可选 JWT 可继续验证，或通过正式治理改为匿名目录读取。
 使用现有 PMS `file_credentials` 机制，描述符精确绑定 provider/deployment/instance；
 签名密钥只挂载到私有凭据目录，不向浏览器传递。
 若存在其他 external 实例，必须保留其原凭据。

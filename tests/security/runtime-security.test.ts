@@ -9,6 +9,66 @@ import {
 import { createLogger, RuntimeMetrics } from "../../packages/observability/src/index.js";
 
 describe("Runtime security boundaries", () => {
+  it("preserves the historical site authorization domain without authenticating an operator", () => {
+    const resolve = createAuthorizationResolver({
+      mode: "site_anonymous",
+      secret: "site-test-secret-with-at-least-32-bytes",
+    });
+    const historical = createAuthorizationResolver({ mode: "development" })(request({}));
+    for (const headers of [
+      {},
+      { "x-sdar-subject": "forged", "x-sdar-tenant": "other", "x-sdar-actor-type": "operator" },
+    ]) {
+      const value = resolve(request(headers));
+      expect(value).toMatchObject({
+        hash: historical.hash,
+        executionMode: "live",
+        simulationId: null,
+      });
+      expect(value.verifiedResponder).toBeUndefined();
+    }
+    expect(() => resolve(request({ "x-sdar-execution-mode": "simulation" }))).toThrow(
+      "INVALID_SIMULATION_CONTEXT",
+    );
+  });
+
+  it("strictly verifies optional JWTs in site_anonymous without anonymous fallback", () => {
+    const secret = "site-test-secret-with-at-least-32-bytes";
+    const resolve = createAuthorizationResolver({
+      mode: "site_anonymous",
+      secret,
+      issuer: "site",
+      audience: "mcp",
+    });
+    const claims = {
+      sub: "development-anonymous",
+      tenant: "default",
+      actor_type: "operator",
+      iss: "site",
+      aud: "mcp",
+      exp: Math.floor(Date.now() / 1000) + 60,
+    };
+    const valid = resolve(
+      request({ authorization: `Bearer ${jwt(secret, claims)}`, "x-sdar-subject": "forged" }),
+    );
+    expect(valid.hash).toBe(resolve(request({})).hash);
+    expect(valid.verifiedResponder).toEqual({
+      actorType: "operator",
+      actorId: "development-anonymous",
+      source: "jwt_hs256",
+    });
+    for (const authorization of [
+      "",
+      "Basic forged",
+      "Bearer forged",
+      `Bearer ${jwt("wrong-signing-key", claims)}`,
+      `Bearer ${jwt(secret, { ...claims, exp: 1 })}`,
+      `Bearer ${jwt(secret, { ...claims, iss: "wrong" })}`,
+      `Bearer ${jwt(secret, { ...claims, aud: "wrong" })}`,
+    ])
+      expect(() => resolve(request({ authorization }))).toThrow();
+  });
+
   it("issues an honest development policy responder without accepting caller role claims", () => {
     const resolve = createAuthorizationResolver({ mode: "development" });
     for (const headers of [{}, { authorization: "Bearer forged", "x-sdar-actor-type": "user" }]) {

@@ -1,0 +1,249 @@
+{
+  "baseline": "76a6deafd525ed590dc536e1d0977dea879b739b",
+  "runs": [
+    {
+      "directory": "/mnt/data/ugv-zmq-anonymous-patrol-20261028/smpp-software-1",
+      "receiptSha256": "d12ff7fe5116334fa16580e80c32283570c5c20746dd7ed5c8eaf7ee6a4d4a3a",
+      "sourceSha256": "b883be0d82d30d7ac2cf8467ed659b37b0394ee6d5958ebbab088cc51db1af14",
+      "commands": [
+        {
+          "id": "typecheck",
+          "exitCode": 0,
+          "logSha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "security",
+          "exitCode": 0,
+          "logSha256": "07c04868362c52f60da0dacede18c1c12b3c9fcc3b72100fc88f24eb1917dbea",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "configuration-schema",
+          "exitCode": 0,
+          "logSha256": "3bbe78a49461cf1f2fec3dc1fb8a693bfbf5787332102d1ef1d6b2105a2849bf",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "console-typecheck",
+          "exitCode": 0,
+          "logSha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "lint-source",
+          "exitCode": 0,
+          "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "format-changed",
+          "exitCode": 0,
+          "logSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "protocol",
+          "exitCode": 0,
+          "logSha256": "b211fded711fc0109091affb9a8bcc281769bdd5f30159cdbbd4e0f9196b9434",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "contract-lock",
+          "exitCode": 0,
+          "logSha256": "1bc3618e95d59aa833e15b784be76aacc117f01f421548cee8091e640935343b",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "catalog",
+          "exitCode": 0,
+          "logSha256": "0a97c8a784671bc46108093f268b32c8bbd0ede15a710ea98c55ed793d4a3d80",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "site-control-catalog",
+          "exitCode": 0,
+          "logSha256": "768dfdad614e10fb53fc3b0e68796633dab3cb8bc7464916eec8e4efc456deae",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "build",
+          "exitCode": 0,
+          "logSha256": "536cc4f74bc927dcd4e9e023fc52b0871374c6ac34ebbfec8258499cfd7b634f",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "console-build",
+          "exitCode": 0,
+          "logSha256": "4470fa247a6d84371da53122a08b6e3d3edfacdeb05208ae33cc3fc211150420",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "native-and-lifecycle",
+          "exitCode": 0,
+          "logSha256": "304eddec4447f8acdeebd0ad1e912fcc3443aeb543e60fcfe365d79606dc6f03",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "frozen-74",
+          "exitCode": 0,
+          "logSha256": "df1991bcf41a5f6330eb2e3eeaf2aee5e911ffc534cc5781f44d4fadf739bcda",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "unit-and-contract",
+          "exitCode": 1,
+          "logSha256": "bfe7f8f2152031960be7c5ffbcb644bc2962002ac3b66caa558d1119d2419937",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "console",
+          "exitCode": 0,
+          "logSha256": "76fd9f0d9db4199c443e0bec6fb8488ee6f46972254ab69ebc11000d37e845b7",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "browser-site-control",
+          "exitCode": 0,
+          "logSha256": "7f6b4f249bda217246b53f15624493a17f8f2e6bc19f65d6440f35d4fd647a92",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "browser-site",
+          "exitCode": 0,
+          "logSha256": "585d11fada6f5864fa34442495525075fa674df314ad21cb58f6c371f3e9c33a",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "browser-legacy",
+          "exitCode": 0,
+          "logSha256": "c28f0b6e9e4837977b7328bce2fc9fcdaa62c1449df1a48390499fd2520500b4",
+          "sourceUnchanged": true
+        }
+      ]
+    },
+    {
+      "directory": "/mnt/data/ugv-zmq-anonymous-patrol-20261028/smpp-software-2",
+      "receiptSha256": "6ce2aa3a460f1f4ed97f174e593299a1582f16ea6d00ac4dd2b9dbfe3ea8fa83",
+      "sourceSha256": "817cecddf8a3aa116cf12e32b0ecf47c08a8a5f38bf1cc2b8cba94281520f765",
+      "commands": [
+        {
+          "id": "typecheck",
+          "exitCode": 0,
+          "logSha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "security",
+          "exitCode": 0,
+          "logSha256": "9b0073a26d1f78c25b2a952fe275003f465470bb1b7b610b15ad666636fb5d88",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "configuration-schema",
+          "exitCode": 0,
+          "logSha256": "3bbe78a49461cf1f2fec3dc1fb8a693bfbf5787332102d1ef1d6b2105a2849bf",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "console-typecheck",
+          "exitCode": 0,
+          "logSha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "lint-source",
+          "exitCode": 0,
+          "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "format-changed",
+          "exitCode": 0,
+          "logSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "protocol",
+          "exitCode": 0,
+          "logSha256": "b211fded711fc0109091affb9a8bcc281769bdd5f30159cdbbd4e0f9196b9434",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "contract-lock",
+          "exitCode": 0,
+          "logSha256": "1bc3618e95d59aa833e15b784be76aacc117f01f421548cee8091e640935343b",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "catalog",
+          "exitCode": 0,
+          "logSha256": "0a97c8a784671bc46108093f268b32c8bbd0ede15a710ea98c55ed793d4a3d80",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "site-control-catalog",
+          "exitCode": 0,
+          "logSha256": "768dfdad614e10fb53fc3b0e68796633dab3cb8bc7464916eec8e4efc456deae",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "build",
+          "exitCode": 0,
+          "logSha256": "536cc4f74bc927dcd4e9e023fc52b0871374c6ac34ebbfec8258499cfd7b634f",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "console-build",
+          "exitCode": 0,
+          "logSha256": "4b6c9fe9fc99a921a3f56e7b6731edd7716de14a6453304d8fdad3bb9a39f8ce",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "native-and-lifecycle",
+          "exitCode": 0,
+          "logSha256": "f72ffd5c7a1f6009aa125f3b9b9f0c99f03668036bbc6aece64f36361fb1d1ad",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "frozen-74",
+          "exitCode": 0,
+          "logSha256": "df1991bcf41a5f6330eb2e3eeaf2aee5e911ffc534cc5781f44d4fadf739bcda",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "unit-and-contract",
+          "exitCode": 0,
+          "logSha256": "7d134c7cd5b315f46b328476aaff529ad1d464f52649de06d311d1e76ebdecf8",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "console",
+          "exitCode": 0,
+          "logSha256": "6bfe74a890c5fc091947d8a40ee672a28498f2f8fbbd8035ab166514900c5861",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "browser-site-control",
+          "exitCode": 0,
+          "logSha256": "35906a20f7c492eb3b78bb4acf2500ab300ef903b0d9e691354aa2391a4506bc",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "browser-site",
+          "exitCode": 0,
+          "logSha256": "bfb33c2b6f3abdb8124da90e4489738fc349ae7ed027faa5daf81ce51e1fe320",
+          "sourceUnchanged": true
+        },
+        {
+          "id": "browser-legacy",
+          "exitCode": 0,
+          "logSha256": "c717f27543cc43832eb9f7ba12acb0de48e85a26c37212c1d54ab4dd5955716d",
+          "sourceUnchanged": true
+        }
+      ]
+    }
+  ],
+  "fieldActions": "not_attempted",
+  "formalCutover": "not_performed"
+}

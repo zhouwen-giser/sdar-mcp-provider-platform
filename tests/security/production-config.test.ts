@@ -14,6 +14,30 @@ afterEach(() => {
 });
 
 describe("H4 production fail-closed configuration", () => {
+  it.each(["development", "test", "production"])(
+    "requires explicit site_anonymous opt-in and JWT verifier in %s",
+    (RUNTIME_ENV) => {
+      const base = {
+        RUNTIME_ENV,
+        AUTH_MODE: "site_anonymous",
+        JWT_HS256_SECRET: "site-test-secret-with-at-least-32-bytes",
+      };
+      expect(() => loadRuntimeConfig(base)).toThrow(
+        "site_anonymous requires explicit insecure internal transport",
+      );
+      expect(() =>
+        loadRuntimeConfig({
+          RUNTIME_ENV,
+          AUTH_MODE: "site_anonymous",
+          ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
+        }),
+      ).toThrow("site_anonymous requires JWT_HS256_SECRET");
+      expect(
+        loadRuntimeConfig({ ...base, ALLOW_INSECURE_INTERNAL_TRANSPORT: "true" }),
+      ).toMatchObject({ AUTH_MODE: "site_anonymous" });
+    },
+  );
+
   it.each([
     ["true", true],
     ["TRUE", true],

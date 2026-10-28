@@ -689,9 +689,10 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       if (
         validated.providerType === "isr.vehicle.ugv.zmq" &&
         validated.providerVersion === "1.2.0" &&
-        config.AUTH_MODE !== "jwt_hs256"
+        config.AUTH_MODE !== "jwt_hs256" &&
+        config.AUTH_MODE !== "site_anonymous"
       )
-        throw Error("ZMQ_SITE_CONTROL_JWT_REQUIRED");
+        throw Error("ZMQ_SITE_CONTROL_AUTH_MODE_REQUIRED");
       const siteReadonly =
         validated.providerType === "isr.vehicle.ugv.zmq" && validated.providerVersion === "1.1.0";
       const retainSiteHistory =
@@ -1439,7 +1440,7 @@ function authenticationOptions(config: RuntimeConfig): AuthenticationOptions {
   if (config.AUTH_MODE === "trusted_headers") return { mode: "trusted_headers" };
   if (config.JWT_HS256_SECRET === undefined) throw new Error("JWT_HS256_SECRET_REQUIRED");
   return {
-    mode: "jwt_hs256",
+    mode: config.AUTH_MODE,
     secret: config.JWT_HS256_SECRET,
     ...(config.JWT_ISSUER === undefined ? {} : { issuer: config.JWT_ISSUER }),
     ...(config.JWT_AUDIENCE === undefined ? {} : { audience: config.JWT_AUDIENCE }),

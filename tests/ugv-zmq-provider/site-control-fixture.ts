@@ -24,7 +24,10 @@ export const siteDestination = {
   longitude: 106.81485 - 192 / 111320,
   latitude: 29.7195 - 100 / 110540,
 };
-export async function controlSiteFixture(databaseUrl: string) {
+export async function controlSiteFixture(
+  databaseUrl: string,
+  authMode: "jwt_hs256" | "site_anonymous" = "jwt_hs256",
+) {
   if (new URL(databaseUrl).hostname !== "127.0.0.1") throw Error("ISOLATED_DATABASE_REQUIRED");
   const suffix = randomUUID().replaceAll("-", ""),
     schemas = ["site_provider_", "site_runtime_", "site_archive_"].map((s) => s + suffix);
@@ -150,8 +153,8 @@ export async function controlSiteFixture(databaseUrl: string) {
     segment({ alg: "HS256", typ: "JWT" }) +
     "." +
     segment({
-      sub: "SIMULATED-operator",
-      tenant: "SIMULATED-site",
+      sub: authMode === "site_anonymous" ? "development-anonymous" : "SIMULATED-operator",
+      tenant: authMode === "site_anonymous" ? "default" : "SIMULATED-site",
       actor_type: "operator",
       exp: Math.floor(Date.now() / 1000) + 3600,
     });
@@ -163,7 +166,8 @@ export async function controlSiteFixture(databaseUrl: string) {
       DATABASE_URL: db(1),
       ADAPTER_ENDPOINT: `127.0.0.1:${provider.port}`,
       ADAPTER_TLS_MODE: "disabled",
-      AUTH_MODE: "jwt_hs256",
+      AUTH_MODE: authMode,
+      ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
       JWT_HS256_SECRET: jwtSecret,
       LOG_LEVEL: "fatal",
       SCHEDULER_POLL_MS: "100",
