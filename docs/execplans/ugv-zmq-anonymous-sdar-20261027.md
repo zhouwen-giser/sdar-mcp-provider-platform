@@ -25,9 +25,9 @@ Native patrol has exactly two confirmed children, bounded by the original deadli
 - [x] Restore SDAR pinned dependencies offline without lockfile changes.
 - [x] Implement and test site_anonymous authentication and history compatibility (2026-10-28).
 - [x] Repair tagged, service-specific network paths and verify two source refresh periods.
-- [ ] Implement exact 1.1.0/1.2.0 profiles, live identity, governance and renewal.
-- [ ] Implement native single-area patrol, lifecycle and truthful evidence aggregation.
-- [ ] Run both repositories' required gates and isolated PostgreSQL/Redis/ZMQ task chains.
+- [x] Implement exact 1.1.0/1.2.0 profiles, live identity, governance and renewal.
+- [x] Implement native single-area patrol, lifecycle and truthful evidence aggregation.
+- [x] Run both repositories' required gates and isolated PostgreSQL/Redis/ZMQ task chains.
 - [ ] Build fixed candidate images and deployment packages; verify anonymous readonly access.
 - [ ] Operator confirms and executes field acceptance via formal A2A task chain.
 - [ ] Handoff and promotion, commit/push, rollback and evidence delivery.
@@ -96,3 +96,20 @@ run c256fbc8 passes all six native controls, preview and patrol degradation/paus
 cancel/timeout with no Authorization headers. Its complete gate and field acceptance remain open.
 The packaging CLI now explicitly selects the readonly/control catalog; controlQualified stays false
 until operator field acceptance, and a bundle never triggers automatic deployment.
+
+## Cross-project software closeout and owner boundary (2026-10-28)
+
+SMPP b910f93 has 19 passing commands. SDAR ebfd2c22 passes all 30 frozen stages and cleanup;
+run sdar-verify-b7f10881-aa19-453c-a81f-ab858acfe474, runtime input db5bbf16… unchanged.
+Native isolated joint d6315423 passes 21 cases. Fixed SDAR image32e7fa… matches 2997 source
+files and offline import. Real direct control14 and PMS readonly7 governance pass in isolated storage.
+SMPP bundle c0f0e42… and final SDAR source/image have no matches for 25 actual deployment-secret
+patterns across 83,769 inspected files, including compressed OCI layers.
+
+Original restricted GOWM startup/governance works, but readonly Task a015bf15… fails
+MCP_TASK_SERVER_BINDING_MISMATCH: frozen owner binding 80099d63… authorizes smpp-sz-gowm,
+not the new local Server. Keep this exact check and original binding; a history-preserving owner
+binding successor requires explicit user direction. Seven trial production Exposures/Capabilities/
+Skills were suspended, original services restored and independent candidate kept separate.
+Formal integration, control promotion and physical action acceptance remain OPEN/NOT_RUN.
+No site device command was sent. Full receipts: /mnt/data/ugv-zmq-anonymous-patrol-20261028.
