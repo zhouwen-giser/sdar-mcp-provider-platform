@@ -1,0 +1,2 @@
+$ node scripts/require-env.mjs TEST_DATABASE_URL && node scripts/protocol/run-frozen-conformance.mjs
+Frozen conformance: 74/74 passed; report /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/protocol-v1-migration/conformance-74.json

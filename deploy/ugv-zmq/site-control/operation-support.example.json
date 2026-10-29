@@ -1,0 +1,44 @@
+{
+  "transportSendTimeoutMs": 1000,
+  "transportReceiveTimeoutMs": 2000,
+  "operationSupport": {
+    "navigation.point": { "status": "unverified", "description": "待核实当前部署和可行驶范围。" },
+    "navigation.route": {
+      "status": "unverified",
+      "description": "待完成路线可达性和连续停稳验收。"
+    },
+    "navigation.returnHome": { "status": "unverified", "description": "待完成返航验收。" },
+    "camera.position": {
+      "status": "unverified",
+      "description": "待绑定当前部署的角度与停稳验收证据。"
+    },
+    "camera.velocity": {
+      "status": "unverified",
+      "description": "待绑定当前部署的有限租期与停稳验收证据。"
+    },
+    "camera.zoom": {
+      "status": "unsupported",
+      "reasonCode": "ZMQ_OPTICAL_ZOOM_UNSUPPORTED",
+      "description": "当前仿真通过重建相机调整视场，缺少光学镜头稳定和停止反馈。",
+      "evidenceRef": "field:20261029:req-3abd3d98-7fea-4755-872b-96695144a4df:UNSUPPORTED"
+    },
+    "recon.area": {
+      "status": "unverified",
+      "description": "待取得有效区域配置回执与完整生命周期证据。"
+    },
+    "recon.sector": { "status": "unverified", "description": "待核实机械限位与扇扫支持。" },
+    "recon.circular": { "status": "unverified", "description": "待核实连续整圈运动支持。" },
+    "inspection.area": {
+      "status": "unverified",
+      "description": "待核实区域扫描执行、覆盖声明和发现来源。"
+    },
+    "simulation.applyEffect.observation": {
+      "status": "unverified",
+      "description": "待取得有效定位观测并完成当前场景验收。"
+    },
+    "simulation.applyEffect.manual": {
+      "status": "unverified",
+      "description": "待核实人工位置附近的有效仿真实体。"
+    }
+  }
+}

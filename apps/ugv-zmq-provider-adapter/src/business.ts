@@ -84,6 +84,18 @@ export function zmqBusiness(
       terminalProperties: (e) => ({
         schemaVersion: "ugv.zmq-context-summary/1",
         executionResult: e.result ?? null,
+        commandDiagnostics: isZmqExecution(e)
+          ? e.zmqControl.commands
+              .filter((c) => c.diagnostic)
+              .map((c) => ({
+                stepId: c.stepId,
+                requestId: c.requestId,
+                method: c.method,
+                action: c.action,
+                status: c.status,
+                diagnostic: c.diagnostic,
+              }))
+          : [],
         supplementalResultQuery:
           e.operationName === "simulation_apply_effect"
             ? "simulation_get_effect_result"

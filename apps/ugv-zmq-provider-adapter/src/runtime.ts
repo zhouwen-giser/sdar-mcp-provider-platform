@@ -1,3 +1,4 @@
+import { operationSupportCatalog } from "../../../packages/vehicle-zmq-control/src/operation-support.js";
 import {
   siteControlTool,
   siteControlOperation,
@@ -313,7 +314,10 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
         catalogProfile: this.catalogProfile,
         executionDomain: this.engine.scope.profile.executionDomain,
         controlAdmission: "per_operation",
-        controlAvailable: true,
+        controlAvailable: operationSupportCatalog(this.engine.scope.settings).some(
+          (o) => o.available,
+        ),
+        operationSupport: operationSupportCatalog(this.engine.scope.settings),
         controlScopeHash: this.engine.scope.hash,
         controllerSystemId: this.engine.scope.profile.components.chassis.controllerSystemId,
         tools: SITE_TOOLS.map((name) => ({
@@ -481,6 +485,11 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
           ),
         )
       : undefined;
+    const diagnostic = isZmqExecution(e) ? e.zmqControl.commands.at(-1)?.diagnostic : undefined;
+    const failedStage = diagnostic && diagnostic.stage !== "complete" ? diagnostic : undefined;
+    const diagnosticMessage = failedStage
+      ? `${e.reasonCode} · ${failedStage.code} · ${failedStage.stage} · ${failedStage.elapsedMs} ms${failedStage.validationCode ? ` · ${failedStage.validationCode}` : ""}`
+      : e.reasonCode;
     return {
       taskId: e.taskId,
       externalExecutionId: e.externalExecutionId,
@@ -493,7 +502,7 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
       state: e.state === "STARTING" ? "ACCEPTED" : e.state,
       revision: String(e.revision),
       reasonCode: e.reasonCode,
-      message: e.reasonCode,
+      message: diagnosticMessage,
       retryable: false,
       observedAt: protoTime(e.updatedAt),
       // Attests this persisted report, including its gaps; it does not attest complete device coverage.

@@ -1,0 +1,378 @@
+{
+  "schemaVersion": "ugv.zmq-site-control-software-wire/1",
+  "source": "isolated_wire_simulator_not_field_acceptance",
+  "frames": [
+    {
+      "base64": "YWRfcmVtb3RlX2NvbW1hbmQ6AQAAAAAAAAAAAAAAAQAAAAAAAAAEABwfAwAAAA==",
+      "sha256": "db02c90cbb5c6bc32047bfc812ec20ce85b8b3661a6850cf34d5ad0c7feb9003",
+      "decoded": {
+        "protocolVersion": "2.0",
+        "topic": "ad_remote_command",
+        "messageId": 1,
+        "systemId": "0",
+        "targetSystemId": "1",
+        "payloadBytes": 4,
+        "body": {
+          "type": "mode",
+          "value": 3
+        }
+      }
+    },
+    {
+      "base64": "YWRfcmVtb3RlX2NvbW1hbmQ6AwAAAAAAAAAAAAAAAQAAAAAAAAAEAORYAACAPw==",
+      "sha256": "91166d7b761db38c95c0e4b1ae041bb7862f5ac2255c989567e76c0fadb60167",
+      "decoded": {
+        "protocolVersion": "2.0",
+        "topic": "ad_remote_command",
+        "messageId": 3,
+        "systemId": "0",
+        "targetSystemId": "1",
+        "payloadBytes": 4,
+        "body": {
+          "type": "speedLimit",
+          "metresPerSecond": 1
+        }
+      }
+    },
+    {
+      "base64": "YWRfcmVtb3RlX2NvbW1hbmQ6BAAAAAAAAAAAAAAAAQAAAAAAAAABANHxAQ==",
+      "sha256": "96552863c55a1420bcef95e7525cfd9f2fd085289bde1350b6b2b7fb8bdd1c20",
+      "decoded": {
+        "protocolVersion": "2.0",
+        "topic": "ad_remote_command",
+        "messageId": 4,
+        "systemId": "0",
+        "targetSystemId": "1",
+        "payloadBytes": 1,
+        "body": {
+          "type": "obstacleAvoidance",
+          "value": 1
+        }
+      }
+    },
+    {
+      "base64": "Y2FsbF90YXNrOgoAAAAAAAAAAAAAAAEAAAAAAAAAJQB3DHqiVOEBAAAAAAAAAAAAPUDy0k1iEIBaQAAAAAAAAAAAAgAAAAA=",
+      "sha256": "10957a141f713a88c15ada4de4c090115fc2e35322ff9ce514e5874ea315c213",
+      "decoded": {
+        "protocolVersion": "2.0",
+        "topic": "call_task",
+        "messageId": 10,
+        "systemId": "0",
+        "targetSystemId": "1",
+        "payloadBytes": 37,
+        "body": {
+          "type": "targetPoint",
+          "missionId": 3780420218,
+          "taskPoints": [
+            {
+              "latitude": 29,
+              "longitude": 106.001,
+              "headingAngle": 0,
+              "property": 2,
+              "reserved": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "base64": "YWRfcmVtb3RlX2NvbW1hbmQ6AgAAAAAAAAAAAAAAAQAAAAAAAAAEAHTyAQAAAA==",
+      "sha256": "2cd172467d907c5b5835722685fc59581fdd49e384d42001afd2eade49ccbdd6",
+      "decoded": {
+        "protocolVersion": "2.0",
+        "topic": "ad_remote_command",
+        "messageId": 2,
+        "systemId": "0",
+        "targetSystemId": "1",
+        "payloadBytes": 4,
+        "body": {
+          "type": "motionControl",
+          "value": 1
+        }
+      }
+    },
+    {
+      "base64": "YWRfcmVtb3RlX2NvbW1hbmQ6AgAAAAAAAAAAAAAAAQAAAAAAAAAEADFOBAAAAA==",
+      "sha256": "f75716d4e62493a90f4c31d24fecd45c41a5fa251e21ee94152eae35a296ead5",
+      "decoded": {
+        "protocolVersion": "2.0",
+        "topic": "ad_remote_command",
+        "messageId": 2,
+        "systemId": "0",
+        "targetSystemId": "1",
+        "payloadBytes": 4,
+        "body": {
+          "type": "motionControl",
+          "value": 4
+        }
+      }
+    },
+    {
+      "base64": "YWRfcmVtb3RlX2NvbW1hbmQ6AQAAAAAAAAAAAAAAAQAAAAAAAAAEAHTyAQAAAA==",
+      "sha256": "2cb2c0e3357dc1fd21a1f15935e4215bd5072ab6845bc5a53dea20f9c02a0fcc",
+      "decoded": {
+        "protocolVersion": "2.0",
+        "topic": "ad_remote_command",
+        "messageId": 1,
+        "systemId": "0",
+        "targetSystemId": "1",
+        "payloadBytes": 4,
+        "body": {
+          "type": "mode",
+          "value": 1
+        }
+      }
+    },
+    {
+      "base64": "YWRfcmVtb3RlX2NvbW1hbmQ6AwAAAAAAAAAAAAAAAQAAAAAAAAAEAORYAACAPw==",
+      "sha256": "91166d7b761db38c95c0e4b1ae041bb7862f5ac2255c989567e76c0fadb60167",
+      "decoded": {
+        "protocolVersion": "2.0",
+        "topic": "ad_remote_command",
+        "messageId": 3,
+        "systemId": "0",
+        "targetSystemId": "1",
+        "payloadBytes": 4,
+        "body": {
+          "type": "speedLimit",
+          "metresPerSecond": 1
+        }
+      }
+    },
+    {
+      "base64": "YWRfcmVtb3RlX2NvbW1hbmQ6BAAAAAAAAAAAAAAAAQAAAAAAAAABANHxAQ==",
+      "sha256": "96552863c55a1420bcef95e7525cfd9f2fd085289bde1350b6b2b7fb8bdd1c20",
+      "decoded": {
+        "protocolVersion": "2.0",
+        "topic": "ad_remote_command",
+        "messageId": 4,
+        "systemId": "0",
+        "targetSystemId": "1",
+        "payloadBytes": 1,
+        "body": {
+          "type": "obstacleAvoidance",
+          "value": 1
+        }
+      }
+    },
+    {
+      "base64": "Y2FsbF90YXNrOgsAAAAAAAAAAAAAAAEAAAAAAAAAQgDyZsoPFUECAAAAAAAAAAAAPUDy0k1iEIBaQAAAAAAAAAAAAgAAAAAAAAAAAAA9QOOlm8QggFpAAAAAAAAAAAACAAAAAA==",
+      "sha256": "f9109ae11cc8df02f401a432ad0dca7ea9e7cc4bbe11060acc3f835b8a30cd82",
+      "decoded": {
+        "protocolVersion": "2.0",
+        "topic": "call_task",
+        "messageId": 11,
+        "systemId": "0",
+        "targetSystemId": "1",
+        "payloadBytes": 66,
+        "body": {
+          "type": "pathFollow",
+          "missionId": 1091899338,
+          "taskPoints": [
+            {
+              "latitude": 29,
+              "longitude": 106.001,
+              "headingAngle": 0,
+              "property": 2,
+              "reserved": 0
+            },
+            {
+              "latitude": 29,
+              "longitude": 106.002,
+              "headingAngle": 0,
+              "property": 2,
+              "reserved": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "base64": "YWRfcmVtb3RlX2NvbW1hbmQ6AgAAAAAAAAAAAAAAAQAAAAAAAAAEAHTyAQAAAA==",
+      "sha256": "2cd172467d907c5b5835722685fc59581fdd49e384d42001afd2eade49ccbdd6",
+      "decoded": {
+        "protocolVersion": "2.0",
+        "topic": "ad_remote_command",
+        "messageId": 2,
+        "systemId": "0",
+        "targetSystemId": "1",
+        "payloadBytes": 4,
+        "body": {
+          "type": "motionControl",
+          "value": 1
+        }
+      }
+    },
+    {
+      "base64": "YWRfcmVtb3RlX2NvbW1hbmQ6AQAAAAAAAAAAAAAAAQAAAAAAAAAEADFOBAAAAA==",
+      "sha256": "c22b23ac95a94bd87797b9493ce71bc597d94b81841b5cc423dad25f9c5898d8",
+      "decoded": {
+        "protocolVersion": "2.0",
+        "topic": "ad_remote_command",
+        "messageId": 1,
+        "systemId": "0",
+        "targetSystemId": "1",
+        "payloadBytes": 4,
+        "body": {
+          "type": "mode",
+          "value": 4
+        }
+      }
+    },
+    {
+      "base64": "YWRfcmVtb3RlX2NvbW1hbmQ6AwAAAAAAAAAAAAAAAQAAAAAAAAAEAORYAACAPw==",
+      "sha256": "91166d7b761db38c95c0e4b1ae041bb7862f5ac2255c989567e76c0fadb60167",
+      "decoded": {
+        "protocolVersion": "2.0",
+        "topic": "ad_remote_command",
+        "messageId": 3,
+        "systemId": "0",
+        "targetSystemId": "1",
+        "payloadBytes": 4,
+        "body": {
+          "type": "speedLimit",
+          "metresPerSecond": 1
+        }
+      }
+    },
+    {
+      "base64": "YWRfcmVtb3RlX2NvbW1hbmQ6BAAAAAAAAAAAAAAAAQAAAAAAAAABANHxAQ==",
+      "sha256": "96552863c55a1420bcef95e7525cfd9f2fd085289bde1350b6b2b7fb8bdd1c20",
+      "decoded": {
+        "protocolVersion": "2.0",
+        "topic": "ad_remote_command",
+        "messageId": 4,
+        "systemId": "0",
+        "targetSystemId": "1",
+        "payloadBytes": 1,
+        "body": {
+          "type": "obstacleAvoidance",
+          "value": 1
+        }
+      }
+    },
+    {
+      "base64": "Y2FsbF90YXNrOg0AAAAAAAAAAAAAAAEAAAAAAAAACQDjplMYlWQAAAAAAA==",
+      "sha256": "cd28232644ef87b33771ce6c26e6528401d5c308751df26cf1c810307f2d964b",
+      "decoded": {
+        "protocolVersion": "2.0",
+        "topic": "call_task",
+        "messageId": 13,
+        "systemId": "0",
+        "targetSystemId": "1",
+        "payloadBytes": 9,
+        "body": {
+          "type": "returnHome",
+          "missionId": 1687492691,
+          "returnType": 0,
+          "taskPoints": []
+        }
+      }
+    },
+    {
+      "base64": "YWRfcmVtb3RlX2NvbW1hbmQ6AgAAAAAAAAAAAAAAAQAAAAAAAAAEAHTyAQAAAA==",
+      "sha256": "2cd172467d907c5b5835722685fc59581fdd49e384d42001afd2eade49ccbdd6",
+      "decoded": {
+        "protocolVersion": "2.0",
+        "topic": "ad_remote_command",
+        "messageId": 2,
+        "systemId": "0",
+        "targetSystemId": "1",
+        "payloadBytes": 4,
+        "body": {
+          "type": "motionControl",
+          "value": 1
+        }
+      }
+    },
+    {
+      "base64": "YWRfcmVtb3RlX2NvbW1hbmQ6AQAAAAAAAAAAAAAAAQAAAAAAAAAEABwfAwAAAA==",
+      "sha256": "db02c90cbb5c6bc32047bfc812ec20ce85b8b3661a6850cf34d5ad0c7feb9003",
+      "decoded": {
+        "protocolVersion": "2.0",
+        "topic": "ad_remote_command",
+        "messageId": 1,
+        "systemId": "0",
+        "targetSystemId": "1",
+        "payloadBytes": 4,
+        "body": {
+          "type": "mode",
+          "value": 3
+        }
+      }
+    },
+    {
+      "base64": "YWRfcmVtb3RlX2NvbW1hbmQ6AwAAAAAAAAAAAAAAAQAAAAAAAAAEAORYAACAPw==",
+      "sha256": "91166d7b761db38c95c0e4b1ae041bb7862f5ac2255c989567e76c0fadb60167",
+      "decoded": {
+        "protocolVersion": "2.0",
+        "topic": "ad_remote_command",
+        "messageId": 3,
+        "systemId": "0",
+        "targetSystemId": "1",
+        "payloadBytes": 4,
+        "body": {
+          "type": "speedLimit",
+          "metresPerSecond": 1
+        }
+      }
+    },
+    {
+      "base64": "YWRfcmVtb3RlX2NvbW1hbmQ6BAAAAAAAAAAAAAAAAQAAAAAAAAABANHxAQ==",
+      "sha256": "96552863c55a1420bcef95e7525cfd9f2fd085289bde1350b6b2b7fb8bdd1c20",
+      "decoded": {
+        "protocolVersion": "2.0",
+        "topic": "ad_remote_command",
+        "messageId": 4,
+        "systemId": "0",
+        "targetSystemId": "1",
+        "payloadBytes": 1,
+        "body": {
+          "type": "obstacleAvoidance",
+          "value": 1
+        }
+      }
+    },
+    {
+      "base64": "Y2FsbF90YXNrOgoAAAAAAAAAAAAAAAEAAAAAAAAAJQD+fBpQA2kBAAAAAAAAAAAAPUDy0k1iEIBaQAAAAAAAAAAAAgAAAAA=",
+      "sha256": "98982d74bdaba40a8026c4d8bac7ba0e1088b23ffa2f414fa0fc1214c6a15a6c",
+      "decoded": {
+        "protocolVersion": "2.0",
+        "topic": "call_task",
+        "messageId": 10,
+        "systemId": "0",
+        "targetSystemId": "1",
+        "payloadBytes": 37,
+        "body": {
+          "type": "targetPoint",
+          "missionId": 1761824794,
+          "taskPoints": [
+            {
+              "latitude": 29,
+              "longitude": 106.001,
+              "headingAngle": 0,
+              "property": 2,
+              "reserved": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "base64": "YWRfcmVtb3RlX2NvbW1hbmQ6AgAAAAAAAAAAAAAAAQAAAAAAAAAEAHTyAQAAAA==",
+      "sha256": "2cd172467d907c5b5835722685fc59581fdd49e384d42001afd2eade49ccbdd6",
+      "decoded": {
+        "protocolVersion": "2.0",
+        "topic": "ad_remote_command",
+        "messageId": 2,
+        "systemId": "0",
+        "targetSystemId": "1",
+        "payloadBytes": 4,
+        "body": {
+          "type": "motionControl",
+          "value": 1
+        }
+      }
+    }
+  ]
+}

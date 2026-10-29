@@ -1,0 +1,83 @@
+{
+  "oldConfigurationPreserved": true,
+  "candidateConfiguration": "/home/sz/.smpp-debug/ugv-zmq-view-diagnostics-20261029/candidate-local-fixes.json",
+  "legacySharedTimeoutMs": 1000,
+  "sendTimeoutMs": 1000,
+  "receiveTimeoutMs": 2000,
+  "operationCount": 12,
+  "zoomStatus": "unsupported",
+  "automaticActivation": false,
+  "requiresPredecessorOccupancyReconciliation": true,
+  "formalModeUnchanged": "anonymous_readonly",
+  "simulationViewBackend": "unresolved; not published",
+  "operations": [
+    {
+      "name": "navigation.point",
+      "status": "supported",
+      "description": "已观察到单点执行、暂停恢复和停稳；来源及完整业务报告资格另行核实。",
+      "evidenceRef": "field:20261029:sdar-task:9b4343de-74a1-44aa-81da-9d2bef274c32"
+    },
+    {
+      "name": "navigation.route",
+      "status": "unverified",
+      "description": "待完成路线可达性和连续停稳验收。"
+    },
+    {
+      "name": "navigation.returnHome",
+      "status": "unverified",
+      "description": "待完成返航验收。"
+    },
+    {
+      "name": "camera.position",
+      "status": "supported",
+      "description": "已观察到角度状态、停止和占用解除；报告仍有证据缺口。",
+      "evidenceRef": "field:20261029:sdar-task:ac854c6f-33e5-448a-98e4-04b763b74ab7"
+    },
+    {
+      "name": "camera.velocity",
+      "status": "supported",
+      "description": "已观察到有限租期角速度及停止反馈；报告仍有证据缺口。",
+      "evidenceRef": "field:20261029:sdar-task:1d71bcbb-035d-46e4-a894-da930628ed0c"
+    },
+    {
+      "name": "camera.zoom",
+      "status": "unsupported",
+      "reasonCode": "ZMQ_OPTICAL_ZOOM_UNSUPPORTED",
+      "description": "当前仿真通过重建相机调整视场，缺少光学镜头稳定和停止反馈。",
+      "evidenceRef": "field:20261029:req-3abd3d98-7fea-4755-872b-96695144a4df:UNSUPPORTED"
+    },
+    {
+      "name": "recon.area",
+      "status": "unverified",
+      "description": "待取得有效区域配置回执与完整生命周期证据。"
+    },
+    {
+      "name": "recon.sector",
+      "status": "unverified",
+      "description": "待核实机械限位与扇扫支持。"
+    },
+    {
+      "name": "recon.circular",
+      "status": "unverified",
+      "description": "待核实连续整圈运动支持。"
+    },
+    {
+      "name": "inspection.area",
+      "status": "unverified",
+      "description": "待核实区域扫描执行、覆盖声明和发现来源。"
+    },
+    {
+      "name": "simulation.applyEffect.observation",
+      "status": "supported",
+      "description": "与人工分支共用已受理的原生位置交互合同；仍须逐次核实有效地理观测引用。",
+      "evidenceRef": "field:20261029:sdar-task:cda53d01-e45a-47bc-8756-b76e4bea05a8"
+    },
+    {
+      "name": "simulation.applyEffect.manual",
+      "status": "supported",
+      "description": "原生位置交互已受理并执行；该次无有效实体，业务失败，不代表能力不支持。",
+      "evidenceRef": "field:20261029:sdar-task:cda53d01-e45a-47bc-8756-b76e4bea05a8"
+    }
+  ],
+  "supportDoesNotGuaranteeBusinessSuccess": true
+}

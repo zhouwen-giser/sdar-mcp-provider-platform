@@ -1,3 +1,4 @@
+import { OPERATION_ADMISSION_KEYS } from "../../packages/vehicle-zmq-control/src/operation-support.js";
 import { fileURLToPath } from "node:url";
 import { randomUUID } from "node:crypto";
 import { once } from "node:events";
@@ -130,8 +131,24 @@ export async function controlSiteFixture(
     controlSettings: {
       ...testScope().settings,
       ...(catalogProfile
-        ? { catalogProfile, maxSpeedMps: 30, transportTimeoutMs: 1000, databaseTimeoutMs: 2000 }
+        ? {
+            catalogProfile,
+            maxSpeedMps: 30,
+            transportSendTimeoutMs: 1000,
+            transportReceiveTimeoutMs: 2000,
+            databaseTimeoutMs: 2000,
+          }
         : {}),
+      operationSupport: Object.fromEntries(
+        OPERATION_ADMISSION_KEYS.map((key) => [
+          key,
+          {
+            status: "supported",
+            description: "Isolated loopback site-contract fixture; not field qualification.",
+            evidenceRef: "tests/ugv-zmq-control-postgres/simulator.ts",
+          },
+        ]),
+      ),
       mode: "site_control",
       handoffGrantHash: sha256(canonical(grant)),
       siteEndpoints: Object.values(profile.components).flatMap((c) => [

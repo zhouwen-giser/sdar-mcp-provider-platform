@@ -1,0 +1,12 @@
+$ vitest run tests/security
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+{"level":30,"time":1793288346147,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","req":{"method":"GET","url":"/health/live","host":"localhost:80","remoteAddress":"127.0.0.1"},"msg":"incoming request"}
+{"level":30,"time":1793288346152,"service":"sdar-mcp-tasks-runtime","reqId":"req-1","res":{"statusCode":200},"responseTime":4.314095000000179,"msg":"request completed"}
+
+ Test Files  9 passed (9)
+      Tests  60 passed (60)
+   Start at  23:39:03
+   Duration  9.35s (transform 2.20s, setup 0ms, import 7.04s, tests 750ms, environment 1ms)
+

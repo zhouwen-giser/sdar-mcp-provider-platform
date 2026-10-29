@@ -111,3 +111,25 @@ site_anonymous 下 SDAR Binding 固定使用 unauthenticated://none，不配置�
 现场观测原始档案按分区计量；原默认 1 GiB 档案已满时会停止接收并报告
 `ZMQ_ARCHIVE_PAYLOAD_BUDGET_EXHAUSTED`。本次正式配置为每分区 64 GiB，保留历史数据。
 后续应结合磁盘容量核实 `archive_partition.canonical_bytes`，在上限前安排容量或归档。
+
+## 独立超时、命令诊断和动作支持
+
+新部署按已确认原生合同配置 `transportSendTimeoutMs=1000`、
+`transportReceiveTimeoutMs=2000`。旧 `transportTimeoutMs` 仍作为显式共享回退值；
+显式分项优先。未配置共享值或分项时，现场默认 1000/2000 ms，隔离仿真默认 250/250 ms。
+接收配置上限 5000 ms；增加等待不允许自动重派已尝试命令。
+
+命令 JSONB 保存版本化 diagnostic：connect/guard/send/receive/validate/complete 阶段、
+稳定原因码、耗时、发送是否完成、收到的帧数/长度/哈希。未知包装器错误标记 dispatch，
+发送事实为 null。非法回执仅保留哈希，不记录任意原文或异常文本；合法原生拒绝回执保留。
+任务消息展示失败阶段，终态 TaskBusiness summary 包含 commandDiagnostics，历史结果不改写。
+
+现场模式 `operationSupport` 按具体动作配置 supported/unsupported/unverified；缺省为
+unverified 并拒绝派发，supported 必须给出验收/部署依据 evidenceRef。端点租约、设备新鲜度、
+占用和完整参数还需通过原有检查。停止和暂停不因动作支持被撤回而失效；恢复及新动作重新检查。
+扇扫与整圈、人工位置与设备观测分别配置。面板显示当前动作的支持状态和原因。
+
+见 `operation-support.example.json`，该文件是需要合并到完整 controlSettings 的保守示例，
+不是已完成现场验收的配置。相机重建式仿真视场调整须有独立真实后端合同，不能直接将被拒绝的
+光学变焦改名后宣称可用。新配置改变控制 scope，未知旧占用必须先按现有对账流程处置；
+不得改 scope 跳过前驱占用保护。

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "ugv.zmq-local-fixes-delivery/1",
+  "status": "software_verified_fov_backend_pending",
+  "sourceFingerprint": "8c3b2e6639517508b10aeafacf88b4786f4679027b2046a5a43bede07a0cf29b",
+  "verification": {
+    "passed": true,
+    "steps": 21,
+    "receipt": "software/verification.json"
+  },
+  "fixed": [
+    "split_transport_timeouts",
+    "persistent_failure_stages",
+    "per_operation_admission",
+    "console_operation_reasons"
+  ],
+  "fov": {
+    "implemented": false,
+    "published": false,
+    "reason": "UPSTREAM_INTERFACE_OR_SOURCE_REQUIRED"
+  },
+  "candidateConfiguration": "prepared_not_activated",
+  "formalDeployment": "unchanged_verified_anonymous_readonly",
+  "sdar": "unchanged",
+  "fieldAcceptance": "not_executed_in_this_phase",
+  "predecessorOccupancy": "preserved_requires_existing_reconciliation"
+}

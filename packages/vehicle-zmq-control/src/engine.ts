@@ -1,3 +1,5 @@
+import { unobservedDispatchFailure } from "./transport-diagnostics.js";
+import { operationAdmissionKey, operationSupport } from "./operation-support.js";
 import { EventEmitter } from "node:events";
 import { randomBytes, randomUUID } from "node:crypto";
 import { canonical, sha256 } from "../../vehicle-zmq-observer/src/config.js";
@@ -268,6 +270,8 @@ export class ZmqControlEngine {
   }
   availability(operation: Operation): { available: boolean; reasonCode: string } {
     const component = componentFor(operation.name);
+    const support = operationSupport(this.scope.settings, operationAdmissionKey(operation));
+    if (!support.available) return { available: false, reasonCode: support.reasonCode };
     if (!this.#started || this.#closed || !this.#healthy)
       return { available: false, reasonCode: "ZMQ_CONTROL_NOT_READY" };
     if (this.#active.has(component))
@@ -1512,6 +1516,13 @@ export class ZmqControlEngine {
       return;
     }
     const permit = () => {
+      if (action !== "stop" && action !== "pause") {
+        const support = operationSupport(
+          this.scope.settings,
+          operationAdmissionKey(e.arguments.operation as Operation),
+        );
+        if (!support.available) throw Error(support.reasonCode);
+      }
       if (
         this.#closed ||
         this.#sourceInterrupted.has(e.taskId) ||
@@ -1572,13 +1583,25 @@ export class ZmqControlEngine {
       );
     }
     let result;
+    const exchangeStarted = this.clock.monotonicMs();
     try {
       result = await this.transport.dispatch(command, permit);
-    } catch {
-      result = { outcome: "uncertain" as const, response: null };
+    } catch (error) {
+      result = {
+        outcome: "uncertain" as const,
+        response: null,
+        diagnostic: unobservedDispatchFailure(
+          this.scope.settings,
+          error,
+          this.clock.monotonicMs() - exchangeStarted,
+        ),
+      };
     }
-    command.status = result.outcome;
+    const revokedBeforeSend =
+      result.diagnostic?.stage === "guard" && result.diagnostic.sendAttempted === false;
+    command.status = revokedBeforeSend ? "superseded" : result.outcome;
     command.response = result.response;
+    if (result.diagnostic) command.diagnostic = result.diagnostic;
     command.completedAt = this.at();
     const nativeId =
       result.response?.command && typeof result.response.command === "object"
@@ -1599,6 +1622,10 @@ export class ZmqControlEngine {
     };
     if (!(await this.repository.store.advanceMutationJournal(completed, "DISPATCHING")))
       throw Error("ZMQ_DISPATCH_RECEIPT_UNCONFIRMED");
+    if (revokedBeforeSend) {
+      await this.requestStop(e, result.diagnostic?.nativeErrorCode ?? "ZMQ_DISPATCH_REVOKED");
+      return;
+    }
     if (
       (action === "configure" || action === "effect") &&
       result.outcome === "accepted" &&
@@ -2146,14 +2173,21 @@ export class ZmqControlEngine {
     s.missingEvidence = [
       ...new Set([...s.missingEvidence, "STOP_DISPATCH_RECEIPT_PERSISTENCE_UNCONFIRMED"]),
     ];
+    const fallbackExchangeStarted = this.clock.monotonicMs();
     try {
       const result = await this.transport.dispatch(command, () => {
         if (this.#closed) throw Error("ZMQ_CONTROL_CLOSED");
       });
       command.status = result.outcome;
       command.response = result.response;
-    } catch {
+      if (result.diagnostic) command.diagnostic = result.diagnostic;
+    } catch (error) {
       command.status = "uncertain";
+      command.diagnostic = unobservedDispatchFailure(
+        this.scope.settings,
+        error,
+        this.clock.monotonicMs() - fallbackExchangeStarted,
+      );
     }
     command.completedAt = this.at();
     this.events.emit("fault", "ZMQ_PREARMED_STOP_DISPATCHED_PERSISTENCE_UNCONFIRMED");

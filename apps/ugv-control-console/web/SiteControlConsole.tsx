@@ -59,6 +59,23 @@ export function SiteControlConsole(props: ComponentProps<typeof SiteReadonlyCons
     stopEpoch = useRef(0);
   const resourceId = text(props.device.resourceId),
     catalogHash = text(props.device.catalogHash);
+  const support = array(
+    record(record(props.device.data).vehicle_get_capabilities).operationSupport,
+  ).map(record);
+  const admissionKey =
+    tool === "vehicle_zmq_navigate"
+      ? "navigation." + variant
+      : tool === "vehicle_zmq_camera"
+        ? "camera." + camera
+        : tool === "vehicle_zmq_area_recon"
+          ? "recon.area"
+          : tool === "vehicle_zmq_inspect_area"
+            ? "inspection.area"
+            : tool === "vehicle_zmq_circular_recon"
+              ? "recon." + scan
+              : "simulation.applyEffect." + source;
+  const admission = support.find((s) => s.operation === admissionKey);
+  const blockedOperation = support.length > 0 && admission?.status !== "supported";
   const candidates = array(
     record(record(props.device.data).vehicle_get_targets).effectCandidates,
   ).map(record);
@@ -146,6 +163,9 @@ export function SiteControlConsole(props: ComponentProps<typeof SiteReadonlyCons
   } catch (error) {
     inputError = describe(error);
   }
+  if (blockedOperation)
+    inputError =
+      text(admission?.description) || text(admission?.reasonCode) || "该动作尚未核实支持";
   const argsKey = args ? JSON.stringify(args) : "",
     timing = {
       start: { mode: "immediate" as const, startToleranceMs: 60000 },
@@ -326,6 +346,22 @@ export function SiteControlConsole(props: ComponentProps<typeof SiteReadonlyCons
     <section className="panel">
       <h2>现场设备控制</h2>
       {select("控制能力", tool, setTool, labels)}
+      {admission && (
+        <div
+          className={blockedOperation ? "notice warning" : "field-help"}
+          aria-label="动作准入状态"
+        >
+          当前动作：
+          {admission.status === "supported"
+            ? "已配置支持"
+            : admission.status === "unsupported"
+              ? "不支持"
+              : "待核实"}
+          {" · "}
+          {text(admission.description)}
+          {text(admission.reasonCode) && <span> · {text(admission.reasonCode)}</span>}
+        </div>
+      )}
       {tool === "vehicle_zmq_navigate" && (
         <>
           {select("导航方式", variant, setVariant, {

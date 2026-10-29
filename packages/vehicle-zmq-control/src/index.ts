@@ -6,3 +6,5 @@ export * from "./engine.js";
 export * from "./results.js";
 export * from "./inspection.js";
 export * from "./console-candidate.js";
+export * from "./transport-diagnostics.js";
+export * from "./operation-support.js";

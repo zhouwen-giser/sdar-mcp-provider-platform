@@ -4,6 +4,8 @@ import {
 } from "../../vehicle-zmq-contract/src/site-profile.js";
 import { z } from "zod";
 import { EoRequest, SimulationEffectRequest } from "../../vehicle-zmq-contract/src/index.js";
+import { OperationSupportMap } from "./operation-support.js";
+import type { TransportDiagnostic } from "./transport-diagnostics.js";
 import type { InspectionSummary } from "./inspection.js";
 import { canonical, sha256 } from "../../vehicle-zmq-observer/src/config.js";
 import type {
@@ -209,7 +211,11 @@ export const ControlSettings = z
       })
       .strict()
       .optional(),
-    transportTimeoutMs: z.number().int().min(25).max(1000).default(250),
+    /** Deprecated shared override. Omit it to use the protocol-specific site defaults. */
+    transportTimeoutMs: z.number().int().min(25).max(1000).optional(),
+    transportSendTimeoutMs: z.number().int().min(25).max(1000).optional(),
+    transportReceiveTimeoutMs: z.number().int().min(25).max(5000).optional(),
+    operationSupport: OperationSupportMap.optional(),
     databaseTimeoutMs: z.number().int().min(100).max(2000).default(500),
     stateFreshForMs: z.number().int().min(100).max(3000).default(3000),
     clockSkewMs: z.number().int().min(10).max(5000).default(1000),
@@ -338,6 +344,7 @@ export interface WireCommand {
   dispatchAt: string | null;
   completedAt: string | null;
   response: Record<string, unknown> | null;
+  diagnostic?: TransportDiagnostic;
 }
 export interface SourceRef {
   partitionHash: string;
