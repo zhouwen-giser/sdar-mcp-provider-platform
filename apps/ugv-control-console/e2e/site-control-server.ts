@@ -13,15 +13,21 @@ import { password } from "../test/fixture.js";
 const path = process.env.SMPP_ZMQ_TEST_CONFIG_FILE;
 if (!path) throw Error("ISOLATED_TEST_CONFIG_REQUIRED");
 const config = JSON.parse(readFileSync(path, "utf8")) as { databaseUrl: string };
-const f = await controlSiteFixture(config.databaseUrl),
+const v13 = process.env.SMPP_ZMQ_UI_V13 === "true",
+  port = v13 ? 19114 : 19113;
+const f = await controlSiteFixture(
+    config.databaseUrl,
+    "jwt_hs256",
+    v13 ? "zmq_v1_3_0_site_control_13" : undefined,
+  ),
   store = new Store(f.admin, "site-browser:" + randomUUID());
 await store.migrate();
 f.devices.positionOverride = siteStart;
 const app = createApp(
   {
     host: "127.0.0.1",
-    port: 19113,
-    origins: ["http://127.0.0.1:19113"],
+    port,
+    origins: [`http://127.0.0.1:${port}`],
     mcpUrl: f.mcp.url,
     databaseUrl: config.databaseUrl,
     credentials: makeCredentials("operator", password),
@@ -32,7 +38,7 @@ const app = createApp(
   },
   new Service(f.mcp, store, "operator"),
 );
-await app.listen({ host: "127.0.0.1", port: 19113 });
+await app.listen({ host: "127.0.0.1", port });
 for (const signal of ["SIGINT", "SIGTERM"] as const)
   process.once(signal, () => {
     void app.close().then(() => f.close());

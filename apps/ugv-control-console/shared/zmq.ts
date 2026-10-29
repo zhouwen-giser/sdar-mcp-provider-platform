@@ -174,13 +174,44 @@ export function inspectionArguments(
     },
   };
 }
-export function validateZmqGeometry(args: Json) {
+export function validateZmqGeometry(args: Json, defaultZero = false) {
   const area = record(args.area),
     vertices = array(area.vertices).map(record);
   inspectionArguments(
     text(args.resourceId),
     vertices.map((v) => `${text(v.longitude)},${text(v.latitude)}`).join("\n"),
-    text(vertices[0]?.ellipsoidHeightM),
+    vertices[0]?.ellipsoidHeightM === undefined && defaultZero
+      ? "0"
+      : text(vertices[0]?.ellipsoidHeightM),
     text(area.searchStrategy),
   );
+}
+
+/** New profile only: omission is retained until the authoritative Provider resolves it. */
+export function inspectionArgumentsV13(
+  resourceId: string,
+  coordinates: string,
+  height: string,
+  strategy: string,
+) {
+  const value = inspectionArguments(
+    resourceId,
+    coordinates,
+    height.trim() ? height : "0",
+    strategy,
+  );
+  return {
+    ...value,
+    area: {
+      ...value.area,
+      vertices: value.area.vertices.map((p) =>
+        height.trim() ? p : { longitude: p.longitude, latitude: p.latitude },
+      ),
+    },
+  };
+}
+export function kilometresPerHourToMps(value: number) {
+  if (!Number.isFinite(value) || value <= 0 || value > 108)
+    throw Error("速度上限必须大于 0 且不超过 108 km/h");
+  return value / 3.6;
 }

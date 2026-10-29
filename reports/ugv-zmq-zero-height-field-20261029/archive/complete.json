@@ -1,0 +1,13 @@
+{
+  "commandId": "a38093e0-d41d-4454-bef4-d50dc541e8d2",
+  "snapshotHash": "19eb3a3ed5016c1c8c47856e1e57cdc722a5dbecec249bce75961f6c93e617b8",
+  "deletedReceptions": 31316198,
+  "verified": {
+    "state": "VERIFIED",
+    "oldBindings": 0,
+    "oldArchiveStreams": 0,
+    "protectedOwnerAndTasksUnchanged": true,
+    "guardsRestored": true,
+    "foreignKeysDisabled": false
+  }
+}

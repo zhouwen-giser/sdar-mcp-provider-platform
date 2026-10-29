@@ -545,6 +545,9 @@ export class ZmqControlEngine {
     await this.reloadResultHead(e);
     return {
       ...inspectionReport(e.zmqInspection, (this.#pendingReports.get(e.taskId) ?? 0) > 0),
+      ...(e.zmqAdmission?.parameterResolution
+        ? { parameterResolution: structuredClone(e.zmqAdmission.parameterResolution) }
+        : {}),
       ...(this.scope.settings.mode === "site_control"
         ? { schemaVersion: "ugv.zmq-inspection-result/2" }
         : {}),
@@ -708,10 +711,10 @@ export class ZmqControlEngine {
         if (execution.zmqInspection) await this.collectInspection(execution, value);
         if (execution.zmqEffect) await this.collectEffect(execution, value);
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         this.#healthy = false;
         execution.zmqInspection?.missingEvidence.push("LOCAL_REPORT_PERSISTENCE_UNCONFIRMED");
-        this.events.emit("fault", "ZMQ_RESULT_PERSISTENCE_UNCONFIRMED");
+        this.events.emit("fault", "ZMQ_RESULT_PERSISTENCE_UNCONFIRMED", faultCause(error));
       })
       .finally(() =>
         this.#pendingReports.set(
@@ -1203,11 +1206,15 @@ export class ZmqControlEngine {
         if (!e) return;
         try {
           await this.advance(e);
-        } catch {
+        } catch (error) {
           this.#healthy = false;
           this.#invalidated.set(e.taskId, e.zmqControl.generation + 1);
           await this.fallbackStop(e);
-          this.events.emit("fault", "ZMQ_CONTROL_PERSISTENCE_OR_DISPATCH_UNCONFIRMED");
+          this.events.emit(
+            "fault",
+            "ZMQ_CONTROL_PERSISTENCE_OR_DISPATCH_UNCONFIRMED",
+            faultCause(error),
+          );
         }
       })
       .catch(() => {
@@ -2145,6 +2152,11 @@ export class ZmqControlEngine {
     this.events.emit("fault", "ZMQ_PREARMED_STOP_DISPATCHED_PERSISTENCE_UNCONFIRMED");
   }
   private async save(e: ZmqExecution) {
+    if (e.result && e.zmqAdmission?.parameterResolution)
+      e.result = {
+        ...e.result,
+        parameterResolution: structuredClone(e.zmqAdmission.parameterResolution),
+      };
     e.revision++;
     e.updatedAt = this.at();
     try {
@@ -2173,3 +2185,16 @@ export class ZmqControlEngine {
 const object = (value: unknown): Record<string, unknown> =>
   value && typeof value === "object" ? (value as Record<string, unknown>) : {};
 export type CommittedObservation = ArchiveEntry;
+/** Stable diagnostics only: arbitrary SQL, endpoint and credential-bearing messages stay private. */
+function faultCause(error: unknown) {
+  const message = error instanceof Error ? error.message : "";
+  const code =
+    error !== null && typeof error === "object" && "code" in error ? error.code : undefined;
+  return {
+    cause: /^[A-Z][A-Z0-9_]{0,127}$/.test(message)
+      ? message
+      : typeof code === "string" && /^[A-Z0-9_]{1,128}$/.test(code)
+        ? code
+        : "INTERNAL_ERROR",
+  };
+}

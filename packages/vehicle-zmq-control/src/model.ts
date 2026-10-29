@@ -172,6 +172,8 @@ export const StartControl = z
         operationName: id,
         argumentHash: z.string().regex(/^[a-f0-9]{64}$/),
         arguments: z.record(z.string(), z.unknown()),
+        catalogProfile: z.literal("zmq_v1_3_0_site_control_13").optional(),
+        parameterResolution: z.record(z.string(), z.unknown()).optional(),
       })
       .strict()
       .optional(),
@@ -189,6 +191,7 @@ export type StartControl = z.infer<typeof StartControl>;
 export const ControlSettings = z
   .object({
     mode: z.enum(["isolated_simulator", "site_control"]),
+    catalogProfile: z.literal("zmq_v1_3_0_site_control_13").optional(),
     siteEndpoints: z.array(z.url()).length(6).optional(),
     handoffGrantHash: z
       .string()
@@ -252,6 +255,8 @@ export interface ControlScope {
 export function controlScope(profileInput: unknown, settingsInput: unknown): ControlScope {
   const profile = ControlDeploymentProfile.parse(profileInput),
     settings = ControlSettings.parse(settingsInput);
+  if (settings.catalogProfile && settings.mode !== "site_control")
+    throw Error("ZMQ_CATALOG_EXECUTION_MODE_MISMATCH");
   for (const component of Object.values(profile.components)) {
     for (const endpoint of [component.commandEndpoint, component.publicationEndpoint]) {
       // Numeric loopback only: no DNS, forwarding URL or externally routable command target.

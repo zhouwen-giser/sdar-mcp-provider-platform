@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "cases": [
+    "snapshot_conflict_no_delete",
+    "interrupt_after_committed_batch",
+    "foreign_key_failure_rolls_back_small_delete_and_restores_guard",
+    "resume_from_database_audit_without_local_checkpoint",
+    "duplicate_apply_no_additional_delete",
+    "future_reader_revoked",
+    "foreign_keys_enabled",
+    "guard_restored",
+    "non_target_projection_and_current_tasks_preserved"
+  ],
+  "count": 9,
+  "rawReceptions": 40000
+}

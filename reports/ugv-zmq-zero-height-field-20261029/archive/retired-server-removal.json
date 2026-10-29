@@ -1,0 +1,12 @@
+[
+  {
+    "serverId": "smpp-sz-gowm",
+    "status": 204,
+    "body": null
+  },
+  {
+    "serverId": "zmq-site-pms-readonly",
+    "status": 204,
+    "body": null
+  }
+]

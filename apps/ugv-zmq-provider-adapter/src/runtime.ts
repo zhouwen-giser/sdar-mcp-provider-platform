@@ -5,6 +5,13 @@ import {
   SITE_CONTROL_PROFILE,
   SITE_TOOLS,
 } from "../../../packages/vehicle-zmq-control/src/site-control-catalog.js";
+import {
+  SITE_CONTROL_V13_PROFILE,
+  siteControlV13Tool,
+  siteControlV13Operation,
+  siteControlV13OutputSchema,
+  resolveRegionArguments,
+} from "../../../packages/vehicle-zmq-control/src/site-control-v13.js";
 import { PLAN_ROUTE } from "../../../packages/vehicle-zmq-control/src/site-catalog.js";
 import type { SiteReadonlyRuntime } from "./site-runtime.js";
 import { randomUUID } from "node:crypto";
@@ -91,6 +98,7 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
   readonly validators = new Map<string, ValidateFunction>();
   readonly resultValidators = new Map<string, ValidateFunction>();
   readonly historicalResultValidators = new Map<string, ValidateFunction>();
+  readonly legacySiteResultValidators = new Map<string, ValidateFunction>();
   constructor(
     readonly engine: ZmqControlEngine,
     readonly observer: ZmqObservationObserver,
@@ -103,24 +111,43 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
       this.validators.set(
         name,
         ajv.compile(
-          (this.siteReads ? siteControlTool : zmqTool)(name, this.resourceId).inputSchema,
+          (this.v13 ? siteControlV13Tool : this.siteReads ? siteControlTool : zmqTool)(
+            name,
+            this.resourceId,
+          ).inputSchema,
         ),
       );
     for (const name of ZMQ_PROVIDER_TOOLS.slice(4))
       this.resultValidators.set(
         name,
         ajv.compile(
-          this.siteReads ? siteControlOutputSchema(name, true) : nativeDtoOutputSchema(name),
+          this.v13
+            ? siteControlV13OutputSchema(name, true)
+            : this.siteReads
+              ? siteControlOutputSchema(name, true)
+              : nativeDtoOutputSchema(name),
         ),
       );
     for (const name of ZMQ_PROVIDER_TOOLS.slice(4))
       this.historicalResultValidators.set(name, ajv.compile(nativeDtoOutputSchema(name)));
+    for (const name of ZMQ_PROVIDER_TOOLS.slice(4))
+      this.legacySiteResultValidators.set(name, ajv.compile(siteControlOutputSchema(name, true)));
     engine.events.on("execution", (e: ZmqExecution) =>
       this.events.emit(e.taskId, this.executionSnapshot(e)),
     );
   }
   get resourceId() {
     return this.engine.scope.profile.providerBinding.resourceId ?? "";
+  }
+  get v13() {
+    return this.engine.scope.settings.catalogProfile === SITE_CONTROL_V13_PROFILE;
+  }
+  get catalogProfile() {
+    return this.v13
+      ? SITE_CONTROL_V13_PROFILE
+      : this.siteReads
+        ? SITE_CONTROL_PROFILE
+        : "zmq_v1_0_1_12";
   }
   snapshot() {
     return this.observer.snapshot();
@@ -166,7 +193,10 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
       }
       nativeTiming(timing);
       const a = await this.engine.checkAvailability(
-        (this.siteReads ? siteControlOperation : zmqOperation)(name, args).operation,
+        (this.v13 ? siteControlV13Operation : this.siteReads ? siteControlOperation : zmqOperation)(
+          name,
+          args,
+        ).operation,
         c,
       );
       return result(a.available, a.reasonCode);
@@ -206,10 +236,9 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
     }
     let e: ProviderExecution;
     if (ZMQ_CONTROL_TOOLS.has(input.operationName)) {
-      const native = (this.siteReads ? siteControlOperation : zmqOperation)(
-        input.operationName,
-        input.arguments,
-      );
+      const native = (
+        this.v13 ? siteControlV13Operation : this.siteReads ? siteControlOperation : zmqOperation
+      )(input.operationName, input.arguments);
       e = await this.engine.start(
         {
           taskId: input.taskId,
@@ -222,6 +251,20 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
             operationName: input.operationName,
             argumentHash: input.argumentHash,
             arguments: input.arguments,
+            ...(this.v13
+              ? {
+                  catalogProfile: SITE_CONTROL_V13_PROFILE,
+                  ...(resolveRegionArguments(input.operationName, input.arguments)
+                    .parameterResolution
+                    ? {
+                        parameterResolution: resolveRegionArguments(
+                          input.operationName,
+                          input.arguments,
+                        ).parameterResolution,
+                      }
+                    : {}),
+                }
+              : {}),
           },
         },
         input.signal,
@@ -267,7 +310,7 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
         ...readings,
         schemaVersion: "ugv.zmq-site-capabilities/2",
         qualification: "site_control",
-        catalogProfile: SITE_CONTROL_PROFILE,
+        catalogProfile: this.catalogProfile,
         executionDomain: this.engine.scope.profile.executionDomain,
         controlAdmission: "per_operation",
         controlAvailable: true,
@@ -425,7 +468,9 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
     const validate = (
       e.executionContext.executionMode === "simulation"
         ? this.historicalResultValidators
-        : this.resultValidators
+        : isZmqExecution(e) && e.zmqAdmission?.catalogProfile === SITE_CONTROL_V13_PROFILE
+          ? this.resultValidators
+          : this.legacySiteResultValidators
     ).get(e.operationName);
     if (e.result && validate && !validate(e.result))
       throw Error("ZMQ_INTERNAL_RESULT_CONTRACT_INVALID");

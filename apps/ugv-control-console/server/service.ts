@@ -1,3 +1,4 @@
+import { siteControlV13Tools } from "../shared/zmq-native.js";
 import { Ajv2020 } from "ajv/dist/2020.js";
 import { createHash } from "node:crypto";
 import addFormatsImport from "ajv-formats";
@@ -153,7 +154,8 @@ export class Service {
     )
       throw Error("ZMQ_SITE_LIVE_DOMAIN_REQUIRED");
     validateSchema(tool.inputSchema, args);
-    if (name === ZMQ_INSPECT || name === "vehicle_zmq_area_recon") validateZmqGeometry(args);
+    if (name === ZMQ_INSPECT || name === "vehicle_zmq_area_recon")
+      validateZmqGeometry(args, siteControlV13Tools(c.tools));
     const isControl = (CONTROL_TOOLS as readonly string[]).includes(name);
     if (
       isControl &&
@@ -284,7 +286,7 @@ export class Service {
     if (
       identity.taskId !== taskId ||
       !text(identity.executionId) ||
-      identity.simulationId !== this.mcp.headers["x-sdar-simulation-id"]
+      (identity.simulationId ?? "") !== (this.mcp.headers["x-sdar-simulation-id"] ?? "")
     )
       throw Error("TASK_IDENTITY_UNCONFIRMED");
     const args = {
@@ -301,15 +303,25 @@ export class Service {
       rows = array(page.records).map(record);
     if (
       result.schemaVersion !==
-        (name === EFFECT_RESULT ? "ugv.zmq-effect-query/1" : "ugv.zmq-inspection-result/1") ||
-      page.schemaVersion !== "ugv.zmq-result-page/1" ||
+        (name === EFFECT_RESULT
+          ? this.mcp.headers["x-sdar-execution-mode"] === "live"
+            ? "ugv.zmq-effect-query/2"
+            : "ugv.zmq-effect-query/1"
+          : this.mcp.headers["x-sdar-execution-mode"] === "live"
+            ? "ugv.zmq-inspection-result/2"
+            : "ugv.zmq-inspection-result/1") ||
+      page.schemaVersion !==
+        (this.mcp.headers["x-sdar-execution-mode"] === "live"
+          ? "ugv.zmq-result-page/2"
+          : "ugv.zmq-result-page/1") ||
       page.historySource !== "platform_retained_only" ||
       resultIdentity.taskId !== taskId ||
       resultIdentity.externalExecutionId !== identity.executionId ||
       resultIdentity.resourceId !== catalog.resourceId ||
       resultIdentity.providerId !== catalog.provider.providerId ||
-      resultIdentity.executionMode !== "simulation" ||
-      resultIdentity.simulationId !== this.mcp.headers["x-sdar-simulation-id"] ||
+      resultIdentity.executionMode !==
+        (this.mcp.headers["x-sdar-execution-mode"] ?? "simulation") ||
+      (resultIdentity.simulationId ?? "") !== (this.mcp.headers["x-sdar-simulation-id"] ?? "") ||
       rows.length > 8 ||
       typeof page.hasMore !== "boolean"
     )
@@ -318,7 +330,10 @@ export class Service {
     for (const row of rows) {
       const { schemaVersion, revision, contentHash, ...draft } = row;
       if (
-        schemaVersion !== "ugv.zmq-result-record/1" ||
+        schemaVersion !==
+          (this.mcp.headers["x-sdar-execution-mode"] === "live"
+            ? "ugv.zmq-result-record/2"
+            : "ugv.zmq-result-record/1") ||
         typeof revision !== "number" ||
         !Number.isSafeInteger(revision) ||
         revision <= previous ||

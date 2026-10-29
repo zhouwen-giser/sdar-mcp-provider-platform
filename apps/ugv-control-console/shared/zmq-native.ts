@@ -1,3 +1,4 @@
+import v13Catalog from "./zmq-site-control-v13-catalog.json" with { type: "json" };
 import controlCatalog from "./zmq-site-control-catalog.json" with { type: "json" };
 import siteCatalog from "./zmq-site-catalog.json" with { type: "json" };
 import nativeCatalog from "./zmq-native-catalog.json" with { type: "json" };
@@ -22,9 +23,16 @@ export const NATIVE_CONTROL_TOOLS = [
   "vehicle_zmq_camera",
 ];
 export const SITE_CONTROL_PROFILE = "zmq_v1_2_0_site_control_13";
-export function siteControlTools(tools: readonly Tool[]) {
+export const SITE_CONTROL_V13_PROFILE = "zmq_v1_3_0_site_control_13";
+export function siteControlV13Tools(tools: readonly Tool[]) {
   return tools.some(
-    (t) => record(t._meta?.["io.sdar/ugvZmq"]).catalogProfile === SITE_CONTROL_PROFILE,
+    (t) => record(t._meta?.["io.sdar/ugvZmq"]).catalogProfile === SITE_CONTROL_V13_PROFILE,
+  );
+}
+export function siteControlTools(tools: readonly Tool[]) {
+  return (
+    siteControlV13Tools(tools) ||
+    tools.some((t) => record(t._meta?.["io.sdar/ugvZmq"]).catalogProfile === SITE_CONTROL_PROFILE)
   );
 }
 export const SITE_PROFILE = "zmq_v1_1_0_readonly_13";
@@ -38,13 +46,15 @@ export function nativeContract(
   profile = nativeCatalog.profile,
 ): Tool | undefined {
   const catalog =
-    profile === SITE_CONTROL_PROFILE
-      ? controlCatalog
-      : profile === SITE_PROFILE
-        ? siteCatalog
-        : profile === nativeCatalog.profile
-          ? nativeCatalog
-          : undefined;
+    profile === SITE_CONTROL_V13_PROFILE
+      ? v13Catalog
+      : profile === SITE_CONTROL_PROFILE
+        ? controlCatalog
+        : profile === SITE_PROFILE
+          ? siteCatalog
+          : profile === nativeCatalog.profile
+            ? nativeCatalog
+            : undefined;
   const raw = catalog?.tools.find((t) => t.name === name);
   if (!raw) return undefined;
   const tool = structuredClone(raw) as unknown as Tool;
@@ -78,13 +88,23 @@ export function nativeToolReason(tool: Tool, resourceId: string): string | null 
 export function nativeCatalogReason(tools: readonly Tool[], resourceId: string): string | null {
   const site = siteReadonlyTools(tools),
     control = siteControlTools(tools),
-    catalog = control ? controlCatalog : site ? siteCatalog : nativeCatalog;
+    catalog = siteControlV13Tools(tools)
+      ? v13Catalog
+      : control
+        ? controlCatalog
+        : site
+          ? siteCatalog
+          : nativeCatalog;
   if (
     (site || control) &&
     tools.some(
       (t) =>
         record(t._meta?.["io.sdar/ugvZmq"]).catalogProfile !==
-        (control ? SITE_CONTROL_PROFILE : SITE_PROFILE),
+        (siteControlV13Tools(tools)
+          ? SITE_CONTROL_V13_PROFILE
+          : control
+            ? SITE_CONTROL_PROFILE
+            : SITE_PROFILE),
     )
   )
     return "ZMQ_NATIVE_CONTRACT_MISMATCH";

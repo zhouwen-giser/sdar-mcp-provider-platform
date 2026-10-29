@@ -16,7 +16,7 @@ parser.add_argument('--provider-image', required=True)
 parser.add_argument('--runtime-image', required=True)
 parser.add_argument('--console-image', required=True)
 parser.add_argument('--evidence-root', type=Path, required=True)
-parser.add_argument('--catalog-profile', choices=['zmq_v1_1_0_readonly_13', 'zmq_v1_2_0_site_control_13'],
+parser.add_argument('--catalog-profile', choices=['zmq_v1_1_0_readonly_13', 'zmq_v1_2_0_site_control_13', 'zmq_v1_3_0_site_control_13'],
                     default='zmq_v1_1_0_readonly_13')
 args = parser.parse_args()
 root = Path(__file__).resolve().parents[1]

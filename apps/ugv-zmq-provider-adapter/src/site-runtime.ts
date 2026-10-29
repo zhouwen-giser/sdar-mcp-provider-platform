@@ -275,6 +275,9 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
       if (pending) e.zmqInspection.missingEvidence.push("LOCAL_SUMMARY_REBUILD_LIMIT_USE_PAGES");
       return {
         ...inspectionReport(e.zmqInspection, pending),
+        ...(e.zmqAdmission?.parameterResolution
+          ? { parameterResolution: structuredClone(e.zmqAdmission.parameterResolution) }
+          : {}),
         schemaVersion:
           identity.executionMode === "live"
             ? "ugv.zmq-inspection-result/2"

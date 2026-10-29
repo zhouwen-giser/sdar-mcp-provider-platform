@@ -27,6 +27,7 @@ export const siteDestination = {
 export async function controlSiteFixture(
   databaseUrl: string,
   authMode: "jwt_hs256" | "site_anonymous" = "jwt_hs256",
+  catalogProfile?: "zmq_v1_3_0_site_control_13",
 ) {
   if (new URL(databaseUrl).hostname !== "127.0.0.1") throw Error("ISOLATED_DATABASE_REQUIRED");
   const suffix = randomUUID().replaceAll("-", ""),
@@ -128,6 +129,9 @@ export async function controlSiteFixture(
     handoffGrant: grant,
     controlSettings: {
       ...testScope().settings,
+      ...(catalogProfile
+        ? { catalogProfile, maxSpeedMps: 30, transportTimeoutMs: 1000, databaseTimeoutMs: 2000 }
+        : {}),
       mode: "site_control",
       handoffGrantHash: sha256(canonical(grant)),
       siteEndpoints: Object.values(profile.components).flatMap((c) => [

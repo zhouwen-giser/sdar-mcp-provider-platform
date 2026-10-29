@@ -3,7 +3,11 @@ import { SiteReadonlyConsole } from "./SiteReadonlyConsole.js";
 import { api, describe } from "./api.js";
 import { newCommandId } from "./command-id.js";
 import { parseCoordinates } from "../shared/coordinates.js";
-import { inspectionArguments } from "../shared/zmq.js";
+import {
+  inspectionArguments,
+  inspectionArgumentsV13,
+  kilometresPerHourToMps,
+} from "../shared/zmq.js";
 import { array, record, text, type Command, type CommandRow, type Json } from "../shared/model.js";
 const labels: Record<string, string> = {
   vehicle_zmq_navigate: "导航",
@@ -14,13 +18,16 @@ const labels: Record<string, string> = {
   simulation_apply_effect: "仿真效果交互",
 };
 export function SiteControlConsole(props: ComponentProps<typeof SiteReadonlyConsole>) {
+  const v13 =
+    record(record(record(array(props.device.tools)[0])._meta)["io.sdar/ugvZmq"]).catalogProfile ===
+    "zmq_v1_3_0_site_control_13";
   const [tool, setTool] = useState("vehicle_zmq_navigate"),
     [variant, setVariant] = useState("point"),
     [camera, setCamera] = useState("position"),
     [coordinates, setCoordinates] = useState(""),
     [height, setHeight] = useState(""),
     [strategy, setStrategy] = useState("recognize");
-  const [speed, setSpeed] = useState("1"),
+  const [speed, setSpeed] = useState(v13 ? "60" : "1"),
     [avoid, setAvoid] = useState(true),
     [budget, setBudget] = useState("300"),
     [yaw, setYaw] = useState("0"),
@@ -72,7 +79,7 @@ export function SiteControlConsole(props: ComponentProps<typeof SiteReadonlyCons
         operation: {
           name: "navigation." + variant,
           params: {
-            speedLimitMps: number(speed),
+            speedLimitMps: v13 ? kilometresPerHourToMps(number(speed)) : number(speed),
             obstacleAvoidance: avoid,
             ...(variant === "point" ? { destination: points[0] } : { waypoints: points }),
             ...(variant === "returnHome" ? { returnType: number(returnType) } : {}),
@@ -97,7 +104,12 @@ export function SiteControlConsole(props: ComponentProps<typeof SiteReadonlyCons
         },
       };
     else if (["vehicle_zmq_area_recon", "vehicle_zmq_inspect_area"].includes(tool))
-      args = inspectionArguments(resourceId, coordinates, height, strategy);
+      args = (v13 ? inspectionArgumentsV13 : inspectionArguments)(
+        resourceId,
+        coordinates,
+        height,
+        strategy,
+      );
     else if (tool === "vehicle_zmq_circular_recon")
       args = {
         resourceId,
@@ -321,7 +333,7 @@ export function SiteControlConsole(props: ComponentProps<typeof SiteReadonlyCons
             route: "航点路线",
             returnHome: "返航",
           })}
-          {field("速度上限（m/s）", speed, setSpeed)}
+          {field(v13 ? "速度上限（km/h）" : "速度上限（m/s）", speed, setSpeed)}
           <label>
             <input type="checkbox" checked={avoid} onChange={(e) => setAvoid(e.target.checked)} />
             避障开启
@@ -349,7 +361,14 @@ export function SiteControlConsole(props: ComponentProps<typeof SiteReadonlyCons
       )}
       {["vehicle_zmq_area_recon", "vehicle_zmq_inspect_area", "simulation_apply_effect"].includes(
         tool,
-      ) && field("椭球高（米，不能自动补零）", height, setHeight)}
+      ) &&
+        field(
+          v13 && tool !== "simulation_apply_effect"
+            ? "椭球高（米，留空默认 0；非实测高度）"
+            : "椭球高（米，仿真目标未知可留空）",
+          height,
+          setHeight,
+        )}
       {[
         "vehicle_zmq_area_recon",
         "vehicle_zmq_inspect_area",
@@ -546,7 +565,7 @@ export function SiteControlConsole(props: ComponentProps<typeof SiteReadonlyCons
               name: "navigation.route",
               params: {
                 waypoints: array(preview.waypoints),
-                speedLimitMps: Number(speed),
+                speedLimitMps: v13 ? kilometresPerHourToMps(Number(speed)) : Number(speed),
                 obstacleAvoidance: avoid,
               },
             },
