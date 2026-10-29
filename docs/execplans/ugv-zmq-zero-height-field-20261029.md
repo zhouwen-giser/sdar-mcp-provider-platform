@@ -92,3 +92,34 @@ Inspection also found the readonly archive pool hardcoded to 500 ms while transa
 the configured databaseTimeoutMs (default 2000 ms). Align the pool with that existing bound,
 as already done in control mode. The original formal archive exception is unavailable, so
 this discrepancy is not asserted as the proven cause of that historical failure.
+
+### Field window and finite unknown-result correction
+
+SDAR frozen verification sdar-verify-1ebeaebe-51c7-4455-86d9-fbd7a33cd068 passes all 30
+steps, input/baseline immutability and cleanup. SMPP f1184c7 passes all 21 site steps.
+Candidate software and source-matched images are deployed. Production SDAR consumers and
+renewal are stopped; the candidate alone consumes original production storage/Redis. The
+existing Server URL is retained via a private Docker bridge relay to loopback 19110. Real
+PMS Binding successor revision 2 pins catalog 2.0.0-rc.1:2/checksum 9f8cef18..., registry
+revision 15/checksum 94522d2d...; 13 native capabilities plus patrol publish through governance.
+
+Formal A2A point navigation has native completion, stationary stop and released occupancy;
+pause/resume also pass, with source/feedback evidence still degraded. Position and finite-lease
+velocity camera operations stop and release occupancy with degraded reports. Zoom returns an
+explicit native UNSUPPORTED business failure. Regional configuration receives no ACK and no
+native Task ID; the original request is retained and never repeated. No fresh geolocated effect
+candidate is observed in 60 reads. These are field facts, not complete qualification.
+
+During route navigation the source reports altitude about -9982 m, vertical velocity about
+-244 m/s, then stops publishing localization. The Task is canceled; passive capture confirms
+mission state canceled and manual mode but no localization frames in 12 seconds. Physical
+stationary stop remains unconfirmed and chassis occupancy remains held. Return-home is not
+dispatched. Upstream recovery is required within the user's no-upstream-modification scope.
+
+This exposes a local lifecycle defect: EO configuration ACK loss leaves nativeTaskId null, and
+cancel/deadline can cycle through STOPPING/uncertain forever because no stop command can be
+addressed. Correct this branch to an immutable TECHNICAL_FAILED unknown outcome with held
+occupancy, NATIVE_TASK_ID_UNKNOWN and PHYSICAL_STOP_UNCONFIRMED. Never issue another configure,
+START or an unaddressed stop. Explicit management reconciliation still needs a fresh idle
+snapshot. Two cancel/deadline regression cases pass with all 22 control tests; repeat the full
+site gate before shipping the corrective Provider.

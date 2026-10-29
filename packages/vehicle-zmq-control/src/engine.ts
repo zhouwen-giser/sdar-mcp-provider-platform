@@ -1934,7 +1934,14 @@ export class ZmqControlEngine {
       !(e.arguments.operation as Operation).name.startsWith("camera.")
     ) {
       s.stage = "uncertain";
+      s.occupancy = "held";
+      e.state = "TECHNICAL_FAILED";
       e.reasonCode = "ZMQ_NATIVE_TASK_UNKNOWN_STOP_UNAVAILABLE";
+      e.terminalAt ??= this.at();
+      s.missingEvidence = [
+        ...new Set([...s.missingEvidence, "NATIVE_TASK_ID_UNKNOWN", "PHYSICAL_STOP_UNCONFIRMED"]),
+      ];
+      e.result ??= this.result(e);
       await this.save(e);
       return;
     }

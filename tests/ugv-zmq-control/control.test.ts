@@ -212,6 +212,50 @@ describe("SIMULATED scoped control lifecycle", () => {
       "RESTART_RECONCILIATION_REQUIRED",
     );
   });
+  it.each(["cancel", "deadline"] as const)(
+    "terminates an unacknowledged EO configuration on %s without inventing an identity or replaying",
+    async (action) => {
+      const r = await setup();
+      r.transport.outcome = "uncertain";
+      const input = request(r.clock, area);
+      input.timing.maxElapsedMs = 2000;
+      const e = await r.engine.start(input);
+      await r.pulse();
+      expect(r.transport.commands).toHaveLength(1);
+      expect(r.transport.commands[0]?.action).toBe("configure");
+      if (action === "cancel") await r.engine.control("cancel", identity(e));
+      else {
+        r.clock.advance(2001);
+        await r.pulse();
+      }
+      const ended = await r.repository.get(e.taskId);
+      expect(ended).toMatchObject({
+        state: "TECHNICAL_FAILED",
+        reasonCode: "ZMQ_NATIVE_TASK_UNKNOWN_STOP_UNAVAILABLE",
+        terminalAt: expect.any(String),
+        zmqControl: {
+          stage: "uncertain",
+          occupancy: "held",
+          nativeTaskId: null,
+          stopConfirmed: false,
+        },
+        result: {
+          occupancy: "held",
+          stopConfirmed: false,
+          missingEvidence: expect.arrayContaining([
+            "NATIVE_TASK_ID_UNKNOWN",
+            "PHYSICAL_STOP_UNCONFIRMED",
+          ]),
+        },
+      });
+      const result = ended?.result;
+      r.clock.advance(10000);
+      for (let i = 0; i < 5; i++) await r.pulse();
+      expect(r.transport.commands).toHaveLength(1);
+      expect((await r.repository.get(e.taskId))?.result).toEqual(result);
+      await expect(r.engine.start(request(r.clock, area))).rejects.toThrow("OCCUPIED");
+    },
+  );
   it("does not reset platform budget across pause/resume and sends stop on expiration", async () => {
     const r = await setup(),
       input = request(r.clock, area);
