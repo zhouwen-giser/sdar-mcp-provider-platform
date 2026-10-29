@@ -1,0 +1,22 @@
+services:
+  provider:
+    volumes:
+      - ${SIMULATION_VIEW_TOKEN:?private token required}:/run/secrets/simulation-view.token:ro
+  simulation-view:
+    image: ${SIMULATION_VIEW_IMAGE:?fixed image digest required}
+    network_mode: host
+    restart: "no"
+    stop_grace_period: 30s
+    user: ${SIMULATION_VIEW_UID:-1000}:${SIMULATION_VIEW_GID:-1000}
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    ulimits:
+      core: 0
+    environment:
+      PYTHONPATH: /opt/site-sdk
+    volumes:
+      - ${SIMULATION_VIEW_CONFIG:?private config required}:/run/config/simulation-view.json:ro
+      - ${SIMULATION_VIEW_TOKEN:?private token required}:/run/secrets/simulation-view.token:ro
+      - ${SIMULATION_VIEW_STATE:?durable private command directory required}:/var/lib/simulation-view
+      - ${SIMULATION_VIEW_SDK:?exact matching SDK directory required}:/opt/site-sdk:ro

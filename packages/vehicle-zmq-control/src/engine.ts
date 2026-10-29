@@ -1,4 +1,10 @@
-import { unobservedDispatchFailure } from "./transport-diagnostics.js";
+import { unobservedDispatchFailure, safeFailureCode } from "./transport-diagnostics.js";
+import {
+  decodeViewRequest,
+  ViewReply,
+  ViewResult,
+  validateViewReply,
+} from "./simulation-view-contract.js";
 import { operationAdmissionKey, operationSupport } from "./operation-support.js";
 import { EventEmitter } from "node:events";
 import { randomBytes, randomUUID } from "node:crypto";
@@ -81,6 +87,7 @@ export class ZmqControlEngine {
     { firstMs: number; lastSequence: number; count: number }
   >();
   readonly #positionWindow: Observed[] = [];
+  readonly #viewQueries = new Map<string, number>();
   #sequence = 0;
   #started = false;
   #closed = false;
@@ -270,6 +277,8 @@ export class ZmqControlEngine {
   }
   availability(operation: Operation): { available: boolean; reasonCode: string } {
     const component = componentFor(operation.name);
+    if (operation.name === "camera.simulationView" && !this.scope.settings.simulationView)
+      return { available: false, reasonCode: "ZMQ_VIEW_BACKEND_NOT_CONFIGURED" };
     const support = operationSupport(this.scope.settings, operationAdmissionKey(operation));
     if (!support.available) return { available: false, reasonCode: support.reasonCode };
     if (!this.#started || this.#closed || !this.#healthy)
@@ -338,9 +347,14 @@ export class ZmqControlEngine {
   /** Full-parameter candidate admission; the synchronous method above is component health only. */
   async checkAvailability(operation: Operation, context: ExecutionContextRecord) {
     const current = this.availability(operation);
-    if (!current.available || operation.name !== "simulation.applyEffect") return current;
+    if (!current.available) return current;
     try {
-      await this.validateEffectObservation(operation, context);
+      if (operation.name === "simulation.applyEffect")
+        await this.validateEffectObservation(operation, context);
+      if (operation.name === "camera.simulationView") {
+        if (!this.transport.checkView) throw Error("ZMQ_VIEW_BACKEND_NOT_CONFIGURED");
+        await this.transport.checkView(this.scope.profile.providerBinding.resourceId ?? "");
+      }
       return current;
     } catch (error) {
       const code = error instanceof Error ? error.message : "";
@@ -353,6 +367,16 @@ export class ZmqControlEngine {
   private validateLimits(operation: Operation): void {
     const p = operation.params,
       s = this.scope.settings;
+    if (operation.name === "camera.simulationView") {
+      const view = s.simulationView;
+      if (!view) throw Error("ZMQ_VIEW_BACKEND_NOT_CONFIGURED");
+      if (
+        operation.params.viewId !== view.viewId ||
+        operation.params.horizontalFovDeg < view.minFovDeg ||
+        operation.params.horizontalFovDeg > view.maxFovDeg
+      )
+        throw Error("ZMQ_VIEW_DEPLOYMENT_LIMIT_EXCEEDED");
+    }
     if (
       ("speedLimitMps" in p && p.speedLimitMps > s.maxSpeedMps) ||
       ("yaw_rad" in p && (p.yaw_rad < s.minYawRad || p.yaw_rad > s.maxYawRad)) ||
@@ -394,6 +418,10 @@ export class ZmqControlEngine {
       if (!available.available) throw Error(available.reasonCode);
       if (request.operation.name === "simulation.applyEffect")
         await this.validateEffectObservation(request.operation, request.executionContext);
+      if (request.operation.name === "camera.simulationView") {
+        if (!this.transport.checkView) throw Error("ZMQ_VIEW_BACKEND_NOT_CONFIGURED");
+        await this.transport.checkView(request.resourceId);
+      }
       const component = componentFor(request.operation.name),
         at = this.at();
       let nativeTaskId: string | null = null;
@@ -425,6 +453,7 @@ export class ZmqControlEngine {
         createdAt: at,
         updatedAt: at,
         evidence: [],
+        ...(request.operation.name === "camera.simulationView" ? { zmqView: { reply: null } } : {}),
         ...(request.operation.name === "inspection.area"
           ? { zmqInspection: emptyInspection() }
           : {}),
@@ -470,17 +499,20 @@ export class ZmqControlEngine {
           nativeOutcome: null,
           nativeReason: null,
           latestEvidence: [],
-          missingEvidence: [
-            "SOURCE_PRODUCER_EPOCH_UNATTESTED",
-            ...(component === "chassis" &&
-            this.scope.settings.mode === "site_control" &&
-            !this.latest("chassis", "missionState")
-              ? ["CHASSIS_INITIAL_MISSION_STATE_NOT_OBSERVED"]
-              : []),
-            ...(component === "chassis"
-              ? ["CHASSIS_FEEDBACK_UNCORRELATED", "MODE_PUBLICATION_ORDER_UNVERIFIED"]
-              : []),
-          ],
+          missingEvidence:
+            request.operation.name === "camera.simulationView"
+              ? []
+              : [
+                  "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+                  ...(component === "chassis" &&
+                  this.scope.settings.mode === "site_control" &&
+                  !this.latest("chassis", "missionState")
+                    ? ["CHASSIS_INITIAL_MISSION_STATE_NOT_OBSERVED"]
+                    : []),
+                  ...(component === "chassis"
+                    ? ["CHASSIS_FEEDBACK_UNCORRELATED", "MODE_PUBLICATION_ORDER_UNVERIFIED"]
+                    : []),
+                ],
         },
       };
       if (signal?.aborted) throw Error("ZMQ_ADMISSION_CANCELLED");
@@ -1026,6 +1058,7 @@ export class ZmqControlEngine {
       throw Error("ZMQ_EXECUTION_IDENTITY_MISMATCH");
     if (existing.zmqControl.component === "simulationEffect")
       throw Error("ZMQ_SIMULATION_EFFECT_CONTROL_UNSUPPORTED");
+    if (existing.zmqView) throw Error("ZMQ_VIEW_LIFECYCLE_UNSUPPORTED");
     if (this.#sourceInterrupted.has(existing.taskId))
       throw Error("ZMQ_RESTART_RECONCILIATION_REQUIRED");
     if (this.nativeTypeConflict(existing)) throw Error("ZMQ_EXECUTION_IDENTITY_UNCONFIRMED");
@@ -1117,6 +1150,7 @@ export class ZmqControlEngine {
         return structuredClone(e);
       }
       if (s.occupancy !== "held") throw Error("ZMQ_RECONCILIATION_NOT_REQUIRED");
+      if (e.zmqView) throw Error("ZMQ_VIEW_BACKEND_RECONCILIATION_REQUIRED");
       const state = this.latest(
         input.component,
         input.component === "chassis" ? "systemState" : "device_status",
@@ -1237,6 +1271,17 @@ export class ZmqControlEngine {
   private async advance(e: ZmqExecution): Promise<void> {
     const s = e.zmqControl,
       operation = e.arguments.operation as Operation;
+    if (
+      e.zmqView &&
+      s.commands.some(
+        (c) => c.action === "camera" && (c.status !== "intent" || s.stage === "uncertain"),
+      )
+    ) {
+      await this.viewProgress(e);
+      if (s.occupancy === "released" || e.terminalAt) return;
+      if (this.expired(e)) await this.requestStop(e, "DEADLINE_EXCEEDED");
+      return;
+    }
     if (this.#sourceInterrupted.has(e.taskId)) {
       if (!s.missingEvidence.includes("SOURCE_RESTART_RECONCILIATION_UNAVAILABLE")) {
         s.stage = "uncertain";
@@ -1555,6 +1600,7 @@ export class ZmqControlEngine {
     // Reserve a stable stop request before the first operation that can move hardware.
     // A later table-write failure can use it while the independently checked writer lease lives.
     if (
+      !e.zmqView &&
       ["camera", "configure", "start", "resume"].includes(action) &&
       !s.fallbackStop &&
       (s.component === "chassis" || s.nativeTaskId !== null || action === "camera")
@@ -1601,6 +1647,14 @@ export class ZmqControlEngine {
       result.diagnostic?.stage === "guard" && result.diagnostic.sendAttempted === false;
     command.status = revokedBeforeSend ? "superseded" : result.outcome;
     command.response = result.response;
+    if (e.zmqView && result.response?.viewReply) {
+      const request = decodeViewRequest(command.frames);
+      e.zmqView.reply = validateViewReply(
+        result.response.viewReply,
+        request,
+        sha256(canonical(request)),
+      );
+    }
     if (result.diagnostic) command.diagnostic = result.diagnostic;
     command.completedAt = this.at();
     const nativeId =
@@ -1843,7 +1897,55 @@ export class ZmqControlEngine {
     this.evidence(e, current);
     await this.save(e);
   }
+  private async viewProgress(e: ZmqExecution): Promise<void> {
+    if (!e.zmqView) return;
+    const command = e.zmqControl.commands.find((c) => c.method === "SimulationView");
+    if (
+      !command ||
+      command.status === "superseded" ||
+      (command.status === "intent" && e.zmqControl.stage !== "uncertain")
+    )
+      return;
+    let reply = e.zmqView.reply;
+    if (e.terminalAt && reply?.status === "partial") return;
+    if (!reply || reply.status === "unknown") {
+      const now = this.clock.monotonicMs();
+      if (now - (this.#viewQueries.get(e.taskId) ?? -Infinity) < 1000) return;
+      this.#viewQueries.set(e.taskId, now);
+      if (!this.transport.queryView) return;
+      try {
+        const request = decodeViewRequest(command.frames);
+        reply = validateViewReply(
+          await this.transport.queryView(command),
+          request,
+          sha256(canonical(request)),
+        );
+      } catch (error) {
+        // Read failure cannot authorize a new apply or release an unknown camera operation.
+        const code = safeFailureCode(error) ?? "ZMQ_VIEW_QUERY_UNAVAILABLE";
+        if (e.zmqView.lastQueryError !== code) {
+          e.zmqView.lastQueryError = code;
+          await this.save(e);
+        }
+        return;
+      }
+    }
+    if (reply.status === "unknown") return;
+    e.zmqView.reply = ViewReply.parse(reply);
+    e.zmqControl.nativeOutcome = reply.status;
+    e.zmqControl.nativeReason = reply.reasonCode;
+    await this.finish(
+      e,
+      reply.status === "applied" ? "SUCCEEDED" : "BUSINESS_FAILED",
+      reply.reasonCode,
+      reply.status !== "partial",
+    );
+  }
   private async cameraProgress(e: ZmqExecution): Promise<void> {
+    if (e.zmqView) {
+      await this.viewProgress(e);
+      return;
+    }
     if (e.zmqControl.stage === "stopping") {
       await this.stopping(e);
       return;
@@ -1896,6 +1998,21 @@ export class ZmqControlEngine {
   }
   private async requestStop(e: ZmqExecution, reason: string): Promise<void> {
     const s = e.zmqControl;
+    if (e.zmqView) {
+      const attempted = s.commands.some(
+        (c) => c.action === "camera" && !["intent", "superseded"].includes(c.status),
+      );
+      const confirmed = ["applied", "rejected"].includes(e.zmqView.reply?.status ?? "");
+      if (attempted && !confirmed && !s.missingEvidence.includes("VIEW_APPLICATION_UNCONFIRMED"))
+        s.missingEvidence.push("VIEW_APPLICATION_UNCONFIRMED");
+      await this.finish(
+        e,
+        attempted && !confirmed ? "TECHNICAL_FAILED" : "BUSINESS_FAILED",
+        reason,
+        !attempted || confirmed,
+      );
+      return;
+    }
     if (s.component === "simulationEffect") {
       const attempted = s.commands.some(
         (c) => c.action === "effect" && !["intent", "superseded", "rejected"].includes(c.status),
@@ -2098,10 +2215,28 @@ export class ZmqControlEngine {
       this.#monoDeadlines.delete(e.taskId);
       this.#stopMonoDeadlines.delete(e.taskId);
       this.#stationary.delete(e.taskId);
+      this.#viewQueries.delete(e.taskId);
     }
   }
   private result(e: ZmqExecution): Record<string, unknown> {
     const s = e.zmqControl;
+    if (e.zmqView) {
+      const reply = e.zmqView.reply;
+      return ViewResult.parse({
+        schemaVersion: "ugv.simulation-view-result/1",
+        qualification: "project_owned_simulation_view",
+        requestId: s.commands.find((c) => c.action === "camera")?.requestId ?? null,
+        application:
+          reply?.status ??
+          (s.commands.some((c) => !["intent", "superseded"].includes(c.status))
+            ? "unknown"
+            : "not_attempted"),
+        eoRecognitionAffected: false,
+        occupancy: s.occupancy,
+        evidence: reply?.evidence ?? null,
+        missingEvidence: [...new Set([...s.missingEvidence, ...(reply?.missingEvidence ?? [])])],
+      });
+    }
     if (e.zmqEffect) return this.effectResult(e);
     return structuredClone({
       schemaVersion:

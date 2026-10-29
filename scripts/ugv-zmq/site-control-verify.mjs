@@ -45,10 +45,12 @@ const baseline = source();
 writeFileSync(resolve(out, "source.json"), JSON.stringify(baseline, null, 2) + "\n");
 const env = {
   ...process.env,
+  PYTHONDONTWRITEBYTECODE: "1",
   TEST_DATABASE_URL: config.databaseUrl,
   SMPP_ZMQ_TEST_CONFIG_FILE: configPath,
   SMPP_INSPECTION_TEST_CONFIG_FILE: configPath,
   SMPP_ZMQ_SITE_CONTROL_WIRE_EVIDENCE_FILE: resolve(out, "native-wire.json"),
+  SMPP_SIMULATION_VIEW_WIRE_EVIDENCE_FILE: resolve(out, "simulation-view-wire.json"),
 };
 const changed = execFileSync("git", ["diff", "--name-only", "863dbd0"], { encoding: "utf8" })
   .trim()
@@ -78,6 +80,10 @@ const commands = [
   ["build", ["pnpm", "build"]],
   ["console-build", ["pnpm", "--filter", "@sdar/ugv-control-console", "build"]],
   [
+    "simulation-view-backend",
+    ["python3", "-m", "unittest", "discover", "-s", "tests/simulation-view", "-v"],
+  ],
+  [
     "native-and-lifecycle",
     [
       "pnpm",
@@ -95,6 +101,8 @@ const commands = [
       "tests/ugv-zmq-provider/site-control-contract.test.ts",
       "tests/ugv-zmq-provider/site-control-v13.test.ts",
       "tests/ugv-zmq-provider/site-control-v13.postgres.test.ts",
+      "tests/ugv-zmq-provider/site-control-v14.test.ts",
+      "tests/ugv-zmq-provider/site-control-v14.postgres.test.ts",
       "tests/ugv-zmq-provider/site-control.postgres.test.ts",
       "tests/ugv-zmq-provider/site-anonymous.postgres.test.ts",
       "tests/ugv-zmq-provider/site-handoff.postgres.test.ts",
@@ -105,6 +113,10 @@ const commands = [
   [
     "site-control-v13-catalog",
     ["node", "--import", "tsx", "scripts/ugv-zmq/site-control-v13-catalog.ts", "--check"],
+  ],
+  [
+    "site-control-v14-catalog",
+    ["node", "--import", "tsx", "scripts/ugv-zmq/site-control-v14-catalog.ts", "--check"],
   ],
   ["frozen-74", ["pnpm", "test:frozen-74"]],
   ["unit-and-contract", ["pnpm", "exec", "vitest", "run", "tests/unit/", "tests/contract/"]],
@@ -133,6 +145,19 @@ const commands = [
       "test",
       "--config",
       "playwright.site-control-v13.config.ts",
+    ],
+  ],
+  [
+    "browser-site-control-v14",
+    [
+      "pnpm",
+      "--filter",
+      "@sdar/ugv-control-console",
+      "exec",
+      "playwright",
+      "test",
+      "--config",
+      "playwright.site-control-v14.config.ts",
     ],
   ],
   [

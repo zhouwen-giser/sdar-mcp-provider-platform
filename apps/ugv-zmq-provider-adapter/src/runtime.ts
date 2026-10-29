@@ -1,5 +1,15 @@
 import { operationSupportCatalog } from "../../../packages/vehicle-zmq-control/src/operation-support.js";
 import {
+  VIEW_PROFILE,
+  VIEW_TOOL,
+} from "../../../packages/vehicle-zmq-control/src/simulation-view-contract.js";
+import {
+  SITE_VIEW_TOOLS,
+  siteControlV14Tool,
+  siteControlV14OutputSchema,
+  siteControlV14Operation,
+} from "../../../packages/vehicle-zmq-control/src/site-control-v14.js";
+import {
   siteControlTool,
   siteControlOperation,
   siteControlOutputSchema,
@@ -108,25 +118,30 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
   ) {
     const ajv = new Ajv({ strict: false, allErrors: true });
     addFormats(ajv);
-    for (const name of this.siteReads ? SITE_TOOLS : ZMQ_PROVIDER_TOOLS)
+    for (const name of this.toolNames)
       this.validators.set(
         name,
         ajv.compile(
-          (this.v13 ? siteControlV13Tool : this.siteReads ? siteControlTool : zmqTool)(
-            name,
-            this.resourceId,
-          ).inputSchema,
+          (this.v14
+            ? siteControlV14Tool
+            : this.v13
+              ? siteControlV13Tool
+              : this.siteReads
+                ? siteControlTool
+                : zmqTool)(name, this.resourceId).inputSchema,
         ),
       );
-    for (const name of ZMQ_PROVIDER_TOOLS.slice(4))
+    for (const name of [...ZMQ_PROVIDER_TOOLS.slice(4), ...(this.v14 ? [VIEW_TOOL] : [])])
       this.resultValidators.set(
         name,
         ajv.compile(
-          this.v13
-            ? siteControlV13OutputSchema(name, true)
-            : this.siteReads
-              ? siteControlOutputSchema(name, true)
-              : nativeDtoOutputSchema(name),
+          this.v14
+            ? siteControlV14OutputSchema(name, true)
+            : this.v13
+              ? siteControlV13OutputSchema(name, true)
+              : this.siteReads
+                ? siteControlOutputSchema(name, true)
+                : nativeDtoOutputSchema(name),
         ),
       );
     for (const name of ZMQ_PROVIDER_TOOLS.slice(4))
@@ -143,12 +158,23 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
   get v13() {
     return this.engine.scope.settings.catalogProfile === SITE_CONTROL_V13_PROFILE;
   }
+  get v14() {
+    return this.engine.scope.settings.catalogProfile === VIEW_PROFILE;
+  }
+  get toolNames() {
+    return this.v14 ? SITE_VIEW_TOOLS : this.siteReads ? SITE_TOOLS : ZMQ_PROVIDER_TOOLS;
+  }
+  get controlTools() {
+    return this.v14 ? new Set([...ZMQ_CONTROL_TOOLS, VIEW_TOOL]) : ZMQ_CONTROL_TOOLS;
+  }
   get catalogProfile() {
-    return this.v13
-      ? SITE_CONTROL_V13_PROFILE
-      : this.siteReads
-        ? SITE_CONTROL_PROFILE
-        : "zmq_v1_0_1_12";
+    return this.v14
+      ? VIEW_PROFILE
+      : this.v13
+        ? SITE_CONTROL_V13_PROFILE
+        : this.siteReads
+          ? SITE_CONTROL_PROFILE
+          : "zmq_v1_0_1_12";
   }
   snapshot() {
     return this.observer.snapshot();
@@ -178,26 +204,29 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
   ): Promise<AvailabilityDecision> {
     const result = (available: boolean, reasonCode: string): AvailabilityDecision => ({
       availability: available ? "AVAILABLE" : "DISABLED",
-      riskLevel: ZMQ_CONTROL_TOOLS.has(name) ? "MEDIUM" : "LOW",
+      riskLevel: this.controlTools.has(name) ? "MEDIUM" : "LOW",
       reasonCode,
       description: reasonCode,
     });
     try {
       this.validate(name, args);
       const c =
-        this.siteReads && !ZMQ_CONTROL_TOOLS.has(name)
+        this.siteReads && !this.controlTools.has(name)
           ? this.siteReads.context(context)
           : this.context(context);
-      if (!ZMQ_CONTROL_TOOLS.has(name)) {
+      if (!this.controlTools.has(name)) {
         if (name.endsWith("_result")) await this.read(name, args, c);
         return result(true, "ZMQ_READ_AVAILABLE");
       }
       nativeTiming(timing);
       const a = await this.engine.checkAvailability(
-        (this.v13 ? siteControlV13Operation : this.siteReads ? siteControlOperation : zmqOperation)(
-          name,
-          args,
-        ).operation,
+        (this.v14
+          ? siteControlV14Operation
+          : this.v13
+            ? siteControlV13Operation
+            : this.siteReads
+              ? siteControlOperation
+              : zmqOperation)(name, args).operation,
         c,
       );
       return result(a.available, a.reasonCode);
@@ -223,7 +252,7 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
     if (sha256(canonical(input.arguments)) !== input.argumentHash)
       throw Error("ZMQ_ARGUMENT_HASH_MISMATCH");
     const c =
-      this.siteReads && !ZMQ_CONTROL_TOOLS.has(input.operationName)
+      this.siteReads && !this.controlTools.has(input.operationName)
         ? this.siteReads.context(input.executionContext)
         : this.context(input.executionContext);
     if (input.signal?.aborted) throw Error("ZMQ_ADMISSION_CANCELLED");
@@ -236,9 +265,15 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
       };
     }
     let e: ProviderExecution;
-    if (ZMQ_CONTROL_TOOLS.has(input.operationName)) {
+    if (this.controlTools.has(input.operationName)) {
       const native = (
-        this.v13 ? siteControlV13Operation : this.siteReads ? siteControlOperation : zmqOperation
+        this.v14
+          ? siteControlV14Operation
+          : this.v13
+            ? siteControlV13Operation
+            : this.siteReads
+              ? siteControlOperation
+              : zmqOperation
       )(input.operationName, input.arguments);
       e = await this.engine.start(
         {
@@ -252,9 +287,9 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
             operationName: input.operationName,
             argumentHash: input.argumentHash,
             arguments: input.arguments,
-            ...(this.v13
+            ...(this.v13 || this.v14
               ? {
-                  catalogProfile: SITE_CONTROL_V13_PROFILE,
+                  catalogProfile: this.v14 ? VIEW_PROFILE : SITE_CONTROL_V13_PROFILE,
                   ...(resolveRegionArguments(input.operationName, input.arguments)
                     .parameterResolution
                     ? {
@@ -320,11 +355,20 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
         operationSupport: operationSupportCatalog(this.engine.scope.settings),
         controlScopeHash: this.engine.scope.hash,
         controllerSystemId: this.engine.scope.profile.components.chassis.controllerSystemId,
-        tools: SITE_TOOLS.map((name) => ({
+        simulationView: this.engine.scope.settings.simulationView
+          ? {
+              viewId: this.engine.scope.settings.simulationView.viewId,
+              minFovDeg: this.engine.scope.settings.simulationView.minFovDeg,
+              maxFovDeg: this.engine.scope.settings.simulationView.maxFovDeg,
+              ownership: "project_owned",
+              eoRecognitionAffected: false,
+            }
+          : null,
+        tools: this.toolNames.map((name) => ({
           name,
-          available: !ZMQ_CONTROL_TOOLS.has(name),
+          available: !this.controlTools.has(name),
           blockers: [],
-          requiresParameters: ZMQ_CONTROL_TOOLS.has(name),
+          requiresParameters: this.controlTools.has(name),
         })),
       };
     }
@@ -472,7 +516,8 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
     const validate = (
       e.executionContext.executionMode === "simulation"
         ? this.historicalResultValidators
-        : isZmqExecution(e) && e.zmqAdmission?.catalogProfile === SITE_CONTROL_V13_PROFILE
+        : isZmqExecution(e) &&
+            [SITE_CONTROL_V13_PROFILE, VIEW_PROFILE].includes(e.zmqAdmission?.catalogProfile ?? "")
           ? this.resultValidators
           : this.legacySiteResultValidators
     ).get(e.operationName);

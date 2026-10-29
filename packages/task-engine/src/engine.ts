@@ -120,7 +120,7 @@ export class TaskEngine {
     return (
       !(
         this.manifest.providerType === "isr.vehicle.ugv.zmq" &&
-        this.manifest.providerVersion === "1.2.0"
+        ["1.2.0", "1.3.0", "1.4.0"].includes(this.manifest.providerVersion)
       ) ||
       (task.executionMode === "live" &&
         this.operationSnapshotIds.get(task.operationName) === task.operationSnapshotId)

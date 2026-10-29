@@ -10,6 +10,8 @@ import {
   type ZmqExecution,
 } from "../../../packages/vehicle-zmq-control/src/model.js";
 import { ZMQ_CONTROL_TOOLS } from "../../../packages/vehicle-zmq-control/src/catalog.js";
+import { VIEW_TOOL } from "../../../packages/vehicle-zmq-control/src/simulation-view-contract.js";
+const businessOperations = new Set([...ZMQ_CONTROL_TOOLS, VIEW_TOOL]);
 import type {
   PostgresProviderStore,
   ProviderExecution,
@@ -20,7 +22,7 @@ import type {
  * must retain the stored Context, including unfinished historical projections. */
 export class SiteReadonlyBusinessService extends UgvTaskBusinessContextService {
   override supports(operationName: string): boolean {
-    return super.supports(operationName) || ZMQ_CONTROL_TOOLS.has(operationName);
+    return super.supports(operationName) || businessOperations.has(operationName);
   }
   override finalizeForTerminalExecution(execution: ProviderExecution): Promise<void> {
     void execution;
@@ -78,12 +80,13 @@ export function zmqBusiness(
     resourceId,
     (e) => events.notify(e),
     {
-      operations: ZMQ_CONTROL_TOOLS,
+      operations: businessOperations,
       // No footprint/trajectory is invented from requested geometry. Versioned native facts are queried separately.
       requestedArtifacts: () => [],
       terminalProperties: (e) => ({
         schemaVersion: "ugv.zmq-context-summary/1",
         executionResult: e.result ?? null,
+        simulationViewLatest: isZmqExecution(e) ? (e.zmqView ?? null) : null,
         commandDiagnostics: isZmqExecution(e)
           ? e.zmqControl.commands
               .filter((c) => c.diagnostic)

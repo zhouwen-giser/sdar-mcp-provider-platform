@@ -1,4 +1,5 @@
 import { OPERATION_ADMISSION_KEYS } from "../../packages/vehicle-zmq-control/src/operation-support.js";
+import type { ViewBackendSettings } from "../../packages/vehicle-zmq-control/src/simulation-view-contract.js";
 import { fileURLToPath } from "node:url";
 import { randomUUID } from "node:crypto";
 import { once } from "node:events";
@@ -28,7 +29,8 @@ export const siteDestination = {
 export async function controlSiteFixture(
   databaseUrl: string,
   authMode: "jwt_hs256" | "site_anonymous" = "jwt_hs256",
-  catalogProfile?: "zmq_v1_3_0_site_control_13",
+  catalogProfile?: "zmq_v1_3_0_site_control_13" | "zmq_v1_4_0_site_control_14",
+  simulationView?: ViewBackendSettings,
 ) {
   if (new URL(databaseUrl).hostname !== "127.0.0.1") throw Error("ISOLATED_DATABASE_REQUIRED");
   const suffix = randomUUID().replaceAll("-", ""),
@@ -129,6 +131,7 @@ export async function controlSiteFixture(
     mode: "site_control" as const,
     handoffGrant: grant,
     controlSettings: {
+      ...(simulationView ? { simulationView } : {}),
       ...testScope().settings,
       ...(catalogProfile
         ? {

@@ -663,7 +663,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
         const ownerCatalog = new OperationRegistry().validate(ownerManifest);
         const ownerReadonly =
           ownerCatalog.providerType === "isr.vehicle.ugv.zmq" &&
-          ["1.1.0", "1.2.0"].includes(ownerCatalog.providerVersion);
+          ["1.1.0", "1.2.0", "1.3.0", "1.4.0"].includes(ownerCatalog.providerVersion);
         await verifyGowmStorage(pool, config.gowmStorage);
         await resolveDeviceContext(
           pool,
@@ -688,7 +688,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       validatedManifest = validated;
       if (
         validated.providerType === "isr.vehicle.ugv.zmq" &&
-        validated.providerVersion === "1.2.0" &&
+        ["1.2.0", "1.3.0", "1.4.0"].includes(validated.providerVersion) &&
         config.AUTH_MODE !== "jwt_hs256" &&
         config.AUTH_MODE !== "site_anonymous"
       )
@@ -697,7 +697,8 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
         validated.providerType === "isr.vehicle.ugv.zmq" && validated.providerVersion === "1.1.0";
       const retainSiteHistory =
         siteReadonly ||
-        (validated.providerType === "isr.vehicle.ugv.zmq" && validated.providerVersion === "1.2.0");
+        (validated.providerType === "isr.vehicle.ugv.zmq" &&
+          ["1.2.0", "1.3.0", "1.4.0"].includes(validated.providerVersion));
       assertTaskBusinessEventReadiness(validated, config.BUSINESS_EVENTS_ENABLED);
       if (config.BUSINESS_EVENTS_ENABLED && validated.businessEventSources.length === 0) {
         throw new Error("BUSINESS_EVENTS_ENABLED_REQUIRES_SOURCE");
@@ -842,7 +843,7 @@ export function createRuntime(config: RuntimeConfig): RuntimeApplication {
       const taskRepository = new TaskRepository(pool);
       if (
         validated.providerType === "isr.vehicle.ugv.zmq" &&
-        validated.providerVersion === "1.2.0"
+        ["1.2.0", "1.3.0", "1.4.0"].includes(validated.providerVersion)
       ) {
         taskRepository.setWorkerSnapshotIds([...snapshotIds.values()], "live");
       }

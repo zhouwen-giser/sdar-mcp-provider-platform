@@ -5,6 +5,7 @@ import {
   encodeChassisFrame,
 } from "../../vehicle-zmq-contract/src/index.js";
 import type { ControlScope, Operation, WireCommand, ZmqExecution } from "./model.js";
+import { ViewRequest, VIEW_PROTOCOL } from "./simulation-view-contract.js";
 
 const integer = (value: number) => {
   const b = Buffer.alloc(4);
@@ -26,7 +27,25 @@ export function commandFor(
     method: string,
     requestId: string | null = null;
   const remaining = Math.max(0, Date.parse(state.deadlineAt ?? at) - Date.parse(at));
-  if (state.component === "chassis") {
+  if (operation.name === "camera.simulationView") {
+    const backend = scope.settings.simulationView;
+    if (action !== "camera" || !backend) throw Error("ZMQ_VIEW_COMMAND_UNSUPPORTED");
+    method = "SimulationView";
+    requestId = `req-${randomUUID()}`;
+    const request = ViewRequest.parse({
+      protocol: VIEW_PROTOCOL,
+      requestId,
+      resourceId: execution.resourceId,
+      ownershipId: backend.ownershipId,
+      expectedApiVersion: backend.apiVersion,
+      expectedWorldId: backend.worldId,
+      parentActorId: backend.parentActorId,
+      parentRoleName: backend.parentRoleName,
+      deadlineAt: state.deadlineAt,
+      parameters: operation.params,
+    });
+    frames = [Buffer.from(JSON.stringify(request))];
+  } else if (state.component === "chassis") {
     const binding = scope.profile.components.chassis;
     if (binding.controllerSystemId === null) throw Error("ZMQ_CHASSIS_CONTROL_SENDER_UNSPECIFIED");
     if (binding.systemId === null) throw Error("ZMQ_CHASSIS_SYSTEM_ID_UNBOUND");

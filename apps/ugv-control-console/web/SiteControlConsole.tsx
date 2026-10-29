@@ -18,9 +18,13 @@ const labels: Record<string, string> = {
   simulation_apply_effect: "仿真效果交互",
 };
 export function SiteControlConsole(props: ComponentProps<typeof SiteReadonlyConsole>) {
-  const v13 =
-    record(record(record(array(props.device.tools)[0])._meta)["io.sdar/ugvZmq"]).catalogProfile ===
-    "zmq_v1_3_0_site_control_13";
+  const profile = text(
+    record(record(record(array(props.device.tools)[0])._meta)["io.sdar/ugvZmq"]).catalogProfile,
+  );
+  const v14 = profile === "zmq_v1_4_0_site_control_14";
+  const v13 = v14 || profile === "zmq_v1_3_0_site_control_13";
+  const [fov, setFov] = useState("60"),
+    [recreate, setRecreate] = useState(false);
   const [tool, setTool] = useState("vehicle_zmq_navigate"),
     [variant, setVariant] = useState("point"),
     [camera, setCamera] = useState("position"),
@@ -62,18 +66,21 @@ export function SiteControlConsole(props: ComponentProps<typeof SiteReadonlyCons
   const support = array(
     record(record(props.device.data).vehicle_get_capabilities).operationSupport,
   ).map(record);
+  const view = record(record(record(props.device.data).vehicle_get_capabilities).simulationView);
   const admissionKey =
-    tool === "vehicle_zmq_navigate"
-      ? "navigation." + variant
-      : tool === "vehicle_zmq_camera"
-        ? "camera." + camera
-        : tool === "vehicle_zmq_area_recon"
-          ? "recon.area"
-          : tool === "vehicle_zmq_inspect_area"
-            ? "inspection.area"
-            : tool === "vehicle_zmq_circular_recon"
-              ? "recon." + scan
-              : "simulation.applyEffect." + source;
+    tool === "simulation_adjust_view"
+      ? "camera.simulationView"
+      : tool === "vehicle_zmq_navigate"
+        ? "navigation." + variant
+        : tool === "vehicle_zmq_camera"
+          ? "camera." + camera
+          : tool === "vehicle_zmq_area_recon"
+            ? "recon.area"
+            : tool === "vehicle_zmq_inspect_area"
+              ? "inspection.area"
+              : tool === "vehicle_zmq_circular_recon"
+                ? "recon." + scan
+                : "simulation.applyEffect." + source;
   const admission = support.find((s) => s.operation === admissionKey);
   const blockedOperation = support.length > 0 && admission?.status !== "supported";
   const candidates = array(
@@ -141,7 +148,19 @@ export function SiteControlConsole(props: ComponentProps<typeof SiteReadonlyCons
           search_strategy: strategy,
         },
       };
-    else {
+    else if (tool === "simulation_adjust_view") {
+      if (!text(view.viewId)) throw Error("尚未配置本项目仿真相机和场景绑定");
+      if (!recreate) throw Error("请确认创建或重建本项目专属相机");
+      const degrees = number(fov);
+      if (degrees < Number(view.minFovDeg) || degrees > Number(view.maxFovDeg))
+        throw Error("视场角超出部署支持范围");
+      args = {
+        resourceId,
+        viewId: text(view.viewId),
+        horizontalFovDeg: degrees,
+        acknowledgeCameraRecreation: true,
+      };
+    } else {
       const p = parseCoordinates(coordinates);
       if (p.length !== 1) throw Error("仿真交互需要一个目标位置");
       args = {
@@ -213,7 +232,7 @@ export function SiteControlConsole(props: ComponentProps<typeof SiteReadonlyCons
         row.status === "accepted" &&
         row.taskId &&
         epoch !== stopEpoch.current &&
-        request.tool !== "simulation_apply_effect"
+        !["simulation_apply_effect", "simulation_adjust_view"].includes(request.tool ?? "")
       ) {
         await api("/commands", {
           commandId: newCommandId(),
@@ -345,7 +364,12 @@ export function SiteControlConsole(props: ComponentProps<typeof SiteReadonlyCons
   const controls = (
     <section className="panel">
       <h2>现场设备控制</h2>
-      {select("控制能力", tool, setTool, labels)}
+      {select(
+        "控制能力",
+        tool,
+        setTool,
+        v14 ? { ...labels, simulation_adjust_view: "仿真视场（专属相机）" } : labels,
+      )}
       {admission && (
         <div
           className={blockedOperation ? "notice warning" : "field-help"}
@@ -411,6 +435,27 @@ export function SiteControlConsole(props: ComponentProps<typeof SiteReadonlyCons
         "vehicle_zmq_circular_recon",
       ].includes(tool) &&
         select("搜索策略", strategy, setStrategy, { recognize: "识别", track: "跟踪搜索" })}
+      {tool === "simulation_adjust_view" && (
+        <>
+          <p className="field-help">
+            来源：本项目专属仿真视图相机。结果包含实际视场角和新帧取证，上游光电识别使用自己的相机来源。
+          </p>
+          <p>
+            视图：{text(view.viewId) || "尚未绑定"} · 支持 {text(view.minFovDeg) || "—"}–
+            {text(view.maxFovDeg) || "—"}°
+          </p>
+          {field("水平视场角（度）", fov, setFov)}
+          <label>
+            <input
+              type="checkbox"
+              checked={recreate}
+              onChange={(e) => setRecreate(e.target.checked)}
+            />
+            确认创建或重建本项目专属相机
+          </label>
+          <small>已应用的视场不会因任务超时自动恢复，当前版本不支持暂停或撤销重建。</small>
+        </>
+      )}
       {tool === "vehicle_zmq_camera" && (
         <>
           {select("云台动作", camera, setCamera, {

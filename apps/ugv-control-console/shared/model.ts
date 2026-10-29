@@ -24,6 +24,7 @@ export const CONTROL_TOOLS = [
   "vehicle_zmq_camera",
   "vehicle_zmq_inspect_area",
   "simulation_apply_effect",
+  "simulation_adjust_view",
 ] as const;
 export const READ_TOOLS = [
   "vehicle_zmq_plan_route",
@@ -103,6 +104,23 @@ export function classifyTask(task: Json): { label: string; tone: string } {
       data = record(result.structuredContent);
     const evidence = record(data.inspectionReport ?? data.completeness ?? data.reportCompleteness);
     const outcome = text(data.outcome ?? data.status);
+    if (data.schemaVersion === "ugv.simulation-view-result/1") {
+      if (data.application === "rejected" || result.isError === true)
+        return { label: "仿真视场未完成", tone: "error" };
+      if (
+        data.application === "applied" &&
+        data.occupancy === "released" &&
+        record(data.evidence).ownership === "project_owned" &&
+        typeof record(data.evidence).actualHorizontalFovDeg === "number" &&
+        record(record(record(data.evidence).frame).thumbnail).sha256 &&
+        !array(data.missingEvidence).length
+      )
+        return { label: "仿真视场已应用", tone: "success" };
+      return {
+        label: data.application === "partial" ? "视场已应用，清理未确认" : "视场结果未确认",
+        tone: "warning",
+      };
+    }
     if (["ugv.zmq-effect-result/1", "ugv.zmq-effect-result/2"].includes(text(data.schemaVersion))) {
       if (data.executionState === "failed") return { label: "仿真执行失败", tone: "error" };
       if (

@@ -6,6 +6,12 @@ import { z } from "zod";
 import { EoRequest, SimulationEffectRequest } from "../../vehicle-zmq-contract/src/index.js";
 import { OperationSupportMap } from "./operation-support.js";
 import type { TransportDiagnostic } from "./transport-diagnostics.js";
+import {
+  ViewParameters,
+  ViewBackendSettings,
+  VIEW_PROFILE,
+  type ViewReply,
+} from "./simulation-view-contract.js";
 import type { InspectionSummary } from "./inspection.js";
 import { canonical, sha256 } from "../../vehicle-zmq-observer/src/config.js";
 import type {
@@ -151,6 +157,7 @@ export const Operation = z.discriminatedUnion("name", [
         .strict(),
     })
     .strict(),
+  z.object({ name: z.literal("camera.simulationView"), params: ViewParameters }).strict(),
 ]);
 export type Operation = z.infer<typeof Operation>;
 export const StartControl = z
@@ -174,7 +181,7 @@ export const StartControl = z
         operationName: id,
         argumentHash: z.string().regex(/^[a-f0-9]{64}$/),
         arguments: z.record(z.string(), z.unknown()),
-        catalogProfile: z.literal("zmq_v1_3_0_site_control_13").optional(),
+        catalogProfile: z.enum(["zmq_v1_3_0_site_control_13", VIEW_PROFILE]).optional(),
         parameterResolution: z.record(z.string(), z.unknown()).optional(),
       })
       .strict()
@@ -193,7 +200,8 @@ export type StartControl = z.infer<typeof StartControl>;
 export const ControlSettings = z
   .object({
     mode: z.enum(["isolated_simulator", "site_control"]),
-    catalogProfile: z.literal("zmq_v1_3_0_site_control_13").optional(),
+    catalogProfile: z.enum(["zmq_v1_3_0_site_control_13", VIEW_PROFILE]).optional(),
+    simulationView: ViewBackendSettings.optional(),
     siteEndpoints: z.array(z.url()).length(6).optional(),
     handoffGrantHash: z
       .string()
@@ -263,6 +271,12 @@ export function controlScope(profileInput: unknown, settingsInput: unknown): Con
     settings = ControlSettings.parse(settingsInput);
   if (settings.catalogProfile && settings.mode !== "site_control")
     throw Error("ZMQ_CATALOG_EXECUTION_MODE_MISMATCH");
+  if (
+    settings.simulationView &&
+    settings.mode === "site_control" &&
+    settings.catalogProfile !== VIEW_PROFILE
+  )
+    throw Error("ZMQ_VIEW_CATALOG_REQUIRED");
   for (const component of Object.values(profile.components)) {
     for (const endpoint of [component.commandEndpoint, component.publicationEndpoint]) {
       // Numeric loopback only: no DNS, forwarding URL or externally routable command target.
@@ -296,6 +310,13 @@ export function controlScope(profileInput: unknown, settingsInput: unknown): Con
   const writerKeys = Object.values(profile.components)
     .map((c) => sha256(c.commandEndpoint))
     .sort();
+  if (settings.simulationView)
+    writerKeys.push(
+      sha256(
+        `simulation-view:${settings.simulationView.endpoint}:${settings.simulationView.ownershipId}`,
+      ),
+    );
+  writerKeys.sort();
   return { hash, writerKey, writerKeys, profile, settings };
 }
 export type Stage =
@@ -388,6 +409,7 @@ export interface ZmqControlState {
   missingEvidence: string[];
 }
 export interface ZmqExecution extends ProviderExecution {
+  zmqView?: { reply: ViewReply | null; lastQueryError?: string };
   zmqAdmission?: NonNullable<StartControl["admission"]>;
   zmqControl: ZmqControlState;
   zmqInspection?: InspectionSummary;

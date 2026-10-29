@@ -1,4 +1,6 @@
 import { performance } from "node:perf_hooks";
+import { SimulationViewClient } from "./simulation-view-client.js";
+import type { ViewReply } from "./simulation-view-contract.js";
 import { Publisher, Request } from "zeromq";
 import { parseResponse } from "../../vehicle-zmq-contract/src/index.js";
 import { controlScope, type ControlScope, type WireCommand } from "./model.js";
@@ -19,6 +21,8 @@ export interface CommandTransport {
   prepare?(): void;
   dispatch(command: WireCommand, permit: () => void): Promise<DispatchResult>;
   close(): void;
+  checkView?(resourceId: string): Promise<void>;
+  queryView?(command: WireCommand): Promise<ViewReply>;
 }
 /** One bounded exchange per REQ socket. No action retry or relaxed REQ mode. */
 export class NativeControlTransport implements CommandTransport {
@@ -28,8 +32,11 @@ export class NativeControlTransport implements CommandTransport {
   readonly #busy = new Set<string>();
   #publisherConnected = false;
   readonly scope: ControlScope;
+  readonly view: SimulationViewClient | undefined;
   constructor(scope: ControlScope) {
     this.scope = controlScope(scope.profile, scope.settings);
+    if (this.scope.settings.simulationView)
+      this.view = new SimulationViewClient(this.scope.settings.simulationView);
     if (scope.settings.mode === "isolated_simulator") this.prepare();
   }
   prepare(): void {
@@ -46,6 +53,10 @@ export class NativeControlTransport implements CommandTransport {
     this.#publisherConnected = true;
   }
   async dispatch(command: WireCommand, permit: () => void): Promise<DispatchResult> {
+    if (command.method === "SimulationView") {
+      if (!this.view) throw Error("ZMQ_VIEW_BACKEND_NOT_CONFIGURED");
+      return this.view.dispatch(command, permit);
+    }
     const started = performance.now(),
       frames = command.frames.map((f) => Buffer.from(f, "base64")),
       { sendMs, receiveMs } = exchangeTimeouts(this.scope.settings);
@@ -153,7 +164,16 @@ export class NativeControlTransport implements CommandTransport {
       this.#busy.delete(command.component);
     }
   }
+  async checkView(resourceId: string) {
+    if (!this.view) throw Error("ZMQ_VIEW_BACKEND_NOT_CONFIGURED");
+    await this.view.check(resourceId);
+  }
+  async queryView(command: WireCommand) {
+    if (!this.view) throw Error("ZMQ_VIEW_BACKEND_NOT_CONFIGURED");
+    return this.view.query(command);
+  }
   close(): void {
+    this.view?.close();
     if (this.#closed) return;
     this.#closed = true;
     this.#publisher?.close();

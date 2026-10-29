@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { ControlSettings, Operation } from "./model.js";
+import { VIEW_PROFILE } from "./simulation-view-contract.js";
 
 export const OPERATION_ADMISSION_KEYS = [
   "navigation.point",
@@ -8,6 +9,7 @@ export const OPERATION_ADMISSION_KEYS = [
   "camera.position",
   "camera.velocity",
   "camera.zoom",
+  "camera.simulationView",
   "recon.area",
   "recon.sector",
   "recon.circular",
@@ -71,4 +73,6 @@ export function operationSupport(settings: ControlSettings, key: OperationAdmiss
 }
 
 export const operationSupportCatalog = (settings: ControlSettings) =>
-  OPERATION_ADMISSION_KEYS.map((key) => operationSupport(settings, key));
+  OPERATION_ADMISSION_KEYS.filter(
+    (key) => key !== "camera.simulationView" || settings.catalogProfile === VIEW_PROFILE,
+  ).map((key) => operationSupport(settings, key));

@@ -7,6 +7,7 @@ import { PLAN_ROUTE } from "../shared/zmq-native.js";
 import { array, record, text, type Json, type CommandRow, type TaskRow } from "../shared/model.js";
 
 const labels: Record<string, string> = {
+  simulation_adjust_view: "仿真视场（专属相机）",
   chassis: "自驾",
   eo: "光电",
   simulationEffect: "仿真效果",

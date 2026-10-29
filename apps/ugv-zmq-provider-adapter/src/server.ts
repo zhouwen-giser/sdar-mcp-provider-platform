@@ -1,5 +1,6 @@
 import { siteControlManifest } from "../../../packages/vehicle-zmq-control/src/site-control-catalog.js";
 import { siteControlV13Manifest } from "../../../packages/vehicle-zmq-control/src/site-control-v13.js";
+import { siteControlV14Manifest } from "../../../packages/vehicle-zmq-control/src/site-control-v14.js";
 import {
   VehicleProviderGrpcServer,
   type ProviderStore,
@@ -23,11 +24,13 @@ export function zmqServer(
       tlsMode: "disabled",
       internalErrorCode: "ZMQ_PROVIDER_ERROR",
       manifest: () =>
-        (runtime.v13
-          ? siteControlV13Manifest
-          : runtime.siteReads
-            ? siteControlManifest
-            : zmqProviderManifest)(providerId, runtime.resourceId, store),
+        (runtime.v14
+          ? siteControlV14Manifest
+          : runtime.v13
+            ? siteControlV13Manifest
+            : runtime.siteReads
+              ? siteControlManifest
+              : zmqProviderManifest)(providerId, runtime.resourceId, store),
       resource: (s) => ({
         resourceId: runtime.resourceId,
         resourceType: "isr.vehicle.ugv.zmq",

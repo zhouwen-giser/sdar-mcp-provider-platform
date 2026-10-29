@@ -9,6 +9,7 @@ import { SiteControlConsole } from "./SiteControlConsole.js";
 import { SiteReadonlyConsole } from "./SiteReadonlyConsole.js";
 import { siteReadonlyTools, siteControlTools } from "../shared/zmq-native.js";
 import { ZmqResults } from "./ZmqResults.js";
+import { SimulationViewResult } from "./SimulationViewResult.js";
 import {
   NATIVE_CONTROL_TOOLS,
   isZmqControl,
@@ -45,6 +46,7 @@ const labels: Record<string, string> = {
   vehicle_zmq_area_recon: "ZMQ 区域侦察",
   vehicle_zmq_circular_recon: "ZMQ 环视",
   vehicle_zmq_camera: "ZMQ 云台",
+  simulation_adjust_view: "仿真视场（专属相机）",
   [ZMQ_INSPECT]: "ZMQ 区域检查",
   [EFFECT_APPLY]: "仿真效果",
 };
@@ -1346,6 +1348,7 @@ function TaskDetail({
         </div>
       </div>
       <ErrorNote error={task.error ?? error} />
+      {operation === "simulation_adjust_view" && <SimulationViewResult result={content} />}
       {[ZMQ_INSPECT, EFFECT_APPLY].includes(operation) && (
         <ZmqResults taskId={taskId} operation={operation} />
       )}

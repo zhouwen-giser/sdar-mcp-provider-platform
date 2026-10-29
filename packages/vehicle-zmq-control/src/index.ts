@@ -8,3 +8,5 @@ export * from "./inspection.js";
 export * from "./console-candidate.js";
 export * from "./transport-diagnostics.js";
 export * from "./operation-support.js";
+export * from "./simulation-view-contract.js";
+export * from "./simulation-view-client.js";
