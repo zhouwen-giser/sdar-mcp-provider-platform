@@ -232,7 +232,6 @@ describe("SIMULATED scoped control lifecycle", () => {
       expect(ended).toMatchObject({
         state: "TECHNICAL_FAILED",
         reasonCode: "ZMQ_NATIVE_TASK_UNKNOWN_STOP_UNAVAILABLE",
-        terminalAt: expect.any(String),
         zmqControl: {
           stage: "uncertain",
           occupancy: "held",
@@ -242,12 +241,11 @@ describe("SIMULATED scoped control lifecycle", () => {
         result: {
           occupancy: "held",
           stopConfirmed: false,
-          missingEvidence: expect.arrayContaining([
-            "NATIVE_TASK_ID_UNKNOWN",
-            "PHYSICAL_STOP_UNCONFIRMED",
-          ]),
         },
       });
+      expect(typeof ended?.terminalAt).toBe("string");
+      expect(ended?.result?.missingEvidence).toContain("NATIVE_TASK_ID_UNKNOWN");
+      expect(ended?.result?.missingEvidence).toContain("PHYSICAL_STOP_UNCONFIRMED");
       const result = ended?.result;
       r.clock.advance(10000);
       for (let i = 0; i < 5; i++) await r.pulse();

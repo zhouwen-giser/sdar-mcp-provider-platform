@@ -112,7 +112,7 @@ candidate is observed in 60 reads. These are field facts, not complete qualifica
 
 During route navigation the source reports altitude about -9982 m, vertical velocity about
 -244 m/s, then stops publishing localization. The Task is canceled; passive capture confirms
-mission state canceled and manual mode but no localization frames in 12 seconds. Physical
+mission state canceled with route mode 1 still reported, but no localization frames in 12 seconds. Physical
 stationary stop remains unconfirmed and chassis occupancy remains held. Return-home is not
 dispatched. Upstream recovery is required within the user's no-upstream-modification scope.
 
