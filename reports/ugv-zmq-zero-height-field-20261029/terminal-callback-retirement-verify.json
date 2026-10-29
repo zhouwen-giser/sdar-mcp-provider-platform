@@ -1,0 +1,43 @@
+{
+  "commandId": "a9143b03-9da6-4d16-bf40-7e2d6d79866e",
+  "verified": true,
+  "rows": [
+    {
+      "phase": "canceled",
+      "status": "failed",
+      "task_id": "173d6536-64d3-4df7-b95b-a101c3d660fe",
+      "version": 109,
+      "attempts": 0,
+      "event_id": "remote-task-control-085ed395-6f2e-458d-b700-f16bf17fa5cf",
+      "binding_id": "remote-task-binding-mcp-invocation-8d7d354f-803b-4f86-bd66-2e8d1c682fbb",
+      "error_code": "PARENT_CANCELED_NO_ACTIVE_CONTINUATION",
+      "error_hash": "a0b9b9790768a534427a2858e328d7e3",
+      "local_state": "quarantined",
+      "result_hash": "d41d8cd98f00b204e9800998ecf8427e",
+      "authority_hash": "cde0b376806b9b02e93d199fbe59c4a5",
+      "remote_task_id": "f49b6c69-048c-48d4-b935-4aca6d343348",
+      "protocol_status": "failed",
+      "active_snapshots": 0
+    },
+    {
+      "phase": "canceled",
+      "status": "failed",
+      "task_id": "7f5e924f-745b-475c-965d-7f508f1a3ff6",
+      "version": 421,
+      "attempts": 0,
+      "event_id": "remote-task-control-f6fa4c50-4e50-454c-ae22-464df65b0249",
+      "binding_id": "remote-task-binding-mcp-invocation-fe2ec704-2088-4e24-a837-f049d0ccb1ab",
+      "error_code": "PARENT_CANCELED_NO_ACTIVE_CONTINUATION",
+      "error_hash": "0956590aa72c60df4d23c0d0fed8adc9",
+      "local_state": "quarantined",
+      "result_hash": "d41d8cd98f00b204e9800998ecf8427e",
+      "authority_hash": "0fe3d7342d9b567ee824207a00584ab5",
+      "remote_task_id": "8b6f208e-1bad-4c86-9e6e-f6f80ed0d07d",
+      "protocol_status": "failed",
+      "active_snapshots": 0
+    }
+  ],
+  "taskHistoryPreserved": true,
+  "deviceResultsUnchanged": true,
+  "foreignKeysAndTriggersUnchanged": true
+}

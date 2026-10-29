@@ -22,6 +22,18 @@ services:
     read_only: true
     init: true
     restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:'+process.env.PORT+'/health/ready',{signal:AbortSignal.timeout(2000)}).then(r=>process.exit(r.ok?0:1),()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
     env_file: ${SITE_RUNTIME_ENV:?private Runtime environment}
     volumes:
       - ${SITE_GOWM_URL_FILE:?existing restricted owner URL}:/run/secrets/gowm.url:ro

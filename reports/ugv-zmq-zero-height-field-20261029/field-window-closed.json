@@ -1,0 +1,56 @@
+{
+  "startedAt": "2026-10-29T11:07:29.132540+00:00",
+  "nonterminalExecutions": 0,
+  "motionFootprintBefore": "bf6a5f3a1ae955d4aa1adae6f380e518ae7802fc77aa395fb4b8bba4c891c894",
+  "containers": [
+    {
+      "name": "smpp-zmq-site-control-runtime-1",
+      "id": "6bb623541fed3a6af7953a858d8eae87b259fbe2ce19657350efac8c1b7f4212",
+      "image": "sha256:b48f5bb6d33d960537a660b248654ef76c935b5456534329c0e1444a174a253e",
+      "status": "exited",
+      "restartPolicy": "no"
+    },
+    {
+      "name": "smpp-zmq-site-control-provider-1",
+      "id": "dcc2f064f5372c2b399f0c6a9805b4df667a9872d4e61469be9e9047920d68a1",
+      "image": "sha256:847a3670ae540ff5f1da1ec7860435acfcb1b7a4f83651c3a38c96821a1ab2a2",
+      "status": "exited",
+      "restartPolicy": "no"
+    },
+    {
+      "name": "smpp-zmq-site-control-console-1",
+      "id": "ed015bc1e97a3337296656fe8458da2c6816c52436fe7aa911c55fb604ace0aa",
+      "image": "sha256:b67ef8a951f2ad9a2e97267a0ac760427a73d51e228293a78efc057606a2ded7",
+      "status": "exited",
+      "restartPolicy": "no"
+    },
+    {
+      "name": "smpp-zmq-field-relay-20261029",
+      "id": "36c33f67f1588cc493ddffc36a0bea34567ee13a5ad0edb8248af206c96e997d",
+      "image": "sha256:302592720e7ef06c2c2838d59f7504f201f9015a2335266b4d55494f76494256",
+      "status": "exited",
+      "restartPolicy": "no"
+    }
+  ],
+  "motionFootprintAfter": "bf6a5f3a1ae955d4aa1adae6f380e518ae7802fc77aa395fb4b8bba4c891c894",
+  "motionCommandsNotReplayed": true,
+  "completedAt": "2026-10-29T11:07:32.565448+00:00",
+  "providerOccupancy": [
+    {
+      "state": "TECHNICAL_FAILED",
+      "taskId": "8b6f208e-1bad-4c86-9e6e-f6f80ed0d07d",
+      "component": "eo",
+      "occupancy": "released",
+      "reasonCode": "ZMQ_SOURCE_RESTART_UNVERIFIABLE",
+      "stopConfirmed": false
+    },
+    {
+      "state": "TECHNICAL_FAILED",
+      "taskId": "f49b6c69-048c-48d4-b935-4aca6d343348",
+      "component": "chassis",
+      "occupancy": "held",
+      "reasonCode": "ZMQ_STOP_UNCONFIRMED",
+      "stopConfirmed": false
+    }
+  ]
+}

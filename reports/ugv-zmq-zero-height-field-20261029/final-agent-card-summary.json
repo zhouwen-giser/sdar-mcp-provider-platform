@@ -1,0 +1,54 @@
+{
+  "at": "2026-10-29T11:08:47.347401+00:00",
+  "entries": [
+    {
+      "exposureId": "a2a.vehicle.ugv.zmq.simulation_get_effect_result",
+      "profile": {
+        "const": "zmq_v1_1_0_readonly_13"
+      },
+      "version": null
+    },
+    {
+      "exposureId": "a2a.vehicle.ugv.zmq.vehicle_get_capabilities",
+      "profile": {
+        "const": "zmq_v1_1_0_readonly_13"
+      },
+      "version": null
+    },
+    {
+      "exposureId": "a2a.vehicle.ugv.zmq.vehicle_get_inspection_result",
+      "profile": {
+        "const": "zmq_v1_1_0_readonly_13"
+      },
+      "version": null
+    },
+    {
+      "exposureId": "a2a.vehicle.ugv.zmq.vehicle_get_payload_status",
+      "profile": {
+        "const": "zmq_v1_1_0_readonly_13"
+      },
+      "version": null
+    },
+    {
+      "exposureId": "a2a.vehicle.ugv.zmq.vehicle_get_state",
+      "profile": {
+        "const": "zmq_v1_1_0_readonly_13"
+      },
+      "version": null
+    },
+    {
+      "exposureId": "a2a.vehicle.ugv.zmq.vehicle_get_targets",
+      "profile": {
+        "const": "zmq_v1_1_0_readonly_13"
+      },
+      "version": null
+    },
+    {
+      "exposureId": "a2a.vehicle.ugv.zmq.vehicle_zmq_plan_route",
+      "profile": {
+        "const": "zmq_v1_1_0_readonly_13"
+      },
+      "version": null
+    }
+  ]
+}

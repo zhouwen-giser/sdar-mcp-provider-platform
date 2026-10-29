@@ -34,11 +34,11 @@ uses Server smpp-zmq-site. Old bindings c6a0eef5-05a5-467b-8f0a-4ab10530cd19 and
 - [x] 2026-10-29 Confirm scope, height default, speed unit and clean tracked baselines.
 - [x] 2026-10-29 Scoped retirement applied: 31,316,198 receptions, 44 projections, old streams/readers/sessions and two bindings removed; archive 24 KB, state snapshots 522255876096 bytes unchanged. Both retired Servers deleted by API (204).
 - [x] 2026-10-29 Additive 1.3.0 Provider/Runtime/console and provenance implemented; all 21 SMPP gate commands pass with unchanged source.
-- [x] 2026-10-29 SDAR exact catalog, pre-confirmation resolution and patrol successor implemented; 21-case native joint passes. Full SDAR gate remains in progress.
-- [ ] Pass software gates and PostgreSQL/Redis/MCP/ZMQ/browser integration.
-- [ ] Build candidate images; verify idle, leases, anonymous catalog and actual state.
+- [x] 2026-10-29 SDAR exact catalog, pre-confirmation resolution and patrol successor implemented; 21-case native joint passes. Full SDAR frozen gate passes 30/30.
+- [x] Pass software gates: SMPP 21/21, SDAR 30/30 and native joint 21 cases.
+- [x] Build pinned candidate images; verify idle, leases, anonymous catalog and actual state.
 - [ ] Execute operator-confirmed field cases, both effect sources, and native patrol.
-- [ ] Promote only qualified formal control; record blockers/readonly rollback otherwise.
+- [x] Field qualification is partial; withdraw controls and verify formal anonymous readonly rollback.
 - [ ] Commit/push, deliver pinned packages, commands, exits and evidence SHA256.
 
 ## Validation / recovery / artifacts
@@ -55,7 +55,7 @@ Service rollback is anonymous readonly; committed archive deletion is not undone
 
 Existing native AreaSearch requires numeric ellipsoid heights. Zero is an explicit operator
 default, not a measured terrain value; native rejection remains a field failure/blocker.
-Archive retirement is complete. Physical field actions remain pending.
+Archive retirement is complete. Field actions are partially verified; unsupported/unknown outcomes and incomplete reports prevent formal control promotion.
 
 ### Maintenance and integration discoveries
 
@@ -122,4 +122,38 @@ addressed. Correct this branch to an immutable TECHNICAL_FAILED unknown outcome 
 occupancy, NATIVE_TASK_ID_UNKNOWN and PHYSICAL_STOP_UNCONFIRMED. Never issue another configure,
 START or an unaddressed stop. Explicit management reconciliation still needs a fresh idle
 snapshot. Two cancel/deadline regression cases pass with all 22 control tests; repeat the full
-site gate before shipping the corrective Provider.
+site gate before shipping the corrective Provider. This gate now passes 21/21 on dfc01bad.
+
+### Final software, field and readonly closeout
+
+Corrective images use SMPP dfc01bad and SDAR 6aa4cb92. Full gates pass 21/21 and 30/30;
+21 native joint cases are isolated software evidence. Formal A2A field point navigation,
+pause/resume and camera position/finite velocity have action/stop evidence with degraded
+reports. Zoom is UNSUPPORTED; manual effect returns TARGET_NOT_FOUND; no fresh geolocated
+observation target was available. Regional configure ACK is unknown, route stop is unknown,
+and return-home/circular/inspection/patrol are not accepted. No uncertain motion was replayed.
+
+Latest 19:06 Beijing readonly evidence shows localization fresh again, zero velocity and EO
+navigation_valid=true. This does not rewrite the earlier route result or release chassis
+occupancy without complete reconciliation evidence. EO occupancy was released through the
+existing authenticated management reconciliation with fresh idle evidence.
+
+Formal rollback is verified: 19100/19101 anonymous readonly and HTTP login/history work;
+SDAR 10998/10999/10091 healthy; real PMS Binding revision 3 pins readonly catalog checksum
+2fe5e0658c9d1769838cbc1d4aafb7f629a7ec2fa7165ab4af0ebc7bc743090e. Seven readonly versions
+4 publish and renew; six controls plus patrol remain suspended. A2A readonly Task
+48a54723-3a0b-41f4-982d-2636dbda518b completes. Ten final readonly checks pass.
+
+Two canceled parent Tasks had invalidated continuations and orphan pending terminal callbacks.
+Exact-row management plan/apply/verify quarantines only those callbacks under snapshot CAS
+and locks, preserving task/result/authority hashes and every FK/trigger/catalog guard.
+The generic automatic orphan-finalization gap is recorded rather than hidden.
+
+Candidate consumers/writer/relay are stopped with restart=no. Motion-command footprint is
+identical before/after, chassis unknown occupancy retained. Three Compose files now probe the
+configured Runtime PORT instead of inherited 8080, use a bounded fetch and exit immediately;
+formal Docker health is healthy. This deployment-only change follows the frozen code gate.
+
+Evidence: reports/ugv-zmq-zero-height-field-20261029/REPORT.md and FINAL_ACCEPTANCE.json;
+full original commands, exit codes, Tasks and hashes: /mnt/data/ugv-zmq-zero-height-field-20261029.
+Field qualification remains open; no complete control/patrol success is claimed.

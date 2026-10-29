@@ -1,0 +1,151 @@
+{
+  "recordedAt": "2026-10-29T11:09:34.299091+00:00",
+  "software": {
+    "smpp": {
+      "codeRevision": "dfc01bad7672c3d68c305aadaff03d074cde15e4",
+      "steps": 21,
+      "passed": true,
+      "evidence": "smpp-software-7/verification.json"
+    },
+    "sdar": {
+      "codeRevision": "6aa4cb92286163389edffba547ba30b6e16959b8",
+      "steps": 30,
+      "passed": true,
+      "evidence": "sdar-software/verification.json"
+    },
+    "nativeJoint": {
+      "cases": 21,
+      "passed": true,
+      "field": false
+    }
+  },
+  "archive": {
+    "receptionsDeleted": 31316198,
+    "projectionEvidenceDeleted": 44,
+    "rawArchiveBytesAfter": 24576,
+    "protectedStateSnapshotBytesAtCleanup": 522255876096,
+    "protectedCurrentOwner": "0ab6028b-f367-4953-819f-ecca220a9a71"
+  },
+  "fieldQualification": "PARTIAL_NOT_QUALIFIED",
+  "formalControlPromoted": false,
+  "formalMode": "anonymous_readonly",
+  "formalProfile": "zmq_v1_1_0_readonly_13",
+  "formalBindingRevision": 3,
+  "formalReadonlyPublicationVersion": 4,
+  "formalReadonlyA2ATask": "48a54723-3a0b-41f4-982d-2636dbda518b",
+  "candidateConsumersStopped": true,
+  "candidateWriterStopped": true,
+  "unknownChassisResultPreserved": true,
+  "sourceLocalizationRecoveredAtLatestProbe": true,
+  "sourceEpochAndTimebaseStillUnattested": true,
+  "smppImages": [
+    {
+      "component": "provider",
+      "sourceRevision": "dfc01bad7672c3d68c305aadaff03d074cde15e4",
+      "command": [
+        "docker",
+        "build",
+        "--build-arg",
+        "VCS_REF=dfc01bad7672c3d68c305aadaff03d074cde15e4",
+        "--build-arg",
+        "NODE_BASE_IMAGE=node:22-bookworm-slim@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c",
+        "--target",
+        "ugv-zmq-site-control",
+        "-f",
+        "Dockerfile",
+        "-t",
+        "smpp-ugv-provider:site-v13-dfc01bad",
+        "."
+      ],
+      "exitCode": 0,
+      "imageId": "sha256:847a3670ae540ff5f1da1ec7860435acfcb1b7a4f83651c3a38c96821a1ab2a2",
+      "labels": {
+        "org.opencontainers.image.licenses": "Apache-2.0",
+        "org.opencontainers.image.revision": "dfc01bad7672c3d68c305aadaff03d074cde15e4",
+        "org.opencontainers.image.source": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform",
+        "org.opencontainers.image.title": "SMPP ZMQ site control and read-only rollback",
+        "org.opencontainers.image.version": "0.1.0"
+      }
+    },
+    {
+      "component": "runtime",
+      "sourceRevision": "dfc01bad7672c3d68c305aadaff03d074cde15e4",
+      "command": [
+        "docker",
+        "build",
+        "--build-arg",
+        "VCS_REF=dfc01bad7672c3d68c305aadaff03d074cde15e4",
+        "--build-arg",
+        "NODE_BASE_IMAGE=node:22-bookworm-slim@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c",
+        "--target",
+        "ugv-production-runtime",
+        "-f",
+        "Dockerfile",
+        "-t",
+        "smpp-ugv-runtime:site-v13-dfc01bad",
+        "."
+      ],
+      "exitCode": 0,
+      "imageId": "sha256:b48f5bb6d33d960537a660b248654ef76c935b5456534329c0e1444a174a253e",
+      "labels": {
+        "io.sdar.production-bundle.profile": "production",
+        "io.sdar.production-bundle.provider": "ugv",
+        "org.opencontainers.image.licenses": "Apache-2.0",
+        "org.opencontainers.image.revision": "dfc01bad7672c3d68c305aadaff03d074cde15e4",
+        "org.opencontainers.image.source": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform",
+        "org.opencontainers.image.title": "SDAR UGV Production Runtime",
+        "org.opencontainers.image.version": "0.1.0"
+      }
+    },
+    {
+      "component": "console",
+      "sourceRevision": "dfc01bad7672c3d68c305aadaff03d074cde15e4",
+      "command": [
+        "docker",
+        "build",
+        "--build-arg",
+        "VCS_REF=dfc01bad7672c3d68c305aadaff03d074cde15e4",
+        "--build-arg",
+        "NODE_BASE_IMAGE=node:22-bookworm-slim@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c",
+        "-f",
+        "deploy/ugv-control-console/Dockerfile",
+        "-t",
+        "smpp-ugv-console:site-v13-dfc01bad",
+        "."
+      ],
+      "exitCode": 0,
+      "imageId": "sha256:e166f32a56c8b3b5d8e4536b0776b85b14b3845d0577e81e9a1000b43aeaee9f",
+      "labels": {
+        "org.opencontainers.image.revision": "dfc01bad7672c3d68c305aadaff03d074cde15e4",
+        "org.opencontainers.image.title": "SMPP UGV Control Console"
+      }
+    }
+  ],
+  "sdarImage": {
+    "source": {
+      "archive": "/home/sz/.smpp-debug/ugv-zmq-zero-height-field-20261029/sdar-source/sdar-development-6aa4cb922861-46e55f5ca975.tar.gz",
+      "sha256": "fea2551453602d6a4a7566d4952aefba7aa8d138501823e738d0ba41b02ab945",
+      "sourceRevision": "6aa4cb92286163389edffba547ba30b6e16959b8",
+      "sourceHash": "46e55f5ca97562648ed714312c9c12ace733da30906b8c45c58e83d3d044322b",
+      "fileCount": 3002,
+      "secretsIncluded": false
+    },
+    "command": [
+      "docker",
+      "build",
+      "-f",
+      "deploy/development/Dockerfile",
+      "--build-arg",
+      "SDAR_SOURCE_REVISION=6aa4cb92286163389edffba547ba30b6e16959b8",
+      "-t",
+      "sdar-zmq-site:v13-6aa4cb92",
+      "."
+    ],
+    "exitCode": 0,
+    "buildContext": "/home/sz/.smpp-debug/ugv-zmq-zero-height-field-20261029/sdar-build-context",
+    "imageId": "sha256:55d59b5ae917f081714db6f80144be39f6a7450d612c5cbc75ef4ddb13476cdc",
+    "labels": {
+      "org.opencontainers.image.revision": "6aa4cb92286163389edffba547ba30b6e16959b8"
+    }
+  }
+}
