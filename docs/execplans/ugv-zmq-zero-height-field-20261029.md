@@ -55,7 +55,7 @@ Service rollback is anonymous readonly; committed archive deletion is not undone
 
 Existing native AreaSearch requires numeric ellipsoid heights. Zero is an explicit operator
 default, not a measured terrain value; native rejection remains a field failure/blocker.
-No field actions or archive deletion have yet been performed in this increment.
+Archive retirement is complete. Physical field actions remain pending.
 
 ### Maintenance and integration discoveries
 
@@ -70,3 +70,25 @@ For 1.3.0 only, candidate control uses the already-supported 1000 ms native exch
 complete a connection under joint load. Existing uncertainty/no-replay tests stay unchanged.
 Live readonly observation shows EO/effect idle/fresh, but localization stale; no navigation
 admission bypass is permitted.
+
+### Localization diagnosis and receiver recovery (2026-10-29)
+
+A passive SUB-only capture at 13:15 Beijing time received 80 valid chassis localization
+frames in 12 seconds. The running candidate had retained a sensor-time watermark of
+58,380,815,345 us; new frames carried approximately 10,276,780,971 us and were correctly
+archived as SOURCE_TIME_REGRESSED_OR_REPLAYED without refreshing state. Source clock reset
+and producer epoch semantics remain unconfirmed; no replay check was relaxed.
+
+After confirming zero active Tasks, uncertain admissions and native occupancy, candidate
+consumers and admission were stopped and the 1.3.0 candidate was deployed with a new
+receiver session. The first Runtime build used the generic target, which omits the GOWM
+contract; it was rejected at startup and replaced by the existing ugv-production-runtime
+target. The failed image is not a release artifact. The formal readonly archive was also
+in a previously failed state; its provider alone was recreated with preserved mounts.
+Both 19100 and 19110 now expose fresh localization and running archives. Recovery sent no
+device commands. Evidence: /mnt/data/ugv-zmq-zero-height-field-20261029/localization/.
+
+Inspection also found the readonly archive pool hardcoded to 500 ms while transactions used
+the configured databaseTimeoutMs (default 2000 ms). Align the pool with that existing bound,
+as already done in control mode. The original formal archive exception is unavailable, so
+this discrepancy is not asserted as the proven cause of that historical failure.

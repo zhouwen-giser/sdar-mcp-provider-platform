@@ -66,9 +66,9 @@ export async function openSiteReadonlyProvider(options: SiteReadonlyOptions) {
   const pool = new Pool({
     connectionString: options.observationDatabaseUrl,
     max: 6,
-    connectionTimeoutMillis: 500,
-    query_timeout: 500,
-    statement_timeout: 500,
+    connectionTimeoutMillis: settings.databaseTimeoutMs,
+    query_timeout: settings.databaseTimeoutMs,
+    statement_timeout: settings.databaseTimeoutMs,
   });
   const identity = observerIdentity(
     profile,
