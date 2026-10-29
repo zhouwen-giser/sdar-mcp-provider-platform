@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "imageTags": [
+    "smpp-simulation-view:20261030-view",
+    "smpp-zmq-console:20261030-view",
+    "smpp-zmq-provider:20261030-view",
+    "smpp-zmq-runtime:20261030-view"
+  ],
+  "archiveMembers": 52,
+  "sourceBundleVerified": true,
+  "sourceCommit": "58d3d734ff67cfb7351eec4ac70d6b15cbc37ccc"
+}

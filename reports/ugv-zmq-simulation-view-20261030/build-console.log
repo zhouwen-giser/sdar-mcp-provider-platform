@@ -1,0 +1,145 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.88kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 446B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 DONE 0.0s
+
+#5 [build 1/8] FROM docker.io/library/node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c
+#5 resolve docker.io/library/node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c 0.0s done
+#5 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 6.61kB 0.1s done
+#4 DONE 0.1s
+
+#6 [build 2/8] WORKDIR /workspace
+#6 CACHED
+
+#7 [build 3/8] RUN corepack enable
+#7 CACHED
+
+#8 [build 4/8] COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+#8 CACHED
+
+#9 [build 5/8] COPY apps/ugv-control-console/package.json apps/ugv-control-console/package.json
+#9 CACHED
+
+#10 [build 6/8] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     pnpm install --filter @sdar/ugv-control-console --frozen-lockfile --ignore-scripts --prefer-offline --store-dir=/pnpm/store
+#10 CACHED
+
+#11 [build 7/8] COPY apps/ugv-control-console apps/ugv-control-console
+#11 DONE 0.7s
+
+#12 [build 8/8] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     pnpm --filter @sdar/ugv-control-console build     && pnpm --filter @sdar/ugv-control-console deploy --legacy --prod /release
+#12 1.326 $ tsc --noEmit -p tsconfig.build.json && vite build && tsc -p tsconfig.server.json
+#12 9.926 vite v8.1.5 building client environment for production...
+#12 9.944 [2Ktransforming...✓ 158 modules transformed.
+#12 10.39 rendering chunks...
+#12 10.53 computing gzip size...
+#12 10.54 dist/index.html                   0.46 kB │ gzip:   0.32 kB
+#12 10.54 dist/assets/index-CK6xs5jj.css   11.88 kB │ gzip:   3.48 kB
+#12 10.54 dist/assets/index-DIQcldft.js   819.30 kB │ gzip: 146.27 kB
+#12 10.54 
+#12 10.54 ✓ built in 616ms
+#12 10.55 [plugin builtin:vite-reporter] 
+#12 10.55 (!) Some chunks are larger than 500 kB after minification. Consider:
+#12 10.55 - Using dynamic import() to code-split the application
+#12 10.55 - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+#12 10.55 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+#12 15.57 [WARN] Shared workspace lockfile detected but configuration forces legacy deploy implementation.
+#12 15.67 Packages are copied from the content-addressable store to the virtual store.
+#12 15.67   Content-addressable store is at: /pnpm/store/v11
+#12 15.67   Virtual store is at:             ../release/node_modules/.pnpm
+#12 15.68 ✓ Lockfile passes supply-chain policies (verified 4d ago)
+#12 15.99 Progress: resolved 1, reused 0, downloaded 0, added 0
+#12 16.99 Progress: resolved 34, reused 34, downloaded 0, added 0
+#12 21.91 Progress: resolved 35, reused 34, downloaded 0, added 0
+#12 22.11 .                                        | [WARN] deprecated @opentelemetry/sdk-trace-node@2.9.0
+#12 22.91 Progress: resolved 48, reused 48, downloaded 0, added 0
+#12 23.91 Progress: resolved 50, reused 50, downloaded 0, added 0
+#12 27.65 Progress: resolved 51, reused 50, downloaded 0, added 0
+#12 28.70 Progress: resolved 52, reused 51, downloaded 0, added 0
+#12 29.70 Progress: resolved 52, reused 52, downloaded 0, added 0
+#12 76.00 [WARN] GET https://registry.npmjs.org/@playwright%2Ftest error (23). Will retry in 10 seconds. 2 retries left.
+#12 76.02 [WARN] GET https://registry.npmjs.org/@opentelemetry%2Fexporter-trace-otlp-http error (23). Will retry in 10 seconds. 2 retries left.
+#12 76.03 [WARN] GET https://registry.npmjs.org/@opentelemetry%2Fsdk-logs error (23). Will retry in 10 seconds. 2 retries left.
+#12 91.96 Progress: resolved 53, reused 52, downloaded 0, added 0
+#12 92.96 Progress: resolved 54, reused 54, downloaded 0, added 0
+#12 95.27 [WARN] Request took 79267ms: https://registry.npmjs.org/@playwright%2Ftest
+#12 99.44 Progress: resolved 55, reused 54, downloaded 0, added 0
+#12 100.5 Progress: resolved 232, reused 231, downloaded 0, added 0
+#12 101.5 Progress: resolved 407, reused 404, downloaded 0, added 0
+#12 102.5 Progress: resolved 412, reused 405, downloaded 0, added 0
+#12 107.0 Progress: resolved 413, reused 405, downloaded 0, added 0
+#12 108.0 Progress: resolved 450, reused 405, downloaded 0, added 0
+#12 109.0 Progress: resolved 453, reused 406, downloaded 0, added 0
+#12 161.0 [WARN] GET https://registry.npmjs.org/@rolldown%2Fbinding-linux-arm-gnueabihf error (23). Will retry in 10 seconds. 2 retries left.
+#12 161.0 [WARN] GET https://registry.npmjs.org/lightningcss-freebsd-x64 error (23). Will retry in 10 seconds. 2 retries left.
+#12 161.0 [WARN] GET https://registry.npmjs.org/lightningcss-linux-x64-gnu error (23). Will retry in 10 seconds. 2 retries left.
+#12 161.0 [WARN] GET https://registry.npmjs.org/lightningcss-win32-x64-msvc error (23). Will retry in 10 seconds. 2 retries left.
+#12 161.0 [WARN] GET https://registry.npmjs.org/@esbuild%2Flinux-x64 error (23). Will retry in 10 seconds. 2 retries left.
+#12 161.0 [WARN] GET https://registry.npmjs.org/@esbuild%2Fwin32-x64 error (23). Will retry in 10 seconds. 2 retries left.
+#12 177.0 [WARN] Request took 75925ms: https://registry.npmjs.org/lightningcss-freebsd-x64
+#12 177.0 Progress: resolved 454, reused 406, downloaded 0, added 0
+#12 177.1 [WARN] Request took 76076ms: https://registry.npmjs.org/lightningcss-win32-x64-msvc
+#12 177.2 [WARN] Request took 76153ms: https://registry.npmjs.org/lightningcss-linux-x64-gnu
+#12 177.2 [WARN] Request took 76194ms: https://registry.npmjs.org/@esbuild%2Fwin32-x64
+#12 177.4 [WARN] Request took 76364ms: https://registry.npmjs.org/@esbuild%2Flinux-x64
+#12 178.0 Progress: resolved 458, reused 408, downloaded 0, added 0
+#12 178.0 [WARN] Request took 76944ms: https://registry.npmjs.org/@rolldown%2Fbinding-linux-arm-gnueabihf
+#12 179.0 Progress: resolved 551, reused 500, downloaded 0, added 0
+#12 180.0 Progress: resolved 552, reused 501, downloaded 0, added 0
+#12 181.0 Progress: resolved 563, reused 512, downloaded 0, added 0
+#12 182.0 Progress: resolved 566, reused 515, downloaded 0, added 0
+#12 183.0 Progress: resolved 585, reused 534, downloaded 0, added 0
+#12 184.0 Progress: resolved 586, reused 535, downloaded 0, added 0
+#12 184.7 [WARN] 3 deprecated subdependencies found: @opentelemetry/propagator-jaeger@2.9.0, @opentelemetry/sdk-trace-base@2.9.0, node-domexception@1.0.0
+#12 184.8 .                                        | +323 ++++++++++++++++++++++++++++++++
+#12 185.0 Progress: resolved 587, reused 536, downloaded 0, added 6
+#12 186.0 Progress: resolved 587, reused 536, downloaded 0, added 80
+#12 187.0 Progress: resolved 587, reused 536, downloaded 0, added 184
+#12 188.0 Progress: resolved 587, reused 536, downloaded 0, added 210
+#12 189.0 Progress: resolved 587, reused 536, downloaded 0, added 253
+#12 190.0 Progress: resolved 587, reused 536, downloaded 0, added 317
+#12 191.0 Progress: resolved 587, reused 536, downloaded 0, added 322
+#12 192.1 Progress: resolved 587, reused 536, downloaded 0, added 323
+#12 192.1 Progress: resolved 587, reused 536, downloaded 0, added 323, done
+#12 192.2 .../node_modules/protobufjs postinstall$ node scripts/postinstall
+#12 192.2 .../zeromq@6.8.0/node_modules/zeromq install$ node ./script/install.js
+#12 192.3 .../node_modules/protobufjs postinstall: Done
+#12 192.3 .../zeromq@6.8.0/node_modules/zeromq install: Done
+#12 192.5 [WARN] Failed to create bin at /release/node_modules/.bin/tsx. ENOENT: no such file or directory, open '/release/node_modules/.pnpm/tsx@4.23.1/node_modules/tsx/dist/cli.mjs'
+#12 192.5 [WARN] Failed to create bin at /release/node_modules/.bin/esbuild. ENOENT: no such file or directory, open '/release/node_modules/.pnpm/esbuild@0.28.1/node_modules/esbuild/bin/esbuild'
+#12 192.5 [WARN] Failed to create bin at /release/node_modules/.bin/acorn. ENOENT: no such file or directory, open '/release/node_modules/.pnpm/acorn@8.17.0/node_modules/acorn/bin/acorn'
+#12 192.5 [WARN] Failed to create bin at /release/node_modules/.bin/vite. ENOENT: no such file or directory, open '/release/node_modules/.pnpm/vite@8.1.5_@types+node@22.20.1_esbuild@0.28.1_tsx@4.23.1_yaml@2.9.0/node_modules/vite/bin/vite.js'
+#12 192.5 [WARN] Failed to create bin at /release/node_modules/.bin/esbuild. ENOENT: no such file or directory, open '/release/node_modules/.pnpm/esbuild@0.28.1/node_modules/esbuild/bin/esbuild'
+#12 DONE 193.2s
+
+#13 [runtime 2/3] WORKDIR /app
+#13 CACHED
+
+#14 [runtime 3/3] COPY --from=build --chown=node:node /release/ ./
+#14 DONE 4.8s
+
+#15 exporting to image
+#15 exporting layers
+#15 exporting layers 8.7s done
+#15 exporting manifest sha256:00bbfca182fe78c04c1be320737a16bc5a1645f68edb0b2c87d03f7b780bfb20 0.1s done
+#15 exporting config sha256:164d5beea0b8114845485fcf133da1c9b8fea35bb6f4a2f19e845f338b0a5a5e 0.1s done
+#15 exporting attestation manifest sha256:5fd46a3ee7b74fa2ae345b655f53d19f4710d5543294f1c9879cb032657458b7 0.1s done
+#15 exporting manifest list sha256:4237409dc390f8533efee22a1bc7c44942c51df66e99ab4a12de6b9105328d8c
+#15 exporting manifest list sha256:4237409dc390f8533efee22a1bc7c44942c51df66e99ab4a12de6b9105328d8c 0.1s done
+#15 naming to docker.io/library/smpp-zmq-console:20261030-view done
+#15 unpacking to docker.io/library/smpp-zmq-console:20261030-view
+#15 unpacking to docker.io/library/smpp-zmq-console:20261030-view 5.5s done
+#15 DONE 14.7s

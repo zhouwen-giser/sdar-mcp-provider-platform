@@ -1,0 +1,221 @@
+{
+  "schemaVersion": "smpp.simulation-view-software-evidence/1",
+  "qualification": "isolated_CARLA_API_double_real_HTTP_MCP_PostgreSQL",
+  "fieldAcceptance": false,
+  "proofs": [
+    {
+      "scenario": "applied_once",
+      "taskId": "3a5b673f-c77b-4e40-a7af-ef73d76e1c22",
+      "result": {
+        "evidence": {
+          "frame": {
+            "frameId": 43,
+            "rawSha256": "9f9fb75a2ec3bfbac1ff7125352436bacec8bacee893d26f00cddf10fcd89f65",
+            "thumbnail": {
+              "width": 128,
+              "base64": "iVBORw0KGgoAAAANSUhEUgAAAIAAAABICAIAAACx52pFAAAAm0lEQVR4nO3RMQ0AMAzAsILYvXv8EQ5Gj1gKgEied48Wm/WDeAAAtAMAoB0AAO0AAGgHAEA7AADaAQDQDgCAdgAAtAMAoB0AAO0AAGgHAEA7AADaAQDQDgCAdgAAtAMAoB0AAO0AAGgHAEA7AADaAQDQDgCAdgAAtAMAoB0AAO0AAGgHAEA7AADaAQDQDgCAdgAAtAMAoB0AAO0+BRWotUG9UyIAAAAASUVORK5CYII=",
+              "height": 72,
+              "sha256": "bc830df4d894e0f9542a218729889b136a059fd4579aea66dcf6d0b2e394daf8",
+              "mediaType": "image/png"
+            },
+            "receivedAt": "2026-10-29T16:58:36.678Z",
+            "simulationTimeSeconds": 12.5
+          },
+          "viewId": "isolated-view",
+          "worldId": "7",
+          "ownership": "project_owned",
+          "apiVersion": "isolated-api",
+          "imageWidth": 128,
+          "intrinsics": {
+            "cx": 64,
+            "cy": 36,
+            "fx": 110.85125168440815,
+            "fy": 110.85125168440815,
+            "source": "derived_from_simulator_attributes",
+            "geolocation": "not_provided"
+          },
+          "imageFovDeg": 60,
+          "imageHeight": 72,
+          "ownershipId": "961f42d8-8aee-42d5-8fe3-642ae3384fc5",
+          "baselineFrame": 42,
+          "cameraActorId": 101,
+          "parentActorId": 1,
+          "schemaVersion": "smpp.simulation-view-evidence/1",
+          "cameraRevision": "req-08fc9dd3-d2c8-4512-8c5f-8d94c58d45ef",
+          "parentRoleName": "isolated-vehicle",
+          "eoRecognitionAffected": false,
+          "replacedCameraActorId": null,
+          "actualHorizontalFovDeg": 60,
+          "previousCameraReleased": true
+        },
+        "occupancy": "released",
+        "requestId": "req-08fc9dd3-d2c8-4512-8c5f-8d94c58d45ef",
+        "application": "applied",
+        "qualification": "project_owned_simulation_view",
+        "schemaVersion": "ugv.simulation-view-result/1",
+        "missingEvidence": [],
+        "eoRecognitionAffected": false
+      },
+      "spawns": 1
+    },
+    {
+      "scenario": "lost_receipt_query_only",
+      "taskId": "bcab11c3-d39e-4c34-9899-94ad0f75c76c",
+      "result": {
+        "evidence": {
+          "frame": {
+            "frameId": 43,
+            "rawSha256": "9f9fb75a2ec3bfbac1ff7125352436bacec8bacee893d26f00cddf10fcd89f65",
+            "thumbnail": {
+              "width": 128,
+              "base64": "iVBORw0KGgoAAAANSUhEUgAAAIAAAABICAIAAACx52pFAAAAm0lEQVR4nO3RMQ0AMAzAsILYvXv8EQ5Gj1gKgEied48Wm/WDeAAAtAMAoB0AAO0AAGgHAEA7AADaAQDQDgCAdgAAtAMAoB0AAO0AAGgHAEA7AADaAQDQDgCAdgAAtAMAoB0AAO0AAGgHAEA7AADaAQDQDgCAdgAAtAMAoB0AAO0AAGgHAEA7AADaAQDQDgCAdgAAtAMAoB0AAO0+BRWotUG9UyIAAAAASUVORK5CYII=",
+              "height": 72,
+              "sha256": "bc830df4d894e0f9542a218729889b136a059fd4579aea66dcf6d0b2e394daf8",
+              "mediaType": "image/png"
+            },
+            "receivedAt": "2026-10-29T16:58:42.746Z",
+            "simulationTimeSeconds": 12.5
+          },
+          "viewId": "isolated-view",
+          "worldId": "7",
+          "ownership": "project_owned",
+          "apiVersion": "isolated-api",
+          "imageWidth": 128,
+          "intrinsics": {
+            "cx": 64,
+            "cy": 36,
+            "fx": 110.85125168440815,
+            "fy": 110.85125168440815,
+            "source": "derived_from_simulator_attributes",
+            "geolocation": "not_provided"
+          },
+          "imageFovDeg": 60,
+          "imageHeight": 72,
+          "ownershipId": "961f42d8-8aee-42d5-8fe3-642ae3384fc5",
+          "baselineFrame": 42,
+          "cameraActorId": 102,
+          "parentActorId": 1,
+          "schemaVersion": "smpp.simulation-view-evidence/1",
+          "cameraRevision": "req-957e6b95-f3b7-441a-8668-f868bb854a3d",
+          "parentRoleName": "isolated-vehicle",
+          "eoRecognitionAffected": false,
+          "replacedCameraActorId": 101,
+          "actualHorizontalFovDeg": 60,
+          "previousCameraReleased": true
+        },
+        "occupancy": "released",
+        "requestId": "req-957e6b95-f3b7-441a-8668-f868bb854a3d",
+        "application": "applied",
+        "qualification": "project_owned_simulation_view",
+        "schemaVersion": "ugv.simulation-view-result/1",
+        "missingEvidence": [],
+        "eoRecognitionAffected": false
+      },
+      "commands": [
+        {
+          "action": "camera",
+          "frames": [
+            "eyJwcm90b2NvbCI6InNtcHAuc2ltdWxhdGlvbi12aWV3LzEiLCJyZXF1ZXN0SWQiOiJyZXEtOTU3ZTZiOTUtZjNiNy00NDFhLTg2NjgtZjg2OGJiODU0YTNkIiwicmVzb3VyY2VJZCI6InZlaGljbGU6U0lNVUxBVEVEIiwib3duZXJzaGlwSWQiOiI5NjFmNDJkOC04YWVlLTQyZDUtOGZlMy02NDJhZTMzODRmYzUiLCJleHBlY3RlZEFwaVZlcnNpb24iOiJpc29sYXRlZC1hcGkiLCJleHBlY3RlZFdvcmxkSWQiOiI3IiwicGFyZW50QWN0b3JJZCI6MSwicGFyZW50Um9sZU5hbWUiOiJpc29sYXRlZC12ZWhpY2xlIiwiZGVhZGxpbmVBdCI6IjIwMjYtMTAtMjlUMTY6NTg6NTIuNjk5WiIsInBhcmFtZXRlcnMiOnsidmlld0lkIjoiaXNvbGF0ZWQtdmlldyIsImhvcml6b250YWxGb3ZEZWciOjYwLCJhY2tub3dsZWRnZUNhbWVyYVJlY3JlYXRpb24iOnRydWV9fQ=="
+          ],
+          "method": "SimulationView",
+          "status": "uncertain",
+          "stepId": "zmq-camera-0009b3fb-605e-4081-b26a-1ca9f72016ac",
+          "response": null,
+          "component": "eo",
+          "createdAt": "2026-10-29T16:58:42.724Z",
+          "requestId": "req-957e6b95-f3b7-441a-8668-f868bb854a3d",
+          "diagnostic": {
+            "code": "ZMQ_VIEW_EXCHANGE_UNCONFIRMED",
+            "stage": "dispatch",
+            "response": null,
+            "elapsedMs": 1005.5208079999993,
+            "schemaVersion": "ugv.zmq-command-diagnostic/1",
+            "sendAttempted": true,
+            "sendCompleted": null,
+            "sendTimeoutMs": 1000,
+            "validationCode": null,
+            "nativeErrorCode": null,
+            "receiveTimeoutMs": 1000,
+            "sendCompletedAfterMs": null,
+            "receiveCompletedAfterMs": null
+          },
+          "dispatchAt": "2026-10-29T16:58:42.730Z",
+          "generation": 0,
+          "completedAt": "2026-10-29T16:58:43.743Z"
+        }
+      ],
+      "spawns": 2
+    },
+    {
+      "scenario": "conflicting_frame_remains_unknown",
+      "taskId": "5d646e14-754e-4b72-8328-cbad9fc24471",
+      "result": {
+        "evidence": null,
+        "occupancy": "held",
+        "requestId": "req-6e9feb6b-13de-4a32-993e-6e6b73124d7c",
+        "application": "unknown",
+        "qualification": "project_owned_simulation_view",
+        "schemaVersion": "ugv.simulation-view-result/1",
+        "missingEvidence": [
+          "VIEW_APPLICATION_UNCONFIRMED"
+        ],
+        "eoRecognitionAffected": false
+      },
+      "commands": [
+        {
+          "action": "camera",
+          "frames": [
+            "eyJwcm90b2NvbCI6InNtcHAuc2ltdWxhdGlvbi12aWV3LzEiLCJyZXF1ZXN0SWQiOiJyZXEtNmU5ZmViNmItMTNkZS00YTMyLTk5M2UtNmU2YjczMTI0ZDdjIiwicmVzb3VyY2VJZCI6InZlaGljbGU6U0lNVUxBVEVEIiwib3duZXJzaGlwSWQiOiI5NjFmNDJkOC04YWVlLTQyZDUtOGZlMy02NDJhZTMzODRmYzUiLCJleHBlY3RlZEFwaVZlcnNpb24iOiJpc29sYXRlZC1hcGkiLCJleHBlY3RlZFdvcmxkSWQiOiI3IiwicGFyZW50QWN0b3JJZCI6MSwicGFyZW50Um9sZU5hbWUiOiJpc29sYXRlZC12ZWhpY2xlIiwiZGVhZGxpbmVBdCI6IjIwMjYtMTAtMjlUMTY6NTg6NDYuMTk1WiIsInBhcmFtZXRlcnMiOnsidmlld0lkIjoiaXNvbGF0ZWQtdmlldyIsImhvcml6b250YWxGb3ZEZWciOjYwLCJhY2tub3dsZWRnZUNhbWVyYVJlY3JlYXRpb24iOnRydWV9fQ=="
+          ],
+          "method": "SimulationView",
+          "status": "uncertain",
+          "stepId": "zmq-camera-65cf356a-a801-468c-8b3c-3ad590e2ba25",
+          "response": {
+            "ok": true,
+            "error": null,
+            "viewReply": {
+              "status": "unknown",
+              "evidence": null,
+              "protocol": "smpp.simulation-view/1",
+              "attempted": true,
+              "requestId": "req-6e9feb6b-13de-4a32-993e-6e6b73124d7c",
+              "reasonCode": "ZMQ_VIEW_FRAME_CONFLICT",
+              "requestHash": "04cc009d2301484eb7bf5cdcf154431b81b56de7461f05b30c2e052f7fcceb4c",
+              "missingEvidence": [
+                "VIEW_APPLICATION_UNCONFIRMED"
+              ]
+            }
+          },
+          "component": "eo",
+          "createdAt": "2026-10-29T16:58:44.213Z",
+          "requestId": "req-6e9feb6b-13de-4a32-993e-6e6b73124d7c",
+          "diagnostic": {
+            "code": "ZMQ_REQUEST_ACCEPTED",
+            "stage": "complete",
+            "response": {
+              "bytes": 315,
+              "frameCount": 1,
+              "frameSha256": [
+                "7f930fd94091755c307467a798fd9ed53875a6b629996db61a6a5e6a3203e9cb"
+              ]
+            },
+            "elapsedMs": 8.991100999999617,
+            "schemaVersion": "ugv.zmq-command-diagnostic/1",
+            "sendAttempted": true,
+            "sendCompleted": true,
+            "sendTimeoutMs": 1000,
+            "validationCode": null,
+            "nativeErrorCode": null,
+            "receiveTimeoutMs": 1000,
+            "sendCompletedAfterMs": null,
+            "receiveCompletedAfterMs": 8.870681000000332
+          },
+          "dispatchAt": "2026-10-29T16:58:44.221Z",
+          "generation": 0,
+          "completedAt": "2026-10-29T16:58:44.237Z"
+        }
+      ],
+      "spawns": 3
+    }
+  ]
+}

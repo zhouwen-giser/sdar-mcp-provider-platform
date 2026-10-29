@@ -1,0 +1,10 @@
+$ vitest run --config vitest.config.ts
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+
+ Test Files  13 passed (13)
+      Tests  76 passed (76)
+   Start at  01:01:41
+   Duration  65.71s (transform 2.16s, setup 96ms, import 7.53s, tests 55.82s, environment 2ms)
+

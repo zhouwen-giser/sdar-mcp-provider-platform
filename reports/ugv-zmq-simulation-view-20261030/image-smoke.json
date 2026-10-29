@@ -1,0 +1,85 @@
+[
+  {
+    "image": "sha256:a48f3bf79bf3db6fbe54d1009b8402b425ec1f5fdbe75ef2d7b17152554a59fb",
+    "argv": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "--read-only",
+      "--entrypoint",
+      "node",
+      "sha256:a48f3bf79bf3db6fbe54d1009b8402b425ec1f5fdbe75ef2d7b17152554a59fb",
+      "--input-type=module",
+      "-e",
+      "await import(\"./dist/apps/ugv-zmq-provider-adapter/src/runtime.js\"); console.log(\"provider_import_ok\")"
+    ],
+    "exitCode": 0,
+    "log": "smoke-provider.log",
+    "logSha256": "5813607c2c3ee2b55f31295ce28c5a538e001135918d5619d4bc060bf8e96335",
+    "network": "none"
+  },
+  {
+    "image": "sha256:11abe9156fe610a28cfb4f261532a95be04a306d40e96adacdcc464fa8511a9e",
+    "argv": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "--read-only",
+      "--entrypoint",
+      "node",
+      "sha256:11abe9156fe610a28cfb4f261532a95be04a306d40e96adacdcc464fa8511a9e",
+      "--input-type=module",
+      "-e",
+      "await import(\"./dist/apps/runtime/src/runtime.js\"); console.log(\"runtime_import_ok\")"
+    ],
+    "exitCode": 0,
+    "log": "smoke-runtime.log",
+    "logSha256": "70ee581d65e7ba65cc9de0034a534d5edadbeac62a47cb520beba5257f5bb5a5",
+    "network": "none"
+  },
+  {
+    "image": "sha256:4237409dc390f8533efee22a1bc7c44942c51df66e99ab4a12de6b9105328d8c",
+    "argv": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "--read-only",
+      "--entrypoint",
+      "node",
+      "sha256:4237409dc390f8533efee22a1bc7c44942c51df66e99ab4a12de6b9105328d8c",
+      "--input-type=module",
+      "-e",
+      "await import(\"./build/server/service.js\"); console.log(\"console_import_ok\")"
+    ],
+    "exitCode": 0,
+    "log": "smoke-console.log",
+    "logSha256": "cc628a946652a9d7c8cc64722f5150ea350dfcb5675446acda53cf58230b8abe",
+    "network": "none"
+  },
+  {
+    "image": "sha256:f2c4187506a3b860f735c88c9f15aadf8a4b848358732fdfdc3239489016f52f",
+    "argv": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "--read-only",
+      "--entrypoint",
+      "python",
+      "sha256:f2c4187506a3b860f735c88c9f15aadf8a4b848358732fdfdc3239489016f52f",
+      "-c",
+      "import carla,hashlib,pathlib,json; print(json.dumps({\"sdkVersion\":carla.Client(\"127.0.0.1\",2000).get_client_version(),\"sourceSha256\":hashlib.sha256(pathlib.Path(\"/app/view_gateway.py\").read_bytes()).hexdigest()}))"
+    ],
+    "exitCode": 0,
+    "log": "smoke-view.log",
+    "logSha256": "b016e102f58fa1be23f77215afae60d0db293adc921d4a7b4dd1825b70a078e2",
+    "network": "none"
+  }
+]

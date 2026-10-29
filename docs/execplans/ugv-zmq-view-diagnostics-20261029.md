@@ -103,3 +103,13 @@ The source commit/push receipt is recorded beside the external verification arti
 interface/source or explicit expansion of the prior no-upstream-change scope. Existing native
 UNSUPPORTED, regional ACK uncertainty and missing stationary evidence are not reclassified as
 successful field actions by these software fixes.
+
+### Clarified project-local implementation
+
+The user subsequently requested extension inside this project. The successor plan
+docs/execplans/ugv-simulation-view-20261030.md implements a distinct project-owned CARLA
+camera, exact 1.4.0/fourteen-tool MCP catalog and real FOV/new-frame evidence. Its source
+commit is 58d3d73; all 24 expanded checks pass. This clarified scope leaves SDAR unchanged.
+Formal activation still requires the matching site SDK and verified vehicle/world mapping;
+the old optical zoom refusal and previous field unknowns remain valid. The local fixes d2a03f7
+are pushed and verified; the new delivery's final push receipt is maintained externally.

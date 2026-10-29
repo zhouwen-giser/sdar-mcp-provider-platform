@@ -1,0 +1,16 @@
+{
+  "package": "smpp-simulation-view-v14-20261030.tar.gz",
+  "bytes": 315317130,
+  "sha256": "c110b12bb0f391ab8a2f1f3d57712f1058666ea8139e37bfbf129243f85822c7",
+  "sourceCommit": "58d3d734ff67cfb7351eec4ac70d6b15cbc37ccc",
+  "sourceFingerprint": "984cdbd8095b61de4cf1d7a8b0b99c62bbb9e01b133122175d9661e4e82dc610",
+  "softwareGate": {
+    "passed": true,
+    "steps": 24
+  },
+  "images": 4,
+  "activated": false,
+  "fieldAcceptance": "blocked_matching_sdk_required",
+  "createdAt": "2026-10-29T17:13:20.528787+00:00",
+  "packageRetry": "initial hashing helper required Python 3.11; replaced by streaming sha256 on Python 3.10; source/images unchanged"
+}

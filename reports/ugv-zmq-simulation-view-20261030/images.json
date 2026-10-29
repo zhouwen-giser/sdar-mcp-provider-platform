@@ -1,0 +1,129 @@
+[
+  {
+    "name": "provider",
+    "argv": [
+      "docker",
+      "build",
+      "-f",
+      "Dockerfile",
+      "--build-arg",
+      "VCS_REF=58d3d734ff67cfb7351eec4ac70d6b15cbc37ccc",
+      "--build-arg",
+      "NODE_BASE_IMAGE=node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c",
+      "--target",
+      "ugv-zmq-site-control",
+      "-t",
+      "smpp-zmq-provider:20261030-view",
+      "."
+    ],
+    "startedAt": "2026-10-29T16:59:33.521651+00:00",
+    "finishedAt": "2026-10-29T17:02:11.306958+00:00",
+    "exitCode": 0,
+    "log": "build-provider.log",
+    "logSha256": "58ab4277e5732321a3e614c10a061636b66d24214ba0b0ac80b94546e349dbf7",
+    "sourceCommit": "58d3d734ff67cfb7351eec4ac70d6b15cbc37ccc",
+    "imageId": "sha256:a48f3bf79bf3db6fbe54d1009b8402b425ec1f5fdbe75ef2d7b17152554a59fb",
+    "tag": "smpp-zmq-provider:20261030-view",
+    "labels": {
+      "org.opencontainers.image.licenses": "Apache-2.0",
+      "org.opencontainers.image.revision": "58d3d734ff67cfb7351eec4ac70d6b15cbc37ccc",
+      "org.opencontainers.image.source": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform",
+      "org.opencontainers.image.title": "SMPP ZMQ site control and read-only rollback",
+      "org.opencontainers.image.version": "0.1.0"
+    },
+    "size": 118551414
+  },
+  {
+    "name": "runtime",
+    "argv": [
+      "docker",
+      "build",
+      "-f",
+      "Dockerfile",
+      "--build-arg",
+      "VCS_REF=58d3d734ff67cfb7351eec4ac70d6b15cbc37ccc",
+      "--build-arg",
+      "NODE_BASE_IMAGE=node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c",
+      "--target",
+      "ugv-production-runtime",
+      "-t",
+      "smpp-zmq-runtime:20261030-view",
+      "."
+    ],
+    "startedAt": "2026-10-29T17:02:11.363152+00:00",
+    "finishedAt": "2026-10-29T17:02:13.907119+00:00",
+    "exitCode": 0,
+    "log": "build-runtime.log",
+    "logSha256": "5f03af7759e746f9d7311c73fcba07c9a920ccb619a9399223b05d0f185d82ad",
+    "sourceCommit": "58d3d734ff67cfb7351eec4ac70d6b15cbc37ccc",
+    "imageId": "sha256:11abe9156fe610a28cfb4f261532a95be04a306d40e96adacdcc464fa8511a9e",
+    "tag": "smpp-zmq-runtime:20261030-view",
+    "labels": {
+      "io.sdar.production-bundle.profile": "production",
+      "io.sdar.production-bundle.provider": "ugv",
+      "org.opencontainers.image.licenses": "Apache-2.0",
+      "org.opencontainers.image.revision": "58d3d734ff67cfb7351eec4ac70d6b15cbc37ccc",
+      "org.opencontainers.image.source": "https://github.com/zhouwen-giser/sdar-mcp-provider-platform",
+      "org.opencontainers.image.title": "SDAR UGV Production Runtime",
+      "org.opencontainers.image.version": "0.1.0"
+    },
+    "size": 118199151
+  },
+  {
+    "name": "console",
+    "argv": [
+      "docker",
+      "build",
+      "-f",
+      "deploy/ugv-control-console/Dockerfile",
+      "--build-arg",
+      "VCS_REF=58d3d734ff67cfb7351eec4ac70d6b15cbc37ccc",
+      "--build-arg",
+      "NODE_BASE_IMAGE=node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c",
+      "-t",
+      "smpp-zmq-console:20261030-view",
+      "."
+    ],
+    "startedAt": "2026-10-29T17:02:13.957979+00:00",
+    "finishedAt": "2026-10-29T17:05:53.451423+00:00",
+    "exitCode": 0,
+    "log": "build-console.log",
+    "logSha256": "32c8eb5673db975e788cae98fe71e0bd85a2d99bb91b5a5d5cda5619e50e9b15",
+    "sourceCommit": "58d3d734ff67cfb7351eec4ac70d6b15cbc37ccc",
+    "imageId": "sha256:4237409dc390f8533efee22a1bc7c44942c51df66e99ab4a12de6b9105328d8c",
+    "tag": "smpp-zmq-console:20261030-view",
+    "labels": {
+      "org.opencontainers.image.revision": "58d3d734ff67cfb7351eec4ac70d6b15cbc37ccc",
+      "org.opencontainers.image.title": "SMPP UGV Control Console"
+    },
+    "size": 123109975
+  },
+  {
+    "name": "view",
+    "argv": [
+      "docker",
+      "build",
+      "-f",
+      "apps/simulation-view-gateway/Dockerfile",
+      "--build-arg",
+      "VCS_REF=58d3d734ff67cfb7351eec4ac70d6b15cbc37ccc",
+      "-t",
+      "smpp-simulation-view:20261030-view",
+      "."
+    ],
+    "startedAt": "2026-10-29T17:05:53.494520+00:00",
+    "finishedAt": "2026-10-29T17:05:56.300478+00:00",
+    "exitCode": 0,
+    "log": "build-view.log",
+    "logSha256": "8c6de0ab57c404caa76e5120a7bf86bb7c7261a077117987de13dd8615e3e1c5",
+    "sourceCommit": "58d3d734ff67cfb7351eec4ac70d6b15cbc37ccc",
+    "imageId": "sha256:f2c4187506a3b860f735c88c9f15aadf8a4b848358732fdfdc3239489016f52f",
+    "tag": "smpp-simulation-view:20261030-view",
+    "labels": {
+      "org.opencontainers.image.revision": "58d3d734ff67cfb7351eec4ac70d6b15cbc37ccc",
+      "org.opencontainers.image.title": "SMPP project-owned simulation view",
+      "org.opencontainers.image.version": "1.4.0"
+    },
+    "size": 84237290
+  }
+]

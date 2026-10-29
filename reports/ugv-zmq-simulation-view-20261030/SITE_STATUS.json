@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "smpp.simulation-view-site-probe/1",
+  "fieldMutationAttempted": false,
+  "versions": {
+    "readOnly": true,
+    "mutationAttempted": false,
+    "observedAt": "2026-10-29T16:55:20.662632+00:00",
+    "clientVersion": "0.9.16",
+    "serverVersion": "067529e82-dirty",
+    "ready": false,
+    "reasonCode": "ZMQ_VIEW_API_VERSION_MISMATCH"
+  },
+  "earlierReadOnlyCompatibilityAttempt": {
+    "clientVersion": "0.9.15",
+    "serverVersion": "067529e82-dirty",
+    "operation": "get_world",
+    "exitCode": 134,
+    "nativeFailure": "std::bad_alloc",
+    "actorMappingObtained": false
+  },
+  "sourceFingerprint": "984cdbd8095b61de4cf1d7a8b0b99c62bbb9e01b133122175d9661e4e82dc610",
+  "siteAcceptance": "blocked_matching_site_sdk_required",
+  "sourceCommit": "58d3d734ff67cfb7351eec4ac70d6b15cbc37ccc"
+}
