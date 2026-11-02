@@ -1,0 +1,182 @@
+{
+  "cutover": {
+    "requestedBy": "human:正式服务切换，启用所有工具",
+    "startedAt": "2026-11-02T02:29:45.538016+00:00",
+    "steps": [
+      {
+        "argv": [
+          "docker",
+          "update",
+          "--restart=no",
+          "smpp-zmq-site-control-runtime-1",
+          "smpp-zmq-site-control-console-1",
+          "smpp-zmq-site-control-provider-1"
+        ],
+        "exitCode": 0,
+        "log": "/home/sz/.smpp-debug/ugv-zmq-formal-tools-20261102/cutover-00.log",
+        "logSha256": "6ff4c90eb698d4a31d39e7b3d40a763618fe3e944ed7c97bce7885c32bc1ee67"
+      },
+      {
+        "argv": [
+          "docker",
+          "stop",
+          "--timeout",
+          "20",
+          "smpp-zmq-site-control-runtime-1",
+          "smpp-zmq-site-control-console-1",
+          "smpp-zmq-site-control-provider-1"
+        ],
+        "exitCode": 0,
+        "log": "/home/sz/.smpp-debug/ugv-zmq-formal-tools-20261102/cutover-01.log",
+        "logSha256": "6ff4c90eb698d4a31d39e7b3d40a763618fe3e944ed7c97bce7885c32bc1ee67"
+      },
+      {
+        "argv": [
+          "docker",
+          "update",
+          "--restart=no",
+          "smpp-zmq-site-formal-runtime-1",
+          "smpp-zmq-site-formal-console-1",
+          "smpp-zmq-site-formal-provider-1"
+        ],
+        "exitCode": 0,
+        "log": "/home/sz/.smpp-debug/ugv-zmq-formal-tools-20261102/cutover-02.log",
+        "logSha256": "1a2b349cfe57aedb8c7c1baa5f86bfe6faa405cc3c21ea1a1406f0791996559a"
+      },
+      {
+        "argv": [
+          "docker",
+          "stop",
+          "--timeout",
+          "20",
+          "smpp-zmq-site-formal-runtime-1",
+          "smpp-zmq-site-formal-console-1",
+          "smpp-zmq-site-formal-provider-1"
+        ],
+        "exitCode": 0,
+        "log": "/home/sz/.smpp-debug/ugv-zmq-formal-tools-20261102/cutover-03.log",
+        "logSha256": "1a2b349cfe57aedb8c7c1baa5f86bfe6faa405cc3c21ea1a1406f0791996559a"
+      },
+      {
+        "argv": ["node", "--import", "tsx", "scripts/ugv-zmq/site-handoff-check.ts"],
+        "exitCode": 0,
+        "log": "/home/sz/.smpp-debug/ugv-zmq-formal-tools-20261102/cutover-04.log",
+        "logSha256": "0a49405c63ffa1dcdbea3f71812e6219aa35cf10faa62da254ecb4bcb3a2c18f"
+      },
+      {
+        "argv": [
+          "docker",
+          "compose",
+          "--env-file",
+          "/home/sz/.smpp-debug/ugv-zmq-formal-tools-20261102/formal/site-images.env",
+          "-p",
+          "smpp-zmq-site-formal",
+          "-f",
+          "deploy/ugv-zmq/site-control/compose.formal.yaml",
+          "-f",
+          "/home/sz/.smpp-debug/ugv-zmq-formal-tools-20261102/formal/pms-readonly-override.json",
+          "up",
+          "-d",
+          "--force-recreate",
+          "--no-deps",
+          "--no-build",
+          "--pull",
+          "never",
+          "provider",
+          "runtime",
+          "console"
+        ],
+        "exitCode": 0,
+        "log": "/home/sz/.smpp-debug/ugv-zmq-formal-tools-20261102/cutover-05.log",
+        "logSha256": "200d4fd60f80151533fb0d912a9c64528a7a50139cf646fa3cb8aea6afe741f1"
+      }
+    ],
+    "deviceActionsRequested": 0,
+    "completedAt": "2026-11-02T02:29:51.031844+00:00",
+    "formalPorts": [19100, 19101],
+    "catalogProfile": "zmq_v1_4_0_site_control_14",
+    "pmsReadonlyCompatibilityRetained": true,
+    "oldWritersStopped": true
+  },
+  "verificationCommands": [
+    {
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "/home/sz/.smpp-debug/ugv-zmq-formal-tools-20261102/verify.mts"
+      ],
+      "environment": {
+        "PHASE": "candidate"
+      },
+      "exitCode": 0,
+      "privateScriptSha256": "06e6b799eb4014ccdbcc1e8f01f1e3d31ac185eafdf4287fe297d2016b13de8c"
+    },
+    {
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "/home/sz/.smpp-debug/ugv-zmq-formal-tools-20261102/verify.mts"
+      ],
+      "environment": {
+        "PHASE": "formal"
+      },
+      "exitCode": 0,
+      "privateScriptSha256": "06e6b799eb4014ccdbcc1e8f01f1e3d31ac185eafdf4287fe297d2016b13de8c"
+    },
+    {
+      "argv": ["node", "/home/sz/.smpp-debug/ugv-zmq-formal-tools-20261102/browser.mjs"],
+      "exitCode": 0,
+      "privateScriptSha256": "b6dec0f47bfd8280e0d5c1db316a3526fbebc99fbc3f3939db53ce96a53ac99f"
+    },
+    {
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "/home/sz/.smpp-debug/ugv-zmq-formal-tools-20261102/sdar-compat.mts"
+      ],
+      "exitCode": 0,
+      "privateScriptSha256": "170b41829303f4aac9d93218234f86a3df076754c13b7ce20f44dfb58e405ce5"
+    }
+  ],
+  "privateEvidenceSha256": {
+    "candidate-verification.json": "e678441120d369546bbf42fe6379b8591770afd22919964a5531f446f8176c0c",
+    "formal-verification.json": "bb1cf69f576f2b3407d889b407361b67dc224075ae289a2149589d1e05569234",
+    "old-formal-verification.json": "09042eb32ce8f01edaafc2c5076204dd6898d95fc56a3ee1d985d6b121e70f42",
+    "cutover.json": "5dcc7202c3e0df0a77aa6223ee91e31abaee0a017d1934ed1fefd1e5ba34b9ce",
+    "handoff-idle.json": "ff831fc20887074493a00feace1f0e29a4367538a781a217654afcff17ee0d41",
+    "reconciliation.json": "3524c426f37260079edab505e4a60c87fb53d6b29b06537ebf31c01688fe7cc0",
+    "history-and-journal-before.json": "bc478958afde322d929cddf8d6f029eeb66e0a05c4c06a35d494c4b8fc351415",
+    "history-and-journal-after.json": "d31782fd8cee8491e466260381a7d4a0fd0caafbc0b4cee1c732117df6e3eda5",
+    "browser-verification.json": "7b47be9709c3faee75ad45e57620549eee9675f099d9414824308fbf86412356",
+    "sdar-compatibility.json": "47457b7f96183630424e15d3b66af3a2fc49716689fcdc0019eca37334383647",
+    "carla-version-probe.json": "9ff8e1d650486d195aaf8265edfb74c72a1340b62dd10e32e3204d3142c10632"
+  },
+  "privateConfigurationSha256": {
+    "candidate/console.env": "f2d98580bf269b8da64aee97526830ca568a96106e63249f7c7bda1401fe0d5b",
+    "candidate/provider.env": "4b79723ebe97b87777a4b24c1ebd1841cf871759ca7e625ea8d0a466a17a977f",
+    "candidate/runtime.env": "7a9eb58c16c177a1f95934ad8c92703a2c014074aae190d7eee7b11553138c0c",
+    "candidate/site-images.env": "63d9278fe5f6dc74ed2cdf00e216e1c21f0cc1015bc2a69f64c3160e5ea5c113",
+    "candidate/provider.json": "834184777bb8e75b486f0255b04dc5be76ac66a889a87e49b1280251377ee0bc",
+    "formal/console.env": "37f640fb7036728ec50e87b5f10fe092d6cd629efad29ac110bdd3b66f8f8f11",
+    "formal/provider.env": "4b79723ebe97b87777a4b24c1ebd1841cf871759ca7e625ea8d0a466a17a977f",
+    "formal/runtime.env": "9b7364ba291ef37fe3637940c504bad021cf5139d21a87f6bfe29d898937d523",
+    "formal/pms-readonly-override.json": "2117a5f8b158aed68e37ee7d35a6614a0f14322bd2c87e0cda898738a8905f82",
+    "formal/site-images.env": "aac17b2e95d563a99041ad2e892acf96b047b608d893f0e54782b63f13e401f8",
+    "formal/provider.json": "71cf87b75cec15d5ae18dff9183f5ad106cf58e10fc82b4d8cb3e7eddb7ff3b2",
+    "readonly-compat/provider.env": "4b79723ebe97b87777a4b24c1ebd1841cf871759ca7e625ea8d0a466a17a977f",
+    "readonly-compat/runtime.env": "168a5512e2591ee1f72c182d489b2743d99b9f526e9e415a1d62d115f31f5811",
+    "readonly-compat/site-images.env": "6497f6f69699b62a2dc6fb2816aa1864aeea625360c12888a135824f819d7fba",
+    "readonly-compat/compose.json": "52c480dabb9ad027810b47c43b605ae956269b6619f9e5d954b0e8b203e01fb1",
+    "readonly-compat/provider.json": "8cc7fe5367cdf1977e831b9f943894332ee8db1d52e5d9bdb6245e1cb0f82b7b"
+  },
+  "softwareGates": {
+    "sourceCommit": "58d3d734ff67cfb7351eec4ac70d6b15cbc37ccc",
+    "receipt": "reports/ugv-zmq-simulation-view-20261030/software/verification.json",
+    "sha256": "4f13dd55e609174708e6a33c6390d0ffefbc84dd6a8719f2680a5ddf293c1bd3",
+    "commandsPassed": 24,
+    "sourceRebuilt": false
+  }
+}

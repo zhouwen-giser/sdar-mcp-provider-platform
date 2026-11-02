@@ -1,0 +1,246 @@
+{
+  "schemaVersion": "smpp.zmq-formal-cutover/1",
+  "observedAt": "2026-11-02T02:38:27.564145+00:00",
+  "requestedScope": "正式服务切换，启用所有工具",
+  "sourceCodeCommit": "58d3d734ff67cfb7351eec4ac70d6b15cbc37ccc",
+  "sourceDocumentationHeadBeforeCutover": "4481fb73cad17c648121c01e2e36cb0d3b1f1dde",
+  "sourceFingerprint": "984cdbd8095b61de4cf1d7a8b0b99c62bbb9e01b133122175d9661e4e82dc610",
+  "deploymentStatus": "formal_control_active",
+  "toolActivationStatus": "catalog_published_with_two_explicit_operation_blockers",
+  "catalogProfile": "zmq_v1_4_0_site_control_14",
+  "toolCount": 14,
+  "tools": [
+    "vehicle_get_state",
+    "vehicle_get_capabilities",
+    "vehicle_get_payload_status",
+    "vehicle_get_targets",
+    "vehicle_zmq_navigate",
+    "vehicle_zmq_area_recon",
+    "vehicle_zmq_circular_recon",
+    "vehicle_zmq_camera",
+    "vehicle_zmq_inspect_area",
+    "simulation_apply_effect",
+    "vehicle_get_inspection_result",
+    "simulation_get_effect_result",
+    "vehicle_zmq_plan_route",
+    "simulation_adjust_view"
+  ],
+  "mcpUrl": "http://17.26.1.20:19100/mcp",
+  "consoleUrl": "http://17.26.1.20:19101/",
+  "authentication": "site_anonymous_optional_strict_jwt",
+  "consoleProtocol": "HTTP",
+  "containers": {
+    "smpp-zmq-site-formal-provider-1": {
+      "id": "6b2fb419a7b7750cc2928e516f7e8b6b2ae10d0e9bcb02e64ec9f3ac0d95546a",
+      "image": "sha256:a48f3bf79bf3db6fbe54d1009b8402b425ec1f5fdbe75ef2d7b17152554a59fb",
+      "running": true,
+      "restartPolicy": "unless-stopped",
+      "health": null,
+      "composeFiles": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/deploy/ugv-zmq/site-control/compose.formal.yaml,/home/sz/.smpp-debug/ugv-zmq-formal-tools-20261102/formal/pms-readonly-override.json"
+    },
+    "smpp-zmq-site-formal-runtime-1": {
+      "id": "deeaa95d0868ff64a47ccddddc831b11573dbaf5351c3962d9ff98b502a37070",
+      "image": "sha256:11abe9156fe610a28cfb4f261532a95be04a306d40e96adacdcc464fa8511a9e",
+      "running": true,
+      "restartPolicy": "unless-stopped",
+      "health": "healthy",
+      "composeFiles": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/deploy/ugv-zmq/site-control/compose.formal.yaml,/home/sz/.smpp-debug/ugv-zmq-formal-tools-20261102/formal/pms-readonly-override.json"
+    },
+    "smpp-zmq-site-formal-console-1": {
+      "id": "8df508a8566bc65837b9d40ec7d04a6f237c0d73234e15beef6888c14b9800b4",
+      "image": "sha256:4237409dc390f8533efee22a1bc7c44942c51df66e99ab4a12de6b9105328d8c",
+      "running": true,
+      "restartPolicy": "unless-stopped",
+      "health": "healthy",
+      "composeFiles": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/deploy/ugv-zmq/site-control/compose.formal.yaml,/home/sz/.smpp-debug/ugv-zmq-formal-tools-20261102/formal/pms-readonly-override.json"
+    },
+    "smpp-zmq-readonly-compat-provider-1": {
+      "id": "c6d5324124c16e930e1592161eba936428500121a6cbd79ad38879a9a4653fc8",
+      "image": "sha256:a48f3bf79bf3db6fbe54d1009b8402b425ec1f5fdbe75ef2d7b17152554a59fb",
+      "running": true,
+      "restartPolicy": "unless-stopped",
+      "health": null,
+      "composeFiles": "/home/sz/.smpp-debug/ugv-zmq-formal-tools-20261102/readonly-compat/compose.json"
+    },
+    "smpp-zmq-readonly-compat-runtime-1": {
+      "id": "a6642c41cc0bade4deb1107dc7af9e5f710e363ce6fd6330cfc2d34b16925add",
+      "image": "sha256:11abe9156fe610a28cfb4f261532a95be04a306d40e96adacdcc464fa8511a9e",
+      "running": true,
+      "restartPolicy": "unless-stopped",
+      "health": "healthy",
+      "composeFiles": "/home/sz/.smpp-debug/ugv-zmq-formal-tools-20261102/readonly-compat/compose.json"
+    },
+    "gowm-analysis-dev-f3dc6f4b8e-smpp-runtime-1": {
+      "id": "dd5a7ec889735236670f694c43f08108b56d5af8646235d8387cb56dad17dce3",
+      "image": "sha256:11abe9156fe610a28cfb4f261532a95be04a306d40e96adacdcc464fa8511a9e",
+      "running": true,
+      "restartPolicy": "unless-stopped",
+      "health": "healthy",
+      "composeFiles": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/deploy/ugv-zmq/site-control/compose.formal.yaml,/home/sz/.smpp-debug/ugv-zmq-formal-tools-20261102/formal/pms-readonly-override.json"
+    },
+    "smpp-zmq-site-control-provider-1": {
+      "id": "b2030f74c1d4fba9bcb8dd77701e4335c38088b59d09e98ec33eb9c48a7ef727",
+      "image": "sha256:a48f3bf79bf3db6fbe54d1009b8402b425ec1f5fdbe75ef2d7b17152554a59fb",
+      "running": false,
+      "restartPolicy": "no",
+      "health": null,
+      "composeFiles": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/deploy/ugv-zmq/site-control/compose.yaml"
+    },
+    "smpp-zmq-site-control-runtime-1": {
+      "id": "f8fd6c31572d28f75d33302e5d1b375ae4676831848834e99dbe8a5aba0846cb",
+      "image": "sha256:11abe9156fe610a28cfb4f261532a95be04a306d40e96adacdcc464fa8511a9e",
+      "running": false,
+      "restartPolicy": "no",
+      "health": "unhealthy",
+      "composeFiles": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/deploy/ugv-zmq/site-control/compose.yaml"
+    },
+    "smpp-zmq-site-control-console-1": {
+      "id": "15ce3ae3897ced48892f528958cdec624d3ec0ca5753f47535e65ab9da505ab5",
+      "image": "sha256:4237409dc390f8533efee22a1bc7c44942c51df66e99ab4a12de6b9105328d8c",
+      "running": false,
+      "restartPolicy": "no",
+      "health": "unhealthy",
+      "composeFiles": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/deploy/ugv-zmq/site-control/compose.yaml"
+    }
+  },
+  "transportTimeoutMs": {
+    "send": 1000,
+    "receive": 2000
+  },
+  "controlFamiliesEnabled": [
+    "navigation",
+    "camera_position_and_velocity",
+    "area_recon",
+    "circular_and_sector_recon",
+    "area_inspection",
+    "simulation_effect_manual_or_valid_geographic_observation"
+  ],
+  "operationSupport": {
+    "navigation.point": {
+      "status": "supported",
+      "description": "已观察到单点执行、暂停恢复和停稳；来源及完整业务报告资格另行核实。",
+      "evidenceRef": "field:20261029:sdar-task:9b4343de-74a1-44aa-81da-9d2bef274c32"
+    },
+    "navigation.route": {
+      "status": "supported",
+      "description": "操作员批准正式启用；现有原生协议与隔离软件验证支持该操作。现场动作及完整报告仍需分别验收，派发前复核实时状态和参数。",
+      "evidenceRef": "repo:58d3d734:reports/ugv-zmq-simulation-view-20261030/software/verification.json:native-and-lifecycle"
+    },
+    "navigation.returnHome": {
+      "status": "supported",
+      "description": "操作员批准正式启用；现有原生协议与隔离软件验证支持该操作。现场动作及完整报告仍需分别验收，派发前复核实时状态和参数。",
+      "evidenceRef": "repo:58d3d734:reports/ugv-zmq-simulation-view-20261030/software/verification.json:native-and-lifecycle"
+    },
+    "camera.position": {
+      "status": "supported",
+      "description": "已观察到角度状态、停止和占用解除；报告仍有证据缺口。",
+      "evidenceRef": "field:20261029:sdar-task:ac854c6f-33e5-448a-98e4-04b763b74ab7"
+    },
+    "camera.velocity": {
+      "status": "supported",
+      "description": "已观察到有限租期角速度及停止反馈；报告仍有证据缺口。",
+      "evidenceRef": "field:20261029:sdar-task:1d71bcbb-035d-46e4-a894-da930628ed0c"
+    },
+    "camera.zoom": {
+      "status": "unsupported",
+      "reasonCode": "ZMQ_OPTICAL_ZOOM_UNSUPPORTED",
+      "description": "当前仿真通过重建相机调整视场，缺少光学镜头稳定和停止反馈。",
+      "evidenceRef": "field:20261029:req-3abd3d98-7fea-4755-872b-96695144a4df:UNSUPPORTED"
+    },
+    "recon.area": {
+      "status": "supported",
+      "description": "操作员批准正式启用；现有原生协议与隔离软件验证支持该操作。现场动作及完整报告仍需分别验收，派发前复核实时状态和参数。",
+      "evidenceRef": "repo:58d3d734:reports/ugv-zmq-simulation-view-20261030/software/verification.json:native-and-lifecycle"
+    },
+    "recon.sector": {
+      "status": "supported",
+      "description": "操作员批准正式启用；现有原生协议与隔离软件验证支持该操作。现场动作及完整报告仍需分别验收，派发前复核实时状态和参数。",
+      "evidenceRef": "repo:58d3d734:reports/ugv-zmq-simulation-view-20261030/software/verification.json:native-and-lifecycle"
+    },
+    "recon.circular": {
+      "status": "supported",
+      "description": "操作员批准正式启用；现有原生协议与隔离软件验证支持该操作。现场动作及完整报告仍需分别验收，派发前复核实时状态和参数。",
+      "evidenceRef": "repo:58d3d734:reports/ugv-zmq-simulation-view-20261030/software/verification.json:native-and-lifecycle"
+    },
+    "inspection.area": {
+      "status": "supported",
+      "description": "操作员批准正式启用；现有原生协议与隔离软件验证支持该操作。现场动作及完整报告仍需分别验收，派发前复核实时状态和参数。",
+      "evidenceRef": "repo:58d3d734:reports/ugv-zmq-simulation-view-20261030/software/verification.json:native-and-lifecycle"
+    },
+    "simulation.applyEffect.observation": {
+      "status": "supported",
+      "description": "与人工分支共用已受理的原生位置交互合同；仍须逐次核实有效地理观测引用。",
+      "evidenceRef": "field:20261029:sdar-task:cda53d01-e45a-47bc-8756-b76e4bea05a8"
+    },
+    "simulation.applyEffect.manual": {
+      "status": "supported",
+      "description": "原生位置交互已受理并执行；该次无有效实体，业务失败，不代表能力不支持。",
+      "evidenceRef": "field:20261029:sdar-task:cda53d01-e45a-47bc-8756-b76e4bea05a8"
+    },
+    "camera.simulationView": {
+      "status": "unverified",
+      "reasonCode": "ZMQ_VIEW_BACKEND_NOT_CONFIGURED",
+      "description": "独立仿真视图已发布；站点 CARLA 067529e82-dirty 缺少匹配 SDK、真实场景及车辆 Actor 映射，尚未配置真实后端。",
+      "evidenceRef": "site:20261102:carla-client-0.9.16-server-067529e82-dirty-version-mismatch"
+    }
+  },
+  "fieldAcceptance": "not_reexecuted_by_deployment_checks",
+  "physicalDispatches": 0,
+  "unavailableOperations": {
+    "camera.zoom": "ZMQ_OPTICAL_ZOOM_UNSUPPORTED: native simulator rejected optical lens zoom",
+    "camera.simulationView": "ZMQ_VIEW_BACKEND_NOT_CONFIGURED: CARLA custom API SDK and verified world/vehicle mapping missing"
+  },
+  "observationEffectCandidates": 0,
+  "sourceQuality": "fresh_receipt_source_epoch_clock_and_report_completeness_unattested",
+  "preservation": {
+    "binding": "0ab6028b-f367-4953-819f-ecca220a9a71",
+    "databaseUrl": true,
+    "observationDatabaseUrl": true,
+    "consoleCredentialsFile": "/home/sz/.smpp-debug/ugv-control-console/credentials.json",
+    "trajectoryDirectory": "/mnt/data/docker/volumes/gowm-analysis-dev-f3dc6f4b8e-smpp_runtime-state/_data"
+  },
+  "sdar": {
+    "binding": {
+      "bindingId": "smpp-zmq-site-readonly-13",
+      "revision": 3,
+      "registryRevision": 15,
+      "registryChecksum": "94522d2dc3d511167fd735e6267ca32c03eff55b2ae20fb6cc12eb3e10172de9",
+      "catalogChecksum": "2fe5e0658c9d1769838cbc1d4aafb7f629a7ec2fa7165ab4af0ebc7bc743090e",
+      "status": "active",
+      "availabilityStatus": "available",
+      "endpointRef": "http://gowm-analysis-dev-f3dc6f4b8e-smpp-runtime-1:8080/mcp"
+    },
+    "compatibilityCatalog": "zmq_v1_1_0_readonly_13",
+    "newV14ControlPublication": false,
+    "readonlyA2ATaskId": "ca4e0707-71b2-4132-9a20-f01a3ae0c9e9",
+    "readonlyA2APhase": "completed",
+    "renewal": "two_or_more_refresh_cycles_observed_after_gateway_change"
+  },
+  "history": {
+    "taskApi": "existing_TASK_EXPIRED_preserved_no_TTL_rewrite",
+    "originalResultHashesUnchanged": true,
+    "effectProviderRead": "formal_v14_read_succeeded; readonly_v11_has_preexisting_output_schema_mismatch",
+    "inspectionAreaReconRead": "preexisting_business_failure_response_preserved"
+  },
+  "dispatchJournalCount": {
+    "before": 22,
+    "after": 22
+  },
+  "handoff": {
+    "databaseIdle": true,
+    "runtimeActive": 0,
+    "unresolvedAdmissions": 0,
+    "providerActive": 0,
+    "unresolvedNativeOccupancy": 0,
+    "pendingCommands": 0,
+    "unresolvedDispatches": 0,
+    "liveLeases": 0
+  },
+  "verification": {
+    "candidate": true,
+    "formal": true,
+    "browser": true,
+    "sdarReadonlyChain": true,
+    "containsPreexistingExpiryParityChecks": true
+  }
+}

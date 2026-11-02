@@ -113,3 +113,13 @@ commit is 58d3d73; all 24 expanded checks pass. This clarified scope leaves SDAR
 Formal activation still requires the matching site SDK and verified vehicle/world mapping;
 the old optical zoom refusal and previous field unknowns remain valid. The local fixes d2a03f7
 are pushed and verified; the new delivery's final push receipt is maintained externally.
+
+### Formal deployment, 2026-11-02
+
+The user subsequently authorized formal cutover. Exact code 58d3d734 now serves the fourteen-tool
+catalog on 19100 and the HTTP console on 19101, including split 1000/2000 ms exchange timeouts,
+persisted failure-stage diagnostics and per-operation admission. Existing unsupported optical
+zoom and the unconfigured project-owned FOV backend remain explicit blockers. Audited fresh
+stationary evidence released the old chassis occupancy while retaining its original unknown
+result. No physical control was dispatched by deployment checks. Details and immutable evidence
+hashes are in `reports/ugv-zmq-formal-tools-20261102/`.

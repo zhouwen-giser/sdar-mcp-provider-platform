@@ -125,3 +125,16 @@ It includes fixed source, offline Git history, four image layers, deployment ins
 the exact verification receipts. The archive is not a formal activation. Push result and final
 remote revision are recorded in the external PUSH_COMPLETION.json, avoiding a self-referential
 commit record. Main checkout packaging work and the other repository remain unchanged.
+
+### Formal catalog activation, 2026-11-02
+
+The user explicitly requested formal cutover and enabling tools. The verified 1.4.0 images now
+serve 19100/19101, with the full fourteen-tool catalog and per-operation admission. Eleven native
+operations have deployment support configured; this does not upgrade their field acceptance.
+Optical zoom remains unsupported. The project-owned view entry remains blocked because the
+matching site SDK and actual world/vehicle mapping are still missing; no camera was created.
+Fresh idle/stationary evidence released the predecessor chassis hold through audited
+reconciliation without changing its unknown outcome. The original PMS/SDAR readonly binding
+continues through an exact thirteen-tool compatibility endpoint. See
+`docs/execplans/ugv-zmq-formal-tools-20261102.md` and
+`reports/ugv-zmq-formal-tools-20261102/` for the actual cutover and remaining gaps.

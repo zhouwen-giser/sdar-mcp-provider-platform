@@ -1,0 +1,37 @@
+{
+  "commandId": "df64b34d-775b-4e24-99b5-4e4b7967e305",
+  "taskId": "f49b6c69-048c-48d4-b935-4aca6d343348",
+  "component": "chassis",
+  "reason": "Operator-authorized formal cutover 2026-11-02. Release predecessor occupancy only with fresh independent stationary and idle evidence. Preserve original unknown stop outcome; no device command or replay.",
+  "httpStatus": 200,
+  "occupancy": "released",
+  "priorOutcome": "ZMQ_STOP_UNCONFIRMED remains technical failure; device outcome unknown",
+  "physicalCommandRequested": false,
+  "freshIdleEvidence": [
+    {
+      "partitionHash": "1f75619a9800022a0df869dd80130e15282412724439e88871910674bb706376",
+      "sessionId": "13413043-fb63-4a36-b062-515fac752904",
+      "ordinal": "5906",
+      "entryHash": "5a8347a3f15b52216c3fddaccde49249317c56d7b4e79b009b8b2bcee53c90ac"
+    },
+    {
+      "partitionHash": "1f75619a9800022a0df869dd80130e15282412724439e88871910674bb706376",
+      "sessionId": "13413043-fb63-4a36-b062-515fac752904",
+      "ordinal": "5984",
+      "entryHash": "5664ff92bd7ebd46bac7b29c514df587f2aa59a8f78993fc747207392bd849a0"
+    },
+    {
+      "partitionHash": "1f75619a9800022a0df869dd80130e15282412724439e88871910674bb706376",
+      "sessionId": "13413043-fb63-4a36-b062-515fac752904",
+      "ordinal": "5908",
+      "entryHash": "849439f2f359ff5a08fece76468d91c2ad3d646bdb51735c3edc18dbf2c88e9b"
+    },
+    {
+      "partitionHash": "1f75619a9800022a0df869dd80130e15282412724439e88871910674bb706376",
+      "sessionId": "13413043-fb63-4a36-b062-515fac752904",
+      "ordinal": "5705",
+      "entryHash": "c2623465e6694d530406853cfbc72404793547a2b12604df5bedbc6ebf1d9503"
+    }
+  ],
+  "originalResultHashBeforeAndAfter": "36647a3fd5507b730ac514c2bddb904bf196ba0b19cadbf5e5343e525f85b7be"
+}
