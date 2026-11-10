@@ -12,6 +12,7 @@
   },
   "scripts": {
     "package:development-server": "python3 scripts/package-united-deployment.py",
+    "package:wsgs-united-server": "python3 scripts/package-wsgs-united-deployment.py",
     "clean": "rm -rf dist coverage packages/adapter-protocol/generated",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

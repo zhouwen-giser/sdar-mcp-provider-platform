@@ -4,6 +4,8 @@
 
 生成：`pnpm package:united-server`。可用 `--analysis-package`、`--gowm-package` 和 `--output-dir` 指定输入；默认取相邻仓库正式发布目录。
 
+加入已交付的 WSGS 四组件联合包时，使用 `pnpm package:united-server --wsgs-package /absolute/path/gowm-gdps-gsap-wsgs-dev-server-0.2.1.tar.gz`。此模式保留原 WSGS 联合包并提供五组件统一入口；详见 [五组件部署说明](../united-wsgs/README.md)。
+
 在 sz-gowm 将包解压至新目录，使用：
 
 ```sh
