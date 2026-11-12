@@ -282,7 +282,12 @@ export function controlScope(profileInput: unknown, settingsInput: unknown): Con
     ![VIEW_PROFILE, SITE_CONTROL_V15_PROFILE].includes(settings.catalogProfile ?? "")
   )
     throw Error("ZMQ_VIEW_CATALOG_REQUIRED");
-  for (const component of Object.values(profile.components)) {
+  const components = [
+    profile.components.chassis,
+    profile.components.eo,
+    profile.components.simulationEffect,
+  ];
+  for (const component of components) {
     for (const endpoint of [component.commandEndpoint, component.publicationEndpoint]) {
       // Numeric loopback only: no DNS, forwarding URL or externally routable command target.
       if (settings.mode === "isolated_simulator") {
@@ -310,16 +315,8 @@ export function controlScope(profileInput: unknown, settingsInput: unknown): Con
   const stableSettings = { ...settings, observerSessionId: null };
   const hash = sha256(canonical({ profile, settings: stableSettings }));
   // Endpoints, independent of requested identity, prevent two identities controlling one simulator.
-  const writerKey = sha256(
-    canonical(
-      Object.values(profile.components)
-        .map((c) => c.commandEndpoint)
-        .sort(),
-    ),
-  );
-  const writerKeys = Object.values(profile.components)
-    .map((c) => sha256(c.commandEndpoint))
-    .sort();
+  const writerKey = sha256(canonical(components.map((c) => c.commandEndpoint).sort()));
+  const writerKeys = components.map((c) => sha256(c.commandEndpoint)).sort();
   if (settings.simulationView)
     writerKeys.push(
       sha256(

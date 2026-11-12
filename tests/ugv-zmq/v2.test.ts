@@ -1,3 +1,4 @@
+import { present } from "../ugv-zmq-control/helpers.js";
 import { readFileSync } from "node:fs";
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
@@ -90,7 +91,7 @@ describe("explicit native protocol generations", () => {
     expect(() => decodeChassisFrame(encoded)).toThrow();
   });
   it("rejects prefix/CRC corruption, truncation and overlong business payload", () => {
-    const b = Buffer.from(fixtures.vectors[0]!.hex, "hex"),
+    const b = Buffer.from(present(fixtures.vectors[0]).hex, "hex"),
       h = b.indexOf(0x3a) + 1;
     b.writeUInt32LE(0, h + 24);
     expect(() => decodeChassisFrame(b, { protocolVersion: "2.1" })).toThrow("CRC_INVALID");
@@ -122,7 +123,7 @@ describe("explicit native protocol generations", () => {
     expect(EoPublicationV23.safeParse(event("tracklist", track())).success).toBe(true);
     for (const mutation of ["exposure", "outside", "missing", "unknown"]) {
       const d = track(),
-        t = d.targets[0]!;
+        t = present(d.targets[0]);
       if (mutation === "exposure") t.observed_at_utc_ms = 1;
       if (mutation === "outside") t.bbox.x_px = 11;
       if (mutation === "missing") delete (t as Partial<typeof t>).bbox;

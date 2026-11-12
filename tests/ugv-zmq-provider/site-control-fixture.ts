@@ -175,10 +175,11 @@ export async function controlSiteFixture(
       ),
       mode: "site_control",
       handoffGrantHash: sha256(canonical(grant)),
-      siteEndpoints: Object.values(profile.components).flatMap((c) => [
-        c.commandEndpoint,
-        c.publicationEndpoint,
-      ]),
+      siteEndpoints: [
+        profile.components.chassis,
+        profile.components.eo,
+        profile.components.simulationEffect,
+      ].flatMap((c) => [c.commandEndpoint, c.publicationEndpoint]),
     },
     databaseUrl: db(0),
     observationDatabaseUrl: databaseUrl,
@@ -251,6 +252,28 @@ export async function controlSiteFixture(
       const port = provider.port;
       await provider.close();
       provider = await openZmqProvider({ ...providerOptions, port });
+      // The native observer may become ready before the Runtime gRPC channel reconnects.
+      for (let attempt = 0; attempt < 100; attempt++) {
+        try {
+          if (
+            (
+              await mcp.rpc(
+                "tools/call",
+                {
+                  name: "vehicle_get_state",
+                  arguments: { resourceId: present(profile.providerBinding.resourceId) },
+                },
+                1000,
+              )
+            ).isError === false
+          )
+            return;
+        } catch {
+          /* Read-only probe; no control request is retried. */
+        }
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+      throw Error("FIXTURE_RUNTIME_RECONNECT_TIMEOUT");
     },
     async close() {
       await runtime.app.close();

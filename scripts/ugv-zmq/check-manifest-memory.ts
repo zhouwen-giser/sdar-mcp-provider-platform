@@ -23,6 +23,7 @@ manifest.businessEventSources = [
     maxPayloadStringBytes: "65536",
   },
 ];
+// eslint-disable-next-line @typescript-eslint/unbound-method -- Called with explicit compiler this below.
 const original = Ajv2020.prototype.compile;
 let cacheEntries = 0;
 const instrumented = function (this: Ajv2020, ...args: Parameters<typeof original>) {
@@ -43,7 +44,10 @@ for (let round = 0; round <= 60; round++) {
     samples.push({ round, heapUsed: process.memoryUsage().heapUsed, cacheEntries });
   }
 }
-const delta = samples.at(-1)!.heapUsed - samples[2]!.heapUsed;
+const last = samples.at(-1),
+  warm = samples[2];
+if (!last || !warm) throw Error("INSUFFICIENT_MEMORY_SAMPLES");
+const delta = last.heapUsed - warm.heapUsed;
 const report = {
   scenario: "repeated unchanged 1.4 catalog validation with reused registry",
   samples,

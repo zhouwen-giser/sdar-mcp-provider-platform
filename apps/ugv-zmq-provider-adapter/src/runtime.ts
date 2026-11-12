@@ -238,7 +238,7 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
           : this.context(context);
       if (!this.controlTools.has(name)) {
         if (name === FRAME_TOOL && this.siteReads)
-          return this.siteReads.availability(name, args, context);
+          return await this.siteReads.availability(name, args, context);
         if (name.endsWith("_result")) await this.read(name, args, c);
         return result(true, "ZMQ_READ_AVAILABLE");
       }

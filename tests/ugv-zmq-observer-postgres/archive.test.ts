@@ -1,3 +1,4 @@
+import { present } from "../ugv-zmq-control/helpers.js";
 import { DeploymentProfileV2 } from "../../packages/vehicle-zmq-contract/src/site-profile.js";
 import { readFileSync, writeFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
@@ -155,7 +156,7 @@ describe.skipIf(!configFile)("SIMULATED real PostgreSQL and native ZMQ observati
     const { archive, s, identity } = store();
     const observer = new ZmqObservationObserver(profile(), s, identity, archive);
     await observer.start();
-    const oldSession = observer.sessionId!;
+    const oldSession = present(observer.sessionId);
     const append = archive.append.bind(archive);
     const lost = vi.spyOn(archive, "append").mockImplementationOnce(async (events) => {
       await append(events);
@@ -170,7 +171,7 @@ describe.skipIf(!configFile)("SIMULATED real PostgreSQL and native ZMQ observati
     await observer.stop();
     lost.mockRestore();
     const oldPage = await archive.page(oldSession),
-      tail = oldPage.entries.at(-1)!;
+      tail = present(oldPage.entries.at(-1));
     expect(oldPage.entries.filter((e) => e.payload.type === "reception")).toHaveLength(1);
     const next = new PostgresObservationArchive(pool, identity, s);
     stores.push(next);
@@ -228,7 +229,7 @@ describe.skipIf(!configFile)("SIMULATED real PostgreSQL and native ZMQ observati
     await observer.start();
     const after = await archive.page(old.sessionId);
     expect(after).toEqual(before);
-    expect((await next.page(observer.sessionId!)).entries[0]?.payload).toMatchObject({
+    expect((await next.page(present(observer.sessionId))).entries[0]?.payload).toMatchObject({
       code: "RECEIVER_SESSION_STARTED_AFTER_NATIVE_PROTOCOL_UPGRADE",
       recovery: {
         predecessorSessionId: old.sessionId,
@@ -236,7 +237,7 @@ describe.skipIf(!configFile)("SIMULATED real PostgreSQL and native ZMQ observati
         durableHeadHash: before.sessionHeadHash,
       },
     });
-    const page = await next.page(observer.sessionId!);
+    const page = await next.page(present(observer.sessionId));
     expect(page.entries[0]?.payload.type).toBe("gap");
     await observer.stop();
   });

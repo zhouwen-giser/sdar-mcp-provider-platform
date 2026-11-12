@@ -14,6 +14,7 @@ import {
 } from "../../packages/vehicle-zmq-contract/src/index.js";
 import {
   device,
+  present,
   feedbackFrame,
   missionFrame,
   systemFrame,
@@ -426,7 +427,7 @@ export class SimulatedZmqDevices {
         height_px: 15,
       };
       this.frames.set(metadata.frame_id, metadata);
-      if (this.frames.size > 32) this.frames.delete(this.frames.keys().next().value!);
+      if (this.frames.size > 32) this.frames.delete(present(this.frames.keys().next().value));
       await this.eoPub.send(this.eoFrames("frame_header", metadata, utc + 2));
       if (this.emitImageDetections)
         await this.eoPub.send(
@@ -475,7 +476,7 @@ export class SimulatedZmqDevices {
   private eoFrames(topic: string, data: unknown, utc: number) {
     const frames = eoFrames(topic, data, utc);
     if (this.newProtocol) {
-      const body = JSON.parse(frames[1]!.toString()) as Record<string, unknown>;
+      const body = JSON.parse(present(frames[1]).toString()) as Record<string, unknown>;
       body.protocol = "2.3";
       frames[1] = Buffer.from(JSON.stringify(body));
     }
@@ -485,7 +486,7 @@ export class SimulatedZmqDevices {
     while (!this.#stopped) {
       try {
         const frames = await this.frameRep.receive(),
-          r = JSON.parse(frames[0]!.toString()) as {
+          r = JSON.parse(present(frames[0]).toString()) as {
             device_id: string;
             request_id: string;
             params: { frame_id: string; camera_id: string };

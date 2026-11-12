@@ -1,3 +1,4 @@
+import { present } from "../ugv-zmq-control/helpers.js";
 import { randomUUID, createHash } from "node:crypto";
 import { Reply } from "zeromq";
 import jpeg from "jpeg-js";
@@ -85,14 +86,14 @@ async function endpoint(
   sockets.push(socket);
   await socket.bind("tcp://127.0.0.1:*");
   const client = new NativeFrameClient(
-    socket.lastEndpoint!,
+    present(socket.lastEndpoint),
     "isr-01",
     FrameSettings.parse({ receiveTimeoutMs: 100 }),
   );
   clients.push(client);
   const work = (async () => {
     const f = await socket.receive(),
-      request = JSON.parse(f[0]!.toString()) as Record<string, unknown>;
+      request = JSON.parse(present(f[0]).toString()) as Record<string, unknown>;
     const reply = {
       protocol: "2.3",
       kind: "response",
@@ -271,7 +272,7 @@ describe("frame ownership, cache and metadata audit", () => {
         { resourceId: "vehicle:ugv", cameraId: "eo", frameId: "frame-1" },
         context,
       );
-    let release: () => void = () => {};
+    let release: () => void = () => undefined;
     const gate = new Promise<void>((resolve) => {
       release = resolve;
     });
@@ -311,7 +312,7 @@ describe("frame ownership, cache and metadata audit", () => {
       r.service.client,
       r.index,
       { ...config, cacheMaxBytes: maxBytes },
-      async () => {},
+      async () => undefined,
     );
     const a = await service.read(
       { resourceId: "vehicle:ugv", cameraId: "eo", frameId: "frame-1" },

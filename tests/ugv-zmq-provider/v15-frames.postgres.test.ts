@@ -1,3 +1,4 @@
+import { present } from "../ugv-zmq-control/helpers.js";
 import { readFileSync } from "node:fs";
 import { createHash, randomUUID } from "node:crypto";
 import { beforeAll, afterAll, describe, expect, it } from "vitest";
@@ -34,11 +35,11 @@ for (const readonly of [true, false])
         const tools = (await f.mcp.rpc("tools/list")).tools as Tool[];
         expect(tools).toHaveLength(15);
         expect(nativeCatalogReason(tools, f.resourceId)).toBeNull();
-        expect(record(tools[0]?._meta?.["io.sdar/ugvZmq"]).catalogProfile).toBe(
+        expect(record(present(tools[0])._meta?.["io.sdar/ugvZmq"]).catalogProfile).toBe(
           readonly ? "zmq_v1_5_0_readonly_15" : "zmq_v1_5_0_site_control_15",
         );
         const bad = structuredClone(tools);
-        bad[0]!.inputSchema.additionalProperties = true;
+        present(bad[0]).inputSchema.additionalProperties = true;
         expect(nativeCatalogReason(bad, f.resourceId)).toBe("ZMQ_NATIVE_CONTRACT_MISMATCH");
         const caps = toolContent(
           await f.mcp.tool("vehicle_get_capabilities", { resourceId: f.resourceId }),
@@ -48,9 +49,11 @@ for (const readonly of [true, false])
         );
       });
       it("reads an exact frame, verifies image hashes, and persists metadata without creating tasks", async () => {
-        const header = f.provider.observer
-          .snapshot()
-          .observations.find((o) => o.observation.key === "frame_header")!.observation.data;
+        const header = present(
+          f.provider.observer
+            .snapshot()
+            .observations.find((o) => o.observation.key === "frame_header"),
+        ).observation.data;
         const result = toolContent(
           await f.mcp.tool("vehicle_zmq_get_frame", {
             resourceId: f.resourceId,
@@ -128,7 +131,7 @@ for (const readonly of [true, false])
         expect(
           array(caps.tools)
             .map(record)
-            .filter((t) => t.name === "simulation_adjust_view")[0]?.available,
+            .find((t) => t.name === "simulation_adjust_view")?.available,
         ).toBe(false);
       });
       it("does not delay owned navigation cancellation while a frame response is pending", async () => {
@@ -170,9 +173,11 @@ for (const readonly of [true, false])
           },
         });
         await until(() => f.devices.moving);
-        const header = f.provider.observer
-          .snapshot()
-          .observations.find((o) => o.observation.key === "frame_header")!.observation.data;
+        const header = present(
+          f.provider.observer
+            .snapshot()
+            .observations.find((o) => o.observation.key === "frame_header"),
+        ).observation.data;
         const before = f.devices.frameRequests;
         f.devices.frameReplyDelayMs = 1500;
         let frameFinished = false;

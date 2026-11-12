@@ -12,6 +12,8 @@ export default tseslint.config(
       "apps/ugv-control-console/build/**",
       "apps/ugv-control-console/test-results/**",
       "coverage/**",
+      "artifacts/**",
+      "reports/**",
       "node_modules/**",
       "packages/adapter-protocol/generated/**",
       "references/**",

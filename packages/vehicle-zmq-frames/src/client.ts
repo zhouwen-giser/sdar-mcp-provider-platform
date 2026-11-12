@@ -71,8 +71,11 @@ export class NativeFrameClient {
     readonly deviceId: string,
     readonly settings: FrameSettings,
   ) {}
+  private isClosed() {
+    return this.#closed;
+  }
   async pull(cameraId: string, frameId: string, signal?: AbortSignal) {
-    if (this.#closed) throw Error("ZMQ_FRAME_CLIENT_CLOSED");
+    if (this.isClosed()) throw Error("ZMQ_FRAME_CLIENT_CLOSED");
     if (this.#busy) throw Error("ZMQ_FRAME_CHANNEL_BUSY");
     if (signal?.aborted) throw Error("ZMQ_FRAME_READ_CANCELLED");
     this.#busy = true;
@@ -130,26 +133,27 @@ export class NativeFrameClient {
       }
       const bytes = frames[1],
         metadata = reply.result;
+      if (!metadata || !bytes) throw Error("ZMQ_FRAME_RESPONSE_ASSOCIATION_INVALID");
       if (
         frames.length !== 2 ||
-        !bytes ||
-        !metadata ||
         bytes.length !== metadata.byte_length ||
         metadata.camera_id !== cameraId ||
         metadata.frame_id !== frameId
       )
         throw Error("ZMQ_FRAME_RESPONSE_ASSOCIATION_INVALID");
       await validateJpeg(bytes, metadata.width_px, metadata.height_px, activeSignal);
-      if (this.#closed) throw Error("ZMQ_FRAME_CLIENT_CLOSED");
+      if (this.isClosed()) throw Error("ZMQ_FRAME_CLIENT_CLOSED");
       return { bytes, metadata };
     } catch (error) {
-      if (this.#closed) throw Error("ZMQ_FRAME_CLIENT_CLOSED");
-      if (activeSignal.aborted) throw Error("ZMQ_FRAME_READ_CANCELLED");
+      if (this.isClosed()) throw Error("ZMQ_FRAME_CLIENT_CLOSED", { cause: error });
+      if (activeSignal.aborted) throw Error("ZMQ_FRAME_READ_CANCELLED", { cause: error });
       const code = error && typeof error === "object" && "code" in error ? error.code : null;
       if (code === "EAGAIN")
-        throw Error(stage === "send" ? "ZMQ_FRAME_SEND_TIMEOUT" : "ZMQ_FRAME_RECEIVE_TIMEOUT");
+        throw Error(stage === "send" ? "ZMQ_FRAME_SEND_TIMEOUT" : "ZMQ_FRAME_RECEIVE_TIMEOUT", {
+          cause: error,
+        });
       if (error instanceof Error && /^ZMQ_FRAME_[A-Z_]+$/.test(error.message)) throw error;
-      throw Error("ZMQ_FRAME_RESPONSE_INVALID");
+      throw Error("ZMQ_FRAME_RESPONSE_INVALID", { cause: error });
     } finally {
       activeSignal.removeEventListener("abort", abort);
       socket.close();

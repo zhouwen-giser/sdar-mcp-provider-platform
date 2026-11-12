@@ -207,10 +207,7 @@ export class ObservationNormalizer {
       nativeRequestId: text(task.request_id) ?? text(command.request_id),
       runtimeTaskId: null,
       sourceProducerEpoch: null,
-      sourceTime:
-        parsed.published_at_utc_ms === null
-          ? { unit: "not_supplied", value: null }
-          : { unit: "utc_ms", value: String(parsed.published_at_utc_ms) },
+      sourceTime: { unit: "utc_ms", value: String(parsed.published_at_utc_ms) },
       acquisitionUtcMs:
         typeof data.observed_at_utc_ms === "number"
           ? data.observed_at_utc_ms

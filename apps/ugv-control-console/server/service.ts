@@ -241,7 +241,7 @@ export class Service {
         total = 0,
         expectedSha = "",
         reference = "";
-      while (true) {
+      for (;;) {
         if (Date.now() - started > 30000) throw Error("ZMQ_FRAME_READ_TIMEOUT");
         const data = toolContent(
           await this.mcp.rpc(

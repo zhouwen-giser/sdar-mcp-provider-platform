@@ -39,6 +39,9 @@ export class FrameService {
     this.#sweeper = setInterval(() => this.prune(), Math.min(1000, this.settings.cacheTtlMs));
     this.#sweeper.unref();
   }
+  private isClosed() {
+    return this.#closed;
+  }
   private owner(context: ExecutionContextRecord) {
     if (!/^[a-f0-9]{64}$/.test(context.authorizationContextHash))
       throw Error("ZMQ_FRAME_IDENTITY_INVALID");
@@ -55,12 +58,12 @@ export class FrameService {
     const args = FrameInput.parse(input),
       owner = this.owner(context);
     if (args.resourceId !== this.resourceId) throw Error("ZMQ_FRAME_RESOURCE_UNAUTHORIZED");
-    if (this.#closed) throw Error("ZMQ_FRAME_CLIENT_CLOSED");
+    if (this.isClosed()) throw Error("ZMQ_FRAME_CLIENT_CLOSED");
     if (this.#reads >= 8) throw Error("ZMQ_FRAME_CHANNEL_BUSY");
     this.prune();
     if (args.retrievalId) {
       const entry = this.#entries.get(args.retrievalId);
-      if (!entry || entry.owner !== owner) throw Error("ZMQ_FRAME_CACHE_EXPIRED_OR_UNAUTHORIZED");
+      if (entry?.owner !== owner) throw Error("ZMQ_FRAME_CACHE_EXPIRED_OR_UNAUTHORIZED");
       if ((args.offset ?? 0) >= entry.bytes.length) throw Error("ZMQ_FRAME_OFFSET_INVALID");
     } else {
       const cached = [...this.#entries.values()].some(
@@ -71,7 +74,10 @@ export class FrameService {
       );
       if (!cached) {
         if (this.#pulling) throw Error("ZMQ_FRAME_CHANNEL_BUSY");
-        this.observations.get(args.cameraId!, args.frameId!);
+        const { cameraId, frameId } = args;
+        if (cameraId === undefined || frameId === undefined)
+          throw Error("ZMQ_FRAME_READ_PARAMETERS_INVALID");
+        this.observations.get(cameraId, frameId);
       }
     }
   }
@@ -96,12 +102,12 @@ export class FrameService {
     const args = FrameInput.parse(input),
       owner = this.owner(context);
     if (args.resourceId !== this.resourceId) throw Error("ZMQ_FRAME_RESOURCE_UNAUTHORIZED");
-    if (this.#closed) throw Error("ZMQ_FRAME_CLIENT_CLOSED");
+    if (this.isClosed()) throw Error("ZMQ_FRAME_CLIENT_CLOSED");
     this.prune();
     let entry: Entry | undefined;
     if (args.retrievalId) {
       entry = this.#entries.get(args.retrievalId);
-      if (!entry || entry.owner !== owner) {
+      if (entry?.owner !== owner) {
         await this.recordAudit({
           schemaVersion: "ugv.zmq-frame-access/1",
           owner,
@@ -113,8 +119,9 @@ export class FrameService {
         throw Error("ZMQ_FRAME_CACHE_EXPIRED_OR_UNAUTHORIZED");
       }
     } else {
-      const cameraId = args.cameraId!,
-        frameId = args.frameId!;
+      const { cameraId, frameId } = args;
+      if (cameraId === undefined || frameId === undefined)
+        throw Error("ZMQ_FRAME_READ_PARAMETERS_INVALID");
       entry = [...this.#entries.values()].find(
         (e) =>
           e.owner === owner && e.metadata.camera_id === cameraId && e.metadata.frame_id === frameId,
@@ -125,7 +132,7 @@ export class FrameService {
         this.#pulling = true;
         try {
           const pulled = await this.client.pull(cameraId, frameId, signal);
-          if (this.#closed) throw Error("ZMQ_FRAME_CLIENT_CLOSED");
+          if (this.isClosed()) throw Error("ZMQ_FRAME_CLIENT_CLOSED");
           const { encoding: _encoding, byte_length: _byteLength, ...metadata } = pulled.metadata;
           void _encoding;
           void _byteLength;
@@ -166,7 +173,7 @@ export class FrameService {
             reference: reference.reference,
             expiresAt,
           });
-          if (this.#closed) throw Error("ZMQ_FRAME_CLIENT_CLOSED");
+          if (this.isClosed()) throw Error("ZMQ_FRAME_CLIENT_CLOSED");
           this.#entries.set(id, entry);
           this.#bytes += entry.cost;
           this.prune();

@@ -114,7 +114,9 @@ export function nativeToolReason(tool: Tool, resourceId: string): string | null 
 }
 /** Formal native Providers must expose the whole reviewed catalog before any read or control. */
 export function nativeCatalogReason(tools: readonly Tool[], resourceId: string): string | null {
-  const profiles = new Set(tools.map((t) => record(t._meta?.["io.sdar/ugvZmq"]).catalogProfile));
+  const profiles = new Set(
+    tools.map((t) => record(t._meta?.["io.sdar/ugvZmq"]).catalogProfile ?? nativeCatalog.profile),
+  );
   const catalog = catalogs.find((c) => c.profile === [...profiles][0]);
   if (profiles.size !== 1 || !catalog) return "ZMQ_NATIVE_CONTRACT_MISMATCH";
   if (
