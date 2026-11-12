@@ -1,0 +1,534 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load local bake definitions
+#1 reading /home/sz/.smpp-debug/zmq-v15-20261112/bake.json 1.32kB / 1.32kB done
+#1 DONE 0.0s
+
+#2 [runtime internal] load build definition from Dockerfile
+#2 transferring dockerfile: 24.45kB done
+#2 DONE 0.0s
+
+#3 [console internal] load build definition from Dockerfile
+#3 transferring dockerfile: 1.88kB done
+#3 DONE 0.0s
+
+#4 [console internal] load metadata for docker.io/library/node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c
+#4 DONE 0.1s
+
+#5 [runtime internal] load .dockerignore
+#5 transferring context: 446B done
+#5 DONE 0.0s
+
+#6 [provider build 1/8] FROM docker.io/library/node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c
+#6 resolve docker.io/library/node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c 0.0s done
+#6 DONE 0.0s
+
+#7 [provider internal] load build context
+#7 ...
+
+#8 [console internal] load build context
+#8 transferring context: 3.76MB 0.1s done
+#8 DONE 0.1s
+
+#7 [runtime internal] load build context
+#7 ...
+
+#9 [console build 5/8] COPY apps/ugv-control-console/package.json apps/ugv-control-console/package.json
+#9 CACHED
+
+#10 [console build 2/8] WORKDIR /workspace
+#10 CACHED
+
+#11 [console build 3/8] RUN corepack enable
+#11 CACHED
+
+#12 [console build 4/8] COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+#12 CACHED
+
+#13 [console build 6/8] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     pnpm install --filter @sdar/ugv-control-console --frozen-lockfile --ignore-scripts --prefer-offline --store-dir=/pnpm/store
+#13 CACHED
+
+#7 [runtime internal] load build context
+#7 transferring context: 4.69MB 0.2s done
+#7 DONE 0.4s
+
+#14 [console build 7/8] COPY apps/ugv-control-console apps/ugv-control-console
+#14 DONE 0.5s
+
+#15 [console build 8/8] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     pnpm --filter @sdar/ugv-control-console build     && pnpm --filter @sdar/ugv-control-console deploy --legacy --prod /release
+#15 ...
+
+#16 [provider build 48/59] COPY packages/vehicle-provider-core/package.json packages/vehicle-provider-core/package.json
+#16 CACHED
+
+#17 [provider build 53/59] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     pnpm install --frozen-lockfile --ignore-scripts --prefer-offline       --network-concurrency=8 --store-dir=/pnpm/store     && pnpm rebuild esbuild grpc-tools
+#17 CACHED
+
+#18 [provider build 20/59] COPY packages/configuration-center/package.json packages/configuration-center/package.json
+#18 CACHED
+
+#19 [provider build 25/59] COPY packages/observability/package.json packages/observability/package.json
+#19 CACHED
+
+#20 [provider build 13/59] COPY apps/mock-npc-tank-mqtt-publisher/package.json apps/mock-npc-tank-mqtt-publisher/package.json
+#20 CACHED
+
+#21 [provider build 26/59] COPY packages/operation-registry/package.json packages/operation-registry/package.json
+#21 CACHED
+
+#22 [provider build 39/59] COPY packages/runtime-config-client/package.json packages/runtime-config-client/package.json
+#22 CACHED
+
+#23 [provider build 43/59] COPY packages/runtime-registration/package.json packages/runtime-registration/package.json
+#23 CACHED
+
+#24 [provider build 49/59] COPY packages/vehicle-mqtt-ingress/package.json packages/vehicle-mqtt-ingress/package.json
+#24 CACHED
+
+#25 [provider build  7/59] COPY apps/home-assistant-light-provider/package.json apps/home-assistant-light-provider/package.json
+#25 CACHED
+
+#26 [provider build 24/59] COPY packages/mcp-protocol/package.json packages/mcp-protocol/package.json
+#26 CACHED
+
+#27 [provider build 17/59] COPY apps/pms-worker/package.json apps/pms-worker/package.json
+#27 CACHED
+
+#28 [provider build 29/59] COPY packages/pms-application/package.json packages/pms-application/package.json
+#28 CACHED
+
+#29 [provider build 40/59] COPY packages/runtime-configuration-contract/package.json packages/runtime-configuration-contract/package.json
+#29 CACHED
+
+#30 [provider build 10/59] COPY apps/mock-ugv-device-mcp/package.json apps/mock-ugv-device-mcp/package.json
+#30 CACHED
+
+#31 [provider build 42/59] COPY packages/runtime-migration-runner/package.json packages/runtime-migration-runner/package.json
+#31 CACHED
+
+#32 [provider build 22/59] COPY packages/database-migration-runner/package.json packages/database-migration-runner/package.json
+#32 CACHED
+
+#33 [provider build 15/59] COPY apps/pms-web/package.json apps/pms-web/package.json
+#33 CACHED
+
+#34 [provider build 11/59] COPY apps/mock-ugv-mqtt-publisher/package.json apps/mock-ugv-mqtt-publisher/package.json
+#34 CACHED
+
+#35 [provider build 23/59] COPY packages/domain/package.json packages/domain/package.json
+#35 CACHED
+
+#36 [provider build 51/59] COPY examples/mock-adapter-typescript/package.json examples/mock-adapter-typescript/package.json
+#36 CACHED
+
+#37 [provider build 54/59] COPY Dockerfile Dockerfile
+#37 CACHED
+
+#38 [provider build  9/59] COPY apps/npc-tank-provider-adapter/package.json apps/npc-tank-provider-adapter/package.json
+#38 CACHED
+
+#39 [provider build 18/59] COPY packages/adapter-protocol/package.json packages/adapter-protocol/package.json
+#39 CACHED
+
+#40 [provider build 35/59] COPY packages/task-engine/package.json packages/task-engine/package.json
+#40 CACHED
+
+#41 [provider build  8/59] COPY apps/ugv-provider-adapter/package.json apps/ugv-provider-adapter/package.json
+#41 CACHED
+
+#42 [provider build 14/59] COPY apps/pms-api/package.json apps/pms-api/package.json
+#42 CACHED
+
+#43 [provider build 37/59] COPY packages/provider-package-registry/package.json packages/provider-package-registry/package.json
+#43 CACHED
+
+#44 [provider build 33/59] COPY packages/pms-persistence-postgres/package.json packages/pms-persistence-postgres/package.json
+#44 CACHED
+
+#45 [provider build 55/59] COPY scripts/verify-docker-workspace-manifests.mjs scripts/verify-docker-workspace-manifests.mjs
+#45 CACHED
+
+#46 [provider build 46/59] COPY packages/vehicle-zmq-observer/package.json packages/vehicle-zmq-observer/package.json
+#46 CACHED
+
+#47 [provider build  2/59] RUN corepack enable
+#47 CACHED
+
+#48 [provider build 38/59] COPY packages/registry-snapshot/package.json packages/registry-snapshot/package.json
+#48 CACHED
+
+#49 [provider build  5/59] COPY apps/runtime/package.json apps/runtime/package.json
+#49 CACHED
+
+#50 [provider build 45/59] COPY packages/vehicle-zmq-contract/package.json packages/vehicle-zmq-contract/package.json
+#50 CACHED
+
+#51 [provider build 19/59] COPY packages/catalog-manager/package.json packages/catalog-manager/package.json
+#51 CACHED
+
+#52 [provider build 21/59] COPY packages/conformance-testkit/package.json packages/conformance-testkit/package.json
+#52 CACHED
+
+#53 [provider build 27/59] COPY packages/persistence-postgres/package.json packages/persistence-postgres/package.json
+#53 CACHED
+
+#54 [provider build 36/59] COPY packages/provider-adapter-kit/package.json packages/provider-adapter-kit/package.json
+#54 CACHED
+
+#55 [provider build 47/59] COPY packages/vehicle-zmq-control/package.json packages/vehicle-zmq-control/package.json
+#55 CACHED
+
+#56 [provider build 12/59] COPY apps/mock-npc-tank-device-mcp/package.json apps/mock-npc-tank-device-mcp/package.json
+#56 CACHED
+
+#57 [provider build 32/59] COPY packages/pms-domain/package.json packages/pms-domain/package.json
+#57 CACHED
+
+#58 [provider build 30/59] COPY packages/pms-console-api-contract/package.json packages/pms-console-api-contract/package.json
+#58 CACHED
+
+#59 [provider build 50/59] COPY packages/vehicle-device-mcp-client/package.json packages/vehicle-device-mcp-client/package.json
+#59 CACHED
+
+#60 [provider build 28/59] COPY packages/pm2-runtime-adapter/package.json packages/pm2-runtime-adapter/package.json
+#60 CACHED
+
+#61 [provider build 41/59] COPY packages/runtime-deployment/package.json packages/runtime-deployment/package.json
+#61 CACHED
+
+#62 [provider build 44/59] COPY packages/secret-store/package.json packages/secret-store/package.json
+#62 CACHED
+
+#63 [provider build 52/59] COPY examples/mock-adapter-python/package.json examples/mock-adapter-python/package.json
+#63 CACHED
+
+#64 [provider build  3/59] WORKDIR /workspace
+#64 CACHED
+
+#65 [provider build  6/59] COPY apps/home-assistant-climate-provider/package.json apps/home-assistant-climate-provider/package.json
+#65 CACHED
+
+#66 [provider build 34/59] COPY packages/postgres-provisioner/package.json packages/postgres-provisioner/package.json
+#66 CACHED
+
+#67 [provider build  4/59] COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml .npmrc ./
+#67 CACHED
+
+#68 [provider build 16/59] COPY apps/ugv-control-console/package.json apps/ugv-control-console/package.json
+#68 CACHED
+
+#69 [provider build 31/59] COPY packages/pms-console-api-testkit/package.json packages/pms-console-api-testkit/package.json
+#69 CACHED
+
+#70 [runtime build 56/59] RUN node scripts/verify-docker-workspace-manifests.mjs
+#70 CACHED
+
+#71 [provider build 57/59] COPY . .
+#71 DONE 1.8s
+
+#72 [runtime build 58/59] RUN find contracts deploy/development/server/profiles -type d -exec chmod 755 {} +     && find contracts deploy/development/server/profiles -type f -exec chmod 644 {} +
+#72 DONE 3.4s
+
+#73 [provider build 59/59] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     test "api" = api     && pnpm build     && pnpm --filter @sdar/pms-web build     && cp -R dist/packages release-packages     && node --input-type=module -e 'import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs"; for (const directory of readdirSync("release-packages", { withFileTypes: true })) { if (!directory.isDirectory()) continue; const name = directory.name; const manifest = `packages/${name}/package.json`; if (!existsSync(manifest)) continue; const source = JSON.parse(readFileSync(manifest, "utf8")); writeFileSync(`release-packages/${name}/package.json`, `${JSON.stringify({ name: source.name, version: source.version, private: true, type: "module", main: "./src/index.js", exports: { ".": "./src/index.js" } }, null, 2)}\n`); }'     && find dist proto migrations release-packages -exec touch -h -d '@0' {} +
+#73 ...
+
+#15 [console build 8/8] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     pnpm --filter @sdar/ugv-control-console build     && pnpm --filter @sdar/ugv-control-console deploy --legacy --prod /release
+#15 1.302 $ tsc --noEmit -p tsconfig.build.json && vite build && tsc -p tsconfig.server.json
+#15 9.085 vite v8.1.5 building client environment for production...
+#15 9.103 [2Ktransforming...✓ 161 modules transformed.
+#15 9.719 rendering chunks...
+#15 9.927 computing gzip size...
+#15 9.941 dist/index.html                     0.46 kB │ gzip:   0.32 kB
+#15 9.941 dist/assets/index-CK6xs5jj.css     11.88 kB │ gzip:   3.48 kB
+#15 9.941 dist/assets/index-B0ZnCftS.js   1,051.15 kB │ gzip: 166.02 kB
+#15 9.941 
+#15 9.941 ✓ built in 855ms
+#15 9.942 [plugin builtin:vite-reporter] 
+#15 9.942 (!) Some chunks are larger than 500 kB after minification. Consider:
+#15 9.942 - Using dynamic import() to code-split the application
+#15 9.942 - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+#15 9.942 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+#15 15.71 [WARN] Shared workspace lockfile detected but configuration forces legacy deploy implementation.
+#15 15.78 Packages are copied from the content-addressable store to the virtual store.
+#15 15.78   Content-addressable store is at: /pnpm/store/v11
+#15 15.78   Virtual store is at:             ../release/node_modules/.pnpm
+#15 15.80 ✓ Lockfile passes supply-chain policies (verified 3h ago)
+#15 16.05 Progress: resolved 1, reused 0, downloaded 0, added 0
+#15 16.33 .                                        | [WARN] deprecated @opentelemetry/sdk-trace-node@2.9.0
+#15 17.05 Progress: resolved 48, reused 48, downloaded 0, added 0
+#15 18.05 Progress: resolved 49, reused 49, downloaded 0, added 0
+#15 20.03 Progress: resolved 50, reused 49, downloaded 0, added 0
+#15 21.03 Progress: resolved 50, reused 50, downloaded 0, added 0
+#15 26.74 Progress: resolved 51, reused 50, downloaded 0, added 0
+#15 27.74 Progress: resolved 51, reused 51, downloaded 0, added 0
+#15 29.95 Progress: resolved 52, reused 51, downloaded 0, added 0
+#15 30.95 Progress: resolved 52, reused 52, downloaded 0, added 0
+#15 31.93 [WARN] Request took 13930ms: https://registry.npmjs.org/@typescript-eslint%2Fparser
+#15 31.97 Progress: resolved 53, reused 52, downloaded 0, added 0
+#15 32.97 Progress: resolved 53, reused 53, downloaded 0, added 0
+#15 76.96 [WARN] GET https://registry.npmjs.org/react error (23). Will retry in 10 seconds. 2 retries left.
+#15 77.09 [WARN] GET https://registry.npmjs.org/react-dom error (23). Will retry in 10 seconds. 2 retries left.
+#15 77.18 [WARN] GET https://registry.npmjs.org/@typescript-eslint%2Feslint-plugin error (23). Will retry in 10 seconds. 2 retries left.
+#15 93.99 Progress: resolved 54, reused 53, downloaded 0, added 0
+#15 94.99 Progress: resolved 55, reused 55, downloaded 0, added 0
+#15 98.42 [WARN] Request took 11236ms: https://registry.npmjs.org/@typescript-eslint%2Feslint-plugin
+#15 98.47 Progress: resolved 56, reused 55, downloaded 0, added 0
+#15 99.49 Progress: resolved 226, reused 225, downloaded 0, added 0
+#15 100.5 Progress: resolved 227, reused 226, downloaded 0, added 0
+#15 101.6 Progress: resolved 231, reused 229, downloaded 0, added 0
+#15 102.6 Progress: resolved 232, reused 231, downloaded 0, added 0
+#15 103.6 Progress: resolved 233, reused 232, downloaded 0, added 0
+#15 104.6 Progress: resolved 234, reused 233, downloaded 0, added 0
+#15 106.1 Progress: resolved 235, reused 233, downloaded 0, added 0
+#15 107.1 Progress: resolved 235, reused 234, downloaded 0, added 0
+#15 109.8 [WARN] Request took 10447ms: https://registry.npmjs.org/playwright
+#15 111.9 [WARN] Request took 12089ms: https://registry.npmjs.org/@typescript-eslint%2Fvisitor-keys
+#15 112.1 Progress: resolved 236, reused 234, downloaded 0, added 0
+#15 113.1 Progress: resolved 236, reused 235, downloaded 0, added 0
+#15 116.6 [WARN] Request took 16518ms: https://registry.npmjs.org/@typescript-eslint%2Ftypescript-estree
+#15 116.8 Progress: resolved 237, reused 235, downloaded 0, added 0
+#15 117.8 Progress: resolved 237, reused 236, downloaded 0, added 0
+#15 120.9 [WARN] Request took 11092ms: https://registry.npmjs.org/playwright
+#15 121.0 Progress: resolved 238, reused 236, downloaded 0, added 0
+#15 122.0 Progress: resolved 238, reused 237, downloaded 0, added 0
+#15 159.6 [WARN] GET https://registry.npmjs.org/@typescript-eslint%2Ftypes error (23). Will retry in 10 seconds. 2 retries left.
+#15 176.9 Progress: resolved 239, reused 237, downloaded 0, added 0
+#15 177.9 Progress: resolved 399, reused 397, downloaded 0, added 0
+#15 178.9 Progress: resolved 443, reused 403, downloaded 0, added 0
+#15 179.9 Progress: resolved 455, reused 407, downloaded 0, added 0
+#15 180.9 Progress: resolved 458, reused 408, downloaded 0, added 0
+#15 181.9 Progress: resolved 459, reused 408, downloaded 0, added 0
+#15 182.9 Progress: resolved 517, reused 466, downloaded 0, added 0
+#15 183.9 Progress: resolved 553, reused 502, downloaded 0, added 0
+#15 184.9 Progress: resolved 554, reused 503, downloaded 0, added 0
+#15 185.9 Progress: resolved 585, reused 534, downloaded 0, added 0
+#15 187.3 Progress: resolved 586, reused 534, downloaded 0, added 0
+#15 188.3 Progress: resolved 587, reused 536, downloaded 0, added 0
+#15 189.4 Progress: resolved 588, reused 536, downloaded 0, added 0
+#15 189.6 [WARN] 3 deprecated subdependencies found: @opentelemetry/propagator-jaeger@2.9.0, @opentelemetry/sdk-trace-base@2.9.0, node-domexception@1.0.0
+#15 189.6 .                                        | +324 ++++++++++++++++++++++++++++++++
+#15 190.4 Progress: resolved 588, reused 537, downloaded 0, added 33
+#15 191.4 Progress: resolved 588, reused 537, downloaded 0, added 93
+#15 192.4 Progress: resolved 588, reused 537, downloaded 0, added 174
+#15 193.4 Progress: resolved 588, reused 537, downloaded 0, added 184
+#15 194.4 Progress: resolved 588, reused 537, downloaded 0, added 215
+#15 195.4 Progress: resolved 588, reused 537, downloaded 0, added 235
+#15 196.4 Progress: resolved 588, reused 537, downloaded 0, added 283
+#15 197.4 Progress: resolved 588, reused 537, downloaded 0, added 324, done
+#15 197.5 .../node_modules/protobufjs postinstall$ node scripts/postinstall
+#15 197.6 .../zeromq@6.8.0/node_modules/zeromq install$ node ./script/install.js
+#15 197.6 .../node_modules/protobufjs postinstall: Done
+#15 197.6 .../zeromq@6.8.0/node_modules/zeromq install: Done
+#15 197.8 [WARN] Failed to create bin at /release/node_modules/.bin/tsx. ENOENT: no such file or directory, open '/release/node_modules/.pnpm/tsx@4.23.1/node_modules/tsx/dist/cli.mjs'
+#15 197.8 [WARN] Failed to create bin at /release/node_modules/.bin/esbuild. ENOENT: no such file or directory, open '/release/node_modules/.pnpm/esbuild@0.28.1/node_modules/esbuild/bin/esbuild'
+#15 197.8 [WARN] Failed to create bin at /release/node_modules/.bin/acorn. ENOENT: no such file or directory, open '/release/node_modules/.pnpm/acorn@8.17.0/node_modules/acorn/bin/acorn'
+#15 197.8 [WARN] Failed to create bin at /release/node_modules/.bin/vite. ENOENT: no such file or directory, open '/release/node_modules/.pnpm/vite@8.1.5_@types+node@22.20.1_esbuild@0.28.1_tsx@4.23.1_yaml@2.9.0/node_modules/vite/bin/vite.js'
+#15 197.8 [WARN] Failed to create bin at /release/node_modules/.bin/esbuild. ENOENT: no such file or directory, open '/release/node_modules/.pnpm/esbuild@0.28.1/node_modules/esbuild/bin/esbuild'
+#15 DONE 198.6s
+
+#73 [provider build 59/59] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     test "api" = api     && pnpm build     && pnpm --filter @sdar/pms-web build     && cp -R dist/packages release-packages     && node --input-type=module -e 'import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs"; for (const directory of readdirSync("release-packages", { withFileTypes: true })) { if (!directory.isDirectory()) continue; const name = directory.name; const manifest = `packages/${name}/package.json`; if (!existsSync(manifest)) continue; const source = JSON.parse(readFileSync(manifest, "utf8")); writeFileSync(`release-packages/${name}/package.json`, `${JSON.stringify({ name: source.name, version: source.version, private: true, type: "module", main: "./src/index.js", exports: { ".": "./src/index.js" } }, null, 2)}\n`); }'     && find dist proto migrations release-packages -exec touch -h -d '@0' {} +
+#73 194.5 $ pnpm proto:generate && tsc -p tsconfig.build.json
+#73 195.2 $ node scripts/generate-proto.mjs
+#73 ...
+
+#74 [provider runtime 2/3] WORKDIR /app
+#74 CACHED
+
+#75 [console runtime 3/3] COPY --from=build --chown=node:node /release/ ./
+#75 DONE 5.3s
+
+#73 [provider build 59/59] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     test "api" = api     && pnpm build     && pnpm --filter @sdar/pms-web build     && cp -R dist/packages release-packages     && node --input-type=module -e 'import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs"; for (const directory of readdirSync("release-packages", { withFileTypes: true })) { if (!directory.isDirectory()) continue; const name = directory.name; const manifest = `packages/${name}/package.json`; if (!existsSync(manifest)) continue; const source = JSON.parse(readFileSync(manifest, "utf8")); writeFileSync(`release-packages/${name}/package.json`, `${JSON.stringify({ name: source.name, version: source.version, private: true, type: "module", main: "./src/index.js", exports: { ".": "./src/index.js" } }, null, 2)}\n`); }'     && find dist proto migrations release-packages -exec touch -h -d '@0' {} +
+#73 ...
+
+#76 [console] exporting to image
+#76 exporting layers
+#76 exporting layers 9.2s done
+#76 exporting manifest sha256:838c92ada143ec55a6bb291fc590589519807838ef1b9293fe3921dd901a02e4 0.1s done
+#76 exporting config sha256:e5900af69cad392d11e1f3f8af0d572831c03c5a878d41e10bc0064f67d08a16
+#76 exporting config sha256:e5900af69cad392d11e1f3f8af0d572831c03c5a878d41e10bc0064f67d08a16 0.2s done
+#76 exporting attestation manifest sha256:5f8b4e72e7923549d6853d495b9b57cbc7567db6e7e0a775b638e2cf32c61787 0.1s done
+#76 exporting manifest list sha256:85bb4a88685af269fac74d716f76064c07cea6126ee943044be99148b90a1860
+#76 exporting manifest list sha256:85bb4a88685af269fac74d716f76064c07cea6126ee943044be99148b90a1860 0.1s done
+#76 naming to docker.io/library/smpp-zmq-v15-console:ca33761c1d5c done
+#76 unpacking to docker.io/library/smpp-zmq-v15-console:ca33761c1d5c
+#76 ...
+
+#73 [provider build 59/59] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     test "api" = api     && pnpm build     && pnpm --filter @sdar/pms-web build     && cp -R dist/packages release-packages     && node --input-type=module -e 'import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs"; for (const directory of readdirSync("release-packages", { withFileTypes: true })) { if (!directory.isDirectory()) continue; const name = directory.name; const manifest = `packages/${name}/package.json`; if (!existsSync(manifest)) continue; const source = JSON.parse(readFileSync(manifest, "utf8")); writeFileSync(`release-packages/${name}/package.json`, `${JSON.stringify({ name: source.name, version: source.version, private: true, type: "module", main: "./src/index.js", exports: { ".": "./src/index.js" } }, null, 2)}\n`); }'     && find dist proto migrations release-packages -exec touch -h -d '@0' {} +
+#73 217.7 $ npm run contract:check && npm run validate:architecture && npm run validate:pages && npm run check:imports && npm run typecheck && vite build
+#73 ...
+
+#76 [console] exporting to image
+#76 unpacking to docker.io/library/smpp-zmq-v15-console:ca33761c1d5c 5.8s done
+#76 DONE 15.6s
+
+#73 [provider build 59/59] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     test "api" = api     && pnpm build     && pnpm --filter @sdar/pms-web build     && cp -R dist/packages release-packages     && node --input-type=module -e 'import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs"; for (const directory of readdirSync("release-packages", { withFileTypes: true })) { if (!directory.isDirectory()) continue; const name = directory.name; const manifest = `packages/${name}/package.json`; if (!existsSync(manifest)) continue; const source = JSON.parse(readFileSync(manifest, "utf8")); writeFileSync(`release-packages/${name}/package.json`, `${JSON.stringify({ name: source.name, version: source.version, private: true, type: "module", main: "./src/index.js", exports: { ".": "./src/index.js" } }, null, 2)}\n`); }'     && find dist proto migrations release-packages -exec touch -h -d '@0' {} +
+#73 218.5 
+#73 218.5 > @sdar/pms-web@0.1.0 contract:check
+#73 218.5 > node scripts/check-contract-types.mjs
+#73 218.5 
+#73 219.4 Contract check passed: 1.0.0 dddf9a6c9a5d8264b71aa11495106e197857e186b02fd8e54fc0f0a53e33f042
+#73 219.7 
+#73 219.7 > @sdar/pms-web@0.1.0 validate:architecture
+#73 219.7 > node scripts/validate-architecture.mjs
+#73 219.7 
+#73 219.7 Architecture validation passed
+#73 219.9 
+#73 219.9 > @sdar/pms-web@0.1.0 validate:pages
+#73 219.9 > node scripts/validate-page-completion.mjs
+#73 219.9 
+#73 219.9 Page completion validation passed: 123 routes
+#73 220.1 
+#73 220.1 > @sdar/pms-web@0.1.0 check:imports
+#73 220.1 > node scripts/check-relative-imports.mjs
+#73 220.1 
+#73 220.2 Relative import validation passed
+#73 220.3 
+#73 220.3 > @sdar/pms-web@0.1.0 typecheck
+#73 220.3 > tsc --noEmit -p tsconfig.json
+#73 220.3 
+#73 226.6 vite v8.1.5 building client environment for production...
+#73 226.6 [2Ktransforming...✓ 105 modules transformed.
+#73 226.9 rendering chunks...
+#73 227.5 computing gzip size...
+#73 227.5 dist/index.html                               0.73 kB │ gzip:   0.46 kB
+#73 227.5 dist/assets/index-BfOSSl_w.css                9.20 kB │ gzip:   2.91 kB
+#73 227.5 dist/assets/product-components--jyh2IvQ.js    2.78 kB │ gzip:   1.35 kB │ map:     7.36 kB
+#73 227.5 dist/assets/ResourcePages-BUrPMguk.js         5.53 kB │ gzip:   2.11 kB │ map:    16.56 kB
+#73 227.5 dist/assets/GovernancePages-C0kOkh3V.js       7.33 kB │ gzip:   2.72 kB │ map:    20.03 kB
+#73 227.5 dist/assets/OverviewPages-a2m3RS99.js         7.47 kB │ gzip:   2.87 kB │ map:    19.75 kB
+#73 227.5 dist/assets/SystemPages-DA3J_4mh.js          10.96 kB │ gzip:   4.19 kB │ map:    25.82 kB
+#73 227.5 dist/assets/ConfigurationPages-DyPgJ3zN.js   12.91 kB │ gzip:   4.19 kB │ map:    38.36 kB
+#73 227.5 dist/assets/DiscoveryPages-D9KwZjx_.js       13.52 kB │ gzip:   4.43 kB │ map:    37.63 kB
+#73 227.5 dist/assets/OperationsPages-DXQq_ksm.js      13.79 kB │ gzip:   4.09 kB │ map:    38.50 kB
+#73 227.5 dist/assets/ProviderPages-D96QnSmT.js        16.18 kB │ gzip:   5.13 kB │ map:    45.48 kB
+#73 227.5 dist/assets/hooks-Drxy1ZGi.js                23.37 kB │ gzip:   6.82 kB │ map:    88.61 kB
+#73 227.5 dist/assets/RuntimePages-ya-pD650.js         25.13 kB │ gzip:   6.95 kB │ map:    70.28 kB
+#73 227.5 dist/assets/index-B5roESGf.js               379.60 kB │ gzip: 114.36 kB │ map: 1,665.10 kB
+#73 227.5 
+#73 227.5 ✓ built in 880ms
+#73 DONE 229.3s
+
+#77 [provider production-dependencies 1/1] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     rm -rf node_modules apps/*/node_modules packages/*/node_modules examples/*/node_modules     && CI=true pnpm install --prod --offline --frozen-lockfile       --filter='!@sdar/pms-web' --store-dir=/pnpm/store     && find node_modules -type f -name '*.map' -delete     && find node_modules -type f -iname '*.md'       ! -iname 'license*' ! -iname 'notice*' ! -iname 'copying*' -delete     && rm -f node_modules/.modules.yaml node_modules/.pnpm-workspace-state-v1.json     && find node_modules -exec touch -h -d '@0' {} +
+#77 80.19 Scope: 48 of 49 workspace projects
+#77 80.32 ✓ Lockfile passes supply-chain policies (verified 3h ago)
+#77 80.33 Lockfile is up to date, resolution step is skipped
+#77 80.36 Progress: resolved 1, reused 0, downloaded 0, added 0
+#77 80.44 .                                        | +322 ++++++++++++++++++++++++++++++++
+#77 81.36 Progress: resolved 322, reused 322, downloaded 0, added 82
+#77 82.36 Progress: resolved 322, reused 322, downloaded 0, added 98
+#77 83.36 Progress: resolved 322, reused 322, downloaded 0, added 171
+#77 84.37 Progress: resolved 322, reused 322, downloaded 0, added 265
+#77 85.37 Progress: resolved 322, reused 322, downloaded 0, added 294
+#77 86.37 Progress: resolved 322, reused 322, downloaded 0, added 321
+#77 88.50 Progress: resolved 322, reused 322, downloaded 0, added 322
+#77 88.50 Progress: resolved 322, reused 322, downloaded 0, added 322, done
+#77 88.80 .../node_modules/protobufjs postinstall$ node scripts/postinstall
+#77 88.82 .../zeromq@6.8.0/node_modules/zeromq install$ node ./script/install.js
+#77 88.87 .../node_modules/protobufjs postinstall: Done
+#77 88.89 .../zeromq@6.8.0/node_modules/zeromq install: Done
+#77 89.40 Done in 9.8s using pnpm v11.13.1
+#77 DONE 91.4s
+
+#78 [provider ugv-real-production-dependencies 1/1] RUN rm -rf node_modules/.pnpm/node_modules/@sdar     && touch -h -d '@0' node_modules/.pnpm/node_modules
+#78 DONE 1.2s
+
+#79 [provider ugv-real-base 4/8] COPY --from=build --chown=root:root /workspace/dist/packages /app/dist/packages
+#79 CACHED
+
+#80 [provider ugv-real-base 5/8] COPY --from=build --chown=root:root /workspace/proto /app/proto
+#80 CACHED
+
+#81 [provider ugv-real-base 3/8] COPY --from=ugv-real-production-dependencies --chown=root:root /workspace/node_modules /app/node_modules
+#81 CACHED
+
+#82 [provider ugv-real-base 6/8] COPY --from=build --chown=root:root /workspace/contracts/gowm-shared-storage /app/contracts/gowm-shared-storage
+#82 CACHED
+
+#83 [provider ugv-real-base 7/8] COPY --from=build --chown=root:root /workspace/migrations /app/migrations
+#83 CACHED
+
+#81 [runtime ugv-real-base 3/8] COPY --from=ugv-real-production-dependencies --chown=root:root /workspace/node_modules /app/node_modules
+#81 CACHED
+
+#82 [runtime ugv-real-base 6/8] COPY --from=build --chown=root:root /workspace/contracts/gowm-shared-storage /app/contracts/gowm-shared-storage
+#82 CACHED
+
+#80 [runtime ugv-real-base 5/8] COPY --from=build --chown=root:root /workspace/proto /app/proto
+#80 CACHED
+
+#79 [runtime ugv-real-base 4/8] COPY --from=build --chown=root:root /workspace/dist/packages /app/dist/packages
+#79 CACHED
+
+#83 [runtime ugv-real-base 7/8] COPY --from=build --chown=root:root /workspace/migrations /app/migrations
+#83 CACHED
+
+#84 [runtime ugv-real-base 8/8] RUN mkdir -p /var/lib/sdar     && chown node:node /var/lib/sdar     && touch -d '@0' /var/lib/sdar /app
+#84 DONE 0.5s
+
+#85 [provider ugv-real-adapter 1/4] COPY --from=build --chown=root:root /workspace/dist/apps/ugv-provider-adapter /app/dist/apps/ugv-provider-adapter
+#85 DONE 0.3s
+
+#86 [runtime ugv-real-runtime 1/1] COPY --from=build --chown=root:root /workspace/dist/apps/runtime /app/dist/apps/runtime
+#86 DONE 0.3s
+
+#87 [runtime] exporting to image
+#87 exporting layers
+#87 ...
+
+#88 [provider ugv-real-adapter 2/4] COPY --from=build --chown=root:root /workspace/contracts/ugv-trajectory-history/v1/gowm-storage.json /app/contracts/ugv-trajectory-history/v1/gowm-storage.json
+#88 DONE 0.5s
+
+#89 [provider ugv-real-adapter 3/4] COPY --from=build --chown=root:root /workspace/scripts/ugv-simulation /app/scripts/ugv-simulation
+#89 DONE 0.4s
+
+#87 [runtime] exporting to image
+#87 exporting layers 0.7s done
+#87 exporting manifest sha256:d78ddcd2c1d789146f66a20e83d39d653c9bfee4b9847cc1a3257f0448788147 0.0s done
+#87 exporting config sha256:08d261e05e60f637f844a0d311663f28d86c3deb039b666cebde4df5128f67c7 0.1s done
+#87 exporting attestation manifest sha256:cd4e32da6ff4e63db1e3ec2c453ea19fada1cc67eeabaa279f7dde7fc381db8f
+#87 exporting attestation manifest sha256:cd4e32da6ff4e63db1e3ec2c453ea19fada1cc67eeabaa279f7dde7fc381db8f 0.2s done
+#87 exporting manifest list sha256:a456ce0aaf7354edcc8a02c5329905d211a46b1ad745df814ed96a88e0158788
+#87 exporting manifest list sha256:a456ce0aaf7354edcc8a02c5329905d211a46b1ad745df814ed96a88e0158788 0.1s done
+#87 naming to docker.io/library/smpp-zmq-v15-runtime:ca33761c1d5c done
+#87 unpacking to docker.io/library/smpp-zmq-v15-runtime:ca33761c1d5c
+#87 ...
+
+#90 [provider ugv-real-adapter 4/4] COPY --from=build --chown=root:root /workspace/deploy/development/server/profiles /app/profiles
+#90 DONE 0.4s
+
+#87 [runtime] exporting to image
+#87 unpacking to docker.io/library/smpp-zmq-v15-runtime:ca33761c1d5c 0.2s done
+#87 DONE 1.5s
+
+#91 [provider ugv-zmq-candidate 1/6] COPY --from=build --chown=root:root /workspace/dist/apps/ugv-zmq-provider-adapter /app/dist/apps/ugv-zmq-provider-adapter
+#91 DONE 0.4s
+
+#92 [provider ugv-zmq-candidate 2/6] COPY --from=build --chown=root:root /workspace/dist/scripts/ugv-zmq /app/dist/scripts/ugv-zmq
+#92 DONE 0.2s
+
+#93 [provider ugv-zmq-candidate 3/6] COPY --from=build --chown=root:root /workspace/contracts/ugv-zmq /app/contracts/ugv-zmq
+#93 DONE 0.3s
+
+#94 [provider ugv-zmq-candidate 4/6] COPY --from=build --chown=root:root /workspace/deploy/ugv-zmq /app/deploy/ugv-zmq
+#94 DONE 0.2s
+
+#95 [provider ugv-zmq-candidate 5/6] COPY --from=build --chown=root:root /workspace/packages/vehicle-zmq-contract/package.json /app/packages/vehicle-zmq-contract/package.json
+#95 DONE 0.2s
+
+#96 [provider ugv-zmq-candidate 6/6] COPY --from=build --chown=root:root /workspace/packages/vehicle-zmq-contract/src /app/packages/vehicle-zmq-contract/src
+#96 DONE 0.6s
+
+#97 [provider] exporting to image
+#97 exporting layers 2.7s done
+#97 exporting manifest sha256:feaed2669db4fc8f0a20441ae5367466f9d81d3c7cc72c0be9f3e0cbe635281d 0.1s done
+#97 exporting config sha256:d88388ac5e26f8f455c4d86e1cac26e6895922c7e0934310c6878406e1bfbe50
+#97 exporting config sha256:d88388ac5e26f8f455c4d86e1cac26e6895922c7e0934310c6878406e1bfbe50 0.2s done
+#97 exporting attestation manifest sha256:217e84b027c23ea89847215e32cabc559e47a68e8175959d31d8220fa3cbc31a
+#97 exporting attestation manifest sha256:217e84b027c23ea89847215e32cabc559e47a68e8175959d31d8220fa3cbc31a 0.3s done
+#97 exporting manifest list sha256:fd1eaead2ef4fd21dff77b358e1229d62167c2ff403c8e9310a318a5e7316a7c
+#97 exporting manifest list sha256:fd1eaead2ef4fd21dff77b358e1229d62167c2ff403c8e9310a318a5e7316a7c 0.1s done
+#97 naming to docker.io/library/smpp-zmq-v15-provider:ca33761c1d5c
+#97 naming to docker.io/library/smpp-zmq-v15-provider:ca33761c1d5c done
+#97 unpacking to docker.io/library/smpp-zmq-v15-provider:ca33761c1d5c
+#97 unpacking to docker.io/library/smpp-zmq-v15-provider:ca33761c1d5c 0.7s done
+#97 DONE 4.3s

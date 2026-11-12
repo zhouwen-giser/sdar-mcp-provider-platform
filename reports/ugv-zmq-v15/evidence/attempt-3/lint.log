@@ -1,0 +1,11 @@
+$ eslint .
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-control-console/server/service.ts
+  315:45  error  There is no `cause` attached to the symptom error being thrown  preserve-caught-error
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-control-console/test/api.test.ts
+  183:41  error  'options?.body' may use Object's default stringification format ('[object Object]') when stringified  @typescript-eslint/no-base-to-string
+
+✖ 2 problems (2 errors, 0 warnings)
+
+[ELIFECYCLE] Command failed with exit code 1.

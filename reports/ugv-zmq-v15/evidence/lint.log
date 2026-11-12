@@ -1,0 +1,91 @@
+$ eslint .
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-control-console/server/service.ts
+  244:14  error  Unnecessary conditional, value is always truthy  @typescript-eslint/no-unnecessary-condition
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-zmq-provider-adapter/src/runtime.ts
+  241:18  error  Returning an awaited promise is required in this context  @typescript-eslint/return-await
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/artifacts/inspection-area-v1/debug/vendor-managed.test.ts
+  0:0  error  Parsing error: /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/artifacts/inspection-area-v1/debug/vendor-managed.test.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/vehicle-zmq-control/src/model.ts
+  286:39  error  Unsafe member access .commandEndpoint on an `any` value                                               @typescript-eslint/no-unsafe-member-access
+  286:66  error  Unsafe member access .publicationEndpoint on an `any` value                                           @typescript-eslint/no-unsafe-member-access
+  289:21  error  Unsafe argument of type `any` assigned to a parameter of type `string | { toString: () => string; }`  @typescript-eslint/no-unsafe-argument
+  291:82  error  Unsafe argument of type `any` assigned to a parameter of type `string`                                @typescript-eslint/no-unsafe-argument
+  316:21  error  Unsafe return of a value of type `any`                                                                @typescript-eslint/no-unsafe-return
+  316:23  error  Unsafe member access .commandEndpoint on an `any` value                                               @typescript-eslint/no-unsafe-member-access
+  321:24  error  Unsafe argument of type `any` assigned to a parameter of type `string | Buffer<ArrayBufferLike>`      @typescript-eslint/no-unsafe-argument
+  321:26  error  Unsafe member access .commandEndpoint on an `any` value                                               @typescript-eslint/no-unsafe-member-access
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/vehicle-zmq-frames/src/client.ts
+  136:9   error  Prefer using an optional chain expression instead, as it's more concise and easier to read  @typescript-eslint/prefer-optional-chain
+  143:11  error  Unnecessary conditional, value is always falsy                                              @typescript-eslint/no-unnecessary-condition
+  146:11  error  Unnecessary conditional, value is always falsy                                              @typescript-eslint/no-unnecessary-condition
+  146:25  error  There is no `cause` attached to the symptom error being thrown                              preserve-caught-error
+  147:33  error  There is no `cause` attached to the symptom error being thrown                              preserve-caught-error
+  150:9   error  There is no `cause` attached to the symptom error being thrown                              preserve-caught-error
+  152:7   error  There is no `cause` attached to the symptom error being thrown                              preserve-caught-error
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/vehicle-zmq-frames/src/service.ts
+   63:11  error  Prefer using an optional chain expression instead, as it's more concise and easier to read  @typescript-eslint/prefer-optional-chain
+   74:31  error  Forbidden non-null assertion                                                                @typescript-eslint/no-non-null-assertion
+   74:47  error  Forbidden non-null assertion                                                                @typescript-eslint/no-non-null-assertion
+  104:11  error  Prefer using an optional chain expression instead, as it's more concise and easier to read  @typescript-eslint/prefer-optional-chain
+  116:24  error  Forbidden non-null assertion                                                                @typescript-eslint/no-non-null-assertion
+  117:19  error  Forbidden non-null assertion                                                                @typescript-eslint/no-non-null-assertion
+  128:15  error  Unnecessary conditional, value is always falsy                                              @typescript-eslint/no-unnecessary-condition
+  169:15  error  Unnecessary conditional, value is always falsy                                              @typescript-eslint/no-unnecessary-condition
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/vehicle-zmq-observer/src/normalize.ts
+  211:9  error  Unnecessary conditional, the types have no overlap  @typescript-eslint/no-unnecessary-condition
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/reports/ugv-zmq-site-control-20261027/site-read-verify.mjs
+  103:17  error  'document' is not defined    no-undef
+  104:17  error  'innerWidth' is not defined  no-undef
+  108:13  error  'document' is not defined    no-undef
+  109:60  error  'innerWidth' is not defined  no-undef
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/scripts/ugv-zmq/check-manifest-memory.ts
+  26:18  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  46:15  error  Forbidden non-null assertion                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-non-null-assertion
+  46:42  error  Forbidden non-null assertion                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-non-null-assertion
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/tests/ugv-zmq-control-postgres/simulator.ts
+  429:53  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  478:31  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  488:26  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/tests/ugv-zmq-frames/frames.test.ts
+   88:5   error  Forbidden non-null assertion           @typescript-eslint/no-non-null-assertion
+   95:28  error  Forbidden non-null assertion           @typescript-eslint/no-non-null-assertion
+  274:37  error  Unexpected empty arrow function        @typescript-eslint/no-empty-function
+  314:19  error  Unexpected empty async arrow function  @typescript-eslint/no-empty-function
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/tests/ugv-zmq-observer-postgres/archive.test.ts
+  158:24  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  173:14  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  231:29  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  239:34  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/tests/ugv-zmq-provider/site-control-fixture.ts
+  178:71  error  Unsafe return of a value of type `any[]`                     @typescript-eslint/no-unsafe-return
+  179:11  error  Unsafe member access .commandEndpoint on an `any` value      @typescript-eslint/no-unsafe-member-access
+  180:11  error  Unsafe member access .publicationEndpoint on an `any` value  @typescript-eslint/no-unsafe-member-access
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/tests/ugv-zmq-provider/v15-frames.postgres.test.ts
+   41:9   error  Forbidden non-null assertion                  @typescript-eslint/no-non-null-assertion
+   51:24  error  Forbidden non-null assertion                  @typescript-eslint/no-non-null-assertion
+  129:11  error  Prefer .find(...) instead of .filter(...)[0]  @typescript-eslint/prefer-find
+  173:24  error  Forbidden non-null assertion                  @typescript-eslint/no-non-null-assertion
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/tests/ugv-zmq/v2.test.ts
+   93:27  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  125:13  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+✖ 54 problems (54 errors, 0 warnings)
+
+[ELIFECYCLE] Command failed with exit code 1.

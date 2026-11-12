@@ -28,7 +28,7 @@
 | 浏览器登录、同帧框、原图下载、移动布局 | 1 项通过 | `browser.json` |
 | 三镜像构建与 save/load | exit 0，镜像 ID 不变 | `images-build.json`、`image-roundtrip.json` |
 
-跨仓库 SDAR fixture 需要 `SMPP_ZMQ_SDAR_ROOT`，本轮没有启用或宣称通过。早期失败及被替换构建留在 `attempt-1/`、`attempt-3/`；最终结果以 `attempt-4/` 为准。
+跨仓库 SDAR fixture 需要 `SMPP_ZMQ_SDAR_ROOT`，本轮没有启用或宣称通过。早期失败及被替换构建留在本目录的早期记录及 `attempt-3/`；最终结果以 `attempt-4/` 为准。
 
 内存复现中，60 次目录验证原先保留 1,688 个 AJV Schema、约 122 MB 堆；修复后最多 36 个、约 42 MB。取帧缓存、索引、解码线程和并发上限均经软件测试；这些证据不替代 24 小时现场候选记录。
 

@@ -1,0 +1,69 @@
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+ ❯ tests/ugv-zmq-provider/formal.postgres.test.ts (10 tests | 1 failed | 1 skipped) 27648ms
+     × discovers the exact formal catalog and reads the V2 state without MQTT fields 57ms
+ ❯ tests/ugv-zmq-provider/site-control-v13.postgres.test.ts (5 tests | 1 failed) 15267ms
+     × persists a lost REP stage even when later correlated physical feedback resolves the action, with no replay 486ms
+ ❯ tests/ugv-zmq-provider/contract.test.ts (4 tests | 1 failed) 710ms
+     × pins every schema and policy identically in the Provider and console 383ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/ugv-zmq-provider/contract.test.ts > formal ZMQ catalog > pins every schema and policy identically in the Provider and console
+AssertionError: expected 'ZMQ_NATIVE_CONTRACT_MISMATCH' to be null
+
+- Expected:
+null
+
++ Received:
+"ZMQ_NATIVE_CONTRACT_MISMATCH"
+
+ ❯ tests/ugv-zmq-provider/contract.test.ts:57:61
+     55|     expect(pinned.tools).toEqual(current);
+     56|     expect(consolePinned).toEqual(pinned);
+     57|     expect(nativeCatalogReason(current, "__RESOURCE_ID__")).toBeNull();
+       |                                                             ^
+     58|     expect(nativeCatalogReason(current.slice(1), "__RESOURCE_ID__")).t…
+     59|       "ZMQ_NATIVE_TOOL_SET_MISMATCH",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/ugv-zmq-provider/formal.postgres.test.ts > formal Runtime -> gRPC -> native ZMQ -> PostgreSQL > discovers the exact formal catalog and reads the V2 state without MQTT fields
+AssertionError: expected 'ZMQ_NATIVE_CONTRACT_MISMATCH' to be null
+
+- Expected:
+null
+
++ Received:
+"ZMQ_NATIVE_CONTRACT_MISMATCH"
+
+ ❯ tests/ugv-zmq-provider/formal.postgres.test.ts:277:52
+    275|     const tools = present((await rpc("tools/list", {})).result).tools …
+    276|     expect(tools.map((t) => t.name).sort()).toEqual([...ZMQ_PROVIDER_T…
+    277|     expect(nativeCatalogReason(tools, resourceId)).toBeNull();
+       |                                                    ^
+    278|     expect(
+    279|       tools.find((t) => t.name === "simulation_apply_effect")?._meta?.…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/ugv-zmq-provider/site-control-v13.postgres.test.ts > 1.3.0 anonymous real PostgreSQL / MCP / native ZMQ > persists a lost REP stage even when later correlated physical feedback resolves the action, with no replay
+Error: MCP_RPC_ERROR_-32603
+ ❯ Mcp.rpc apps/ugv-control-console/server/mcp.ts:80:13
+     78|         details = record(err.data);
+     79|       const reason = text(details.reasonCode ?? details.reason ?? err.…
+     80|       throw new UpstreamError(
+       |             ^
+     81|         /^[A-Z][A-Z0-9_]{2,100}$/.test(reason) ? reason : `MCP_RPC_ERR…
+     82|         response.status >= 500 || err.code === -32603,
+ ❯ tests/ugv-zmq-provider/site-control-v13.postgres.test.ts:222:24
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  3 failed | 13 passed (16)
+      Tests  3 failed | 104 passed | 1 skipped (108)
+   Start at  10:14:18
+   Duration  152.58s (transform 2.84s, setup 0ms, import 14.36s, tests 135.33s, environment 2ms)
+
