@@ -1,3 +1,4 @@
+import { DeploymentProfileV2 } from "../../packages/vehicle-zmq-contract/src/site-profile.js";
 import { readFileSync, writeFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { resolve } from "node:path";
@@ -15,6 +16,8 @@ import {
   ZmqSubscriptionDriver,
   reconstructFrames,
   sha256,
+  observerIdentity,
+  canonical,
   type Component,
   type ObserverSettings,
 } from "../../packages/vehicle-zmq-observer/src/index.js";
@@ -147,6 +150,117 @@ describe.skipIf(!configFile)("SIMULATED real PostgreSQL and native ZMQ observati
     const rows = await next.sessions();
     expect(rows.find((r) => r.sessionId === old.sessionId)?.status).toBe("abandoned");
     expect(identity.identity.sourceProducerEpoch).toBeNull();
+  });
+  it("recovers after a committed batch loses its acknowledgement without replaying it", async () => {
+    const { archive, s, identity } = store();
+    const observer = new ZmqObservationObserver(profile(), s, identity, archive);
+    await observer.start();
+    const oldSession = observer.sessionId!;
+    const append = archive.append.bind(archive);
+    const lost = vi.spyOn(archive, "append").mockImplementationOnce(async (events) => {
+      await append(events);
+      throw Object.assign(new Error("statement cancelled"), { code: "57014" });
+    });
+    observer.receive("chassis", localization(999n), clock());
+    await observer.flush();
+    expect(observer.health.status).toBe("failed");
+    expect(observer.health.failureCode).toBe("ZMQ_ARCHIVE_STATEMENT_TIMEOUT_57014");
+    expect(observer.health.unconfirmedReceptions).toBe(1);
+    expect(observer.snapshot().channels.chassis.receiptFresh).toBe(false);
+    await observer.stop();
+    lost.mockRestore();
+    const oldPage = await archive.page(oldSession),
+      tail = oldPage.entries.at(-1)!;
+    expect(oldPage.entries.filter((e) => e.payload.type === "reception")).toHaveLength(1);
+    const next = new PostgresObservationArchive(pool, identity, s);
+    stores.push(next);
+    const fresh = await next.start(),
+      page = await next.page(fresh.sessionId);
+    expect(fresh.sessionId).not.toBe(oldSession);
+    expect(page.entries[0]?.payload).toMatchObject({
+      type: "gap",
+      code: "RECEIVER_SESSION_RECOVERED_AFTER_ARCHIVE_FAILURE",
+      recovery: {
+        predecessorSessionId: oldSession,
+        durableLastOrdinal: tail.ordinal,
+        durableHeadHash: tail.entryHash,
+        predecessorStatus: "failed",
+        failureCode: "ZMQ_ARCHIVE_STATEMENT_TIMEOUT_57014",
+        persistenceBoundary: "database_tail_verified_no_batch_replay",
+      },
+    });
+    expect(page.entries.filter((e) => e.payload.type === "reception")).toHaveLength(0);
+    expect((await next.page(oldSession)).sessionHeadHash).toBe(tail.entryHash);
+  });
+  it("records a verified cross-version predecessor without modifying old archive history", async () => {
+    const { archive, s, identity } = store();
+    const old = await archive.start();
+    await archive.fail("ZMQ_ARCHIVE_STATEMENT_TIMEOUT_57014", 0);
+    await archive.close();
+    const before = await archive.page(old.sessionId);
+    const p = profile();
+    const upgraded = DeploymentProfileV2.parse({
+      ...p,
+      schemaVersion: "ugv.zmq-deployment/2",
+      components: {
+        ...p.components,
+        chassis: { ...p.components.chassis, protocolVersion: "2.1" },
+        eo: {
+          ...p.components.eo,
+          protocolVersion: "2.3",
+          framePullEndpoint: "tcp://127.0.0.1:5559",
+        },
+      },
+    });
+    const nextIdentity = observerIdentity(
+      upgraded,
+      "SIMULATED-upgrade:" + randomUUID(),
+      sha256(canonical(upgraded)),
+      "c".repeat(64),
+    );
+    const nextSettings = {
+      ...s,
+      recoveryPredecessor: { partitionHash: identity.partitionHash, sessionId: old.sessionId },
+    };
+    const next = new PostgresObservationArchive(pool, nextIdentity, nextSettings);
+    stores.push(next);
+    const observer = new ZmqObservationObserver(upgraded, nextSettings, nextIdentity, next);
+    await observer.start();
+    const after = await archive.page(old.sessionId);
+    expect(after).toEqual(before);
+    expect((await next.page(observer.sessionId!)).entries[0]?.payload).toMatchObject({
+      code: "RECEIVER_SESSION_STARTED_AFTER_NATIVE_PROTOCOL_UPGRADE",
+      recovery: {
+        predecessorSessionId: old.sessionId,
+        predecessorPartitionHash: identity.partitionHash,
+        durableHeadHash: before.sessionHeadHash,
+      },
+    });
+    const page = await next.page(observer.sessionId!);
+    expect(page.entries[0]?.payload.type).toBe("gap");
+    await observer.stop();
+  });
+  it("releases lease error listeners across repeated receiver generations", async () => {
+    const local = new Pool({ connectionString: pool.options.connectionString, max: 2 });
+    const { s, identity } = store();
+    try {
+      for (let i = 0; i < 12; i++) {
+        const archive = new PostgresObservationArchive(local, identity, s);
+        await archive.start();
+        await archive.close();
+      }
+      const a = await local.connect(),
+        b = await local.connect();
+      try {
+        expect(a.listenerCount("error")).toBeLessThanOrEqual(1);
+        expect(b.listenerCount("error")).toBeLessThanOrEqual(1);
+      } finally {
+        a.release();
+        b.release();
+      }
+    } finally {
+      await local.end();
+    }
   });
   it("enforces the cumulative canonical payload budget and reserves an explicit failure marker", async () => {
     const { archive, s } = store({ maxArchivePayloadBytes: 1024 }),

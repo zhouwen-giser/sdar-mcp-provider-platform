@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "ugv.zmq-contract-lock/2",
+  "files": [
+    {
+      "path": "packages/vehicle-zmq-contract/src/chassis-versioned.ts",
+      "sha256": "3406964913f582289c912eb6262ea05108ee4afdc8696bc62ea2466112a40f6b"
+    },
+    {
+      "path": "packages/vehicle-zmq-contract/src/schema-v23.ts",
+      "sha256": "0d909d3983c41fc460c73f4656f1ac3efb84150955db03b19315840b3220b151"
+    },
+    {
+      "path": "packages/vehicle-zmq-contract/src/wire-versioned.ts",
+      "sha256": "e4ea30716c58e76f388ac4bac5cec4291bc9853aef073d90d79172d58e2548a1"
+    },
+    {
+      "path": "packages/vehicle-zmq-contract/src/site-profile.ts",
+      "sha256": "be9a353d214bbed341f82007fefd9ee1a756c04ca27bbd0fb54f78b16998cefc"
+    },
+    {
+      "path": "contracts/ugv-zmq/v2/source-lock.json",
+      "sha256": "11a318168e362c4891fc6b2b7256483e487e1a7c9957cedcf5004f463cd623ee"
+    },
+    {
+      "path": "contracts/ugv-zmq/v2/fixtures/chassis-reference.json",
+      "sha256": "687696675ce6e84c35c06a99d28123b6f9487ccbfad8e7404a69d4f7f83378cd"
+    },
+    {
+      "path": "contracts/ugv-zmq/provider-v1.5.0-site-control/catalog.json",
+      "sha256": "5253dff9e77fe11dee18bd495388947229537a55c965956e8715445427e9c6e2"
+    },
+    {
+      "path": "contracts/ugv-zmq/provider-v1.5.0-readonly/catalog.json",
+      "sha256": "736ac206123220a76a7e2b76696fe4b55f941161238f57706b3201bf63744189"
+    },
+    {
+      "path": "contracts/ugv-zmq/v2/message-inventory.json",
+      "sha256": "b4d09346792c759a0b6ddaddf7ee2bb0f1b54e41d058f21a4bf3482003d2c0e9"
+    }
+  ]
+}

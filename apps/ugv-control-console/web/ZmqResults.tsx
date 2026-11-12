@@ -1,3 +1,4 @@
+import { FrameViewer } from "./FrameViewer.js";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api, describe } from "./api.js";
@@ -10,7 +11,17 @@ const effectLabels: Record<string, string> = {
   destroyed: "虚拟实体移除",
   unknown: "效果未知",
 };
-export function ZmqResults({ taskId, operation }: { taskId: string; operation: string }) {
+export function ZmqResults({
+  taskId,
+  operation,
+  resourceId,
+  frameEnabled = false,
+}: {
+  taskId: string;
+  operation: string;
+  resourceId: string;
+  frameEnabled?: boolean;
+}) {
   const [after, setAfter] = useState(0);
   useEffect(() => setAfter(0), [taskId]);
   const result = useQuery({
@@ -132,6 +143,18 @@ export function ZmqResults({ taskId, operation }: { taskId: string; operation: s
           {rows.length} 条 · {text(page.historySource) || "等待结果"}
         </small>
       </div>
+      {frameEnabled && operation !== EFFECT_APPLY && (
+        <FrameViewer
+          resourceId={resourceId}
+          frames={rows.flatMap((row) => {
+            const d = record(record(row.content).data);
+            return [
+              record(d.image),
+              ...array(d.targets).map((t) => record(record(t).image)),
+            ].filter((i) => typeof i.frame_id === "string" && typeof i.camera_id === "string");
+          })}
+        />
+      )}
       {rows.map((row) => (
         <details className="json-view" key={text(row.revision)}>
           <summary>

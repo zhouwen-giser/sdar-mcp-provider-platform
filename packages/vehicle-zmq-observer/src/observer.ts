@@ -69,6 +69,11 @@ export class ZmqObservationObserver {
       if (this.health.status === "failed")
         throw Error(this.health.failureCode ?? "ZMQ_ARCHIVE_START_UNCONFIRMED");
       this.health.status = "running";
+      for (const entry of this.#session.initialEntries ?? []) {
+        this.state.apply(entry.payload);
+        this.health.committedEvents++;
+        for (const listener of this.#committedListeners) listener(structuredClone(entry));
+      }
     } catch (error) {
       this.health.status = "failed";
       this.health.failureCode = safeCode(error);

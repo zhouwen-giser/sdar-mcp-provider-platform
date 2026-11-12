@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import { z } from "zod";
 import {
   VehicleObservationStateV2,
+  VehicleObservationStateV3,
   VehicleObservationCapabilitiesV2,
   decimal,
   type ZmqObservationObserver,
@@ -27,7 +28,11 @@ export function buildObservationApi(
   app.get("/v2/capabilities", () => observer.state.capabilities());
   app.get("/v2/storage", () => archive.storage());
   app.get("/v2/schemas", () => ({
-    state: z.toJSONSchema(VehicleObservationStateV2),
+    state: z.toJSONSchema(
+      observer.profile.components.eo.protocolVersion === "2.3"
+        ? VehicleObservationStateV3
+        : VehicleObservationStateV2,
+    ),
     capabilities: z.toJSONSchema(VehicleObservationCapabilitiesV2),
   }));
   app.get("/v2/sessions", async (request) => {

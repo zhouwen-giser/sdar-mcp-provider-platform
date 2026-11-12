@@ -2,7 +2,7 @@ import { performance } from "node:perf_hooks";
 import { SimulationViewClient } from "./simulation-view-client.js";
 import type { ViewReply } from "./simulation-view-contract.js";
 import { Publisher, Request } from "zeromq";
-import { parseResponse } from "../../vehicle-zmq-contract/src/index.js";
+import { parseResponse } from "../../vehicle-zmq-contract/src/wire-versioned.js";
 import { controlScope, type ControlScope, type WireCommand } from "./model.js";
 import {
   exchangeTimeouts,
@@ -151,6 +151,7 @@ export class NativeControlTransport implements CommandTransport {
       facts.response = responseEvidence(reply);
       stage = "validate";
       const response = parseResponse(command.component, reply, {
+        protocolVersion: this.scope.profile.components.eo.protocolVersion,
         deviceId: this.scope.profile.components[command.component].deviceId,
         requestId: command.requestId ?? "",
         method: command.method,

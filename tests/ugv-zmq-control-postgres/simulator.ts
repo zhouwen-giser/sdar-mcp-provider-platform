@@ -1,9 +1,13 @@
+import jpeg from "jpeg-js";
+import {
+  decodeChassisFrame,
+  encodeChassisFrame,
+} from "../../packages/vehicle-zmq-contract/src/chassis-versioned.js";
+import { EoRequestV23 } from "../../packages/vehicle-zmq-contract/src/schema-v23.js";
 import { randomUUID } from "node:crypto";
 import { setTimeout as delay } from "node:timers/promises";
 import { Publisher, Reply, Subscriber } from "zeromq";
 import {
-  decodeChassisFrame,
-  encodeChassisFrame,
   EoRequest,
   SimulationEffectRequest,
   DeploymentProfile,
@@ -24,6 +28,15 @@ export function releaseSimulatorEndpoints() {
 
 /** Loopback wire simulator. Accelerated 20Hz snapshots are test inputs, not provider qualification. */
 export class SimulatedZmqDevices {
+  newProtocol = false;
+  emitImageDetections = false;
+  readonly frameRep = new Reply({ receiveTimeout: 100, sendTimeout: 100, linger: 0 });
+  readonly jpegBytes = jpeg.encode({ width: 20, height: 15, data: Buffer.alloc(1200, 127) }, 80)
+    .data;
+  readonly frames = new Map<string, Record<string, unknown>>();
+  frameCounter = 0;
+  frameReplyDelayMs = 0;
+  frameRequests = 0;
   readonly chassisCommands = new Subscriber({
     receiveTimeout: 100,
     linger: 0,
@@ -84,6 +97,7 @@ export class SimulatedZmqDevices {
       this.eoPub,
       this.effectRep,
       this.effectPub,
+      ...(this.newProtocol ? [this.frameRep] : []),
     ];
     for (const socket of sockets) await socket.bind("tcp://127.0.0.1:*");
     this.chassisCommands.subscribe();
@@ -94,7 +108,12 @@ export class SimulatedZmqDevices {
     profile.components.eo.publicationEndpoint = this.eoPub.lastEndpoint ?? "";
     profile.components.simulationEffect.commandEndpoint = this.effectRep.lastEndpoint ?? "";
     profile.components.simulationEffect.publicationEndpoint = this.effectPub.lastEndpoint ?? "";
-    this.#tasks.push(this.chassisLoop(), this.eoLoop(), this.effectLoop());
+    this.#tasks.push(
+      this.chassisLoop(),
+      this.eoLoop(),
+      this.effectLoop(),
+      ...(this.newProtocol ? [this.frameLoop()] : []),
+    );
     this.#timers.push(
       setInterval(() => {
         void this.publish().catch((e: unknown) => this.errors.push(e));
@@ -234,7 +253,7 @@ export class SimulatedZmqDevices {
   }
   async publishReport(topic: "targetlist" | "tracklist", data: unknown) {
     this.#lastUtc = Math.max(Date.now(), this.#lastUtc + 2);
-    await this.eoPub.send(eoFrames(topic, data, this.#lastUtc));
+    await this.eoPub.send(this.eoFrames(topic, data, this.#lastUtc));
   }
   private async chassisLoop() {
     while (!this.#stopped) {
@@ -244,6 +263,7 @@ export class SimulatedZmqDevices {
         const parsed = decodeChassisFrame(frames[0], {
           systemId: this.controllerSystemId,
           targetSystemId: "1",
+          protocolVersion: this.newProtocol ? "2.1" : "2.0",
         });
         this.rawChassisFrames.push(Buffer.from(frames[0]));
         const r = parsed.body;
@@ -256,7 +276,7 @@ export class SimulatedZmqDevices {
           this.missionState = 0;
           if (this.emitFeedback) {
             await delay(30);
-            await this.chassisPub.send(feedbackFrame());
+            await this.chassisPub.send(this.chassisFrame(feedbackFrame()));
           }
         } else if (r.type === "motionControl") {
           const control = Number(r.value);
@@ -282,7 +302,9 @@ export class SimulatedZmqDevices {
       try {
         const frames = await this.eoRep.receive();
         if (!frames[0]) continue;
-        const r = EoRequest.parse(JSON.parse(frames[0].toString()) as unknown);
+        const r = (this.newProtocol ? EoRequestV23 : EoRequest).parse(
+          JSON.parse(frames[0].toString()) as unknown,
+        );
         this.commands.push({ component: "eo", at: Date.now(), request: r });
         let response = this.seen.get(r.request_id);
         if (!response) {
@@ -300,7 +322,7 @@ export class SimulatedZmqDevices {
             reason: null,
           };
           response = {
-            protocol: "2.2",
+            protocol: this.newProtocol ? "2.3" : "2.2",
             kind: "response",
             device_id: r.device_id,
             response_id: r.request_id,
@@ -374,12 +396,14 @@ export class SimulatedZmqDevices {
   }
   async publish() {
     if (this.#stopped) return;
-    await this.chassisPub.send(systemFrame(this.mode));
+    await this.chassisPub.send(this.chassisFrame(systemFrame(this.mode)));
     if (this.missionId)
-      await this.chassisPub.send(missionFrame(this.missionId, this.missionState, this.missionType));
+      await this.chassisPub.send(
+        this.chassisFrame(missionFrame(this.missionId, this.missionState, this.missionType)),
+      );
     const utc = Math.max(Date.now(), this.#lastUtc + 2);
     this.#lastUtc = utc;
-    await this.eoPub.send(eoFrames("device_status", this.eoDevice, utc));
+    await this.eoPub.send(this.eoFrames("device_status", this.eoDevice, utc));
     const data: Record<string, unknown> = this.taskId
       ? task(this.taskId, this.taskState)
       : { task: null, command: null };
@@ -392,8 +416,103 @@ export class SimulatedZmqDevices {
         currentTask.total_cycles = this.cycles;
       }
     }
-    await this.eoPub.send(eoFrames("task_status", data, utc + 1));
+    await this.eoPub.send(this.eoFrames("task_status", data, utc + 1));
+    if (this.newProtocol) {
+      const metadata = {
+        camera_id: "eo",
+        frame_id: `test-frame-${++this.frameCounter}`,
+        exposure_utc_ms: null,
+        width_px: 20,
+        height_px: 15,
+      };
+      this.frames.set(metadata.frame_id, metadata);
+      if (this.frames.size > 32) this.frames.delete(this.frames.keys().next().value!);
+      await this.eoPub.send(this.eoFrames("frame_header", metadata, utc + 2));
+      if (this.emitImageDetections)
+        await this.eoPub.send(
+          this.eoFrames(
+            "targetlist",
+            {
+              task_id: null,
+              observed_at_utc_ms: null,
+              image: {
+                camera_id: metadata.camera_id,
+                frame_id: metadata.frame_id,
+                width_px: 20,
+                height_px: 15,
+              },
+              data_origin: "simulated",
+              truncated: false,
+              targets: [
+                {
+                  target_id: "fixture-detection",
+                  category: "object",
+                  confidence: 0.8,
+                  threat_level: null,
+                  pixel: { x_px: 8, y_px: 7 },
+                  bbox: { x_px: 5, y_px: 4, width_px: 8, height_px: 6 },
+                },
+              ],
+            },
+            utc + 3,
+          ),
+        );
+    }
     await this.publishEffect();
+  }
+  private chassisFrame(frames: Buffer[]) {
+    if (!this.newProtocol) return frames;
+    return frames.map((bytes) => {
+      const p = decodeChassisFrame(bytes),
+        start = bytes.indexOf(0x3a) + 1;
+      return encodeChassisFrame({
+        ...p,
+        protocolVersion: "2.1",
+        payload: bytes.subarray(start + 24),
+      });
+    });
+  }
+  private eoFrames(topic: string, data: unknown, utc: number) {
+    const frames = eoFrames(topic, data, utc);
+    if (this.newProtocol) {
+      const body = JSON.parse(frames[1]!.toString()) as Record<string, unknown>;
+      body.protocol = "2.3";
+      frames[1] = Buffer.from(JSON.stringify(body));
+    }
+    return frames;
+  }
+  private async frameLoop() {
+    while (!this.#stopped) {
+      try {
+        const frames = await this.frameRep.receive(),
+          r = JSON.parse(frames[0]!.toString()) as {
+            device_id: string;
+            request_id: string;
+            params: { frame_id: string; camera_id: string };
+          };
+        this.frameRequests++;
+        const metadata = this.frames.get(r.params.frame_id),
+          ok = !!metadata && r.params.camera_id === "eo";
+        const response = {
+          protocol: "2.3",
+          kind: "response",
+          device_id: r.device_id,
+          response_id: r.request_id,
+          method: "FramePull",
+          ok,
+          result: ok ? { ...metadata, encoding: "jpeg", byte_length: this.jpegBytes.length } : null,
+          error: ok ? null : { code: "FRAME_UNAVAILABLE", message: "evicted" },
+        };
+        if (this.frameReplyDelayMs) await delay(this.frameReplyDelayMs);
+        await this.frameRep.send(
+          ok
+            ? [Buffer.from(JSON.stringify(response)), this.jpegBytes]
+            : [Buffer.from(JSON.stringify(response))],
+        );
+      } catch (error) {
+        if (!this.#stopped && !again(error)) this.errors.push(error);
+      }
+    }
   }
   async position() {
     if (this.#stopped) return;
@@ -415,6 +534,7 @@ export class SimulatedZmqDevices {
         systemId: "1",
         targetSystemId: "0",
         payload,
+        protocolVersion: this.newProtocol ? "2.1" : "2.0",
       }),
     );
   }
@@ -439,6 +559,7 @@ export class SimulatedZmqDevices {
         this.eoPub,
         this.effectRep,
         this.effectPub,
+        this.frameRep,
       ],
     );
     await Promise.allSettled(this.#tasks);

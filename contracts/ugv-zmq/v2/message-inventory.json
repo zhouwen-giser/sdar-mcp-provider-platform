@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "ugv.zmq-message-inventory/2",
+  "selection": "explicit_deployment_no_parse_fallback",
+  "chassis": {
+    "protocol": "2.1",
+    "payload": "uint32_le_business_length_then_business_bytes",
+    "envelopeLength": "4+business_length",
+    "crc": "CCITT_FALSE_entire_prefixed_payload",
+    "maxBusinessBytes": 65531,
+    "defaultSender": "0",
+    "target": "1",
+    "businessMessages": "unchanged_frozen_v1_inventory"
+  },
+  "eo": {
+    "protocol": "2.3",
+    "commands": ["AreaSearch", "CircularSearch", "TaskControl", "TeleControl"],
+    "publications": ["device_status", "task_status", "targetlist", "tracklist", "frame_header"],
+    "trackAdditions": ["bbox", "observed_at_utc_ms"],
+    "framePull": {
+      "method": "FramePull",
+      "defaultEndpoint": "tcp://192.168.2.63:5559",
+      "responseParts": ["strict_correlated_JSON", "original_JPEG"],
+      "maxJpegBytes": 16777216,
+      "maxDecodedPixels": 16000000,
+      "mcpChunkRawBytes": 262144,
+      "exposureUtc": "nullable_not_replaced_with_reception_time"
+    }
+  },
+  "simulationEffect": {"protocol": "1.0", "change": "none"},
+  "planner": {"protocol": "socket.io-4", "port": 7879, "change": "none"},
+  "notPublished": ["optical_zoom_support", "next_follow", "infinite_scan", "target_entity_id_extension"],
+  "frameHeaderEvidence": "image_reference_only_not_heartbeat_targets_coverage_or_trajectory"
+}

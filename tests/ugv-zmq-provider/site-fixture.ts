@@ -1,3 +1,5 @@
+import { checkContractsV2 } from "../../scripts/ugv-zmq/check-contracts-v2.js";
+import { SiteControlDeploymentProfileV2 } from "../../packages/vehicle-zmq-contract/src/site-profile.js";
 import { fileURLToPath } from "node:url";
 import { randomUUID } from "node:crypto";
 import { once } from "node:events";
@@ -21,7 +23,7 @@ export const siteDestination = {
   longitude: 106.81485 - 192 / 111320,
   latitude: 29.7195 - 100 / 110540,
 };
-export async function siteFixture(databaseUrl: string) {
+export async function siteFixture(databaseUrl: string, v15 = false) {
   if (new URL(databaseUrl).hostname !== "127.0.0.1") throw Error("ISOLATED_DATABASE_REQUIRED");
   const suffix = randomUUID().replaceAll("-", ""),
     schemas = ["site_provider_", "site_runtime_", "site_archive_"].map((s) => s + suffix);
@@ -39,10 +41,33 @@ export async function siteFixture(databaseUrl: string) {
     await installer.end();
   }
   await installObservationArchive(admin, present(schemas[2]));
-  const devices = new SimulatedZmqDevices(),
-    profile = await devices.start();
-  profile.executionDomain.simulationId = null;
-  profile.components.chassis.controllerSystemId = null;
+  const devices = new SimulatedZmqDevices();
+  devices.newProtocol = v15;
+  const original = await devices.start();
+  const profile = v15
+    ? SiteControlDeploymentProfileV2.parse({
+        ...original,
+        schemaVersion: "ugv.zmq-site-deployment/2",
+        executionDomain: { mode: "live", simulationId: null },
+        components: {
+          ...original.components,
+          chassis: {
+            ...original.components.chassis,
+            protocolVersion: "2.1",
+            controllerSystemId: "0",
+          },
+          eo: {
+            ...original.components.eo,
+            protocolVersion: "2.3",
+            framePullEndpoint: devices.frameRep.lastEndpoint,
+          },
+        },
+      })
+    : original;
+  if (!v15) {
+    profile.executionDomain.simulationId = null;
+    profile.components.chassis.controllerSystemId = null;
+  }
   const planner = new WebSocketServer({ host: "127.0.0.1", port: 0 });
   await once(planner, "listening");
   const plannerAddress = planner.address();
@@ -97,7 +122,7 @@ export async function siteFixture(databaseUrl: string) {
       diagnosticPartition: "SIMULATED-site:" + suffix,
       flushIntervalMs: 5,
     }),
-    contractSha256: "b".repeat(64),
+    contractSha256: v15 ? checkContractsV2().contractSha256 : "b".repeat(64),
     plannerFrame: "airport_south_positive_v1" as const,
   };
   let provider = await openSiteReadonlyProvider(providerOptions);
@@ -108,7 +133,13 @@ export async function siteFixture(databaseUrl: string) {
       DATABASE_URL: db(1),
       ADAPTER_ENDPOINT: `127.0.0.1:${provider.port}`,
       ADAPTER_TLS_MODE: "disabled",
-      AUTH_MODE: "development",
+      AUTH_MODE: v15 ? "site_anonymous" : "development",
+      ...(v15
+        ? {
+            ALLOW_INSECURE_INTERNAL_TRANSPORT: "true",
+            JWT_HS256_SECRET: "SIMULATED-readonly-anonymous-secret-32-bytes",
+          }
+        : {}),
       LOG_LEVEL: "fatal",
       OTEL_ENABLED: "false",
       PROVIDER_TELEMETRY_INGRESS_ENABLED: "false",
@@ -128,6 +159,7 @@ export async function siteFixture(databaseUrl: string) {
     resourceId: present(profile.providerBinding.resourceId),
     devices,
     plannerState,
+    providerOptions,
     mcp,
     runtime,
     get provider() {

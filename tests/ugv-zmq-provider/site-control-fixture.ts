@@ -1,3 +1,4 @@
+import { checkContractsV2 } from "../../scripts/ugv-zmq/check-contracts-v2.js";
 import { OPERATION_ADMISSION_KEYS } from "../../packages/vehicle-zmq-control/src/operation-support.js";
 import type { ViewBackendSettings } from "../../packages/vehicle-zmq-control/src/simulation-view-contract.js";
 import { fileURLToPath } from "node:url";
@@ -6,7 +7,10 @@ import { once } from "node:events";
 import { Pool } from "pg";
 import { WebSocketServer } from "ws";
 import { openZmqProvider } from "../../apps/ugv-zmq-provider-adapter/src/bootstrap.js";
-import { SiteControlDeploymentProfile } from "../../packages/vehicle-zmq-contract/src/site-profile.js";
+import {
+  SiteControlDeploymentProfile,
+  SiteControlDeploymentProfileV2,
+} from "../../packages/vehicle-zmq-contract/src/site-profile.js";
 import { canonical, sha256 } from "../../packages/vehicle-zmq-observer/src/index.js";
 import { createHmac } from "node:crypto";
 import { runUgvProviderMigrations } from "../../apps/ugv-provider-adapter/src/migrate.js";
@@ -29,7 +33,8 @@ export const siteDestination = {
 export async function controlSiteFixture(
   databaseUrl: string,
   authMode: "jwt_hs256" | "site_anonymous" = "jwt_hs256",
-  catalogProfile?: "zmq_v1_3_0_site_control_13" | "zmq_v1_4_0_site_control_14",
+  catalogProfile?:
+    "zmq_v1_3_0_site_control_13" | "zmq_v1_4_0_site_control_14" | "zmq_v1_5_0_site_control_15",
   simulationView?: ViewBackendSettings,
 ) {
   if (new URL(databaseUrl).hostname !== "127.0.0.1") throw Error("ISOLATED_DATABASE_REQUIRED");
@@ -51,14 +56,29 @@ export async function controlSiteFixture(
   await installObservationArchive(admin, present(schemas[2]));
   const devices = new SimulatedZmqDevices();
   devices.controllerSystemId = "0";
+  const v15 = catalogProfile === "zmq_v1_5_0_site_control_15";
+  devices.newProtocol = v15;
   const original = await devices.start();
-  const profile = SiteControlDeploymentProfile.parse({
+  const profile = (v15 ? SiteControlDeploymentProfileV2 : SiteControlDeploymentProfile).parse({
     ...original,
-    schemaVersion: "ugv.zmq-site-deployment/1",
+    schemaVersion: v15 ? "ugv.zmq-site-deployment/2" : "ugv.zmq-site-deployment/1",
     executionDomain: { mode: "live", simulationId: null },
     components: {
       ...original.components,
-      chassis: { ...original.components.chassis, controllerSystemId: "0" },
+      chassis: {
+        ...original.components.chassis,
+        controllerSystemId: "0",
+        ...(v15 ? { protocolVersion: "2.1" } : {}),
+      },
+      ...(v15
+        ? {
+            eo: {
+              ...original.components.eo,
+              protocolVersion: "2.3",
+              framePullEndpoint: devices.frameRep.lastEndpoint,
+            },
+          }
+        : {}),
     },
   });
   const planner = new WebSocketServer({ host: "127.0.0.1", port: 0 });
@@ -133,6 +153,7 @@ export async function controlSiteFixture(
     controlSettings: {
       ...(simulationView ? { simulationView } : {}),
       ...testScope().settings,
+      ...(v15 ? { contractSha256: checkContractsV2().contractSha256 } : {}),
       ...(catalogProfile
         ? {
             catalogProfile,

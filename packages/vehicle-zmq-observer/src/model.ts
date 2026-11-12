@@ -85,6 +85,18 @@ export const Gap = z
     code: z.string().min(1).max(128),
     locallyDiscardedMessages: z.number().int().nonnegative().nullable(),
     sourceLossCount: z.null(),
+    recovery: z
+      .object({
+        predecessorSessionId: z.uuid(),
+        durableLastOrdinal: decimal,
+        durableHeadHash: digest,
+        predecessorStatus: z.enum(["open", "failed", "abandoned", "closed"]),
+        predecessorPartitionHash: digest.optional(),
+        failureCode: z.string().nullable(),
+        persistenceBoundary: z.literal("database_tail_verified_no_batch_replay"),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 export const TransportEvent = z
@@ -170,6 +182,7 @@ export interface ArchiveEntry {
   payload: ObservationEvent;
 }
 export interface ArchiveSession {
+  initialEntries?: ArchiveEntry[];
   sessionId: string;
   partitionHash: string;
   startedAt: string;

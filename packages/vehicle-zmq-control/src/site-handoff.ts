@@ -8,7 +8,7 @@ import {
   resolveDeviceContext,
 } from "../../gowm-shared-storage-adapter/src/index.js";
 import type { PostgresProviderStore } from "../../provider-adapter-kit/src/index.js";
-import { SiteControlDeploymentProfile } from "../../vehicle-zmq-contract/src/site-profile.js";
+import { SiteDeploymentProfile as SiteControlDeploymentProfile } from "../../vehicle-zmq-contract/src/site-profile.js";
 import { metadataColumns, metadataValues, metadataPredicate } from "./metadata-scope.js";
 export const RETIRE_REASON = "ZMQ_LEGACY_RETIRED_OUTCOME_UNKNOWN";
 const writer = z

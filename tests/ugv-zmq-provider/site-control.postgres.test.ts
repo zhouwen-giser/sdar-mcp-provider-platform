@@ -1,4 +1,4 @@
-import { decodeChassisFrame } from "../../packages/vehicle-zmq-contract/src/index.js";
+import { decodeChassisFrame } from "../../packages/vehicle-zmq-contract/src/chassis-versioned.js";
 import { readFileSync, writeFileSync } from "node:fs";
 import { randomUUID, createHash } from "node:crypto";
 import { beforeAll, afterAll, describe, it, expect } from "vitest";
@@ -11,6 +11,7 @@ import { nativeCatalogReason } from "../../apps/ugv-control-console/shared/zmq-n
 import { siteControlOperation } from "../../packages/vehicle-zmq-control/src/site-control-catalog.js";
 import type { Tool } from "../../apps/ugv-control-console/shared/model.js";
 const file = process.env.SMPP_ZMQ_TEST_CONFIG_FILE;
+const v15 = process.env.SMPP_ZMQ_TEST_CATALOG_PROFILE === "zmq_v1_5_0_site_control_15";
 let f: Awaited<ReturnType<typeof controlSiteFixture>>;
 const timing = { start: { mode: "immediate", startToleranceMs: 60000 }, maxElapsedMs: 10000 };
 async function call(name: string, args: Record<string, unknown>, key = randomUUID()) {
@@ -42,7 +43,11 @@ async function done(taskId: string) {
 describe.skipIf(!file)("site-control JWT / real PostgreSQL / native sockets", () => {
   beforeAll(async () => {
     const cfg = JSON.parse(readFileSync(file ?? "", "utf8")) as { databaseUrl: string };
-    f = await controlSiteFixture(cfg.databaseUrl);
+    f = await controlSiteFixture(
+      cfg.databaseUrl,
+      "jwt_hs256",
+      v15 ? "zmq_v1_5_0_site_control_15" : undefined,
+    );
     await until(
       () =>
         f.provider.engine.availability({
@@ -62,7 +67,7 @@ describe.skipIf(!file)("site-control JWT / real PostgreSQL / native sockets", ()
             frames: f.devices.rawChassisFrames.map((frame) => ({
               base64: frame.toString("base64"),
               sha256: createHash("sha256").update(frame).digest("hex"),
-              decoded: decodeChassisFrame(frame),
+              decoded: decodeChassisFrame(frame, { protocolVersion: v15 ? "2.1" : "2.0" }),
             })),
           },
           null,
@@ -71,12 +76,12 @@ describe.skipIf(!file)("site-control JWT / real PostgreSQL / native sockets", ()
       );
     await f?.close();
   });
-  it("requires JWT and publishes only the exact site-control 13-tool catalog", async () => {
+  it("requires configured authentication and publishes the exact selected control catalog", async () => {
     const anonymous = new Mcp(f.mcp.url, { "x-sdar-execution-mode": "live" });
     await expect(anonymous.rpc("tools/list")).rejects.toThrow();
     const list = await f.mcp.rpc("tools/list");
     const tools = list.tools as Tool[];
-    expect(tools).toHaveLength(13);
+    expect(tools).toHaveLength(v15 ? 15 : 13);
     expect(nativeCatalogReason(tools, f.resourceId)).toBeNull();
     expect(nativeCatalogReason(tools.slice(1), f.resourceId)).toBe("ZMQ_NATIVE_TOOL_SET_MISMATCH");
   });
@@ -121,7 +126,7 @@ describe.skipIf(!file)("site-control JWT / real PostgreSQL / native sockets", ()
     expect(f.devices.rawChassisFrames.length).toBeGreaterThan(0);
     expect(
       f.devices.rawChassisFrames.every((frame) => {
-        const d = decodeChassisFrame(frame);
+        const d = decodeChassisFrame(frame, { protocolVersion: v15 ? "2.1" : "2.0" });
         return d.systemId === "0" && d.targetSystemId === "1";
       }),
     ).toBe(true);
@@ -194,15 +199,17 @@ describe.skipIf(!file)("site-control JWT / real PostgreSQL / native sockets", ()
     const execution = await f.provider.repository.get(id);
     if (!execution) throw Error("FIXTURE_EXECUTION_REQUIRED");
     const position = { longitude_deg: 106.001, latitude_deg: 29, ellipsoid_height_m: 10 };
+    const observedAt = Date.now();
     await f.devices.publishReport("tracklist", {
       task_id: execution.zmqControl.nativeTaskId,
       track_state: "tracking",
       track_id: "fixture-track",
       target_id: "object-1",
-      observed_at_utc_ms: Date.now(),
+      observed_at_utc_ms: observedAt,
       data_origin: "simulated",
       targets: [
         {
+          ...(v15 ? { bbox: null, observed_at_utc_ms: observedAt } : {}),
           image: {
             camera_id: "fixture-camera",
             frame_id: randomUUID(),

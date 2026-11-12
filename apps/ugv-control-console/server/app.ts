@@ -53,7 +53,7 @@ export function createApp(config: Config, service: Service) {
       .header("x-frame-options", "DENY")
       .header(
         "content-security-policy",
-        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
       );
     if (request.url.startsWith("/health/")) return;
     if (!config.origins.some((origin) => new URL(origin).host === request.headers.host))
@@ -142,6 +142,18 @@ export function createApp(config: Config, service: Service) {
       .strict()
       .parse(request.body);
     return service.readTool(input.tool, input.arguments);
+  });
+  app.post("/api/frames/image", async (request, reply) => {
+    const { resourceId, retrievalId } = z
+      .object({ resourceId: z.string().min(1).max(256), retrievalId: z.uuid() })
+      .strict()
+      .parse(request.body);
+    const frame = await service.frameImage(resourceId, retrievalId);
+    return reply
+      .type("image/jpeg")
+      .header("x-content-sha256", frame.sha256)
+      .header("content-disposition", 'inline; filename="ugv-frame.jpg"')
+      .send(frame.bytes);
   });
   app.post("/api/availability", async (request) => {
     const input = CommandSchema.pick({ tool: true, arguments: true, timing: true }).parse(

@@ -16,17 +16,25 @@ if (!path) throw Error("ISOLATED_TEST_CONFIG_REQUIRED");
 const config = JSON.parse(readFileSync(path, "utf8")) as { databaseUrl: string };
 const v13 = process.env.SMPP_ZMQ_UI_V13 === "true",
   v14 = process.env.SMPP_ZMQ_UI_V14 === "true",
-  port = v14 ? 19115 : v13 ? 19114 : 19113;
+  v15 = process.env.SMPP_ZMQ_UI_V15 === "true",
+  port = v15 ? 19116 : v14 ? 19115 : v13 ? 19114 : 19113;
 const view = v14 ? await viewFixture() : undefined;
 const f = await controlSiteFixture(
     config.databaseUrl,
     "jwt_hs256",
-    v14 ? "zmq_v1_4_0_site_control_14" : v13 ? "zmq_v1_3_0_site_control_13" : undefined,
+    v15
+      ? "zmq_v1_5_0_site_control_15"
+      : v14
+        ? "zmq_v1_4_0_site_control_14"
+        : v13
+          ? "zmq_v1_3_0_site_control_13"
+          : undefined,
     view?.settings,
   ),
   store = new Store(f.admin, "site-browser:" + randomUUID());
 await store.migrate();
 f.devices.positionOverride = siteStart;
+if (v15) f.devices.emitImageDetections = true;
 const app = createApp(
   {
     host: "127.0.0.1",

@@ -1,3 +1,9 @@
+import {
+  siteV15Tool,
+  SITE_V15_TOOLS,
+  SITE_CONTROL_V15_PROFILE,
+  SITE_READONLY_V15_PROFILE,
+} from "../../vehicle-zmq-control/src/site-v15.js";
 import { siteControlTool } from "../../vehicle-zmq-control/src/site-control-catalog.js";
 import { siteControlV13Tool } from "../../vehicle-zmq-control/src/site-control-v13.js";
 import {
@@ -118,23 +124,34 @@ function assertOutputLimits(value: unknown): void {
 }
 
 export class OperationRegistry {
-  readonly #ajv: Ajv2020;
-
-  constructor() {
-    this.#ajv = new Ajv2020({ strict: true, allErrors: true, validateFormats: true });
-    this.#ajv.addFormat("date-time", (value: string) => !Number.isNaN(Date.parse(value)));
-    this.#ajv.addFormat("uuid", /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
-  }
-
   validate(manifest: ProviderManifest): ValidatedManifest {
     return this.#validate(manifest, true);
   }
 
   #validate(manifest: ProviderManifest, verifyBusinessSource: boolean): ValidatedManifest {
+    // AJV caches by schema object identity. Polling receives new protobuf objects on
+    // every tick; a registry-wide AJV retained every compiled historical copy.
+    // Keep the compiler lifetime within one manifest, including stored definitions.
+    const ajv = new Ajv2020({ strict: true, allErrors: true, validateFormats: true });
+    ajv.addFormat("date-time", (value: string) => !Number.isNaN(Date.parse(value)));
+    ajv.addFormat("uuid", /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
     const zmq = manifest.providerType === "isr.vehicle.ugv.zmq";
-    const site = zmq && ["1.1.0", "1.2.0", "1.3.0", "1.4.0"].includes(manifest.providerVersion);
-    const nativeTool =
-      manifest.providerVersion === "1.4.0"
+    const v15 = zmq && manifest.providerVersion === "1.5.0";
+    const v15Profile = v15
+      ? (
+          protoStructToJson(
+            manifest.operations.find((o) => o.name === "vehicle_get_capabilities")?.outputSchema,
+          ) as { properties?: { catalogProfile?: { const?: unknown } } }
+        ).properties?.catalogProfile?.const
+      : null;
+    if (v15 && v15Profile !== SITE_CONTROL_V15_PROFILE && v15Profile !== SITE_READONLY_V15_PROFILE)
+      throw Error("ZMQ_CATALOG_PROFILE_INVALID");
+    const site =
+      zmq && ["1.1.0", "1.2.0", "1.3.0", "1.4.0", "1.5.0"].includes(manifest.providerVersion);
+    const nativeTool = v15
+      ? (name: string, resource: string) =>
+          siteV15Tool(name, resource, v15Profile === SITE_READONLY_V15_PROFILE)
+      : manifest.providerVersion === "1.4.0"
         ? siteControlV14Tool
         : manifest.providerVersion === "1.3.0"
           ? siteControlV13Tool
@@ -148,11 +165,13 @@ export class OperationRegistry {
       canonicalize(manifest.operations.map((o) => o.name).sort()) !==
         canonicalize(
           [
-            ...(manifest.providerVersion === "1.4.0"
-              ? SITE_VIEW_TOOLS
-              : site
-                ? SITE_TOOLS
-                : ZMQ_PROVIDER_TOOLS),
+            ...(v15
+              ? SITE_V15_TOOLS
+              : manifest.providerVersion === "1.4.0"
+                ? SITE_VIEW_TOOLS
+                : site
+                  ? SITE_TOOLS
+                  : ZMQ_PROVIDER_TOOLS),
           ].sort(),
         )
     )
@@ -250,8 +269,8 @@ export class OperationRegistry {
         if (bytes > 262_144) throw new Error("MANIFEST_SCHEMA_TOO_LARGE");
         assertComplexity(schema);
       }
-      const validateInput = this.#ajv.compile(inputSchema);
-      const validateOutput = this.#ajv.compile(outputSchema);
+      const validateInput = ajv.compile(inputSchema);
+      const validateOutput = ajv.compile(outputSchema);
       const operationWithoutProfile = { ...operation };
       delete operationWithoutProfile.businessFeedbackProfile;
       return {

@@ -1,3 +1,5 @@
+import { checkContractsV2 } from "../../../scripts/ugv-zmq/check-contracts-v2.js";
+import { openFrames } from "./frames.js";
 import { readFileSync, statSync } from "node:fs";
 import { openSiteManagement } from "./site-management.js";
 import { verifySiteGrant } from "../../../packages/vehicle-zmq-control/src/site-handoff.js";
@@ -10,6 +12,7 @@ import { ControlDeploymentProfile } from "../../../packages/vehicle-zmq-contract
 import {
   observerIdentity,
   ObserverSettings,
+  safeCode,
   PostgresObservationArchive,
   ZmqObservationObserver,
   ZmqSubscriptionDriver,
@@ -38,6 +41,7 @@ export interface ZmqProviderOptions {
   mode?: "site_control";
   management?: { port: number; jwtSecretFile: string };
   handoffGrant?: unknown;
+  frameSettings?: unknown;
   plannerFrame?: "airport_south_positive_v1";
   databaseUrl: string;
   /** Independent SMPP-owned archive; schema installation is an owner command, never startup DDL. */
@@ -54,6 +58,12 @@ export async function openZmqProvider(options: ZmqProviderOptions) {
     settings = ObserverSettings.parse(options.observerSettings);
   // Validate all command endpoints before creating a socket, pool or attempting admission.
   const limits = ControlSettings.parse(options.controlSettings);
+  if (
+    profile.components.chassis.protocolVersion === "2.1" &&
+    options.mode === "site_control" &&
+    limits.contractSha256 !== checkContractsV2().contractSha256
+  )
+    throw Error("ZMQ_DEPLOYMENT_NATIVE_CONTRACT_HASH_MISMATCH");
   if (options.gowm)
     limits.storageBinding = {
       deviceId: options.gowm.allowedDeviceIds[0] ?? "",
@@ -90,6 +100,8 @@ export async function openZmqProvider(options: ZmqProviderOptions) {
   const archive = new PostgresObservationArchive(pool, identity, settings),
     observer = new ZmqObservationObserver(profile, settings, identity, archive),
     driver = new ZmqSubscriptionDriver(observer, settings);
+  pool.on("error", (error: Error) => observer.fail(safeCode(error)));
+  const frames = openFrames(observer, store, options.frameSettings);
   let management: Awaited<ReturnType<typeof openSiteManagement>> | undefined;
   let engine: ZmqControlEngine | undefined,
     server: ReturnType<typeof zmqServer> | undefined,
@@ -97,6 +109,7 @@ export async function openZmqProvider(options: ZmqProviderOptions) {
   const close = async () => {
     if (closed) return;
     closed = true;
+    frames?.close();
     await management?.close();
     await server?.close();
     await engine?.close();
@@ -154,6 +167,7 @@ export async function openZmqProvider(options: ZmqProviderOptions) {
             profile.planner.policy === "retain" && profile.planner.endpoint && options.plannerFrame
               ? new SiteRoutePlanner(profile.planner.endpoint, pool)
               : undefined,
+            frames?.service,
           )
         : undefined;
     const runtime = new ZmqProviderRuntime(engine, observer, business, siteReads);

@@ -1350,7 +1350,12 @@ function TaskDetail({
       <ErrorNote error={task.error ?? error} />
       {operation === "simulation_adjust_view" && <SimulationViewResult result={content} />}
       {[ZMQ_INSPECT, EFFECT_APPLY].includes(operation) && (
-        <ZmqResults taskId={taskId} operation={operation} />
+        <ZmqResults
+          taskId={taskId}
+          operation={operation}
+          resourceId={resourceId}
+          frameEnabled={tools.some((t) => t.name === "vehicle_zmq_get_frame")}
+        />
       )}
       <div className="detail-meta">
         <div>

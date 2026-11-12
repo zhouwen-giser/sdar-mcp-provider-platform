@@ -1,9 +1,7 @@
+import { EoRequestV23 } from "../../vehicle-zmq-contract/src/schema-v23.js";
+import { encodeChassisFrame } from "../../vehicle-zmq-contract/src/chassis-versioned.js";
 import { randomUUID } from "node:crypto";
-import {
-  EoRequest,
-  SimulationEffectRequest,
-  encodeChassisFrame,
-} from "../../vehicle-zmq-contract/src/index.js";
+import { EoRequest, SimulationEffectRequest } from "../../vehicle-zmq-contract/src/index.js";
 import type { ControlScope, Operation, WireCommand, ZmqExecution } from "./model.js";
 import { ViewRequest, VIEW_PROTOCOL } from "./simulation-view-contract.js";
 
@@ -100,6 +98,7 @@ export function commandFor(
     }
     frames = [
       encodeChassisFrame({
+        protocolVersion: binding.protocolVersion,
         topic,
         messageId,
         systemId: binding.controllerSystemId,
@@ -168,8 +167,9 @@ export function commandFor(
       method = "TaskControl";
       params = { task_id: state.nativeTaskId, action };
     } else throw Error("ZMQ_CONTROL_NATIVE_TASK_UNKNOWN");
-    const request = EoRequest.parse({
-      protocol: "2.2",
+    const version = scope.profile.components.eo.protocolVersion;
+    const request = (version === "2.3" ? EoRequestV23 : EoRequest).parse({
+      protocol: version,
       kind: "request",
       device_id: scope.profile.components.eo.deviceId,
       request_id: requestId,

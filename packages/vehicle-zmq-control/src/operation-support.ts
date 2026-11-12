@@ -1,3 +1,4 @@
+import { SITE_CONTROL_V15_PROFILE } from "./catalog-profiles.js";
 import { z } from "zod";
 import type { ControlSettings, Operation } from "./model.js";
 import { VIEW_PROFILE } from "./simulation-view-contract.js";
@@ -74,5 +75,7 @@ export function operationSupport(settings: ControlSettings, key: OperationAdmiss
 
 export const operationSupportCatalog = (settings: ControlSettings) =>
   OPERATION_ADMISSION_KEYS.filter(
-    (key) => key !== "camera.simulationView" || settings.catalogProfile === VIEW_PROFILE,
+    (key) =>
+      key !== "camera.simulationView" ||
+      [VIEW_PROFILE, SITE_CONTROL_V15_PROFILE].includes(settings.catalogProfile ?? ""),
   ).map((key) => operationSupport(settings, key));

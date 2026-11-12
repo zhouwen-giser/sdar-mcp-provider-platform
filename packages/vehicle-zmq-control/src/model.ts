@@ -1,3 +1,4 @@
+import { SITE_CONTROL_V15_PROFILE } from "./catalog-profiles.js";
 import {
   ControlDeploymentProfile,
   type ControlDeploymentProfile as DeploymentProfile,
@@ -181,7 +182,9 @@ export const StartControl = z
         operationName: id,
         argumentHash: z.string().regex(/^[a-f0-9]{64}$/),
         arguments: z.record(z.string(), z.unknown()),
-        catalogProfile: z.enum(["zmq_v1_3_0_site_control_13", VIEW_PROFILE]).optional(),
+        catalogProfile: z
+          .enum(["zmq_v1_3_0_site_control_13", VIEW_PROFILE, SITE_CONTROL_V15_PROFILE])
+          .optional(),
         parameterResolution: z.record(z.string(), z.unknown()).optional(),
       })
       .strict()
@@ -200,7 +203,9 @@ export type StartControl = z.infer<typeof StartControl>;
 export const ControlSettings = z
   .object({
     mode: z.enum(["isolated_simulator", "site_control"]),
-    catalogProfile: z.enum(["zmq_v1_3_0_site_control_13", VIEW_PROFILE]).optional(),
+    catalogProfile: z
+      .enum(["zmq_v1_3_0_site_control_13", VIEW_PROFILE, SITE_CONTROL_V15_PROFILE])
+      .optional(),
     simulationView: ViewBackendSettings.optional(),
     siteEndpoints: z.array(z.url()).length(6).optional(),
     handoffGrantHash: z
@@ -274,7 +279,7 @@ export function controlScope(profileInput: unknown, settingsInput: unknown): Con
   if (
     settings.simulationView &&
     settings.mode === "site_control" &&
-    settings.catalogProfile !== VIEW_PROFILE
+    ![VIEW_PROFILE, SITE_CONTROL_V15_PROFILE].includes(settings.catalogProfile ?? "")
   )
     throw Error("ZMQ_VIEW_CATALOG_REQUIRED");
   for (const component of Object.values(profile.components)) {
@@ -294,9 +299,14 @@ export function controlScope(profileInput: unknown, settingsInput: unknown): Con
     !profile.providerBinding.sourceSessionKey ||
     (settings.mode === "isolated_simulator"
       ? !profile.executionDomain.simulationId
-      : profile.schemaVersion !== "ugv.zmq-site-deployment/1")
+      : !["ugv.zmq-site-deployment/1", "ugv.zmq-site-deployment/2"].includes(profile.schemaVersion))
   )
     throw Error("ZMQ_CONTROL_BINDING_REQUIRED");
+  if (
+    (settings.catalogProfile === SITE_CONTROL_V15_PROFILE) !==
+    (profile.components.chassis.protocolVersion === "2.1")
+  )
+    throw Error("ZMQ_CATALOG_NATIVE_VERSION_MISMATCH");
   const stableSettings = { ...settings, observerSessionId: null };
   const hash = sha256(canonical({ profile, settings: stableSettings }));
   // Endpoints, independent of requested identity, prevent two identities controlling one simulator.

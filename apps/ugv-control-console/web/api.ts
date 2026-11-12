@@ -44,6 +44,22 @@ export function download(value: unknown, name: string) {
   setTimeout(() => URL.revokeObjectURL(href), 1000);
 }
 export const reasons: Record<string, string> = {
+  ZMQ_FRAME_AUDIT_UNAVAILABLE: "图像读取审计存储不可用，本次读取未完成",
+  ZMQ_FRAME_ENDPOINT_UNCONFIGURED: "未配置独立取帧端点",
+  ZMQ_FRAME_EVICTED: "指定帧已被上游淘汰，请重新选择已观测帧",
+  ZMQ_FRAME_NOT_OBSERVED_OR_EXPIRED: "该帧未被当前接收会话观测，或关联记录已过期",
+  ZMQ_FRAME_CACHE_EXPIRED_OR_UNAUTHORIZED: "图像缓存已失效，或当前会话无权读取",
+  ZMQ_FRAME_SEND_TIMEOUT: "取帧请求发送超时",
+  ZMQ_FRAME_RECEIVE_TIMEOUT: "等待原图响应超时",
+  ZMQ_FRAME_RESPONSE_INVALID: "上游取帧响应无效",
+  ZMQ_FRAME_RESPONSE_ASSOCIATION_INVALID: "取帧响应与指定相机、帧或请求不一致",
+  ZMQ_FRAME_OBSERVATION_MISMATCH: "图像元数据与已观测帧不一致",
+  ZMQ_FRAME_JPEG_INVALID: "JPEG 无效或超过解码资源上限",
+  ZMQ_FRAME_JPEG_DIMENSIONS_INVALID: "JPEG 实际尺寸与元数据不一致",
+  ZMQ_FRAME_CHUNK_INTEGRITY_FAILED: "图像分块或完整文件校验失败",
+  ZMQ_FRAME_CAMERA_NOT_FOUND: "上游未注册该相机",
+  ZMQ_FRAME_CHANNEL_BUSY: "已有图像读取进行中，请稍后重试",
+
   ZMQ_SITE_READONLY_CONTROL_DISABLED: "现场只读模式，设备控制尚未开放",
   ZMQ_CHASSIS_CONTROL_SENDER_UNSPECIFIED: "控制端 ID 保持缺省，底盘发令身份尚未确认",
   SOURCE_RESTART_RECONCILIATION_UNAVAILABLE: "来源服务重启后的动作对账证据不足",

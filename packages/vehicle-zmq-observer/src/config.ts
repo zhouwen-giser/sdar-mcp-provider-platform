@@ -31,6 +31,13 @@ export const ObserverSettings = z
     maxSourceClockSkewMs: z.number().int().min(0).max(60000).default(5000),
     databaseTimeoutMs: z.number().int().min(100).max(30000).default(2000),
     shutdownTimeoutMs: z.number().int().min(100).max(60000).default(10000),
+    recoveryPredecessor: z
+      .object({
+        partitionHash: z.string().regex(/^[a-f0-9]{64}$/),
+        sessionId: z.uuid(),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 export type ObserverSettings = z.infer<typeof ObserverSettings>;

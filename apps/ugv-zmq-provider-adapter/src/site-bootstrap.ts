@@ -1,8 +1,16 @@
+import { checkContractsV2 } from "../../../scripts/ugv-zmq/check-contracts-v2.js";
+import { openFrames } from "./frames.js";
+import { siteV15Manifest } from "../../../packages/vehicle-zmq-control/src/site-v15.js";
+import {
+  DeploymentProfileV2,
+  SiteControlDeploymentProfileV2,
+} from "../../../packages/vehicle-zmq-contract/src/site-profile.js";
 import { Pool } from "pg";
 import { z } from "zod";
 import { DeploymentProfile } from "../../../packages/vehicle-zmq-contract/src/index.js";
 import {
   ObserverSettings,
+  safeCode,
   observerIdentity,
   PostgresObservationArchive,
   ZmqObservationObserver,
@@ -22,10 +30,7 @@ import {
   type GowmStorageConfig,
 } from "../../../packages/gowm-shared-storage-adapter/src/index.js";
 import { jsonToProtoStruct } from "../../../packages/adapter-protocol/src/index.js";
-import {
-  SITE_PROFILE,
-  siteManifest,
-} from "../../../packages/vehicle-zmq-control/src/site-catalog.js";
+import { siteManifest } from "../../../packages/vehicle-zmq-control/src/site-catalog.js";
 import { ZmqBusinessEvents, siteReadonlyBusiness } from "./business.js";
 import { SiteReadonlyRuntime } from "./site-runtime.js";
 import { SiteRoutePlanner } from "./site-planner.js";
@@ -37,6 +42,7 @@ export interface SiteReadonlyOptions {
   profile: unknown;
   observerSettings: unknown;
   contractSha256: string;
+  frameSettings?: unknown;
   plannerFrame?: "airport_south_positive_v1";
   gowm?: GowmStorageConfig;
   host?: string;
@@ -44,12 +50,19 @@ export interface SiteReadonlyOptions {
 }
 export async function openSiteReadonlyProvider(options: SiteReadonlyOptions) {
   z.literal("site_readonly").parse(options.mode);
-  const profile = DeploymentProfile.parse(options.profile),
+  const profile = z
+      .union([DeploymentProfile, DeploymentProfileV2, SiteControlDeploymentProfileV2])
+      .parse(options.profile),
     settings = ObserverSettings.parse(options.observerSettings);
   const contract = z
     .string()
     .regex(/^[a-f0-9]{64}$/)
     .parse(options.contractSha256);
+  if (
+    profile.components.eo.protocolVersion === "2.3" &&
+    contract !== checkContractsV2().contractSha256
+  )
+    throw Error("ZMQ_DEPLOYMENT_NATIVE_CONTRACT_HASH_MISMATCH");
   z.url().parse(options.databaseUrl);
   z.url().parse(options.observationDatabaseUrl);
   if (!profile.providerBinding.providerId || !profile.providerBinding.resourceId)
@@ -79,11 +92,14 @@ export async function openSiteReadonlyProvider(options: SiteReadonlyOptions) {
   const archive = new PostgresObservationArchive(pool, identity, settings),
     observer = new ZmqObservationObserver(profile, settings, identity, archive),
     driver = new ZmqSubscriptionDriver(observer, settings);
+  pool.on("error", (error: Error) => observer.fail(safeCode(error)));
+  const frames = openFrames(observer, store, options.frameSettings);
   let server: VehicleProviderGrpcServer<ReturnType<typeof observer.snapshot>> | undefined,
     closed = false;
   const close = async () => {
     if (closed) return;
     closed = true;
+    frames?.close();
     await server?.close();
     await driver.stop();
     await observer.stop();
@@ -122,7 +138,14 @@ export async function openSiteReadonlyProvider(options: SiteReadonlyOptions) {
       profile.planner.policy === "retain" && profile.planner.endpoint && options.plannerFrame
         ? new SiteRoutePlanner(profile.planner.endpoint, pool)
         : undefined;
-    const runtime = new SiteReadonlyRuntime(profile, observer, store, business, planner);
+    const runtime = new SiteReadonlyRuntime(
+      profile,
+      observer,
+      store,
+      business,
+      planner,
+      frames?.service,
+    );
     await observer.start();
     await driver.start();
     server = new VehicleProviderGrpcServer(
@@ -132,7 +155,14 @@ export async function openSiteReadonlyProvider(options: SiteReadonlyOptions) {
         tlsMode: "disabled",
         internalErrorCode: "ZMQ_PROVIDER_ERROR",
         manifest: () =>
-          siteManifest(profile.providerBinding.providerId ?? "", runtime.resourceId, store),
+          runtime.v15
+            ? siteV15Manifest(
+                profile.providerBinding.providerId ?? "",
+                runtime.resourceId,
+                store,
+                true,
+              )
+            : siteManifest(profile.providerBinding.providerId ?? "", runtime.resourceId, store),
         resource: (state) => ({
           resourceId: runtime.resourceId,
           resourceType: "isr.vehicle.ugv.zmq",
@@ -141,7 +171,7 @@ export async function openSiteReadonlyProvider(options: SiteReadonlyOptions) {
           health: state.archive.status === "running" ? "degraded" : "unknown",
           metadata: jsonToProtoStruct({
             qualification: "site_readonly",
-            catalogProfile: SITE_PROFILE,
+            catalogProfile: runtime.catalogProfile,
             controlAvailable: false,
             completeEvidence: false,
             deploymentBinding: "unqualified_diagnostic",

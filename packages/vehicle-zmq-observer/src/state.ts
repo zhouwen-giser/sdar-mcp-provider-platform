@@ -6,7 +6,7 @@ import {
   type ObserverIdentity,
   type ObserverSettings,
 } from "./config.js";
-import { NormalizedObservation, type ObservationEvent, type Reception } from "./model.js";
+import { Gap, NormalizedObservation, type ObservationEvent, type Reception } from "./model.js";
 
 const channel = z
   .object({
@@ -61,6 +61,10 @@ export const VehicleObservationStateV2 = z
     completeEvidence: z.literal(false),
   })
   .strict();
+export const VehicleObservationStateV3 = VehicleObservationStateV2.extend({
+  schemaVersion: z.literal("ugv.vehicle-observation-state/3.0"),
+  archiveGaps: z.array(Gap).max(16),
+});
 export const VehicleObservationCapabilitiesV2 = z
   .object({
     schemaVersion: z.literal("ugv.vehicle-observation-capabilities/2.0"),
@@ -99,6 +103,7 @@ export interface ArchiveHealth {
 
 export class ObservationState {
   #latest = new Map<string, Reception>();
+  #gaps: z.infer<typeof Gap>[] = [];
   #channels = new Map<
     Component,
     {
@@ -123,6 +128,17 @@ export class ObservationState {
       });
   }
   apply(event: ObservationEvent): void {
+    if (event.type === "gap") {
+      this.#gaps.push(event);
+      if (this.#gaps.length > 16) this.#gaps.shift();
+      if (event.component === null) {
+        for (const channel of this.#channels.values()) {
+          channel.barrier = BigInt(event.monotonicNs);
+          channel.diagnostics = [event.code];
+        }
+        return;
+      }
+    }
     const c = event.component ? this.#channels.get(event.component) : undefined;
     if (!c) return;
     if (event.type === "transport") {
@@ -137,8 +153,19 @@ export class ObservationState {
         ? event.diagnostics
         : [event.validationCode ?? "INVALID_PUBLICATION"];
       if (event.projectable && event.observation) {
-        c.lastValid = event;
-        this.#latest.set(`${event.component}/${event.observation.key}`, event);
+        // Images do not refresh the component heartbeat used for control admission.
+        if (event.observation.key !== "frame_header") c.lastValid = event;
+        const camera =
+          event.observation.key === "frame_header"
+            ? `/${String(event.observation.data.camera_id)}`
+            : "";
+        const key = `${event.component}/${event.observation.key}${camera}`;
+        this.#latest.delete(key);
+        this.#latest.set(key, event);
+        if (this.#latest.size > 128) {
+          const oldest = [...this.#latest.keys()].find((k) => k.startsWith("eo/frame_header/"));
+          if (oldest !== undefined) this.#latest.delete(oldest);
+        }
       }
     }
   }
@@ -180,8 +207,9 @@ export class ObservationState {
     if (!targets) diagnostics.push("TARGET_REPORT_NOT_OBSERVED");
     else if (!fresh(targets, this.settings.stateFreshForMs))
       diagnostics.push("TARGET_REPORT_RECEPTION_STALE");
-    return VehicleObservationStateV2.parse({
-      schemaVersion: "ugv.vehicle-observation-state/2.0",
+    const v3 = this.scope.identity.components.eo.protocolVersion === "2.3";
+    return (v3 ? VehicleObservationStateV3 : VehicleObservationStateV2).parse({
+      schemaVersion: v3 ? "ugv.vehicle-observation-state/3.0" : "ugv.vehicle-observation-state/2.0",
       generatedAt: new Date().toISOString(),
       partitionHash: this.scope.partitionHash,
       sessionId,
@@ -206,6 +234,7 @@ export class ObservationState {
         observation: r.observation,
       })),
       diagnostics,
+      ...(v3 ? { archiveGaps: this.#gaps } : {}),
       archive,
       continuity: "upstream_loss_and_producer_epoch_unverified",
       completeEvidence: false,

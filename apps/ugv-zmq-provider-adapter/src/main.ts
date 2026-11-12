@@ -18,6 +18,7 @@ if (
         "mode",
         "contractSha256",
         "plannerFrame",
+        "frameSettings",
         "handoffGrantFile",
         "management",
         "host",
@@ -64,3 +65,44 @@ for (const signal of ["SIGINT", "SIGTERM"] as const)
       process.exitCode = 1;
     });
   });
+
+// The supervisor restarts a complete receiver/engine generation, so a new
+// archive session cannot inherit a control engine's old source identity.
+let recycling = false;
+const archiveMonitor = setInterval(() => {
+  const health = app.observer.health;
+  if (health.status !== "failed" || recycling) return;
+  const retryable =
+    /ZMQ_ARCHIVE_(STATEMENT_TIMEOUT|LOCK_TIMEOUT|CONNECTION_LOST|CLIENT_TIMEOUT|SERIALIZATION_FAILURE|DEADLOCK|WRITER_CONNECTION_LOST)/.test(
+      health.failureCode ?? "",
+    );
+  if (!retryable) return;
+  recycling = true;
+  clearInterval(archiveMonitor);
+  process.stderr.write(
+    JSON.stringify({
+      event: "zmq_archive_controlled_restart",
+      failureCode: health.failureCode,
+      previousSessionId: app.observer.sessionId,
+      unconfirmedReceptions: health.unconfirmedReceptions,
+      controlsAdmitted: false,
+      replayUnconfirmedBatch: false,
+    }) + "\n",
+  );
+  const timer = setTimeout(() => {
+    const deadline = setTimeout(() => process.exit(75), 30000);
+    deadline.unref();
+    void app
+      .close()
+      .catch(() => {
+        process.stderr.write(
+          JSON.stringify({ event: "zmq_archive_restart_shutdown_unconfirmed" }) + "\n",
+        );
+      })
+      .finally(() => {
+        process.exitCode = 75;
+      });
+  }, 5000);
+  timer.unref();
+}, 1000);
+archiveMonitor.unref();

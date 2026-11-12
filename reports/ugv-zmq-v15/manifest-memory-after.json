@@ -1,0 +1,42 @@
+{
+  "scenario": "repeated unchanged 1.4 catalog validation with reused registry",
+  "samples": [
+    {
+      "round": 0,
+      "heapUsed": 35694384,
+      "cacheEntries": 0
+    },
+    {
+      "round": 10,
+      "heapUsed": 39965392,
+      "cacheEntries": 36
+    },
+    {
+      "round": 20,
+      "heapUsed": 41466176,
+      "cacheEntries": 36
+    },
+    {
+      "round": 30,
+      "heapUsed": 41698272,
+      "cacheEntries": 36
+    },
+    {
+      "round": 40,
+      "heapUsed": 41667632,
+      "cacheEntries": 36
+    },
+    {
+      "round": 50,
+      "heapUsed": 42313792,
+      "cacheEntries": 36
+    },
+    {
+      "round": 60,
+      "heapUsed": 42845952,
+      "cacheEntries": 36
+    }
+  ],
+  "retainedGrowthAfterWarmup": 1379776,
+  "status": "passed"
+}

@@ -1,7 +1,8 @@
 import type { ControlDeploymentProfile as DeploymentProfile } from "../../vehicle-zmq-contract/src/site-profile.js";
 import { randomUUID } from "node:crypto";
 import { ZodError } from "zod";
-import { decodeChassisFrame, parsePublication } from "../../vehicle-zmq-contract/src/index.js";
+import { decodeChassisFrame } from "../../vehicle-zmq-contract/src/chassis-versioned.js";
+import { parsePublication } from "../../vehicle-zmq-contract/src/wire-versioned.js";
 import { canonical, sha256, type Component, type ObserverSettings } from "./config.js";
 import {
   multipartHash,
@@ -61,10 +62,20 @@ export class ObservationNormalizer {
       receipt.observation = observation;
       receipt.valid = true;
       receipt.projectable = true;
-      const key = `${component}/${observation.key}`;
+      const camera =
+        observation.key === "frame_header" ? `/${String(observation.data.camera_id)}` : "";
+      const key = `${component}/${observation.key}${camera}`;
       if (this.#lastBytes.get(key) === receipt.multipartSha256)
         receipt.diagnostics.push("REPEATED_WIRE_BYTES");
       this.#lastBytes.set(key, receipt.multipartSha256 ?? "");
+      // A sender can invent camera IDs. Keep diagnostics bounded independently of archive size.
+      if (this.#lastBytes.size > 256) {
+        const oldest = [...this.#lastBytes.keys()].find((k) => k.startsWith("eo/frame_header/"));
+        if (oldest !== undefined) {
+          this.#lastBytes.delete(oldest);
+          this.#watermarks.delete(oldest);
+        }
+      }
       const sourceTime = observation.sourceTime.value;
       if (sourceTime !== null) {
         const time = BigInt(sourceTime),
@@ -91,13 +102,18 @@ export class ObservationNormalizer {
         receipt.diagnostics.push("SOURCE_REPLAY_ORIGIN");
         receipt.projectable = false;
       }
-      if (component === "eo" && ["targetlist", "tracklist"].includes(observation.key)) {
+      if (
+        component === "eo" &&
+        ["targetlist", "tracklist", "frame_header"].includes(observation.key)
+      ) {
         const images =
-          observation.key === "targetlist"
-            ? [observation.data.image]
-            : Array.isArray(observation.data.targets)
-              ? observation.data.targets.map((t) => object(t).image)
-              : [];
+          observation.key === "frame_header"
+            ? [observation.data]
+            : observation.key === "targetlist"
+              ? [observation.data.image]
+              : Array.isArray(observation.data.targets)
+                ? observation.data.targets.map((t) => object(t).image)
+                : [];
         for (const input of images) {
           const image = object(input),
             frameKey = `${component}/${observation.key}/${String(image.camera_id)}/${String(image.frame_id)}`;
@@ -136,7 +152,10 @@ export class ObservationNormalizer {
       if (frames.length !== 1 || !frames[0]) throw Error("ZMQ_CHASSIS_MULTIPART_INVALID");
       const config = this.profile.components.chassis;
       if (config.systemId === null) throw Error("ZMQ_CHASSIS_SYSTEM_ID_UNBOUND");
-      const parsed = decodeChassisFrame(frames[0], { systemId: config.systemId });
+      const parsed = decodeChassisFrame(frames[0], {
+        systemId: config.systemId,
+        protocolVersion: config.protocolVersion,
+      });
       if (parsed.topic !== "ipc_message") throw Error("ZMQ_CHASSIS_PUBLICATION_TOPIC_INVALID");
       if (parsed.targetSystemId !== "0" && parsed.targetSystemId !== config.controllerSystemId)
         throw Error("ZMQ_PUBLICATION_TARGET_UNMATCHED");
@@ -169,7 +188,12 @@ export class ObservationNormalizer {
         data,
       };
     }
-    const parsed = parsePublication(component, frames, this.profile.components[component].deviceId);
+    const parsed = parsePublication(
+      component,
+      frames,
+      this.profile.components[component].deviceId,
+      this.profile.components.eo.protocolVersion,
+    );
     const data: Record<string, unknown> = parsed.data;
     const task = object(data.task),
       command = object(data.command);
@@ -183,9 +207,16 @@ export class ObservationNormalizer {
       nativeRequestId: text(task.request_id) ?? text(command.request_id),
       runtimeTaskId: null,
       sourceProducerEpoch: null,
-      sourceTime: { unit: "utc_ms", value: String(parsed.published_at_utc_ms) },
+      sourceTime:
+        parsed.published_at_utc_ms === null
+          ? { unit: "not_supplied", value: null }
+          : { unit: "utc_ms", value: String(parsed.published_at_utc_ms) },
       acquisitionUtcMs:
-        typeof data.observed_at_utc_ms === "number" ? data.observed_at_utc_ms : null,
+        typeof data.observed_at_utc_ms === "number"
+          ? data.observed_at_utc_ms
+          : typeof data.exposure_utc_ms === "number"
+            ? data.exposure_utc_ms
+            : null,
       reportedOrigin:
         origin === "measured" || origin === "simulated" || origin === "replay"
           ? origin
@@ -201,6 +232,25 @@ const object = (value: unknown): Record<string, unknown> =>
     : {};
 const text = (value: unknown) => (typeof value === "string" ? value : null);
 export const safeCode = (error: unknown): string => {
+  const code = error !== null && typeof error === "object" && "code" in error ? error.code : null;
+  if (typeof code === "string" && /^[0-9A-Z]{5}$/.test(code)) {
+    const category =
+      code === "57014"
+        ? "STATEMENT_TIMEOUT"
+        : code === "55P03"
+          ? "LOCK_TIMEOUT"
+          : code.startsWith("08") || ["57P01", "57P02", "57P03"].includes(code)
+            ? "CONNECTION_LOST"
+            : code === "53100"
+              ? "DISK_FULL"
+              : code === "40001"
+                ? "SERIALIZATION_FAILURE"
+                : code === "40P01"
+                  ? "DEADLOCK"
+                  : "DATABASE_FAILURE";
+    return `ZMQ_ARCHIVE_${category}_${code}`;
+  }
   const message = error instanceof Error ? error.message : "ZMQ_OBSERVATION_FAILED";
+  if (message === "Query read timeout") return "ZMQ_ARCHIVE_CLIENT_TIMEOUT_COMMIT_UNCONFIRMED";
   return /^[A-Z][A-Z0-9_]{0,127}$/.test(message) ? message : "ZMQ_OBSERVATION_FAILED";
 };

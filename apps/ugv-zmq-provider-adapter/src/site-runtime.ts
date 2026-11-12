@@ -1,3 +1,14 @@
+import {
+  siteV15Tool,
+  SITE_V15_TOOLS,
+  SITE_READONLY_V15_PROFILE,
+} from "../../../packages/vehicle-zmq-control/src/site-v15.js";
+import {
+  FRAME_TOOL,
+  FrameInput,
+  type FrameService,
+} from "../../../packages/vehicle-zmq-frames/src/index.js";
+import { VIEW_TOOL } from "../../../packages/vehicle-zmq-control/src/simulation-view-contract.js";
 import { randomUUID } from "node:crypto";
 import { EventEmitter } from "node:events";
 import AjvImport, { type Options, type ValidateFunction } from "ajv";
@@ -76,13 +87,32 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
     readonly store: PostgresProviderStore,
     readonly business: Pick<ReturnType<typeof zmqBusiness>, "service">,
     readonly planner?: SiteRoutePlanner,
+    readonly frames?: FrameService,
   ) {
     if (!profile.providerBinding.providerId || !profile.providerBinding.resourceId)
       throw Error("ZMQ_READONLY_LOGICAL_BINDING_REQUIRED");
     const ajv = new Ajv({ strict: false, allErrors: true });
     addFormats(ajv);
-    for (const name of SITE_TOOLS)
-      this.validators.set(name, ajv.compile(siteTool(name, this.resourceId).inputSchema));
+    for (const name of this.toolNames)
+      this.validators.set(
+        name,
+        ajv.compile(
+          (this.v15 ? siteV15Tool(name, this.resourceId, true) : siteTool(name, this.resourceId))
+            .inputSchema,
+        ),
+      );
+  }
+  get v15() {
+    return this.profile.components.eo.protocolVersion === "2.3";
+  }
+  get toolNames() {
+    return this.v15 ? SITE_V15_TOOLS : SITE_TOOLS;
+  }
+  get catalogProfile() {
+    return this.v15 ? SITE_READONLY_V15_PROFILE : SITE_PROFILE;
+  }
+  isControl(name: string) {
+    return ZMQ_CONTROL_TOOLS.has(name) || name === VIEW_TOOL;
   }
   get resourceId() {
     return this.profile.providerBinding.resourceId ?? "";
@@ -105,8 +135,13 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
   ) {
     try {
       this.validate(name, args);
-      if (ZMQ_CONTROL_TOOLS.has(name)) return this.decision(false, SITE_READONLY_REASON);
+      if (this.isControl(name)) return this.decision(false, SITE_READONLY_REASON);
       this.context(context);
+      if (name === FRAME_TOOL) {
+        FrameInput.parse(args);
+        if (!this.frames) return this.decision(false, "ZMQ_FRAME_ENDPOINT_UNCONFIGURED");
+        this.frames.check(args, this.context(context));
+      }
       if (name === PLAN_ROUTE && !this.planner)
         return this.decision(false, "UGV_PLANNER_FRAME_OR_POLICY_UNCONFIRMED");
       if (name.endsWith("_result")) await this.read(name, args, this.context(context));
@@ -132,10 +167,12 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
   }
   capabilities() {
     const blockers = (name: string) => {
-      if (!ZMQ_CONTROL_TOOLS.has(name))
-        return name === PLAN_ROUTE && !this.planner
-          ? ["UGV_PLANNER_FRAME_OR_POLICY_UNCONFIRMED"]
-          : [];
+      if (!this.isControl(name))
+        return name === FRAME_TOOL && !this.frames
+          ? ["ZMQ_FRAME_ENDPOINT_UNCONFIGURED"]
+          : name === PLAN_ROUTE && !this.planner
+            ? ["UGV_PLANNER_FRAME_OR_POLICY_UNCONFIRMED"]
+            : [];
       const reasons = [SITE_READONLY_REASON, "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE"];
       if (name === "vehicle_zmq_navigate") {
         reasons.push("CHASSIS_FEEDBACK_UNCORRELATED");
@@ -153,7 +190,7 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
     return {
       schemaVersion: "ugv.zmq-site-capabilities/1",
       qualification: "site_readonly",
-      catalogProfile: SITE_PROFILE,
+      catalogProfile: this.catalogProfile,
       resourceId: this.resourceId,
       observationAdmission: "diagnostic_readonly",
       controlAdmission: "disabled",
@@ -162,7 +199,7 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
       deploymentBinding: "unqualified_diagnostic",
       sourceProducerEpoch: null,
       completeSpatialEvidence: false,
-      tools: SITE_TOOLS.map((name) => ({
+      tools: this.toolNames.map((name) => ({
         name,
         available: !blockers(name).length,
         blockers: blockers(name),
@@ -176,7 +213,7 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
     };
   }
   async start(input: StartVehicleOperation) {
-    if (ZMQ_CONTROL_TOOLS.has(input.operationName)) throw Error(SITE_READONLY_REASON);
+    if (this.isControl(input.operationName)) throw Error(SITE_READONLY_REASON);
     this.validate(input.operationName, input.arguments);
     if (sha256(canonical(input.arguments)) !== input.argumentHash)
       throw Error("ZMQ_ARGUMENT_HASH_MISMATCH");
@@ -219,6 +256,10 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
     if (name === "vehicle_get_capabilities") return this.capabilities();
     if (["vehicle_get_state", "vehicle_get_payload_status", "vehicle_get_targets"].includes(name))
       return this.snapshot();
+    if (name === FRAME_TOOL) {
+      if (!this.frames) throw Error("ZMQ_FRAME_ENDPOINT_UNCONFIGURED");
+      return this.frames.read(args, context, signal);
+    }
     if (name === PLAN_ROUTE) {
       if (!this.planner) throw Error("UGV_PLANNER_FRAME_OR_POLICY_UNCONFIRMED");
       return this.planner.plan(args, signal);
@@ -432,7 +473,10 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
                     result,
                   }),
                 ),
-                evidenceType: "ugv.zmq.retained_report",
+                evidenceType:
+                  e.operationName === FRAME_TOOL
+                    ? "ugv.zmq.frame_chunk"
+                    : "ugv.zmq.retained_report",
                 observedAt: e.terminalAt,
                 subjectRef: e.resourceId,
                 payloadRef: { kind: "structured_content", jsonPointer: "" },

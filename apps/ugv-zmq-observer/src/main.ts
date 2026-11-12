@@ -19,7 +19,7 @@ export async function runObservationServer() {
     config.scope,
     archive,
   );
-  pool.on("error", () => observer.fail("ZMQ_ARCHIVE_CONNECTION_LOST"));
+  pool.on("error", (error: Error) => observer.fail(safeCode(error)));
   const driver = new ZmqSubscriptionDriver(observer, config.settings),
     api = buildObservationApi(observer, archive);
   let finish: () => void = () => undefined;

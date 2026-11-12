@@ -49,12 +49,17 @@ const wireHash = (value: unknown) =>
     .update(JSON.stringify(sorted(value)))
     .digest("hex");
 export function validateSchema(schema: Json, value: unknown) {
-  const validate = ajv.compile(schema);
-  if (!validate(value)) throw Error("TOOL_ARGUMENTS_SCHEMA_MISMATCH");
+  try {
+    const validate = ajv.compile(schema);
+    if (!validate(value)) throw Error("TOOL_ARGUMENTS_SCHEMA_MISMATCH");
+  } finally {
+    ajv.removeSchema(schema);
+  }
 }
 export class Service {
   #stateCache?: { value: Json; expires: number };
   #stateFlight?: Promise<Json>;
+  #frameBusy = false;
   constructor(
     readonly mcp: Mcp,
     readonly store: Store,
@@ -222,6 +227,71 @@ export class Service {
     if (!(READ_TOOLS as readonly string[]).includes(name)) throw Error("READ_TOOL_REQUIRED");
     this.validateTool(c, name, args);
     return toolContent(await this.mcp.tool(name, args));
+  }
+  async frameImage(resourceId: string, retrievalId: string) {
+    if (this.#frameBusy) throw Error("ZMQ_FRAME_CHANNEL_BUSY");
+    this.#frameBusy = true;
+    try {
+      const catalog = await this.catalog();
+      this.validateTool(catalog, "vehicle_zmq_get_frame", { resourceId, retrievalId, offset: 0 });
+      const chunks: Buffer[] = [],
+        hash = createHash("sha256"),
+        started = Date.now();
+      let offset = 0,
+        total = 0,
+        expectedSha = "",
+        reference = "";
+      while (true) {
+        if (Date.now() - started > 30000) throw Error("ZMQ_FRAME_READ_TIMEOUT");
+        const data = toolContent(
+          await this.mcp.rpc(
+            "tools/call",
+            { name: "vehicle_zmq_get_frame", arguments: { resourceId, retrievalId, offset } },
+            3000,
+          ),
+        );
+        const bytes = Buffer.from(text(data.dataBase64), "base64");
+        if (!total) {
+          total = Number(data.byteLength);
+          expectedSha = text(data.sha256);
+          reference = JSON.stringify([data.metadata, data.reference]);
+        }
+        const end = offset + bytes.length;
+        if (
+          !Number.isInteger(total) ||
+          total < 1 ||
+          total > 16777216 ||
+          !bytes.length ||
+          bytes.length > 262144 ||
+          end > total ||
+          bytes.toString("base64") !== data.dataBase64 ||
+          bytes.length !== data.chunkBytes ||
+          data.offset !== offset ||
+          data.byteLength !== total ||
+          data.sha256 !== expectedSha ||
+          data.retrievalId !== retrievalId ||
+          data.resourceId !== resourceId ||
+          JSON.stringify([data.metadata, data.reference]) !== reference ||
+          createHash("sha256").update(bytes).digest("hex") !== data.chunkSha256 ||
+          data.nextOffset !== (end < total ? end : null)
+        )
+          throw Error("ZMQ_FRAME_CHUNK_INTEGRITY_FAILED");
+        chunks.push(bytes);
+        hash.update(bytes);
+        offset = end;
+        if (data.nextOffset === null) break;
+      }
+      if (hash.digest("hex") !== expectedSha) throw Error("ZMQ_FRAME_CHUNK_INTEGRITY_FAILED");
+      await this.store.audit(
+        this.actor,
+        "frame.download",
+        undefined,
+        JSON.stringify({ resourceId, sha256: expectedSha, byteLength: total }),
+      );
+      return { bytes: Buffer.concat(chunks, total), sha256: expectedSha };
+    } finally {
+      this.#frameBusy = false;
+    }
   }
   async task(taskId: string) {
     const saved = await this.store.task(taskId);

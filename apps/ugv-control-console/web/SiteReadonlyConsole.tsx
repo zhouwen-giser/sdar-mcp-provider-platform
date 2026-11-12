@@ -1,3 +1,5 @@
+import { FrameViewer } from "./FrameViewer.js";
+import { FRAME_TOOL } from "../shared/zmq-native.js";
 import { useState, type ReactNode } from "react";
 import { api, describe, download } from "./api.js";
 import { newCommandId } from "./command-id.js";
@@ -176,13 +178,47 @@ export function SiteReadonlyConsole({
               .join("；")}
           </div>
         )}
+        <section className="panel" aria-label="观测归档与准入">
+          <h2>归档与控制准入</h2>
+          <p>
+            归档：
+            {record(state.archive).status === "running"
+              ? "正常写入"
+              : `不可用 · ${text(record(state.archive).status)}`}
+            {record(state.archive).failureCode
+              ? ` · ${text(record(state.archive).failureCode)}`
+              : ""}
+          </p>
+          <p>
+            控制准入：{siteControl ? "逐操作核实" : "关闭（只读模式）"}
+            。归档不可用或有效状态过期时禁止派发。
+          </p>
+          {array(state.archiveGaps)
+            .map(record)
+            .map((g) => (
+              <p className="notice warning" key={text(g.eventId)}>
+                已记录接收断档：{when(g.receivedAt)} · {text(g.code)}
+              </p>
+            ))}
+          {record(state.archive).status !== "running" && (
+            <div className="notice warning">
+              归档接收已中断，以下连接状态是最后一次已持久化记录，不能证明当前链路正常。
+            </div>
+          )}
+        </section>
         <section className="metrics">
           {Object.entries(record(state.channels)).map(([name, value]) => {
             const c = record(value);
             return (
               <article className="metric" key={name}>
                 <span>{labels[name] ?? name}</span>
-                <h2>{text(c.state) === "connected" ? "订阅已连接" : "订阅未连接"}</h2>
+                <h2>
+                  {record(state.archive).status !== "running"
+                    ? "连接状态未确认"
+                    : text(c.state) === "connected"
+                      ? "订阅已连接"
+                      : "订阅未连接"}
+                </h2>
                 <p>{c.receiptFresh === true ? "近期收到有效消息" : "有效消息过期或未收到"}</p>
                 <small>接收 {when(c.lastValidCommittedAt)} · 源新鲜度未核实</small>
               </article>
@@ -192,6 +228,24 @@ export function SiteReadonlyConsole({
         <div className="main-grid">
           <div>
             {controls}
+            {array(device.tools).some((t) => record(t).name === FRAME_TOOL) && (
+              <FrameViewer
+                resourceId={resourceId}
+                unavailableReason={
+                  array(
+                    array(capabilities.tools)
+                      .map(record)
+                      .find((t) => t.name === FRAME_TOOL)?.blockers,
+                  ).map(text)[0]
+                }
+                frames={array(state.observations)
+                  .map(record)
+                  .map((o) => record(o.observation))
+                  .filter((o) => o.key === "frame_header")
+                  .map((o) => record(o.data))}
+              />
+            )}
+
             <section className="panel">
               <div className="section-head">
                 <h2>7879 路线预览</h2>

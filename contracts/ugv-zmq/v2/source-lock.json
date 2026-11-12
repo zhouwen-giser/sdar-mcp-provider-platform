@@ -1,0 +1,100 @@
+{
+  "schemaVersion": "ugv.zmq-source-lock/2",
+  "frozenAt": "2026-11-11",
+  "upstreamCommit": "a0be6a51e17fb9e85bc4ba0b62f7157a1b77c82e",
+  "protocols": {
+    "chassis": "2.1",
+    "eo": "2.3",
+    "simulationEffect": "1.0"
+  },
+  "framePull": {
+    "defaultPort": 5559,
+    "documentPortConflict": 5557
+  },
+  "sources": [
+    {
+      "source": "doc/zmq/自驾ZMQ对接协议.md",
+      "snapshot": "contracts/ugv-zmq/v2/sources/自驾ZMQ对接协议.md",
+      "sha256": "802612d4697e234ee4644248ea781ff8453a9691c3a4375d04ca783c8f47b953",
+      "bytes": 19286
+    },
+    {
+      "source": "doc/zmq/光电ZMQ对接协议.md",
+      "snapshot": "contracts/ugv-zmq/v2/sources/光电ZMQ对接协议.md",
+      "sha256": "562f7b4e992b99f3458a6889616deb0dcd39cdc376e322c549bb24eb8d4b490c",
+      "bytes": 76754
+    },
+    {
+      "source": "doc/zmq/光电协议-V2.3变更与集成说明.md",
+      "snapshot": "contracts/ugv-zmq/v2/sources/光电协议-V2.3变更与集成说明.md",
+      "sha256": "909644ffe8ddc08f201d576cc0b4c12e501cb1f50148a32aba02639d200ea078",
+      "bytes": 8275
+    },
+    {
+      "source": "doc/zmq/火炮ZMQ对接协议.md",
+      "snapshot": "contracts/ugv-zmq/v2/sources/火炮ZMQ对接协议.md",
+      "sha256": "e3cd63525b5f7f06131d6ce048d2563bd7cfc4c6708db881b8d7c2b32dfa92a0",
+      "bytes": 22506
+    },
+    {
+      "source": "ros_ws/src/ros2_zmq_server_sl/src/protocol.cpp",
+      "snapshot": "contracts/ugv-zmq/v2/sources/src-protocol.cpp",
+      "sha256": "5cfd3429cec2977bbfc897a08b5c29a0b9c53c2efca2565f9eb14520580021b7",
+      "bytes": 18989
+    },
+    {
+      "source": "ros_ws/src/ros2_zmq_server_sl/src/eo/protocol.cpp",
+      "snapshot": "contracts/ugv-zmq/v2/sources/src-eo-protocol.cpp",
+      "sha256": "fe8c85899dcf36462e812e77204731a0355b764ee06952ac08f2dfaf9ddc7988",
+      "bytes": 8225
+    },
+    {
+      "source": "ros_ws/src/ros2_zmq_server_sl/src/eo/frames.cpp",
+      "snapshot": "contracts/ugv-zmq/v2/sources/src-eo-frames.cpp",
+      "sha256": "c65892eb87cd4acbad39af3979d22dd0b2deee5fc3b92277572775369cf0c502",
+      "bytes": 7534
+    },
+    {
+      "source": "ros_ws/src/ros2_zmq_server_sl/src/eo/main.cpp",
+      "snapshot": "contracts/ugv-zmq/v2/sources/src-eo-main.cpp",
+      "sha256": "f3f183777d59d3c1427e065bdaea1816607097e01533bb740fe915ab2a74219d",
+      "bytes": 18974
+    },
+    {
+      "source": "ros_ws/src/ros2_zmq_server_sl/src/eo/controller.cpp",
+      "snapshot": "contracts/ugv-zmq/v2/sources/src-eo-controller.cpp",
+      "sha256": "61a32c820a3d8113b6cf7b5bdf5af57c5905c4030135c857811584a6c6235a02",
+      "bytes": 28223
+    },
+    {
+      "source": "ros_ws/src/ros2_zmq_server_sl/光电接口映射.md",
+      "snapshot": "contracts/ugv-zmq/v2/sources/光电接口映射.md",
+      "sha256": "f45b4caced1765eea41cd6e313679d6b90a4810d3ece7319b39036aa8f81d515",
+      "bytes": 17739
+    },
+    {
+      "source": "ros_ws/src/ros2_zmq_server_sl/test/frames/mode.hex",
+      "snapshot": "contracts/ugv-zmq/v2/fixtures/upstream-mode.hex",
+      "sha256": "759b7e4cd7cc49b483bd2955b4b15b11f5fcdddc41cdd69bbe2586ee6c4184bc",
+      "bytes": 150
+    },
+    {
+      "source": "ros_ws/src/ros2_zmq_server_sl/test/frames/path.hex",
+      "snapshot": "contracts/ugv-zmq/v2/fixtures/upstream-path.hex",
+      "sha256": "d7a8eb2b645da4377dc66273cbcd1ae38c7d7c084fb0868e56367a94f42d1651",
+      "bytes": 312
+    },
+    {
+      "source": "ros_ws/src/ros2_zmq_server_sl/test/frames/feedback.hex",
+      "snapshot": "contracts/ugv-zmq/v2/fixtures/upstream-feedback.hex",
+      "sha256": "788fb82b21cbb8358ed00103673694d0ff212c1bc778cad0a0168c1813343d5c",
+      "bytes": 162
+    },
+    {
+      "source": "ros_ws/src/ros2_zmq_server_sl/test/frames/failsafe.hex",
+      "snapshot": "contracts/ugv-zmq/v2/fixtures/upstream-failsafe.hex",
+      "sha256": "c6cfb9f2a09b4802ea1f83cb8a9dfe05c69f5c8dad80ec9feeeee9abe04bc663",
+      "bytes": 159
+    }
+  ]
+}

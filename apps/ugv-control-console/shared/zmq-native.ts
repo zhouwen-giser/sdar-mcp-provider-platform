@@ -1,3 +1,5 @@
+import v15ControlCatalog from "./zmq-v15-control-catalog.json" with { type: "json" };
+import v15ReadonlyCatalog from "./zmq-v15-readonly-catalog.json" with { type: "json" };
 import v13Catalog from "./zmq-site-control-v13-catalog.json" with { type: "json" };
 import v14Catalog from "./zmq-site-control-v14-catalog.json" with { type: "json" };
 import controlCatalog from "./zmq-site-control-catalog.json" with { type: "json" };
@@ -26,15 +28,27 @@ export const NATIVE_CONTROL_TOOLS = [
 ];
 export const SITE_CONTROL_PROFILE = "zmq_v1_2_0_site_control_13";
 export const SITE_CONTROL_V13_PROFILE = "zmq_v1_3_0_site_control_13";
+export const SITE_CONTROL_V15_PROFILE = "zmq_v1_5_0_site_control_15";
+export const SITE_READONLY_V15_PROFILE = "zmq_v1_5_0_readonly_15";
+export const FRAME_TOOL = "vehicle_zmq_get_frame";
+export function siteV15Tools(tools: readonly Tool[]) {
+  return tools.some((t) =>
+    [SITE_CONTROL_V15_PROFILE, SITE_READONLY_V15_PROFILE].includes(
+      String(record(t._meta?.["io.sdar/ugvZmq"]).catalogProfile),
+    ),
+  );
+}
 export const SITE_CONTROL_V14_PROFILE = "zmq_v1_4_0_site_control_14";
 export function siteControlV14Tools(tools: readonly Tool[]) {
-  return tools.some(
-    (t) => record(t._meta?.["io.sdar/ugvZmq"]).catalogProfile === SITE_CONTROL_V14_PROFILE,
+  return tools.some((t) =>
+    [SITE_CONTROL_V14_PROFILE, SITE_CONTROL_V15_PROFILE].includes(
+      String(record(t._meta?.["io.sdar/ugvZmq"]).catalogProfile),
+    ),
   );
 }
 export function siteControlV13Tools(tools: readonly Tool[]) {
   return tools.some((t) =>
-    [SITE_CONTROL_V13_PROFILE, SITE_CONTROL_V14_PROFILE].includes(
+    [SITE_CONTROL_V13_PROFILE, SITE_CONTROL_V14_PROFILE, SITE_CONTROL_V15_PROFILE].includes(
       String(record(t._meta?.["io.sdar/ugvZmq"]).catalogProfile),
     ),
   );
@@ -48,25 +62,27 @@ export function siteControlTools(tools: readonly Tool[]) {
 export const SITE_PROFILE = "zmq_v1_1_0_readonly_13";
 export const PLAN_ROUTE = "vehicle_zmq_plan_route";
 export function siteReadonlyTools(tools: readonly Tool[]) {
-  return tools.some((t) => record(t._meta?.["io.sdar/ugvZmq"]).catalogProfile === SITE_PROFILE);
+  return tools.some((t) =>
+    [SITE_PROFILE, SITE_READONLY_V15_PROFILE].includes(
+      String(record(t._meta?.["io.sdar/ugvZmq"]).catalogProfile),
+    ),
+  );
 }
+const catalogs = [
+  nativeCatalog,
+  siteCatalog,
+  controlCatalog,
+  v13Catalog,
+  v14Catalog,
+  v15ControlCatalog,
+  v15ReadonlyCatalog,
+];
 export function nativeContract(
   name: string,
   resourceId: string,
   profile = nativeCatalog.profile,
 ): Tool | undefined {
-  const catalog =
-    profile === SITE_CONTROL_V14_PROFILE
-      ? v14Catalog
-      : profile === SITE_CONTROL_V13_PROFILE
-        ? v13Catalog
-        : profile === SITE_CONTROL_PROFILE
-          ? controlCatalog
-          : profile === SITE_PROFILE
-            ? siteCatalog
-            : profile === nativeCatalog.profile
-              ? nativeCatalog
-              : undefined;
+  const catalog = catalogs.find((c) => c.profile === profile);
   const raw = catalog?.tools.find((t) => t.name === name);
   if (!raw) return undefined;
   const tool = structuredClone(raw) as unknown as Tool;
@@ -98,32 +114,9 @@ export function nativeToolReason(tool: Tool, resourceId: string): string | null 
 }
 /** Formal native Providers must expose the whole reviewed catalog before any read or control. */
 export function nativeCatalogReason(tools: readonly Tool[], resourceId: string): string | null {
-  const site = siteReadonlyTools(tools),
-    control = siteControlTools(tools),
-    catalog = siteControlV14Tools(tools)
-      ? v14Catalog
-      : siteControlV13Tools(tools)
-        ? v13Catalog
-        : control
-          ? controlCatalog
-          : site
-            ? siteCatalog
-            : nativeCatalog;
-  if (
-    (site || control) &&
-    tools.some(
-      (t) =>
-        record(t._meta?.["io.sdar/ugvZmq"]).catalogProfile !==
-        (siteControlV14Tools(tools)
-          ? SITE_CONTROL_V14_PROFILE
-          : siteControlV13Tools(tools)
-            ? SITE_CONTROL_V13_PROFILE
-            : control
-              ? SITE_CONTROL_PROFILE
-              : SITE_PROFILE),
-    )
-  )
-    return "ZMQ_NATIVE_CONTRACT_MISMATCH";
+  const profiles = new Set(tools.map((t) => record(t._meta?.["io.sdar/ugvZmq"]).catalogProfile));
+  const catalog = catalogs.find((c) => c.profile === [...profiles][0]);
+  if (profiles.size !== 1 || !catalog) return "ZMQ_NATIVE_CONTRACT_MISMATCH";
   if (
     canonical(tools.map((t) => t.name).sort()) !==
     canonical(catalog.tools.map((t) => t.name).sort())

@@ -2,7 +2,8 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { Pool } from "pg";
 import { z } from "zod";
-import { DeploymentProfile } from "../../../packages/vehicle-zmq-contract/src/index.js";
+import { ControlDeploymentProfile as DeploymentProfile } from "../../../packages/vehicle-zmq-contract/src/site-profile.js";
+import { checkContractsV2 } from "../../../scripts/ugv-zmq/check-contracts-v2.js";
 import {
   ObserverSettings,
   observerIdentity,
@@ -30,7 +31,10 @@ export function loadObservationConfig(env: NodeJS.ProcessEnv = process.env) {
     .refine((value) => ["postgres:", "postgresql:"].includes(new URL(value).protocol))
     .parse(databaseUrl);
   checkContracts(resolve("contracts/ugv-zmq/v1"));
-  const contractSha = sha256(readFileSync(resolve("contracts/ugv-zmq/v1/contract-lock.json")));
+  const contractSha =
+    profile.components.chassis.protocolVersion === "2.1"
+      ? checkContractsV2().contractSha256
+      : sha256(readFileSync(resolve("contracts/ugv-zmq/v1/contract-lock.json")));
   const scope = observerIdentity(
     profile,
     settings.diagnosticPartition,

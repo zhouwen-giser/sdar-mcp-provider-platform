@@ -1,3 +1,9 @@
+import {
+  SITE_CONTROL_V15_PROFILE,
+  SITE_V15_TOOLS,
+  siteV15Tool,
+} from "../../../packages/vehicle-zmq-control/src/site-v15.js";
+import { FRAME_TOOL } from "../../../packages/vehicle-zmq-frames/src/contract.js";
 import { operationSupportCatalog } from "../../../packages/vehicle-zmq-control/src/operation-support.js";
 import {
   VIEW_PROFILE,
@@ -122,20 +128,25 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
       this.validators.set(
         name,
         ajv.compile(
-          (this.v14
-            ? siteControlV14Tool
-            : this.v13
-              ? siteControlV13Tool
-              : this.siteReads
-                ? siteControlTool
-                : zmqTool)(name, this.resourceId).inputSchema,
+          (this.v15
+            ? siteV15Tool
+            : this.v14
+              ? siteControlV14Tool
+              : this.v13
+                ? siteControlV13Tool
+                : this.siteReads
+                  ? siteControlTool
+                  : zmqTool)(name, this.resourceId).inputSchema,
         ),
       );
-    for (const name of [...ZMQ_PROVIDER_TOOLS.slice(4), ...(this.v14 ? [VIEW_TOOL] : [])])
+    for (const name of [
+      ...ZMQ_PROVIDER_TOOLS.slice(4),
+      ...(this.v14 || this.v15 ? [VIEW_TOOL] : []),
+    ])
       this.resultValidators.set(
         name,
         ajv.compile(
-          this.v14
+          this.v14 || this.v15
             ? siteControlV14OutputSchema(name, true)
             : this.v13
               ? siteControlV13OutputSchema(name, true)
@@ -158,23 +169,34 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
   get v13() {
     return this.engine.scope.settings.catalogProfile === SITE_CONTROL_V13_PROFILE;
   }
+  get v15() {
+    return this.engine.scope.settings.catalogProfile === SITE_CONTROL_V15_PROFILE;
+  }
   get v14() {
     return this.engine.scope.settings.catalogProfile === VIEW_PROFILE;
   }
   get toolNames() {
-    return this.v14 ? SITE_VIEW_TOOLS : this.siteReads ? SITE_TOOLS : ZMQ_PROVIDER_TOOLS;
+    return this.v15
+      ? SITE_V15_TOOLS
+      : this.v14
+        ? SITE_VIEW_TOOLS
+        : this.siteReads
+          ? SITE_TOOLS
+          : ZMQ_PROVIDER_TOOLS;
   }
   get controlTools() {
-    return this.v14 ? new Set([...ZMQ_CONTROL_TOOLS, VIEW_TOOL]) : ZMQ_CONTROL_TOOLS;
+    return this.v14 || this.v15 ? new Set([...ZMQ_CONTROL_TOOLS, VIEW_TOOL]) : ZMQ_CONTROL_TOOLS;
   }
   get catalogProfile() {
-    return this.v14
-      ? VIEW_PROFILE
-      : this.v13
-        ? SITE_CONTROL_V13_PROFILE
-        : this.siteReads
-          ? SITE_CONTROL_PROFILE
-          : "zmq_v1_0_1_12";
+    return this.v15
+      ? SITE_CONTROL_V15_PROFILE
+      : this.v14
+        ? VIEW_PROFILE
+        : this.v13
+          ? SITE_CONTROL_V13_PROFILE
+          : this.siteReads
+            ? SITE_CONTROL_PROFILE
+            : "zmq_v1_0_1_12";
   }
   snapshot() {
     return this.observer.snapshot();
@@ -215,12 +237,14 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
           ? this.siteReads.context(context)
           : this.context(context);
       if (!this.controlTools.has(name)) {
+        if (name === FRAME_TOOL && this.siteReads)
+          return this.siteReads.availability(name, args, context);
         if (name.endsWith("_result")) await this.read(name, args, c);
         return result(true, "ZMQ_READ_AVAILABLE");
       }
       nativeTiming(timing);
       const a = await this.engine.checkAvailability(
-        (this.v14
+        (this.v14 || this.v15
           ? siteControlV14Operation
           : this.v13
             ? siteControlV13Operation
@@ -267,7 +291,7 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
     let e: ProviderExecution;
     if (this.controlTools.has(input.operationName)) {
       const native = (
-        this.v14
+        this.v14 || this.v15
           ? siteControlV14Operation
           : this.v13
             ? siteControlV13Operation
@@ -287,9 +311,9 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
             operationName: input.operationName,
             argumentHash: input.argumentHash,
             arguments: input.arguments,
-            ...(this.v13 || this.v14
+            ...(this.v13 || this.v14 || this.v15
               ? {
-                  catalogProfile: this.v14 ? VIEW_PROFILE : SITE_CONTROL_V13_PROFILE,
+                  catalogProfile: this.catalogProfile,
                   ...(resolveRegionArguments(input.operationName, input.arguments)
                     .parameterResolution
                     ? {
@@ -306,7 +330,7 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
         input.signal,
       );
     } else {
-      const result = await this.read(input.operationName, input.arguments, c),
+      const result = await this.read(input.operationName, input.arguments, c, input.signal),
         at = new Date().toISOString();
       e = {
         taskId: input.taskId,
@@ -339,6 +363,7 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
     name: string,
     args: Record<string, unknown>,
     context: ExecutionContextRecord,
+    signal?: AbortSignal,
   ): Promise<Record<string, unknown>> {
     if (name === "vehicle_get_capabilities" && this.siteReads) {
       const readings = this.siteReads.capabilities();
@@ -364,15 +389,21 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
               eoRecognitionAffected: false,
             }
           : null,
-        tools: this.toolNames.map((name) => ({
-          name,
-          available: !this.controlTools.has(name),
-          blockers: [],
-          requiresParameters: this.controlTools.has(name),
-        })),
+        tools: this.toolNames.map((name) => {
+          const reading = readings.tools.find((tool) => tool.name === name);
+          return {
+            name,
+            available: !this.controlTools.has(name) && reading?.available === true,
+            blockers: this.controlTools.has(name)
+              ? []
+              : (reading?.blockers ?? ["ZMQ_READ_CAPABILITY_UNCONFIRMED"]),
+            requiresParameters: this.controlTools.has(name),
+          };
+        }),
       };
     }
-    if (this.siteReads && name === PLAN_ROUTE) return this.siteReads.read(name, args, context);
+    if (this.siteReads && [PLAN_ROUTE, FRAME_TOOL].includes(name))
+      return this.siteReads.read(name, args, context, signal);
     if (name === "vehicle_get_capabilities")
       return {
         schemaVersion: "ugv.zmq-provider-capabilities/1",
@@ -400,7 +431,7 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
       };
     if (["vehicle_get_state", "vehicle_get_payload_status", "vehicle_get_targets"].includes(name))
       return this.snapshot();
-    if (this.siteReads) return this.siteReads.read(name, args, context);
+    if (this.siteReads) return this.siteReads.read(name, args, context, signal);
     const q = query.parse(args),
       e = await this.engine.get(q.taskId, context);
     if (e?.externalExecutionId !== q.executionId || e.resourceId !== q.resourceId)
@@ -517,7 +548,9 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
       e.executionContext.executionMode === "simulation"
         ? this.historicalResultValidators
         : isZmqExecution(e) &&
-            [SITE_CONTROL_V13_PROFILE, VIEW_PROFILE].includes(e.zmqAdmission?.catalogProfile ?? "")
+            [SITE_CONTROL_V13_PROFILE, VIEW_PROFILE, SITE_CONTROL_V15_PROFILE].includes(
+              e.zmqAdmission?.catalogProfile ?? "",
+            )
           ? this.resultValidators
           : this.legacySiteResultValidators
     ).get(e.operationName);
@@ -565,7 +598,10 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
                     result: publicResult,
                   }),
                 ),
-                evidenceType: "ugv.zmq.retained_report",
+                evidenceType:
+                  e.operationName === FRAME_TOOL
+                    ? "ugv.zmq.frame_chunk"
+                    : "ugv.zmq.retained_report",
                 observedAt: e.terminalAt,
                 subjectRef: e.resourceId,
                 payloadRef: { kind: "structured_content", jsonPointer: "" },

@@ -84,7 +84,9 @@ export class PostgresObservationArchive implements ObservationArchive {
   readonly #name: string;
   #session: ArchiveSession | undefined;
   #lease: PoolClient | undefined;
+  #leaseError: ((error: Error) => void) | undefined;
   #leaseLost = false;
+  #failed = false;
   #onFailure: ((code: string) => void) | undefined;
   setFailureHandler(handler: (code: string) => void): void {
     this.#onFailure = handler;
@@ -99,6 +101,7 @@ export class PostgresObservationArchive implements ObservationArchive {
   async start(): Promise<ArchiveSession> {
     if (this.#session || this.#lease) throw Error("ZMQ_ARCHIVE_ALREADY_STARTED");
     this.#leaseLost = false;
+    this.#failed = false;
     const installed = await this.pool
       .query<{ checksum: string }>(
         `SELECT checksum FROM ${this.#name}.install_history WHERE version=1`,
@@ -109,10 +112,12 @@ export class PostgresObservationArchive implements ObservationArchive {
     if (installed.rows[0]?.checksum !== sha256(migrationSource()))
       throw Error("ZMQ_ARCHIVE_MIGRATION_DRIFT");
     const lease = await this.pool.connect();
-    lease.on("error", () => {
+    const onLeaseError = () => {
       this.#leaseLost = true;
+      this.#failed = true;
       this.#onFailure?.("ZMQ_ARCHIVE_WRITER_CONNECTION_LOST");
-    });
+    };
+    lease.on("error", onLeaseError);
     try {
       const locked = await lease.query<{ locked: boolean }>(
         "SELECT pg_try_advisory_lock(hashtextextended($1,790025)) locked",
@@ -120,11 +125,13 @@ export class PostgresObservationArchive implements ObservationArchive {
       );
       if (!locked.rows[0]?.locked) throw Error("ZMQ_ARCHIVE_WRITER_ALREADY_ACTIVE");
       this.#lease = lease;
+      this.#leaseError = onLeaseError;
       const sessionId = randomUUID(),
         startedAt = new Date().toISOString();
       const genesisHash = sha256(
         `SMPP_ZMQ_ARCHIVE_GENESIS_V2\0${this.scope.partitionHash}\0${sessionId}`,
       );
+      const initialEntries: ArchiveEntry[] = [];
       await this.transaction(async (client) => {
         await client.query(
           `INSERT INTO ${this.#name}.archive_partition(partition_hash,identity) VALUES($1,$2) ON CONFLICT DO NOTHING`,
@@ -138,6 +145,10 @@ export class PostgresObservationArchive implements ObservationArchive {
           throw Error("ZMQ_ARCHIVE_IDENTITY_CONFLICT");
         const predecessors = await client.query<SessionRow>(
           `SELECT * FROM ${this.#name}.archive_session WHERE partition_hash=$1 AND status='open' FOR UPDATE`,
+          [this.scope.partitionHash],
+        );
+        const priorFailures = await client.query<SessionRow>(
+          `SELECT * FROM ${this.#name}.archive_session WHERE partition_hash=$1 ORDER BY started_at DESC,session_id DESC LIMIT 1`,
           [this.scope.partitionHash],
         );
         for (const predecessor of predecessors.rows) {
@@ -157,17 +168,102 @@ export class PostgresObservationArchive implements ObservationArchive {
           `UPDATE ${this.#name}.archive_partition SET active_session=$2 WHERE partition_hash=$1`,
           [this.scope.partitionHash, sessionId],
         );
+        const latest = priorFailures.rows[0];
+        let predecessor =
+          predecessors.rows.at(-1) ??
+          (latest && ["failed", "abandoned"].includes(latest.status) ? latest : undefined);
+        let external = false;
+        const recovery = this.settings.recoveryPredecessor;
+        if (!predecessor && !latest && recovery) {
+          const previous = await client.query<
+            SessionRow & { identity: ObserverIdentity["identity"] }
+          >(
+            `SELECT s.*,p.identity FROM ${this.#name}.archive_session s JOIN ${this.#name}.archive_partition p ON p.partition_hash=s.partition_hash WHERE s.session_id=$1 AND s.partition_hash=$2`,
+            [recovery.sessionId, recovery.partitionHash],
+          );
+          const row = previous.rows[0],
+            old = row?.identity,
+            current = this.scope.identity;
+          if (
+            !row ||
+            !old ||
+            !["failed", "abandoned", "closed"].includes(row.status) ||
+            canonical(old.providerBinding) !== canonical(current.providerBinding) ||
+            canonical(old.executionDomain) !== canonical(current.executionDomain) ||
+            Object.keys(current.components).some((key) => {
+              const component = key as keyof typeof current.components;
+              return (
+                old.components[component].publicationEndpoint !==
+                current.components[component].publicationEndpoint
+              );
+            }) ||
+            old.components.chassis.systemId !== current.components.chassis.systemId ||
+            old.components.eo.deviceId !== current.components.eo.deviceId ||
+            old.components.simulationEffect.deviceId !==
+              current.components.simulationEffect.deviceId
+          )
+            throw Error("ZMQ_ARCHIVE_RECOVERY_PREDECESSOR_INVALID");
+          predecessor = row;
+          external = true;
+        }
+        if (predecessor) {
+          // Read the durable tail after sealing the predecessor. An uncertain batch
+          // is never appended again; the new session explicitly begins after a gap.
+          const tail = await client.query<SessionRow>(
+            `SELECT * FROM ${this.#name}.archive_session WHERE session_id=$1`,
+            [predecessor.session_id],
+          );
+          const row = tail.rows[0];
+          if (!row) throw Error("ZMQ_ARCHIVE_RECOVERY_BOUNDARY_MISSING");
+          const marker = {
+            ...gap(
+              stamp(`recovery:${sessionId}`),
+              external
+                ? "RECEIVER_SESSION_STARTED_AFTER_NATIVE_PROTOCOL_UPGRADE"
+                : "RECEIVER_SESSION_RECOVERED_AFTER_ARCHIVE_FAILURE",
+            ),
+            recovery: {
+              predecessorSessionId: row.session_id,
+              durableLastOrdinal: row.last_ordinal,
+              durableHeadHash: row.head_hash,
+              predecessorStatus: row.status,
+              predecessorPartitionHash: row.partition_hash,
+              failureCode: row.failure_code,
+              persistenceBoundary: "database_tail_verified_no_batch_replay",
+            },
+          };
+          initialEntries.push(
+            ...(await this.insertEvents(
+              client,
+              {
+                session_id: sessionId,
+                partition_hash: this.scope.partitionHash,
+                started_at: new Date(startedAt),
+                status: "open",
+                head_hash: genesisHash,
+                genesis_hash: genesisHash,
+                last_ordinal: "0",
+                failure_code: null,
+              },
+              [ObservationEvent.parse(marker)],
+            )),
+          );
+        }
       });
       this.#session = {
         sessionId,
         partitionHash: this.scope.partitionHash,
         startedAt,
         genesisHash,
+        ...(initialEntries.length ? { initialEntries } : {}),
       };
       return this.#session;
     } catch (error) {
       if (this.#lease) await this.releaseLease();
-      else lease.release();
+      else {
+        lease.removeListener("error", onLeaseError);
+        lease.release();
+      }
       throw error;
     }
   }
@@ -223,6 +319,9 @@ export class PostgresObservationArchive implements ObservationArchive {
       const entries = await this.insertEvents(client, locked.session, parsed);
       if (this.#leaseLost) throw Error("ZMQ_ARCHIVE_WRITER_UNAVAILABLE");
       return entries;
+    }).catch((error: unknown) => {
+      this.#failed = true;
+      throw error;
     });
   }
   private async insertEvents(
@@ -265,6 +364,7 @@ export class PostgresObservationArchive implements ObservationArchive {
     return entries;
   }
   async fail(code: string, locallyDiscardedMessages: number): Promise<void> {
+    this.#failed = true;
     if (!this.#session) return;
     await this.transaction(async (client) => {
       const { session } = await this.lockActiveSession(client);
@@ -287,10 +387,11 @@ export class PostgresObservationArchive implements ObservationArchive {
     try {
       if (this.#session && !this.#leaseLost)
         await this.transaction(async (client) => {
-          await client.query(
-            `UPDATE ${this.#name}.archive_session SET status='closed',ended_at=clock_timestamp() WHERE session_id=$1 AND status='open'`,
-            [this.#session?.sessionId],
-          );
+          if (!this.#failed)
+            await client.query(
+              `UPDATE ${this.#name}.archive_session SET status='closed',ended_at=clock_timestamp() WHERE session_id=$1 AND status='open'`,
+              [this.#session?.sessionId],
+            );
           await client.query(
             `UPDATE ${this.#name}.archive_partition SET active_session=NULL WHERE partition_hash=$1 AND active_session=$2`,
             [this.scope.partitionHash, this.#session?.sessionId],
@@ -303,15 +404,22 @@ export class PostgresObservationArchive implements ObservationArchive {
   }
   private async releaseLease() {
     const lease = this.#lease;
+    const onError = this.#leaseError;
     this.#lease = undefined;
+    this.#leaseError = undefined;
     if (!lease) return;
+    let destroy = this.#leaseLost;
     try {
       if (!this.#leaseLost)
         await lease.query("SELECT pg_advisory_unlock(hashtextextended($1,790025))", [
           this.scope.partitionHash,
         ]);
+    } catch (error) {
+      destroy = true;
+      throw error;
     } finally {
-      lease.release(this.#leaseLost);
+      if (onError) lease.removeListener("error", onError);
+      lease.release(destroy || this.#leaseLost);
     }
   }
   async sessions(limit = 50) {
