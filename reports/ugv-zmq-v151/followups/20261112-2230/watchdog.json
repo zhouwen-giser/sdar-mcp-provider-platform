@@ -1,0 +1,82 @@
+{
+  "at": "2026-11-12T14:30:52.671343+00:00",
+  "scope": "readonly",
+  "result": {
+    "url": "http://192.168.2.63:7879/api/watchdog",
+    "status": 200,
+    "sha256": "52785173222d14b2e202d961b6b2e869761ae34b565e4477ac34503bac44b3ea",
+    "body": {
+      "available": true,
+      "components": [
+        {
+          "level": 0,
+          "message": "Backend ready",
+          "name": "backend",
+          "values": {
+            "backend_type": "carla",
+            "connected": "True",
+            "profile_run_id": "d98f1000071243ae9b71253a3f0f6b8d",
+            "ready": "True",
+            "scene_id": "yuan_qu",
+            "simulation_epoch": "1794479074995276039",
+            "simulation_time": "20307.667035374674",
+            "status_age_sec": "0.005507749039679766"
+          }
+        },
+        {
+          "level": 0,
+          "message": "Configured nodes discovered",
+          "name": "nodes",
+          "values": {
+            "missing_nodes": "",
+            "required_component_count": "5",
+            "required_count": "21",
+            "stale_components": ""
+          }
+        },
+        {
+          "level": 0,
+          "message": "Host resources within configured limits",
+          "name": "resources",
+          "values": {
+            "host_cpus": "20",
+            "host_load1": "5.556640625",
+            "host_mem_available_bytes": "18671210496",
+            "host_mem_total_bytes": "33280671744",
+            "host_memory_used_percent": "43.897735479554626"
+          }
+        }
+      ],
+      "error": "",
+      "level": 0,
+      "mode": "v2",
+      "runtime": {
+        "accepting_commands": true,
+        "auto_recovery_enabled": false,
+        "available": true,
+        "config_digest": "7a648e58aaabf05213922ebb16211260ecda1fa3054efa4cc8cfb4af10b56c97",
+        "fault_component": "dashboard",
+        "incident_id": "06a566d23be94a7b9c9d762249aa99f6",
+        "operation_id": "727f047a5e5e415992bafd4232ef4c31",
+        "operation_state": "succeeded",
+        "operator_required": false,
+        "owner_id": "b7ac54eda94a4a33a3875c0a2363a02f",
+        "phase": "DEGRADED",
+        "profile_run_id": "d98f1000071243ae9b71253a3f0f6b8d",
+        "ready_control_groups": [
+          "adjudication",
+          "eo:ugv",
+          "motion:ugv",
+          "scene"
+        ],
+        "reason": "dashboard: Dashboard HTTP 检查失败: http://127.0.0.1:7879/api/watchdog, timed out",
+        "revision": "4",
+        "simulation_epoch": "1794479074995276039",
+        "stage": "dashboard"
+      },
+      "simulation_epoch": "1794479074995276039",
+      "valid_for_sec": 1.9770703315734863
+    },
+    "bytes": 1620
+  }
+}

@@ -23,6 +23,12 @@
 现场当前为 `yuan_qu`，参考原点经度 114.048222222222、纬度 22.506858333333。旧机场参数不用于当前场景。
 当前使用明确配置的非标准接收变体 `prefix_business_length_crc`；命令仍采用严格 `prefix_wire_length_crc`，不自动回退或声称现场报文符合标准 2.1。
 
+## 最新现场阻塞（11 月 12 日 22:30 复核）
+
+从 22:00 的监控样本起，7879 预览返回 `UGV_PLANNER_SCENE_UNAVAILABLE`。只读接口确认 `/api/simulation/scenarios` 虽为 HTTP 200，业务 `phase=failed`；`/api/watchdog` 的 runtime 为 `DEGRADED`、故障组件 `dashboard`，原因是其对本机 watchdog 的历史健康检查超时。当前 watchdog 组件 level=0、地图和 GNSS 接口可读，不能据此覆盖场景管理器仍未就绪的声明。
+
+SMPP 按固定合同拒绝本次规划，未派发导航或修改上游。三路订阅、归档和原图仍正常，候选身份、重启/OOM 和样本哈希链核验通过，24 小时运行继续；现场只读专项资格当前为 false。正式切换继续阻塞，等待场景管理器恢复 `ready` 后只读复核。证据：`followups/20261112-2230/`。
+
 完整命令、退出码、镜像和证据哈希见 [验收报告](evidence/REPORT.md)。监控目录为 `/home/sz/.smpp-debug/zmq-v15-20261112/stability-24h-3`。
 
 ## 候选部署包

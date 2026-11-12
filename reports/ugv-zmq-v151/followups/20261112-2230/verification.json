@@ -1,0 +1,41 @@
+{
+  "checkedAt": "2026-11-12T14:32:05.151986+00:00",
+  "applicationSourceCommit": "ada745829c635b9bb56d6017c2c2faf7f31e544e",
+  "hashChainVerified": true,
+  "acknowledgedSamples": 252,
+  "lastSampleSha256": "43fb3f74b6e9cbec10f49c33db78ed7b6bf1f0493b1cf2978c6f37d9438a6f77",
+  "runtimeStatus": "running",
+  "runtimeFailures": [],
+  "scenePhase": "failed",
+  "sceneError": "dashboard: Dashboard HTTP 检查失败: http://127.0.0.1:7879/api/watchdog, timed out",
+  "runtimePhase": "DEGRADED",
+  "runtimeFaultComponent": "dashboard",
+  "runtimeAcceptingCommands": true,
+  "watchdogCurrentLevel": 0,
+  "firstPlannerBlockAt": "2026-11-12T14:00:40.477542+00:00",
+  "plannerChecks": 26,
+  "plannerFailures": 4,
+  "latestNativeQualification": false,
+  "archiveStatus": "running",
+  "qualifies24h": false,
+  "formalServicesChanged": false,
+  "upstreamChangedByUs": false,
+  "physicalControlActions": 0,
+  "conclusion": "remote scene manager declares failed/DEGRADED; SMPP correctly rejects planning before dispatch; no motion, fallback or source modification",
+  "sourceEvidence": [
+    {
+      "path": "packages/provider-adapter-kit/src/dashboard-v2-planner.ts",
+      "sha256": "d7fce414da394b0ba2de6d7101462899deb80d6c22c6575d2b534b033f0e0b15"
+    },
+    {
+      "path": "/home/sz/code/isr-simulation/ros_ws/src/referee/referee/dashboard/scenario_control.py",
+      "sha256": "c7f6356dda6c7d3e3b1dfc0b222216da34ad9602b6477b82215cb92a8b8eb489"
+    },
+    {
+      "path": "/home/sz/code/isr-simulation/ros_ws/src/simulation_bringup/simulation_bringup/runtime_owner.py",
+      "sha256": "6182bab865e6f633452a304ab322acbd02f39e994127309260eb9bb1120b5172"
+    }
+  ],
+  "upstreamCommit": "a0be6a51e17fb9e85bc4ba0b62f7157a1b77c82e",
+  "upstreamGitClean": true
+}

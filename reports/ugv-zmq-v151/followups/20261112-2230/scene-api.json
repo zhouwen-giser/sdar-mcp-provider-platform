@@ -1,0 +1,179 @@
+{
+  "checkedAt": "2026-11-12T14:30:25.200648+00:00",
+  "scope": "readonly",
+  "records": [
+    {
+      "url": "http://192.168.2.63:7879/api/simulation/scenarios",
+      "status": 200,
+      "body": {
+        "active_scenario": "yuan_qu",
+        "available_maps": [
+          "airport2",
+          "yuan_qu"
+        ],
+        "busy": true,
+        "can_switch": false,
+        "current_map": "yuan_qu",
+        "default_scenario": "yuan_qu",
+        "error": "dashboard: Dashboard HTTP 检查失败: http://127.0.0.1:7879/api/watchdog, timed out",
+        "ok": true,
+        "owner_id": "b7ac54eda94a4a33a3875c0a2363a02f",
+        "phase": "failed",
+        "profile_run_id": "d98f1000071243ae9b71253a3f0f6b8d",
+        "request_id": "reset-2140047545-1112771767-1131165242-2119994369",
+        "scenarios": {
+          "airport": {
+            "label": "机场",
+            "map": "airport2",
+            "units": {
+              "npc_tank1": {
+                "blueprint": "vehicle.bov_3.bov_3",
+                "position": [
+                  20.915161,
+                  -112.916397,
+                  2.0
+                ],
+                "rotation": [
+                  0.0,
+                  -290.0,
+                  0.0
+                ]
+              },
+              "quadruped": {
+                "blueprint": "static.prop.robotic_dog",
+                "position": [
+                  -338.792419,
+                  82.540146,
+                  0.0
+                ],
+                "rotation": [
+                  0.0,
+                  90.0,
+                  0.0
+                ]
+              },
+              "soldier_1": {
+                "blueprint": "static.prop.german_soldier",
+                "position": [
+                  -202.792419,
+                  -122.540146,
+                  0.12
+                ],
+                "rotation": [
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              },
+              "uav": {
+                "blueprint": "static.prop.uav",
+                "position": [
+                  -277.233,
+                  94.306,
+                  5.0
+                ],
+                "rotation": [
+                  0.0,
+                  90.0,
+                  0.0
+                ]
+              },
+              "ugv": {
+                "blueprint": "vehicle.chinese_zbd_09_body.chinese_zbd_09_body",
+                "position": [
+                  -340.18,
+                  109.45,
+                  2.0
+                ],
+                "rotation": [
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            }
+          },
+          "yuan_qu": {
+            "label": "园区",
+            "map": "yuan_qu",
+            "map_reference": {
+              "altitude": 500.0,
+              "latitude": 22.506858333333,
+              "longitude": 114.048222222222
+            },
+            "units": {
+              "ugv": {
+                "blueprint": "vehicle.songling.songling",
+                "position": [
+                  -46.819,
+                  100.064,
+                  2.0
+                ],
+                "rotation": [
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            }
+          }
+        },
+        "simulation_epoch": "1794479074995276039",
+        "target_scenario": "yuan_qu",
+        "unit_reset": {
+          "operation": null,
+          "pending_intent": null,
+          "ready": true,
+          "units": [
+            {
+              "camp": "red",
+              "entity_id": "ugv",
+              "entity_type": "ugv"
+            }
+          ]
+        },
+        "units": {}
+      },
+      "sha256": "77b8f15215418f782d79e789a8b46688bbbb6c601c123d45fd7e4953341b33c1",
+      "bytes": 1574
+    },
+    {
+      "url": "http://192.168.2.63:7879/api/simulation/map/assets",
+      "status": 200,
+      "body": {
+        "calibration": "/assets/maps/yuan_qu/calibration?v=map.jpeg:1794368556908263207-2475637:1794368556908263207-1069:1794390569829104153-16527:1793927821000000000-980036:1794365764521702056-2346783",
+        "error": "",
+        "image": "/assets/maps/yuan_qu/image?v=map.jpeg:1794368556908263207-2475637:1794368556908263207-1069:1794390569829104153-16527:1793927821000000000-980036:1794365764521702056-2346783",
+        "image3d": "/assets/maps/yuan_qu/image3d?v=map.jpeg:1794368556908263207-2475637:1794368556908263207-1069:1794390569829104153-16527:1793927821000000000-980036:1794365764521702056-2346783",
+        "key": "yuan_qu:map.jpeg:1794368556908263207-2475637:1794368556908263207-1069:1794390569829104153-16527:1793927821000000000-980036:1794365764521702056-2346783",
+        "map": "yuan_qu",
+        "regions": "/assets/maps/yuan_qu/regions?v=map.jpeg:1794368556908263207-2475637:1794368556908263207-1069:1794390569829104153-16527:1793927821000000000-980036:1794365764521702056-2346783",
+        "roads": "/assets/maps/yuan_qu/roads?v=map.jpeg:1794368556908263207-2475637:1794368556908263207-1069:1794390569829104153-16527:1793927821000000000-980036:1794365764521702056-2346783"
+      },
+      "sha256": "b032f42941f03249331d4b12539647968553b2b0e11d36e585a06a5c1e4746ba",
+      "bytes": 1118
+    },
+    {
+      "url": "http://192.168.2.63:7879/api/simulation/map/gnss?x=0&y=0&z=0",
+      "status": 200,
+      "body": {
+        "frame_id": "map",
+        "gnss": {
+          "altitude": 500.0,
+          "latitude": 22.50685833333301,
+          "longitude": 114.048222222222
+        },
+        "ok": true,
+        "position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        }
+      },
+      "sha256": "33088e3b159b7b23496675c73e4e0231c28e60d6498d5559577d376d835e571a",
+      "bytes": 150
+    }
+  ],
+  "physicalControlActions": 0,
+  "upstreamChangedByUs": false
+}
