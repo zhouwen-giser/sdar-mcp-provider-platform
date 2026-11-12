@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "ugv.zmq-site-readonly-bundle/1",
+  "sourceCommit": "69e2d889b83c61b57f0eab360d4c5779deeab836",
+  "fileCount": 4135,
+  "path": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/artifacts/ugv-zmq-v151-ada7458-candidate-20261112.tar.gz",
+  "bytes": 197106820,
+  "sha256": "3fa99f6f099c02fcb7f5cd17c1a255e489210d28855672dbe9737f7054f4f8fa",
+  "images": [
+    {
+      "role": "provider",
+      "tag": "smpp-zmq-v151-provider:ada745829c63",
+      "id": "sha256:b1a92b1c166bda4a2af7dfc7cb2fda6122e2f12aa42dbddc100455a026a5471e",
+      "revision": "ada745829c635b9bb56d6017c2c2faf7f31e544e"
+    },
+    {
+      "role": "runtime",
+      "tag": "smpp-zmq-v151-runtime:ada745829c63",
+      "id": "sha256:26f3f21764e813a02a7f4728ad2610e3a2bf6e8e528f0fe108f13941da27e1a7",
+      "revision": "ada745829c635b9bb56d6017c2c2faf7f31e544e"
+    },
+    {
+      "role": "console",
+      "tag": "smpp-zmq-v151-console:ada745829c63",
+      "id": "sha256:4a65816fb5e9ad1a04ada741e57174c31d1ae0ab7dd4295e423581da49dbe3eb",
+      "revision": "ada745829c635b9bb56d6017c2c2faf7f31e544e"
+    }
+  ],
+  "controlQualified": false,
+  "imageRoundTripVerified": true
+}

@@ -24,3 +24,8 @@
 当前使用明确配置的非标准接收变体 `prefix_business_length_crc`；命令仍采用严格 `prefix_wire_length_crc`，不自动回退或声称现场报文符合标准 2.1。
 
 完整命令、退出码、镜像和证据哈希见 [验收报告](evidence/REPORT.md)。监控目录为 `/home/sz/.smpp-debug/zmq-v15-20261112/stability-24h-3`。
+
+## 候选部署包
+
+`artifacts/ugv-zmq-v151-ada7458-candidate-20261112.tar.gz`，197,106,820 字节，SHA256 `3fa99f6f099c02fcb7f5cd17c1a255e489210d28855672dbe9737f7054f4f8fa`。
+包内源码 `69e2d88`，应用镜像源码 `ada7458`；4,135 项文件及镜像导出/加载身份均已校验。精确命令、退出码与回执见 `package-command.json` / `package-receipt.json`。此包为只读候选交付，不表示正式切换或现场控制验收完成。

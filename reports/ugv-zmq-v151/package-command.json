@@ -1,0 +1,28 @@
+{
+  "recordedAt": "2026-11-12T11:29:46.760302+00:00",
+  "sourceCommit": "69e2d889b83c61b57f0eab360d4c5779deeab836",
+  "applicationSourceCommit": "ada745829c635b9bb56d6017c2c2faf7f31e544e",
+  "command": [
+    "python3",
+    "scripts/package-zmq-site-readonly.py",
+    "--output",
+    "artifacts/ugv-zmq-v151-ada7458-candidate-20261112.tar.gz",
+    "--provider-image",
+    "smpp-zmq-v151-provider:ada745829c63",
+    "--runtime-image",
+    "smpp-zmq-v151-runtime:ada745829c63",
+    "--console-image",
+    "smpp-zmq-v151-console:ada745829c63",
+    "--evidence-root",
+    "reports/ugv-zmq-v151/evidence",
+    "--catalog-profile",
+    "zmq_v1_5_1_readonly_15"
+  ],
+  "exitCode": 0,
+  "receiptSha256": "8cca6762bc33d3a6e86d470a6d033e66c22b097acfa8305874bf1899e9f5dabf",
+  "bundleSha256": "3fa99f6f099c02fcb7f5cd17c1a255e489210d28855672dbe9737f7054f4f8fa",
+  "allMembersVerified": true,
+  "imageRoundTripVerified": true,
+  "formalServicesChanged": false,
+  "physicalControlActions": 0
+}
