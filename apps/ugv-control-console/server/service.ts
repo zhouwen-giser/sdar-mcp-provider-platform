@@ -312,7 +312,7 @@ export class Service {
       return await this.task(taskId);
     } catch (error) {
       if (!(error instanceof UpstreamError) || error.code !== "TASK_EXPIRED") throw error;
-      if (saved.snapshot.taskId !== taskId) throw Error("TASK_IDENTITY_MISMATCH");
+      if (saved.snapshot.taskId !== taskId) throw Error("TASK_IDENTITY_MISMATCH", { cause: error });
       return {
         ...saved.snapshot,
         _consoleRetention: {

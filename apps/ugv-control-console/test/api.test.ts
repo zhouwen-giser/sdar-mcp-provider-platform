@@ -180,7 +180,9 @@ describe("durable, authenticated console API with real PostgreSQL", () => {
     let reasonCode = "TASK_EXPIRED",
       getCalls = 0;
     const mcp = new Mcp(f.fake.mcp.url, {}, async (url, options) => {
-      const request = JSON.parse(String(options?.body)) as { method: string };
+      const request = JSON.parse(typeof options?.body === "string" ? options.body : "{}") as {
+        method: string;
+      };
       if (request.method === "tasks/get") {
         getCalls++;
         return new Response(
