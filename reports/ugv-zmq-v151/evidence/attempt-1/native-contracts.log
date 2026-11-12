@@ -1,0 +1,27 @@
+$ node --import tsx scripts/ugv-zmq/check-contracts.ts && node --import tsx scripts/ugv-zmq/check-contracts-v2.ts && node --import tsx scripts/ugv-zmq/interop-contract.ts
+{
+  "schemaVersion": "ugv.zmq-lock-verification/1",
+  "sourceDocuments": 3,
+  "checkedFiles": [
+    "packages/vehicle-zmq-contract/package.json",
+    "packages/vehicle-zmq-contract/src/index.ts",
+    "deploy/ugv-zmq/task-business.candidate.json",
+    "contracts/ugv-zmq/v1/known-gaps.json",
+    "contracts/ugv-zmq/v1/message-inventory.json",
+    "contracts/ugv-zmq/v1/fixtures/chassis-reference.json",
+    "packages/vehicle-zmq-contract/src/error.ts",
+    "packages/vehicle-zmq-contract/src/json.ts",
+    "packages/vehicle-zmq-contract/src/chassis.ts",
+    "packages/vehicle-zmq-contract/src/schema.ts",
+    "packages/vehicle-zmq-contract/src/wire.ts",
+    "packages/vehicle-zmq-contract/src/profile.ts",
+    "packages/vehicle-zmq-contract/src/capture.ts",
+    "contracts/ugv-zmq/v1/sources/chassis-v2.0.md",
+    "contracts/ugv-zmq/v1/sources/eo-v2.2.md",
+    "contracts/ugv-zmq/v1/sources/simulation-effect-v1.0.md",
+    "contracts/ugv-zmq/v1/sources/simulation-effect-v1.0-original.md"
+  ],
+  "status": "verified"
+}
+{"schemaVersion":"ugv.zmq-lock-verification/2","status":"verified","checkedFiles":23,"contractSha256":"aa790fcd1c396def6c0bf7900b69621adbacd277d000e6de43594c8c6ae338c2","protocols":{"chassis":"2.1","eo":"2.3","simulationEffect":"1.0"}}
+{"status":"verified","contractSha256":"0e2df6125e060d997cdc9eedd986cd2863592fbcecc6bb7210c7b47627efa2f5","checkedFiles":11}

@@ -1,0 +1,19 @@
+{
+  "startedAt": "2026-11-12T10:20:30.655478+00:00",
+  "pid": 1959187,
+  "command": [
+    "python3",
+    "scripts/ugv-zmq/v151-stability.py",
+    "--config",
+    "/home/sz/.smpp-debug/zmq-v15-20261112/stability-config-3.json",
+    "--output",
+    "/home/sz/.smpp-debug/zmq-v15-20261112/stability-24h-3"
+  ],
+  "applicationSourceCommit": "ada745829c635b9bb56d6017c2c2faf7f31e544e",
+  "monitorSha256": "376c55fad6431a80678527b3041da548353aa8f32b0c932bc11614b1a356e35a",
+  "configSha256": "9ab2f3159fdbefabe8b64b7f4a8762920fb693150d58160aa20fbe843e3bed5e",
+  "log": "/home/sz/.smpp-debug/zmq-v15-20261112/stability-process-3.log",
+  "output": "/home/sz/.smpp-debug/zmq-v15-20261112/stability-24h-3",
+  "physicalControlActions": 0,
+  "formalServicesChanged": false
+}

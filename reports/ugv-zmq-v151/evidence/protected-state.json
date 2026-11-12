@@ -1,0 +1,56 @@
+{
+  "at": "2026-11-12T11:26:39.629238+00:00",
+  "repositories": [
+    {
+      "repository": "/home/sz/code/sdar-mcp-provider-platform",
+      "commit": "f1d399631a1447da467de6ebec2612998b96b83b",
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "statusEntries": 0,
+      "modifiedByThisTask": false
+    },
+    {
+      "repository": "/home/sz/code/isr-simulation",
+      "commit": "a0be6a51e17fb9e85bc4ba0b62f7157a1b77c82e",
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "statusEntries": 0,
+      "modifiedByThisTask": false
+    }
+  ],
+  "formalContainers": [
+    {
+      "id": "6b2fb419a7b7750cc2928e516f7e8b6b2ae10d0e9bcb02e64ec9f3ac0d95546a",
+      "name": "/smpp-zmq-site-formal-provider-1",
+      "image": "sha256:a48f3bf79bf3db6fbe54d1009b8402b425ec1f5fdbe75ef2d7b17152554a59fb",
+      "running": true,
+      "restartCount": 0,
+      "startedAt": "2026-11-02T02:29:50.683395258Z"
+    },
+    {
+      "id": "deeaa95d0868ff64a47ccddddc831b11573dbaf5351c3962d9ff98b502a37070",
+      "name": "/smpp-zmq-site-formal-runtime-1",
+      "image": "sha256:11abe9156fe610a28cfb4f261532a95be04a306d40e96adacdcc464fa8511a9e",
+      "running": true,
+      "restartCount": 5,
+      "startedAt": "2026-11-12T08:22:10.938530163Z"
+    },
+    {
+      "id": "8df508a8566bc65837b9d40ec7d04a6f237c0d73234e15beef6888c14b9800b4",
+      "name": "/smpp-zmq-site-formal-console-1",
+      "image": "sha256:4237409dc390f8533efee22a1bc7c44942c51df66e99ab4a12de6b9105328d8c",
+      "running": true,
+      "restartCount": 0,
+      "startedAt": "2026-11-02T02:29:50.697773583Z"
+    },
+    {
+      "id": "dd5a7ec889735236670f694c43f08108b56d5af8646235d8387cb56dad17dce3",
+      "name": "/gowm-analysis-dev-f3dc6f4b8e-smpp-runtime-1",
+      "image": "sha256:11abe9156fe610a28cfb4f261532a95be04a306d40e96adacdcc464fa8511a9e",
+      "running": true,
+      "restartCount": 0,
+      "startedAt": "2026-11-02T02:28:23.50245046Z"
+    }
+  ],
+  "formalServicesChangedByThisTask": false,
+  "sdarChangedByThisTask": false,
+  "physicalControlActions": 0
+}

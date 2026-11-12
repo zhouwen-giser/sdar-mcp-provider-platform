@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "ugv.zmq-v15-soak/1",
+  "startedAt": "2026-11-12T06:37:37.062946+00:00",
+  "sourceCommit": "ca33761c1d5c9c0a6cce3acc9105faa1735832da",
+  "durationSeconds": 86400,
+  "intervalSeconds": 60,
+  "containers": [
+    {
+      "name": "smpp-zmq-v15-candidate-provider-1",
+      "id": "9cad54bc27a1d59d701f8ad6e07b6be259e5ab0fe46f3476907b70cedc97ef0a",
+      "image": "sha256:fd1eaead2ef4fd21dff77b358e1229d62167c2ff403c8e9310a318a5e7316a7c",
+      "running": true,
+      "oomKilled": false,
+      "restartCount": 0,
+      "startedAt": "2026-11-12T06:33:23.445157388Z",
+      "health": null
+    },
+    {
+      "name": "smpp-zmq-v15-candidate-runtime-1",
+      "id": "15abdb516e881c92c15459a0d471c1bde2aca725dabc2756c974e4d74b2e1ece",
+      "image": "sha256:a456ce0aaf7354edcc8a02c5329905d211a46b1ad745df814ed96a88e0158788",
+      "running": true,
+      "oomKilled": false,
+      "restartCount": 0,
+      "startedAt": "2026-11-12T06:33:23.447517613Z",
+      "health": "healthy"
+    },
+    {
+      "name": "smpp-zmq-v15-candidate-console-1",
+      "id": "6653704f340d23b249668196dce33390323a4ea093bea24a583db85c5aa2e979",
+      "image": "sha256:85bb4a88685af269fac74d716f76064c07cea6126ee943044be99148b90a1860",
+      "running": true,
+      "oomKilled": false,
+      "restartCount": 0,
+      "startedAt": "2026-11-12T06:33:23.420756753Z",
+      "health": "healthy"
+    }
+  ],
+  "physicalControlActions": 0,
+  "diagnosticOnly": false,
+  "nativeAcceptanceSeparate": true,
+  "monitorSha256": "bd7340ebe7afb459daef02ef749ba20cc0fb875ab0cc6ba03ab60251c1c3f4a9",
+  "configSha256": "885ceef825169147025d5e1702512c045f07fd6186fda74f00c43ae5a9fa15c5",
+  "updatedAt": "2026-11-12T10:12:49.036038+00:00",
+  "samples": 216,
+  "elapsedSeconds": 12911.973041921854,
+  "lastSampleSha256": "cebb42cab1350c5427e29434173c4c35407111c6295f8a4edbebd5a1fb21b2d8",
+  "failures": [],
+  "status": "running",
+  "lastNativeAcceptance": {
+    "allComponentsFresh": false,
+    "protocols": [
+      "eo@2.3",
+      "simulationEffect@1.0"
+    ]
+  },
+  "formalCutoverAuthorizedByThisReport": false
+}

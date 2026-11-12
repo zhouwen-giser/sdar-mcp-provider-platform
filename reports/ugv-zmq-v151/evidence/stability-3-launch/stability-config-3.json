@@ -1,0 +1,37 @@
+{
+  "sourceCommit": "ada745829c635b9bb56d6017c2c2faf7f31e544e",
+  "mcpUrl": "http://127.0.0.1:19110/mcp",
+  "resourceId": "vehicle:ugv",
+  "durationSeconds": 86400,
+  "intervalSeconds": 60,
+  "containers": [
+    {
+      "id": "25af10bcbc4d00cbff8fb987922b1f49ed46afe69950552a74bc606882470430",
+      "name": "smpp-zmq-v15-candidate-provider-1",
+      "image": "sha256:b1a92b1c166bda4a2af7dfc7cb2fda6122e2f12aa42dbddc100455a026a5471e"
+    },
+    {
+      "id": "ae41fb8bee50f35ba0adc25cc350b5dc243bf83ce08bdb385c193a452728d64f",
+      "name": "smpp-zmq-v15-candidate-runtime-1",
+      "image": "sha256:26f3f21764e813a02a7f4728ad2610e3a2bf6e8e528f0fe108f13941da27e1a7"
+    },
+    {
+      "id": "975f25e9f05442e411b03ba12fdff52d6c6eb7ed8307de827bb73edb3b362538",
+      "name": "smpp-zmq-v15-candidate-console-1",
+      "image": "sha256:4a65816fb5e9ad1a04ada741e57174c31d1ae0ab7dd4295e423581da49dbe3eb"
+    }
+  ],
+  "healthUrls": {
+    "runtime": "http://127.0.0.1:19110/health/ready",
+    "console": "http://127.0.0.1:19111/health/ready"
+  },
+  "publicationFraming": "prefix_business_length_crc",
+  "plannerProbe": {
+    "waypoints": [
+      {
+        "longitude": 114.04791186669047,
+        "latitude": 22.506389083393916
+      }
+    ]
+  }
+}

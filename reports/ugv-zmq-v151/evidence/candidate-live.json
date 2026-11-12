@@ -1,0 +1,158 @@
+{
+  "sourceCommit": "ada745829c635b9bb56d6017c2c2faf7f31e544e",
+  "verifiedAt": "2026-11-12T10:14:45.050Z",
+  "runtime": "http://127.0.0.1:19110/mcp",
+  "profile": "zmq_v1_5_1_readonly_15",
+  "tools": 15,
+  "readOnly": true,
+  "anonymous": true,
+  "invalidJwtRejected": true,
+  "identityOverrideIgnored": true,
+  "archive": {
+    "status": "running",
+    "pendingRecords": 2,
+    "pendingBytes": 4017,
+    "committedEvents": 4105,
+    "receivedMessages": 4100,
+    "committedReceptions": 4098,
+    "unconfirmedReceptions": 0,
+    "locallyDiscardedMessages": 0,
+    "failureCode": null,
+    "failureRecorded": null
+  },
+  "archiveGaps": [
+    {
+      "schemaVersion": "ugv.zmq-observation-event/2.0",
+      "eventId": "04ba72ae-40d2-4503-85f3-b3a733aff8b5",
+      "receivedAt": "2026-11-12T10:12:56.272Z",
+      "monotonicNs": "12379986044858920",
+      "clockId": "recovery:6ef0b8ff-e932-4789-9d18-9ca29376b563",
+      "type": "gap",
+      "component": null,
+      "code": "RECEIVER_SESSION_STARTED_AFTER_NATIVE_PROTOCOL_UPGRADE",
+      "locallyDiscardedMessages": null,
+      "sourceLossCount": null,
+      "recovery": {
+        "predecessorSessionId": "57b50e55-6d20-46f9-82af-00f6bd70807b",
+        "durableLastOrdinal": "436805",
+        "durableHeadHash": "210beea4dea6a3176b5208be7062e433e7bba60fef76101e1e477dfc21797ce9",
+        "predecessorStatus": "closed",
+        "predecessorPartitionHash": "9801a6f506c3785d14afbb5e6a24393161e19030a4d1b9d99883fad61fa37923",
+        "failureCode": null,
+        "persistenceBoundary": "database_tail_verified_no_batch_replay"
+      }
+    }
+  ],
+  "channels": {
+    "chassis": {
+      "state": "connected",
+      "lastReceptionAt": "2026-11-12T10:14:44.105Z",
+      "lastValidCommittedAt": "2026-11-12T10:14:44.105Z",
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+        "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+        "SOURCE_TIMEBASE_UNCONFIRMED"
+      ]
+    },
+    "eo": {
+      "state": "connected",
+      "lastReceptionAt": "2026-11-12T10:14:44.080Z",
+      "lastValidCommittedAt": "2026-11-12T10:14:43.766Z",
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+        "IMAGE_DEDUPLICATION_BOUNDED_TO_RECEIVER_SESSION",
+        "ACQUISITION_TIME_UNKNOWN"
+      ]
+    },
+    "simulationEffect": {
+      "state": "connected",
+      "lastReceptionAt": "2026-11-12T10:14:43.796Z",
+      "lastValidCommittedAt": "2026-11-12T10:14:43.796Z",
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+      ]
+    }
+  },
+  "sessionId": "6ef0b8ff-e932-4789-9d18-9ca29376b563",
+  "partitionHash": "e19841fabee8695bc38d846308230e945e379b8e2068433f45bd7557a3d4a276",
+  "protocols": [
+    "chassis@2.1-site-rx/1",
+    "eo@2.3",
+    "simulationEffect@1.0"
+  ],
+  "frame": {
+    "metadata": {
+      "camera_id": "eo",
+      "frame_id": "86bd9f0f38d04dbbb8d4e8f-1794473540045213880-4940373807672",
+      "exposure_utc_ms": null,
+      "width_px": 640,
+      "height_px": 480
+    },
+    "sha256": "6d70e72a6a6999126e4c226525eecf75d8af45db4e2feff83fbf9ef07c6ea898",
+    "byteLength": 80510,
+    "blocks": 1,
+    "reference": {
+      "receptionId": "7da63c17-0780-4cab-8cc8-67b52034982e",
+      "sessionId": "6ef0b8ff-e932-4789-9d18-9ca29376b563",
+      "receivedAt": "2026-11-12T10:14:44.080Z"
+    },
+    "overlays": 0,
+    "diagnostics": [
+      "SHORT_TERM_CACHE_EARLY_EVICTION_POSSIBLE",
+      "FRAME_NOT_COVERAGE_OR_STREAM_COMPLETENESS_EVIDENCE",
+      "EXPOSURE_UTC_UNKNOWN",
+      "SAME_FRAME_DETECTIONS_NOT_AVAILABLE"
+    ],
+    "rawImagePersisted": false
+  },
+  "planner": {
+    "status": "passed",
+    "context": {
+      "entity_id": "ugv",
+      "simulation_epoch": "1794473540045213880",
+      "controller_instance_id": "3700144451:1373884715",
+      "mission_id": 191,
+      "mission_request_id": "3700144451:1373884715:3"
+    },
+    "planningRequestId": "21e2dd75-e22e-4fa2-8308-8002afdabeae",
+    "transform": {
+      "policy": "scene_enu_wgs84_v1",
+      "sha256": "88f00905d6dd0e697b102e8e9d086d4ae6d52c7f651641bb51d8f301b3df8496",
+      "reference": {
+        "sceneId": "yuan_qu",
+        "mapId": "yuan_qu",
+        "sceneSha256": "0cec5045348e5863475c24a215a2d54933cdff99161f8baaa3eba86cc97cca51",
+        "latitude": 22.506858333333,
+        "longitude": 114.048222222222,
+        "altitude": 500
+      },
+      "heightPolicy": "scene_reference_plane_not_measured"
+    },
+    "schemaVersion": "ugv.zmq-route-preview/2",
+    "adoption": "preview_only",
+    "correlation": "request_id_epoch_context_and_geometry",
+    "points": 9,
+    "sourceMessageSha256": "c3847f2767f70855099bbbb8f4790cc50712cce0a42e6c0f5217c209fe9668d2"
+  },
+  "physicalControlActions": 0,
+  "receiveFraming": {
+    "publicationFraming": "prefix_business_length_crc",
+    "commandFraming": "prefix_wire_length_crc",
+    "baseBusinessProtocol": "2.1",
+    "standard21Conformance": false
+  },
+  "standard21Conformance": false,
+  "acceptanceScope": "readonly_catalog_chassis_compat_eo_effect_frame_dashboard_v2",
+  "overallFieldAcceptance": "ready_for_remaining_gates",
+  "fieldProtocolAccepted": true,
+  "exitCode": 0
+}

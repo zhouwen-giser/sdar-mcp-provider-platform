@@ -1,0 +1,20 @@
+{
+  "sourceCommit": "ada745829c635b9bb56d6017c2c2faf7f31e544e",
+  "command": [
+    "docker",
+    "run",
+    "--rm",
+    "--network",
+    "none",
+    "--entrypoint",
+    "node",
+    "sha256:b1a92b1c166bda4a2af7dfc7cb2fda6122e2f12aa42dbddc100455a026a5471e",
+    "dist/scripts/ugv-zmq/interop-contract.js"
+  ],
+  "startedAt": "2026-11-12T10:07:52.970296+00:00",
+  "exitCode": 0,
+  "elapsedSeconds": 1.758,
+  "log": "reports/ugv-zmq-v151/evidence/image-contract-smoke.log",
+  "sha256": "40ff44c86b5b372f3df6cf93625a049010c4f45bd9f005257c8d1ba92963b2ad",
+  "network": "none"
+}

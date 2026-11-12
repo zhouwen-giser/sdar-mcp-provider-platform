@@ -1,0 +1,39 @@
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+ ❯ tests/ugv-zmq-provider/site-control.postgres.test.ts (10 tests | 1 failed) 24657ms
+     × uses default sender zero and rejects duplicate navigation dispatch 1039ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/ugv-zmq-provider/site-control.postgres.test.ts > site-control JWT / real PostgreSQL / native sockets > uses default sender zero and rejects duplicate navigation dispatch
+AssertionError: expected [ …(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   Error {
++     "message": "Socket is busy writing; only one send operation may be in progress at any time",
++     "errno": 16,
++     "code": "EBUSY",
++   },
++ ]
+
+ ❯ tests/ugv-zmq-provider/site-control.postgres.test.ts:126:30
+    124|     await f.mcp.rpc("tasks/cancel", { taskId: accepted.taskId });
+    125|     expect((await done(String(accepted.taskId))).status).toBe("cancell…
+    126|     expect(f.devices.errors).toEqual([]);
+       |                              ^
+    127|     expect(f.devices.rawChassisFrames.length).toBeGreaterThan(0);
+    128|     expect(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 passed (10)
+   Start at  17:51:28
+   Duration  28.80s (transform 2.71s, setup 0ms, import 3.96s, tests 24.66s, environment 0ms)
+

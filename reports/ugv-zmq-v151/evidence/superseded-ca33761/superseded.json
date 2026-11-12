@@ -1,0 +1,11 @@
+{
+  "status": "superseded_before_24h",
+  "reason": "authorized SMPP-only 1.5.1 interoperability image replacement",
+  "elapsedSeconds": 12911.973041921854,
+  "samples": 216,
+  "acknowledgedSamples": 216,
+  "hashChainVerified": true,
+  "lastJournalSha256": "cebb42cab1350c5427e29434173c4c35407111c6295f8a4edbebd5a1fb21b2d8",
+  "qualifies24h": false,
+  "endedAt": "2026-11-12T10:12:50.887292+00:00"
+}

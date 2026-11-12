@@ -1,0 +1,30 @@
+[
+  {
+    "command": [
+      "node",
+      "--import",
+      "tsx",
+      "/home/sz/.smpp-debug/zmq-v15-20261112/interop-20261112/verify-candidate-v151.mts"
+    ],
+    "exitCode": 0,
+    "sourceCommit": "ada745829c635b9bb56d6017c2c2faf7f31e544e",
+    "verifiedAt": "2026-11-12T10:14:45.050Z",
+    "script": "commands/verify-candidate-v151.mts",
+    "scriptSha256": "1f153a06e4869e5a2424dc514409d9b6ebd05f08ee7e33523c7b449ddf676823",
+    "result": "candidate-live.json",
+    "resultSha256": "183825304fc01fa87dd85809422e056d14187f38bfb6c57e42ad5a3594686457"
+  },
+  {
+    "command": [
+      "node",
+      "/home/sz/.smpp-debug/zmq-v15-20261112/interop-20261112/verify-console-v151.mjs"
+    ],
+    "exitCode": 0,
+    "sourceCommit": "ada745829c635b9bb56d6017c2c2faf7f31e544e",
+    "verifiedAt": "2026-11-12T10:16:38.324Z",
+    "script": "commands/verify-console-v151.mjs",
+    "scriptSha256": "c69b1ae916523e6049e76bc73d2ecf813b2ef0b81b222ca40350cc508d90e111",
+    "result": "candidate-console-live.json",
+    "resultSha256": "6f2f946075343853ff71a076562f43035234db641db6d869630e0408f837baf0"
+  }
+]

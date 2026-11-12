@@ -1,0 +1,73 @@
+$ vitest run --config vitest.config.ts
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+ ❯ apps/ugv-control-console/test/runtime.test.ts (6 tests | 6 skipped) 1884ms
+ ❯ apps/ugv-control-console/test/api.test.ts (14 tests | 14 skipped) 12ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  apps/ugv-control-console/test/api.test.ts [ apps/ugv-control-console/test/api.test.ts ]
+Error: ISOLATED_TEST_CONFIG_REQUIRED
+ ❯ testDb apps/ugv-control-console/test/fixture.ts:17:11
+     15|   const c = JSON.parse(readFileSync(file, "utf8")) as { owner: string;…
+     16|   if (c.owner !== "inspection-area-v1" || new URL(c.databaseUrl).hostn…
+     17|     throw Error("ISOLATED_TEST_CONFIG_REQUIRED");
+       |           ^
+     18|   return c.databaseUrl;
+     19| }
+ ❯ makeFixture apps/ugv-control-console/test/fixture.ts:195:41
+ ❯ apps/ugv-control-console/test/api.test.ts:20:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  apps/ugv-control-console/test/runtime.test.ts [ apps/ugv-control-console/test/runtime.test.ts ]
+Error: FIXTURE_EXIT: /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/scripts/inspection/provider-harness.ts:42
+  .parse(JSON.parse(readFileSync(process.env.SMPP_INSPECTION_TEST_CONFIG_FILE, "utf8")));
+   ^
+
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "inspection-area-v1"
+    ],
+    "path": [
+      "owner"
+    ],
+    "message": "Invalid input: expected \"inspection-area-v1\""
+  },
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "brokerUrl"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  }
+]
+    at <anonymous> (/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/scripts/inspection/provider-harness.ts:42:4)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+
+Node.js v22.23.2
+
+ ❯ <anonymous> scripts/inspection/provider-harness.ts:42:4
+ ❯ ChildProcess.<anonymous> apps/ugv-control-console/test/runtime.test.ts:47:14
+     45|     child.once("exit", () => {
+     46|       clearTimeout(timer);
+     47|       reject(Error("FIXTURE_EXIT: " + failure.slice(-2000)));
+       |              ^
+     48|     });
+     49|     child.on("message", (value) => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 12 passed (14)
+      Tests  60 passed | 20 skipped (80)
+   Start at  17:47:50
+   Duration  59.59s (transform 3.19s, setup 110ms, import 10.61s, tests 46.33s, environment 2ms)
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-control-console:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @sdar/ugv-control-console@0.1.0 test: `vitest run --config vitest.config.ts`
+Exit status 1

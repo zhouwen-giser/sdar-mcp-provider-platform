@@ -58,7 +58,7 @@ def get_health(url):
 
 
 def tool(url, name, arguments):
-    if name not in {'vehicle_get_state', 'vehicle_get_capabilities', 'vehicle_zmq_get_frame'}:
+    if name not in {'vehicle_get_state', 'vehicle_get_capabilities', 'vehicle_zmq_get_frame', 'vehicle_zmq_plan_route'}:
         raise RuntimeError('MONITOR_NON_READ_ONLY_TOOL_REJECTED')
     body = json.dumps({'jsonrpc': '2.0', 'id': str(uuid.uuid4()), 'method': 'tools/call',
                        'params': {'name': name, 'arguments': arguments, '_meta': META}}).encode()

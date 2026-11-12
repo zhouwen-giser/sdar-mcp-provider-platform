@@ -1,0 +1,68 @@
+{
+  "verifiedAt": "2026-11-12T09:50:23.105Z",
+  "intent": "route_preview_only_no_navigation_task",
+  "physicalControlActions": 0,
+  "roadSourceSha256": "c0222d0043a3f8530cb359a1cc16eb71de435778eb7a8923afb96f97374d07e9",
+  "choice": {
+    "roadId": "21",
+    "startRoadDistance": 19.54308022395268,
+    "mapPoint": [
+      -31.935455549127145,
+      -51.9674729669371
+    ]
+  },
+  "input": {
+    "start": {
+      "longitude": 114.0477672269741,
+      "latitude": 22.505954785198227
+    },
+    "waypoints": [
+      {
+        "longitude": 114.04791186669047,
+        "latitude": 22.506389083393916
+      }
+    ],
+    "density": "adaptive"
+  },
+  "result": {
+    "observedAt": "2026-11-12T09:50:23.871Z",
+    "waypoints": [
+      {
+        "longitude": 114.04776712977399,
+        "latitude": 22.505981620387914
+      },
+      {
+        "longitude": 114.04786718895863,
+        "latitude": 22.50598555975196
+      },
+      {
+        "longitude": 114.04790996877361,
+        "latitude": 22.50602879858123
+      },
+      {
+        "longitude": 114.04791091773082,
+        "latitude": 22.506208940989584
+      },
+      {
+        "longitude": 114.04791186669047,
+        "latitude": 22.506389083393916
+      }
+    ],
+    "sourceRecordId": "412919d1584a5dd31342dad9a828070f52445dad815f8512369fec3f924a277f",
+    "routeSource": "isr.dashboard.road-planner/v2",
+    "sourceMessage": "42[\"route_candidates\",{\"ok\":true,\"candidates\":[{\"id\":\"straight\",\"label\":\"\\u4e3b\\u7ebf\\u76f4\\u7ebf\",\"color\":\"#00e5ff\",\"frame_id\":\"map\",\"points\":[[-46.82896146357664,-97.09228909940549],[-36.532881638206625,-96.65604858633007],[-32.13083364546029,-91.8675357710345],[-32.033144597293706,-71.91750436898582],[-31.935455549127123,-51.96747296693714]],\"length_m\":57.0,\"num_points\":5}],\"error\":null,\"target\":\"ugv\",\"simulation_epoch\":\"1794473540045213880\",\"planning_request_id\":\"e60bfd8f-893f-435b-9858-ec0e8c550be2\"}]",
+    "planningRequestId": "e60bfd8f-893f-435b-9858-ec0e8c550be2",
+    "context": {
+      "entity_id": "ugv",
+      "simulation_epoch": "1794473540045213880",
+      "controller_instance_id": "3700144451:1373884715",
+      "mission_id": -1,
+      "mission_request_id": ""
+    },
+    "contextReceivedAt": "2026-11-12T09:50:23.657Z",
+    "contextMessageSha256": "b58b4a8dc0726a0604cf0f4a37018e8805f10955d70f8b283f426efcf6b0b48e",
+    "sceneVerificationSha256": "047b0df7ba6a5a3a3ec5adbd3b123567ba512e280a0a6b1fd5cfee19f6738d90"
+  },
+  "status": "verified",
+  "responseSha256": "f25817a124a7bb0e378b0a833dcfae2abae88fedbdeed7b83ab963e1c6c5f60f"
+}

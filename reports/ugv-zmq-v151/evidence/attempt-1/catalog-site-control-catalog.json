@@ -1,0 +1,17 @@
+{
+  "sourceCommit": "ada745829c635b9bb56d6017c2c2faf7f31e544e",
+  "command": [
+    "node",
+    "--import",
+    "tsx",
+    "scripts/ugv-zmq/site-control-catalog.ts",
+    "--check"
+  ],
+  "environmentFiles": [],
+  "catalogProfile": null,
+  "startedAt": "2026-11-12T09:50:01.889323+00:00",
+  "elapsedSeconds": 1.24,
+  "exitCode": 0,
+  "log": "reports/ugv-zmq-v151/evidence/attempt-1/catalog-site-control-catalog.log",
+  "sha256": "768dfdad614e10fb53fc3b0e68796633dab3cb8bc7464916eec8e4efc456deae"
+}

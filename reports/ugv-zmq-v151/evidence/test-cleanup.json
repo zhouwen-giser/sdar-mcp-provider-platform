@@ -1,0 +1,35 @@
+{
+  "at": "2026-11-12T11:26:11.695010+00:00",
+  "scope": "owned_isolated_tests_only",
+  "label": "zmq-v151-interop-20261112",
+  "steps": [
+    {
+      "command": [
+        "docker",
+        "stop",
+        "-t",
+        "10",
+        "e21b2ad2d6a489f580fc81c76648d965fc606e640ded335495b222c1bd105ab6",
+        "be48013ab4ff0ad85c672bb4630ff8e32cde82edd329475ad172eb067bc07251"
+      ],
+      "exitCode": 0
+    },
+    {
+      "command": [
+        "docker",
+        "rm",
+        "-v",
+        "e21b2ad2d6a489f580fc81c76648d965fc606e640ded335495b222c1bd105ab6",
+        "be48013ab4ff0ad85c672bb4630ff8e32cde82edd329475ad172eb067bc07251"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "removedAnonymousVolumes": [
+    "a24fb7641596338f96d001ce625a22915060be36a387c0c7daf15d0c5eb227db",
+    "b4bc31134609b4a051590c2b39caea9f19cbf4153671e423e1d669dc472977dc",
+    "13ad637ed9d8e6fb76a85356c6026b6e709372e0ec9713e8ccbae7b97b48edcc"
+  ],
+  "productionVolumesChanged": false,
+  "exitCode": 0
+}

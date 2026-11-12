@@ -1,0 +1,44 @@
+{
+  "sourceCommit": "ada745829c635b9bb56d6017c2c2faf7f31e544e",
+  "verifiedAt": "2026-11-12T10:16:38.324Z",
+  "url": "http://127.0.0.1:19111/",
+  "httpLogin": true,
+  "archiveHealthy": true,
+  "originalImage": {
+    "width": 640,
+    "height": 480,
+    "complete": true
+  },
+  "download": {
+    "bytes": 80418,
+    "sha256": "1ceb5c7c48aebd85381a6e30c52da8ed2b69894e6a121c702081cbaba84ba5b0",
+    "filename": "86bd9f0f38d04dbbb8d4e8f-1794473540045213880-5052077264549.jpg"
+  },
+  "preview": {
+    "commandId": "a89a7619-5e19-406a-9de2-a14426592851",
+    "planningRequestId": "d9acc39a-eb25-4a6b-8e96-285bf2b9b08e",
+    "schemaVersion": "ugv.zmq-route-preview/2",
+    "points": 9,
+    "adoption": "preview_only",
+    "download": true
+  },
+  "visibleHistoryTasks": 2,
+  "historicalReport": {
+    "status": "passed",
+    "taskId": "f49b6c69-048c-48d4-b935-4aca6d343348",
+    "schemaVersion": "smpp.ugv-console-report/1",
+    "retention": {
+      "source": "retained_local_snapshot",
+      "upstreamReasonCode": "TASK_EXPIRED",
+      "recordedAt": "2026-10-29T11:06:31.510Z",
+      "readOnly": true
+    },
+    "upstreamReasonCode": "TASK_EXPIRED",
+    "bytes": 1065,
+    "sha256": "c3405d12df43c69d5f9f38768915caecf64007bdfeb27bf20081d6f05ff23163"
+  },
+  "mobileNoHorizontalOverflow": true,
+  "pageErrors": 0,
+  "physicalControlActions": 0,
+  "exitCode": 0
+}

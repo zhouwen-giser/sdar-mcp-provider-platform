@@ -1,0 +1,12 @@
+[WebServer] (node:1539532) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+
+Running 1 test using 1 worker
+
+(node:1543247) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1/1] e2e/v15-frames.spec.ts:3:1 › HTTP login, exact original frame, download and archive health
+  1 passed (17.1s)
