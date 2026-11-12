@@ -88,6 +88,15 @@ export class SimulatedZmqDevices {
   ]);
   #effectUtc = 0;
   #stopped = false;
+  readonly publicationWrites = new Map<Publisher, Promise<void>>();
+  private sendPublication(socket: Publisher, frames: Buffer | Buffer[]) {
+    const previous = this.publicationWrites.get(socket) ?? Promise.resolve();
+    const current = previous.catch(() => undefined).then(() => socket.send(frames));
+    this.publicationWrites.set(socket, current);
+    return current.finally(() => {
+      if (this.publicationWrites.get(socket) === current) this.publicationWrites.delete(socket);
+    });
+  }
   #timers: ReturnType<typeof setInterval>[] = [];
   #tasks: Promise<void>[] = [];
   #lastUtc = 0;
@@ -240,7 +249,7 @@ export class SimulatedZmqDevices {
       ["device_status", this.effectDevice],
       ["task_status", { task: this.effectTask }],
     ] as const)
-      await this.effectPub.send([
+      await this.sendPublication(this.effectPub, [
         Buffer.from(`artillery/artillery-01/${topic}`),
         Buffer.from(
           JSON.stringify({
@@ -256,7 +265,7 @@ export class SimulatedZmqDevices {
   }
   async publishReport(topic: "targetlist" | "tracklist", data: unknown) {
     this.#lastUtc = Math.max(Date.now(), this.#lastUtc + 2);
-    await this.eoPub.send(this.eoFrames(topic, data, this.#lastUtc));
+    await this.sendPublication(this.eoPub, this.eoFrames(topic, data, this.#lastUtc));
   }
   private async chassisLoop() {
     while (!this.#stopped) {
@@ -279,7 +288,7 @@ export class SimulatedZmqDevices {
           this.missionState = 0;
           if (this.emitFeedback) {
             await delay(30);
-            await this.chassisPub.send(this.chassisFrame(feedbackFrame()));
+            await this.sendPublication(this.chassisPub, this.chassisFrame(feedbackFrame()));
           }
         } else if (r.type === "motionControl") {
           const control = Number(r.value);
@@ -399,14 +408,15 @@ export class SimulatedZmqDevices {
   }
   async publish() {
     if (this.#stopped) return;
-    await this.chassisPub.send(this.chassisFrame(systemFrame(this.mode)));
+    await this.sendPublication(this.chassisPub, this.chassisFrame(systemFrame(this.mode)));
     if (this.missionId)
-      await this.chassisPub.send(
+      await this.sendPublication(
+        this.chassisPub,
         this.chassisFrame(missionFrame(this.missionId, this.missionState, this.missionType)),
       );
     const utc = Math.max(Date.now(), this.#lastUtc + 2);
     this.#lastUtc = utc;
-    await this.eoPub.send(this.eoFrames("device_status", this.eoDevice, utc));
+    await this.sendPublication(this.eoPub, this.eoFrames("device_status", this.eoDevice, utc));
     const data: Record<string, unknown> = this.taskId
       ? task(this.taskId, this.taskState)
       : { task: null, command: null };
@@ -419,7 +429,7 @@ export class SimulatedZmqDevices {
         currentTask.total_cycles = this.cycles;
       }
     }
-    await this.eoPub.send(this.eoFrames("task_status", data, utc + 1));
+    await this.sendPublication(this.eoPub, this.eoFrames("task_status", data, utc + 1));
     if (this.newProtocol) {
       const metadata = {
         camera_id: "eo",
@@ -430,9 +440,10 @@ export class SimulatedZmqDevices {
       };
       this.frames.set(metadata.frame_id, metadata);
       if (this.frames.size > 32) this.frames.delete(present(this.frames.keys().next().value));
-      await this.eoPub.send(this.eoFrames("frame_header", metadata, utc + 2));
+      await this.sendPublication(this.eoPub, this.eoFrames("frame_header", metadata, utc + 2));
       if (this.emitImageDetections)
-        await this.eoPub.send(
+        await this.sendPublication(
+          this.eoPub,
           this.eoFrames(
             "targetlist",
             {
@@ -540,7 +551,8 @@ export class SimulatedZmqDevices {
     payload.writeDoubleLE(this.moving ? 0.5 : 0, 49);
     payload.writeDoubleLE(0, 57);
     payload.writeDoubleLE(0, 65);
-    await this.chassisPub.send(
+    await this.sendPublication(
+      this.chassisPub,
       this.siteFrame(
         encodeChassisFrame({
           topic: "ipc_message",
@@ -564,6 +576,7 @@ export class SimulatedZmqDevices {
   async close() {
     this.#stopped = true;
     this.#timers.forEach(clearInterval);
+    await Promise.allSettled(this.publicationWrites.values());
     // Keep each test's endpoint reserved until the suite ends. Reusing a port
     // would correctly look like taking over a previous unresolved execution.
     reservedSockets.push(
