@@ -47,3 +47,8 @@ reports/ugv-zmq-phase3/raw/**
 
 # Immutable phase 4 native reception and command evidence.
 reports/ugv-zmq-phase4/raw/**
+
+# Versioned native protocol source snapshots and byte-addressed release evidence.
+contracts/ugv-zmq/v2/sources/**
+contracts/ugv-zmq/v2/fixtures/**
+reports/ugv-zmq-v15/evidence/**
