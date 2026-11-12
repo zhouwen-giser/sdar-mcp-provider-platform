@@ -177,7 +177,7 @@ export function createApp(config: Config, service: Service) {
     return service.importTask(taskId);
   });
   app.get("/api/tasks/:taskId", async (request) =>
-    service.task(taskParams.parse(request.params).taskId),
+    service.taskRecord(taskParams.parse(request.params).taskId),
   );
   app.get("/api/tasks/:taskId/business", async (request) =>
     service.business(taskParams.parse(request.params).taskId),
@@ -220,10 +220,13 @@ export function createApp(config: Config, service: Service) {
   });
   app.get("/api/tasks/:taskId/report", async (request, reply) => {
     const { taskId } = taskParams.parse(request.params);
-    const task = await service.task(taskId);
+    const task = await service.taskRecord(taskId);
+    const retention = record(task._consoleRetention);
+    const retained = retention.readOnly === true;
     let business: unknown, reasonCode: string | undefined, supplementalResults: unknown;
     const artifacts: unknown[] = [];
     try {
+      if (retained) throw Error(text(retention.upstreamReasonCode));
       const snapshot = await service.business(taskId);
       business = snapshot;
       for (const object of snapshot.objects) {
@@ -247,6 +250,7 @@ export function createApp(config: Config, service: Service) {
     const saved = await service.store.task(taskId);
     if (["vehicle_zmq_inspect_area", "simulation_apply_effect"].includes(saved?.operation ?? "")) {
       try {
+        if (retained) throw Error(text(retention.upstreamReasonCode));
         supplementalResults = await service.exportSupplement(taskId);
       } catch (e) {
         supplementalResults = {
@@ -267,8 +271,11 @@ export function createApp(config: Config, service: Service) {
       business,
       artifacts,
       supplementalResults,
+      ...(retained ? { retention } : {}),
       ...(reasonCode ? { reasonCode } : {}),
-      note: "任务状态、业务完整性与证据分别保留；导出成功不代表任务成功。",
+      note: retained
+        ? "上游任务已过期，仅导出本面板留存快照。设备结果未重新核实，未保存的业务对象与原图不在本记录中。"
+        : "任务状态、业务完整性与证据分别保留；导出成功不代表任务成功。",
     };
   });
   app.get("/api/tasks/:taskId/events", async (request, reply) => {

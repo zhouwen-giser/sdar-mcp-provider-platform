@@ -1,0 +1,53 @@
+{
+  "captureEvidence": "reports/ugv-zmq-v15/evidence/attempt-2/chassis-wire-discrepancy.json",
+  "vectors": [
+    {
+      "messageId": 268435458,
+      "archiveOrdinal": "25982",
+      "hex": "6970635f6d6573736167653a0200001001000000000000000000000000000000d4006e3ad4000000c1b99e3b00000000623d316d0b600600623d316d0b6006000115a7469e0e835c40e3a8c7408681364000c0a64f75427f400000000000000000000000000000000000000000000000002821d167916cd13e741b24d6ffb04ebf0ba69b635698e2be0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001ef51ec5ffffef3f63eee3dc1b68c13e003070cdffb03ebfee00dade4a97d2be705af76b1737684176d815482ea0434100c0a64f75427f400000000000000000010103",
+      "sha256": "0c4c93da05236831282f8c0b61b9bdcb6000cd7aac5648c0bff256b21529ed8f",
+      "actualWireLength": 216,
+      "headerLength": 212,
+      "businessLength": 212,
+      "headerCrc": 14958,
+      "wireCrc": 60204,
+      "businessCrc": 14958
+    },
+    {
+      "messageId": 268435488,
+      "archiveOrdinal": "25976",
+      "hex": "6970635f6d6573736167653a200000100100000000000000000000000000000014004b911400000066364d3ef87af53e00005c423f2cfe4603b2dc45",
+      "sha256": "d8ff748a47f67031ae56e75583cda5cc7e46031c1a58efca666d2d5553c27f93",
+      "actualWireLength": 24,
+      "headerLength": 20,
+      "businessLength": 20,
+      "headerCrc": 37195,
+      "wireCrc": 5158,
+      "businessCrc": 37195
+    },
+    {
+      "messageId": 268435457,
+      "archiveOrdinal": "25975",
+      "hex": "6970635f6d6573736167653a0100001001000000000000000000000000000000100035371000000001005555054100000000000000000000",
+      "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7",
+      "actualWireLength": 20,
+      "headerLength": 16,
+      "businessLength": 16,
+      "headerCrc": 14133,
+      "wireCrc": 49364,
+      "businessCrc": 14133
+    },
+    {
+      "messageId": 268435489,
+      "archiveOrdinal": "25974",
+      "hex": "6970635f6d6573736167653a21000010010000000000000000000000000000000400c0840400000000000000",
+      "sha256": "014adaeb80a0c8e1e9faaf8c1ced5fcd027e9ae5d9d74cbbe9359fbda9129c0d",
+      "actualWireLength": 8,
+      "headerLength": 4,
+      "businessLength": 4,
+      "headerCrc": 33984,
+      "wireCrc": 15955,
+      "businessCrc": 33984
+    }
+  ]
+}

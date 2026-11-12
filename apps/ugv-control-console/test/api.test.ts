@@ -5,6 +5,7 @@ import type { Command } from "../shared/model.js";
 import { array, record } from "../shared/model.js";
 import { Service } from "../server/service.js";
 import { createApp } from "../server/app.js";
+import { Mcp } from "../server/mcp.js";
 let f: Awaited<ReturnType<typeof makeFixture>>, cookie: string;
 const headers = () => ({ host: "127.0.0.1:0", origin: "http://127.0.0.1:0", cookie });
 const command = (tool = "vehicle_navigate"): Command => ({
@@ -170,6 +171,99 @@ describe("durable, authenticated console API with real PostgreSQL", () => {
     }
     expect((await f.service.task(taskId)).status).toBe("cancelled");
     expect(f.fake.calls).toBe(before);
+  });
+  it("exports expired tasks only as retained snapshots without enabling lifecycle operations", async () => {
+    const created = await f.service.execute(command()),
+      taskId = created?.taskId;
+    if (!taskId) throw Error("TASK_MISSING");
+    const saved = await f.store.task(taskId);
+    let reasonCode = "TASK_EXPIRED",
+      getCalls = 0;
+    const mcp = new Mcp(f.fake.mcp.url, {}, async (url, options) => {
+      const request = JSON.parse(String(options?.body)) as { method: string };
+      if (request.method === "tasks/get") {
+        getCalls++;
+        return new Response(
+          JSON.stringify({ error: { code: -32000, message: reasonCode, data: { reasonCode } } }),
+          { status: 409, headers: { "content-type": "application/json" } },
+        );
+      }
+      return f.fake.mcp.fetchImpl(url, options);
+    });
+    const viewer = new Service(mcp, f.store, "operator"),
+      app = createApp(f.config, viewer);
+    try {
+      expect(
+        (
+          await app.inject({
+            method: "GET",
+            url: `/api/tasks/${taskId}`,
+            headers: { host: "127.0.0.1:0" },
+          })
+        ).statusCode,
+      ).toBe(401);
+      const response = await app.inject({
+        method: "GET",
+        url: `/api/tasks/${taskId}`,
+        headers: headers(),
+      });
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toMatchObject({
+        ...saved?.snapshot,
+        _consoleRetention: {
+          source: "retained_local_snapshot",
+          upstreamReasonCode: "TASK_EXPIRED",
+          readOnly: true,
+        },
+      });
+      expect(await f.store.task(taskId)).toEqual(saved);
+      const report = await app.inject({
+        method: "GET",
+        url: `/api/tasks/${taskId}/report`,
+        headers: headers(),
+      });
+      expect(report.statusCode).toBe(200);
+      expect(report.json()).toMatchObject({
+        reasonCode: "TASK_EXPIRED",
+        retention: { readOnly: true },
+        artifacts: [],
+        task: { taskId, status: "working" },
+      });
+      expect(record(report.json()).business).toBeUndefined();
+      const before = f.fake.requests.length;
+      for (const kind of ["pause", "resume", "cancel", "input", "intervention"] as const) {
+        const result = await viewer.execute({
+          commandId: randomUUID(),
+          kind,
+          taskId,
+          arguments: {},
+          catalogHash: "fixture-manifest",
+        });
+        expect(result?.status).toBe("rejected");
+        expect(record(result?.response).reasonCode).toBe("TASK_EXPIRED");
+      }
+      expect(
+        f.fake.requests
+          .slice(before)
+          .some(
+            (r) =>
+              r.method === "tasks/cancel" ||
+              r.method === "tasks/update" ||
+              r.method.includes("tasks/pause") ||
+              r.method.includes("tasks/resume") ||
+              r.method.includes("interventions/apply"),
+          ),
+      ).toBe(false);
+      for (const reason of ["AUTHORIZATION_DENIED", "TASK_NOT_FOUND"]) {
+        reasonCode = reason;
+        await expect(viewer.taskRecord(taskId)).rejects.toThrow(reason);
+      }
+      const callsBefore = getCalls;
+      await expect(viewer.taskRecord(randomUUID())).rejects.toThrow("TASK_NOT_IMPORTED");
+      expect(getCalls).toBe(callsBefore);
+    } finally {
+      await app.close();
+    }
   });
   it("answers only the exact live observation request with its real key and revision", async () => {
     const created = await f.service.execute(command("vehicle_area_recon"));

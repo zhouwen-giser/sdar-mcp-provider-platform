@@ -111,6 +111,28 @@ describe("explicit native protocol generations", () => {
       }),
     ).toThrow("PAYLOAD_LENGTH_INVALID");
   });
+  it("rejects captured site frames whose length and CRC omit the string prefix", () => {
+    const capture = z
+      .object({ vectors: z.array(z.object({ hex: z.string(), headerLength: z.number() })) })
+      .parse(
+        JSON.parse(
+          readFileSync("tests/ugv-zmq/fixtures/chassis-site-invalid-20261112.json", "utf8"),
+        ),
+      );
+    for (const vector of capture.vectors) {
+      const bytes = Buffer.from(vector.hex, "hex"),
+        header = bytes.indexOf(0x3a) + 1,
+        wire = bytes.subarray(header + 24);
+      expect(wire.length).toBe(vector.headerLength + 4);
+      expect(crc16CcittFalse(wire.subarray(4))).toBe(bytes.readUInt16LE(header + 22));
+      expect(() => decodeChassisFrame(bytes, { protocolVersion: "2.1" })).toThrow(
+        "ZMQ_BINARY_PAYLOAD_LENGTH_INVALID",
+      );
+      expect(() => decodeChassisFrame(bytes, { protocolVersion: "2.0" })).toThrow(
+        "ZMQ_BINARY_PAYLOAD_LENGTH_INVALID",
+      );
+    }
+  });
   it("accepts nullable exposure without manufacturing UTC; rejects old/new cross interpretation", () => {
     const value = event("frame_header", metadata),
       frames = [Buffer.from("isr/isr-01/frame_header"), Buffer.from(JSON.stringify(value))];

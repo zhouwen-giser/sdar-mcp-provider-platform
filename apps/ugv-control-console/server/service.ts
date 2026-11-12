@@ -304,6 +304,26 @@ export class Service {
     await this.store.saveTask(taskId, operation, snapshot);
     return snapshot;
   }
+  /** For display/export only. Command execution must keep using the live task() query. */
+  async taskRecord(taskId: string): Promise<Json> {
+    const saved = await this.store.task(taskId);
+    if (!saved) throw Error("TASK_NOT_IMPORTED");
+    try {
+      return await this.task(taskId);
+    } catch (error) {
+      if (!(error instanceof UpstreamError) || error.code !== "TASK_EXPIRED") throw error;
+      if (saved.snapshot.taskId !== taskId) throw Error("TASK_IDENTITY_MISMATCH");
+      return {
+        ...saved.snapshot,
+        _consoleRetention: {
+          source: "retained_local_snapshot",
+          upstreamReasonCode: "TASK_EXPIRED",
+          recordedAt: saved.updatedAt,
+          readOnly: true,
+        },
+      };
+    }
+  }
   async importTask(taskId: string) {
     const snapshot = await this.mcp.rpc("tasks/get", { taskId });
     if (snapshot.taskId !== taskId) throw Error("TASK_IDENTITY_MISMATCH");

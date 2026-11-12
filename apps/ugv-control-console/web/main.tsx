@@ -1233,11 +1233,17 @@ function TaskDetail({
     queryKey: ["task", taskId],
     queryFn: () => api<Json>(`/tasks/${encodeURIComponent(taskId)}`),
     refetchInterval: (q) =>
-      ["completed", "failed", "cancelled"].includes(text(q.state.data?.status)) ? false : 2000,
+      record(q.state.data?._consoleRetention).readOnly === true ||
+      ["completed", "failed", "cancelled"].includes(text(q.state.data?.status))
+        ? false
+        : 2000,
   });
+  const retention = record(task.data?._consoleRetention),
+    retained = retention.readOnly === true;
   const business = useQuery({
     queryKey: ["business", taskId],
     queryFn: () => api<Json>(`/tasks/${encodeURIComponent(taskId)}/business`),
+    enabled: !!task.data && !retained,
     refetchInterval: (q) =>
       q.state.error
         ? false
@@ -1252,6 +1258,10 @@ function TaskDetail({
     setAdjust("");
   }, [taskId]);
   useEffect(() => {
+    if (retained) {
+      setStreamState("历史留存 · 已停止订阅");
+      return undefined;
+    }
     let source: EventSource | undefined,
       timer: ReturnType<typeof setTimeout> | undefined,
       closed = false,
@@ -1301,9 +1311,9 @@ function TaskDetail({
       source?.close();
       if (timer) clearTimeout(timer);
     };
-  }, [taskId, qc]);
+  }, [taskId, qc, retained]);
   const snapshot = record(task.data),
-    b = record(business.data),
+    b = retained ? {} : record(business.data),
     context = record(b.context),
     objects = array(b.objects).map(record),
     identity = record(context.identity);
@@ -1315,7 +1325,9 @@ function TaskDetail({
     profile = taskProfile(tool),
     status = classifyTask(snapshot),
     active =
-      !siteReadonlyTools(tools) && ["working", "input_required"].includes(text(snapshot.status));
+      !retained &&
+      !siteReadonlyTools(tools) &&
+      ["working", "input_required"].includes(text(snapshot.status));
   const result = record(snapshot.result),
     content = record(result.structuredContent),
     report = record(content.inspectionReport),
@@ -1338,18 +1350,25 @@ function TaskDetail({
         <div>
           <span className="eyebrow">TASK EXECUTION</span>
           <h2>
-            任务详情 <Badge {...status} />
+            任务详情{" "}
+            <Badge {...status} label={retained ? `历史快照 · ${status.label}` : status.label} />
           </h2>
           <small className="mono">{taskId}</small>
         </div>
         <div className="button-group">
           <small className="muted">{streamState}</small>
-          <button onClick={downloadReport}>下载完整报告</button>
+          <button onClick={downloadReport}>{retained ? "下载留存记录" : "下载完整报告"}</button>
         </div>
       </div>
       <ErrorNote error={task.error ?? error} />
+      {retained && (
+        <div className="notice warning" role="status">
+          上游任务已过期。以下为 {when(retention.recordedAt)} 本面板留存快照，设备结果未重新核实。
+          未保存的业务对象与原图不在此记录中。
+        </div>
+      )}
       {operation === "simulation_adjust_view" && <SimulationViewResult result={content} />}
-      {[ZMQ_INSPECT, EFFECT_APPLY].includes(operation) && (
+      {!retained && [ZMQ_INSPECT, EFFECT_APPLY].includes(operation) && (
         <ZmqResults
           taskId={taskId}
           operation={operation}
