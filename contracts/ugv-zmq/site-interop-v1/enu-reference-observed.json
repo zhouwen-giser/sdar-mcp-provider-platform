@@ -1,0 +1,111 @@
+{
+  "readAt": "2026-11-12T09:16:35.998384+00:00",
+  "endpoint": "http://192.168.2.63:7879",
+  "intent": "GET only; source map transform verification",
+  "responses": [
+    {
+      "path": "/api/simulation/map/assets",
+      "status": 200,
+      "body": {
+        "calibration": "/assets/maps/yuan_qu/calibration?v=map.jpeg:1794368556908263207-2475637:1794368556908263207-1069:1794390569829104153-16527:1793927821000000000-980036:1794365764521702056-2346783",
+        "error": "",
+        "image": "/assets/maps/yuan_qu/image?v=map.jpeg:1794368556908263207-2475637:1794368556908263207-1069:1794390569829104153-16527:1793927821000000000-980036:1794365764521702056-2346783",
+        "image3d": "/assets/maps/yuan_qu/image3d?v=map.jpeg:1794368556908263207-2475637:1794368556908263207-1069:1794390569829104153-16527:1793927821000000000-980036:1794365764521702056-2346783",
+        "key": "yuan_qu:map.jpeg:1794368556908263207-2475637:1794368556908263207-1069:1794390569829104153-16527:1793927821000000000-980036:1794365764521702056-2346783",
+        "map": "yuan_qu",
+        "regions": "/assets/maps/yuan_qu/regions?v=map.jpeg:1794368556908263207-2475637:1794368556908263207-1069:1794390569829104153-16527:1793927821000000000-980036:1794365764521702056-2346783",
+        "roads": "/assets/maps/yuan_qu/roads?v=map.jpeg:1794368556908263207-2475637:1794368556908263207-1069:1794390569829104153-16527:1793927821000000000-980036:1794365764521702056-2346783"
+      }
+    },
+    {
+      "path": "/api/simulation/map/gnss?x=0&y=0&z=0",
+      "status": 200,
+      "body": {
+        "frame_id": "map",
+        "gnss": {
+          "altitude": 500.0,
+          "latitude": 22.50685833333301,
+          "longitude": 114.048222222222
+        },
+        "ok": true,
+        "position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        }
+      }
+    },
+    {
+      "path": "/api/simulation/map/gnss?x=100&y=0&z=0",
+      "status": 200,
+      "body": {
+        "frame_id": "map",
+        "gnss": {
+          "altitude": 500.00078348163515,
+          "latitude": 22.506858330401624,
+          "longitude": 114.04919404671402
+        },
+        "ok": true,
+        "position": {
+          "x": 100.0,
+          "y": 0.0,
+          "z": 0.0
+        }
+      }
+    },
+    {
+      "path": "/api/simulation/map/gnss?x=0&y=100&z=0",
+      "status": 200,
+      "body": {
+        "frame_id": "map",
+        "gnss": {
+          "altitude": 500.0007879883051,
+          "latitude": 22.507761301234588,
+          "longitude": 114.048222222222
+        },
+        "ok": true,
+        "position": {
+          "x": 0.0,
+          "y": 100.0,
+          "z": 0.0
+        }
+      }
+    },
+    {
+      "path": "/api/simulation/map/gnss?x=-172&y=114&z=0",
+      "status": 200,
+      "body": {
+        "frame_id": "map",
+        "gnss": {
+          "altitude": 500.00334192160517,
+          "latitude": 22.507887708060064,
+          "longitude": 114.04655067172358
+        },
+        "ok": true,
+        "position": {
+          "x": -172.0,
+          "y": 114.0,
+          "z": 0.0
+        }
+      }
+    },
+    {
+      "path": "/api/simulation/map/gnss?x=1000&y=-2000&z=25",
+      "status": 200,
+      "body": {
+        "frame_id": "map",
+        "gnss": {
+          "altitude": 525.3935422096401,
+          "latitude": 22.48879873293583,
+          "longitude": 114.0579391671861
+        },
+        "ok": true,
+        "position": {
+          "x": 1000.0,
+          "y": -2000.0,
+          "z": 25.0
+        }
+      }
+    }
+  ]
+}

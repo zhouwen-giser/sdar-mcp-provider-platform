@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "ugv.zmq-site-deployment/3",
+  "status": "candidate",
+  "executionDomain": {
+    "mode": "live",
+    "simulationId": null
+  },
+  "providerBinding": {
+    "providerId": null,
+    "resourceId": null,
+    "sourceSessionKey": null
+  },
+  "components": {
+    "chassis": {
+      "protocolVersion": "2.1",
+      "commandEndpoint": "tcp://192.168.2.63:10001",
+      "publicationEndpoint": "tcp://192.168.2.63:11001",
+      "systemId": "1",
+      "controllerSystemId": "0",
+      "publicationFraming": "prefix_business_length_crc",
+      "commandFraming": "prefix_wire_length_crc"
+    },
+    "eo": {
+      "protocolVersion": "2.3",
+      "commandEndpoint": "tcp://192.168.2.63:5555",
+      "publicationEndpoint": "tcp://192.168.2.63:5556",
+      "deviceId": "isr-01",
+      "framePullEndpoint": "tcp://192.168.2.63:5559"
+    },
+    "simulationEffect": {
+      "protocolVersion": "1.0",
+      "commandEndpoint": "tcp://192.168.2.63:5557",
+      "publicationEndpoint": "tcp://192.168.2.63:5558",
+      "deviceId": "artillery-01"
+    }
+  },
+  "planner": {
+    "policy": "retain",
+    "endpoint": "http://192.168.2.63:7879",
+    "protocolVersion": "dashboard-v2",
+    "entityId": "ugv",
+    "entityType": "ugv",
+    "systemId": "1",
+    "mapReference": {
+      "sceneId": "yuan_qu",
+      "mapId": "yuan_qu",
+      "sceneSha256": "0cec5045348e5863475c24a215a2d54933cdff99161f8baaa3eba86cc97cca51",
+      "latitude": 22.506858333333,
+      "longitude": 114.048222222222,
+      "altitude": 500
+    },
+    "maxContextAgeMs": 1000
+  },
+  "intendedOperations": [
+    "state.read",
+    "navigation.point",
+    "navigation.route",
+    "navigation.returnHome",
+    "recon.area",
+    "recon.circular",
+    "camera.position",
+    "camera.zoom",
+    "inspection.complete",
+    "simulation.effect"
+  ],
+  "evidence": {
+    "deploymentIdentity": null,
+    "timeAndCoordinates": null,
+    "opticalGeometryAndLimits": null,
+    "capabilityScope": null,
+    "serverImplementation": null,
+    "plannerPolicy": null,
+    "providerGoldenFrames": null
+  }
+}

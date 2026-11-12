@@ -11,7 +11,7 @@
     "pnpm": ">=11 <12"
   },
   "scripts": {
-    "zmq:contract:check": "node --import tsx scripts/ugv-zmq/check-contracts.ts && node --import tsx scripts/ugv-zmq/check-contracts-v2.ts",
+    "zmq:contract:check": "node --import tsx scripts/ugv-zmq/check-contracts.ts && node --import tsx scripts/ugv-zmq/check-contracts-v2.ts && node --import tsx scripts/ugv-zmq/interop-contract.ts",
     "zmq:preflight": "node --import tsx scripts/ugv-zmq/preflight.ts",
     "test:ugv-zmq": "vitest run tests/ugv-zmq/",
     "test:ugv-zmq-observer": "vitest run tests/ugv-zmq-observer/",

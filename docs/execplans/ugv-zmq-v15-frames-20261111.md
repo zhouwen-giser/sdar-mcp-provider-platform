@@ -32,6 +32,16 @@ Optical zoom and next_follow remain unsupported. Upstream FramePull is enabled o
 
 ## Findings and decisions
 
+2026-11-12 authorized correction: complete interoperability entirely in SMPP; do not modify or redeploy isr-simulation or SDAR. Supersedes the earlier requirement for an upstream chassis deployment fix. Add an explicitly selected, evidence-locked chassis publication framing variant (uint32 prefix, business-only header length/CRC); keep strict 2.1 and command framing unchanged, with no parser fallback. Add a Dashboard V2 planner with fresh authoritative context, request/ACK correlation, scene-qualified WGS84/ECEF/ENU conversion, and unchanged preview-only semantics. Publish a separate 1.5.1 15-tool catalog/result version so frozen 1.5.0 remains readable. Candidate replacement restarts the 24-hour gate; no physical control without operator confirmation.
+
+### SMPP-only interoperability follow-up
+
+- [ ] Explicit receive framing/deployment contract and captured-frame regressions; strict 2.1 remains strict.
+- [ ] Dashboard V2 context/ACK/request-ID adapter and ENU transform; context changes and errors fail explicitly.
+- [ ] Versioned 1.5.1 catalogs, Runtime/Provider/console exact validation and diagnostics.
+- [ ] Isolated protocol/planner/PostgreSQL/MCP/browser regression and engineering gates.
+- [ ] Real read-only chassis/planner verification, new fixed candidate images/package and fresh 24-hour run.
+
 2026-11-11: formal Provider archive remains failed since 2026-11-04. Runtime logs confirm recurring V8 heap exhaustion. Both are release gates independent of the native protocol incompatibilities. Rollback must understand new native protocols; old images cannot read the current field source.
 
 2026-11-12: Independent vectors and frozen v1 checks passed. Native 2.1/2.3 control regression passed 10 PostgreSQL/MCP cases. Frame and archive integration, browser login/image/bbox/download, and 76 console tests passed before final gates. Final post-change gates and candidate deployment remain pending.

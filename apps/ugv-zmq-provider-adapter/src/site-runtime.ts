@@ -1,4 +1,8 @@
 import {
+  siteV151Tool,
+  SITE_READONLY_V151_PROFILE,
+} from "../../../packages/vehicle-zmq-control/src/site-v151.js";
+import {
   siteV15Tool,
   SITE_V15_TOOLS,
   SITE_READONLY_V15_PROFILE,
@@ -14,7 +18,7 @@ import { EventEmitter } from "node:events";
 import AjvImport, { type Options, type ValidateFunction } from "ajv";
 import addFormatsImport from "ajv-formats";
 import { z } from "zod";
-import type { ControlDeploymentProfile as DeploymentProfile } from "../../../packages/vehicle-zmq-contract/src/site-profile.js";
+import type { ControlDeploymentProfile as DeploymentProfile } from "../../../packages/vehicle-zmq-contract/src/interop-profile.js";
 import type { ZmqObservationObserver } from "../../../packages/vehicle-zmq-observer/src/index.js";
 import { canonical, sha256 } from "../../../packages/vehicle-zmq-observer/src/index.js";
 import { metadataPredicate } from "../../../packages/vehicle-zmq-control/src/metadata-scope.js";
@@ -97,10 +101,15 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
       this.validators.set(
         name,
         ajv.compile(
-          (this.v15 ? siteV15Tool(name, this.resourceId, true) : siteTool(name, this.resourceId))
-            .inputSchema,
+          (this.v15
+            ? (this.v151 ? siteV151Tool : siteV15Tool)(name, this.resourceId, true)
+            : siteTool(name, this.resourceId)
+          ).inputSchema,
         ),
       );
+  }
+  get v151() {
+    return this.profile.schemaVersion === "ugv.zmq-site-deployment/3";
   }
   get v15() {
     return this.profile.components.eo.protocolVersion === "2.3";
@@ -109,7 +118,11 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
     return this.v15 ? SITE_V15_TOOLS : SITE_TOOLS;
   }
   get catalogProfile() {
-    return this.v15 ? SITE_READONLY_V15_PROFILE : SITE_PROFILE;
+    return this.v151
+      ? SITE_READONLY_V151_PROFILE
+      : this.v15
+        ? SITE_READONLY_V15_PROFILE
+        : SITE_PROFILE;
   }
   isControl(name: string) {
     return ZMQ_CONTROL_TOOLS.has(name) || name === VIEW_TOOL;
@@ -198,6 +211,21 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
       executionDomain: this.profile.executionDomain,
       deploymentBinding: "unqualified_diagnostic",
       sourceProducerEpoch: null,
+      ...(this.v151
+        ? {
+            chassisWire: {
+              publicationFraming:
+                "publicationFraming" in this.profile.components.chassis
+                  ? this.profile.components.chassis.publicationFraming
+                  : "prefix_wire_length_crc",
+              commandFraming: "prefix_wire_length_crc",
+              baseBusinessProtocol: "2.1",
+              standard21Conformance:
+                "publicationFraming" in this.profile.components.chassis &&
+                this.profile.components.chassis.publicationFraming === "prefix_wire_length_crc",
+            },
+          }
+        : {}),
       completeSpatialEvidence: false,
       tools: this.toolNames.map((name) => ({
         name,
@@ -207,7 +235,17 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
       planner: {
         policy: this.profile.planner.policy,
         available: !!this.planner,
-        correlation: "geometry_only_no_request_id",
+        correlation: this.v151
+          ? "request_id_epoch_context_and_geometry"
+          : "geometry_only_no_request_id",
+        ...(this.v151
+          ? {
+              coordinateFrame: "map_enu",
+              entityId: "entityId" in this.profile.planner ? this.profile.planner.entityId : null,
+              mapReference:
+                "mapReference" in this.profile.planner ? this.profile.planner.mapReference : null,
+            }
+          : {}),
         adoption: "preview_only",
       },
     };

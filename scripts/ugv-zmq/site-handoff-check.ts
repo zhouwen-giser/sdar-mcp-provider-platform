@@ -11,7 +11,7 @@ import {
   PostgresProviderStore,
   openGowmTaskBusinessStore,
 } from "../../packages/provider-adapter-kit/src/index.js";
-import { ControlDeploymentProfile as DeploymentProfile } from "../../packages/vehicle-zmq-contract/src/site-profile.js";
+import { ControlDeploymentProfile as DeploymentProfile } from "../../packages/vehicle-zmq-contract/src/interop-profile.js";
 import { readZmqHandoffState } from "../../packages/vehicle-zmq-control/src/handoff.js";
 const privateJson = (path: string | undefined): unknown => {
   if (!path || (statSync(path).mode & 0o077) !== 0)

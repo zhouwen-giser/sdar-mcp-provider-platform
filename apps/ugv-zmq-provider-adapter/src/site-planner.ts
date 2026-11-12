@@ -1,4 +1,7 @@
 import { randomUUID } from "node:crypto";
+import { DashboardV2Planner } from "../../../packages/provider-adapter-kit/src/dashboard-v2-planner.js";
+import type { SiteInteropDeploymentProfile } from "../../../packages/vehicle-zmq-contract/src/interop-profile.js";
+import { PlanRouteResultV2 } from "../../../packages/vehicle-zmq-control/src/planner-v2-contract.js";
 import type { Pool } from "pg";
 import {
   AirportRoadPlanner,
@@ -16,6 +19,7 @@ export class SiteRoutePlanner {
   constructor(
     endpoint: string,
     readonly pool: Pool,
+    readonly binding?: SiteInteropDeploymentProfile["planner"],
   ) {
     new AirportRoadPlanner(endpoint, 3000);
     this.endpoint = new URL(endpoint).href;
@@ -33,6 +37,37 @@ export class SiteRoutePlanner {
       );
       locked = lock.rows[0]?.locked === true;
       if (!locked) throw Error("UGV_PLANNER_BUSY");
+      if (this.binding) {
+        const selected = await new DashboardV2Planner(this.endpoint, this.binding).plan(
+          { start: input.start, waypoints: input.waypoints, density: input.density },
+          signal,
+        );
+        if (Buffer.byteLength(selected.sourceMessage) > 262144)
+          throw Error("UGV_PLANNER_SOURCE_TOO_LARGE");
+        const { sourceMessage, observedAt, ...source } = selected;
+        return PlanRouteResultV2.parse({
+          schemaVersion: "ugv.zmq-route-preview/2",
+          previewId: randomUUID(),
+          resourceId: input.resourceId,
+          adoption: "preview_only",
+          correlation: "request_id_epoch_context_and_geometry",
+          ...source,
+          createdAt: observedAt,
+          requestHash: sha256(canonical(input)),
+          sourceMessage,
+          sourceMessageSha256: sha256(sourceMessage),
+          transform: {
+            policy: "scene_enu_wgs84_v1",
+            sha256: sha256(canonical(this.binding.mapReference)),
+            reference: this.binding.mapReference,
+            heightPolicy: "scene_reference_plane_not_measured",
+          },
+          start: input.start,
+          requestedWaypoints: input.waypoints,
+          sourceFreshness: "context_and_scene_verified",
+          completeSpatialEvidence: false,
+        });
+      }
       let wire: string | undefined;
       const planner = new AirportRoadPlanner(this.endpoint, 3000, (data) => {
         wire = data;

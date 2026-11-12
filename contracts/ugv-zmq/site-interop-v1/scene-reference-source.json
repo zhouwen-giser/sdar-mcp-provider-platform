@@ -1,0 +1,16 @@
+{
+  "sourceCommit": "a0be6a51e17fb9e85bc4ba0b62f7157a1b77c82e",
+  "sourcePath": "ros_ws/config/scenarios.yaml",
+  "sha256": "0cec5045348e5863475c24a215a2d54933cdff99161f8baaa3eba86cc97cca51",
+  "activeSceneReadOnlyVerified": {
+    "phase": "ready",
+    "sceneId": "yuan_qu",
+    "mapId": "yuan_qu",
+    "mapReference": {
+      "latitude": 22.506858333333,
+      "longitude": 114.048222222222,
+      "altitude": 500
+    }
+  },
+  "scope": "Reference configuration hash; actual remote scene/epoch and transform are rechecked on every preview."
+}

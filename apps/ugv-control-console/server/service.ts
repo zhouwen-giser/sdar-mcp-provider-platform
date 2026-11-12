@@ -526,11 +526,14 @@ export class Service {
             ...previous.request.arguments,
             density: previous.request.arguments.density ?? "adaptive",
           }) !== preview.requestHash ||
-          wireHash(preview.transform) !==
-            wireHash(
-              record(catalog.tools.find((t) => t.name === PLAN_ROUTE)?._meta?.["io.sdar/ugvZmq"])
-                .routeTransform,
-            ) ||
+          (preview.schemaVersion === "ugv.zmq-route-preview/2"
+            ? record(preview.transform).policy !== "scene_enu_wgs84_v1" ||
+              wireHash(record(preview.transform).reference) !== record(preview.transform).sha256
+            : wireHash(preview.transform) !==
+              wireHash(
+                record(catalog.tools.find((t) => t.name === PLAN_ROUTE)?._meta?.["io.sdar/ugvZmq"])
+                  .routeTransform,
+              )) ||
           preview.routeSource !==
             record(catalog.tools.find((t) => t.name === PLAN_ROUTE)?._meta?.["io.sdar/ugvZmq"])
               .plannerSource ||
@@ -542,6 +545,15 @@ export class Service {
             preview.sourceMessageSha256
         )
           throw Error("ZMQ_PREVIEW_PROVENANCE_INVALID");
+        if (preview.schemaVersion === "ugv.zmq-route-preview/2") {
+          const current = record((await this.state()).data),
+            planner = record(record(current.vehicle_get_capabilities).planner);
+          if (
+            wireHash(record(preview.transform).reference) !== wireHash(planner.mapReference) ||
+            record(preview.context).entity_id !== planner.entityId
+          )
+            throw Error("ZMQ_PREVIEW_PROVENANCE_INVALID");
+        }
         const state = record(record((await this.state()).data).vehicle_get_state),
           observation = array(state.observations)
             .map(record)

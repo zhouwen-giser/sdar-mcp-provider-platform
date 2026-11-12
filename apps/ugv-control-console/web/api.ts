@@ -44,6 +44,24 @@ export function download(value: unknown, name: string) {
   setTimeout(() => URL.revokeObjectURL(href), 1000);
 }
 export const reasons: Record<string, string> = {
+  CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY:
+    "当前使用显式现场接收合同：长度与 CRC 校验业务载荷",
+  UGV_PLANNER_CONTEXT_MISSING: "规划器未提供有效的当前任务上下文",
+  UGV_PLANNER_CONTEXT_STALE: "规划器的设备或控制器状态已过期",
+  UGV_PLANNER_ENTITY_MISMATCH: "规划器受控实体与本项目设备绑定不一致",
+  UGV_PLANNER_EPOCH_CHANGED: "规划过程中仿真世界版本已变化",
+  UGV_PLANNER_CONTROLLER_CHANGED: "规划器控制器实例已变化",
+  UGV_PLANNER_MISSION_CHANGED: "规划器当前任务已变化",
+  UGV_PLANNER_CONTEXT_CHANGED: "规划期间任务上下文已变化，请重新预览",
+  UGV_PLANNER_POSITION_UNAVAILABLE: "规划器缺少新鲜车辆位置",
+  UGV_PLANNER_START_CHANGED: "请求起点与规划器当前车辆位置不一致",
+  UGV_PLANNER_RESPONSE_TIMEOUT: "上下文已核实，等待路线响应超时",
+  UGV_PLANNER_UPSTREAM_REJECTED: "上游明确拒绝本次规划",
+  UGV_PLANNER_SCENE_UNAVAILABLE: "无法核实规划器场景坐标参考",
+  UGV_PLANNER_SCENE_MISMATCH: "规划器地图与部署配置不一致",
+  UGV_PLANNER_SCENE_TRANSFORM_MISMATCH: "规划器坐标转换与配置的 ENU 参考不一致",
+  UGV_PLANNER_RESPONSE_INVALID: "规划响应结构或坐标不符合合同",
+
   ZMQ_FRAME_AUDIT_UNAVAILABLE: "图像读取审计存储不可用，本次读取未完成",
   ZMQ_FRAME_ENDPOINT_UNCONFIGURED: "未配置独立取帧端点",
   ZMQ_FRAME_EVICTED: "指定帧已被上游淘汰，请重新选择已观测帧",

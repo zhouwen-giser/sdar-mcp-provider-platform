@@ -1,3 +1,6 @@
+import { checkInteropContracts } from "../../scripts/ugv-zmq/interop-contract.js";
+import { SiteInteropDeploymentProfile } from "../../packages/vehicle-zmq-contract/src/interop-profile.js";
+import { dashboardFixture, binding } from "./dashboard-v2-fixture.js";
 import { checkContractsV2 } from "../../scripts/ugv-zmq/check-contracts-v2.js";
 import { SiteControlDeploymentProfileV2 } from "../../packages/vehicle-zmq-contract/src/site-profile.js";
 import { fileURLToPath } from "node:url";
@@ -23,7 +26,7 @@ export const siteDestination = {
   longitude: 106.81485 - 192 / 111320,
   latitude: 29.7195 - 100 / 110540,
 };
-export async function siteFixture(databaseUrl: string, v15 = false) {
+export async function siteFixture(databaseUrl: string, v15 = false, interop = false) {
   if (new URL(databaseUrl).hostname !== "127.0.0.1") throw Error("ISOLATED_DATABASE_REQUIRED");
   const suffix = randomUUID().replaceAll("-", ""),
     schemas = ["site_provider_", "site_runtime_", "site_archive_"].map((s) => s + suffix);
@@ -43,8 +46,9 @@ export async function siteFixture(databaseUrl: string, v15 = false) {
   await installObservationArchive(admin, present(schemas[2]));
   const devices = new SimulatedZmqDevices();
   devices.newProtocol = v15;
+  devices.businessCrcPublications = interop;
   const original = await devices.start();
-  const profile = v15
+  const baseProfile = v15
     ? SiteControlDeploymentProfileV2.parse({
         ...original,
         schemaVersion: "ugv.zmq-site-deployment/2",
@@ -65,53 +69,80 @@ export async function siteFixture(databaseUrl: string, v15 = false) {
       })
     : original;
   if (!v15) {
-    profile.executionDomain.simulationId = null;
-    profile.components.chassis.controllerSystemId = null;
+    baseProfile.executionDomain.simulationId = null;
+    baseProfile.components.chassis.controllerSystemId = null;
   }
-  const planner = new WebSocketServer({ host: "127.0.0.1", port: 0 });
-  await once(planner, "listening");
+  const plannerV2 = interop ? await dashboardFixture() : undefined;
+  const planner = plannerV2?.sockets ?? new WebSocketServer({ host: "127.0.0.1", port: 0 });
+  if (!plannerV2) await once(planner, "listening");
   const plannerAddress = planner.address();
   if (!plannerAddress || typeof plannerAddress === "string")
     throw Error("FIXTURE_PLANNER_ADDRESS_REQUIRED");
-  profile.planner = { policy: "retain", endpoint: `http://127.0.0.1:${plannerAddress.port}` };
+  const endpoint = `http://127.0.0.1:${plannerAddress.port}/`;
+  const profile = interop
+    ? SiteInteropDeploymentProfile.parse({
+        ...baseProfile,
+        schemaVersion: "ugv.zmq-site-deployment/3",
+        components: {
+          ...baseProfile.components,
+          chassis: {
+            ...baseProfile.components.chassis,
+            publicationFraming: "prefix_business_length_crc",
+            commandFraming: "prefix_wire_length_crc",
+          },
+        },
+        planner: { ...binding, endpoint },
+      })
+    : baseProfile;
+  if (!interop) profile.planner = { policy: "retain", endpoint };
+  if (plannerV2)
+    devices.positionOverride = {
+      longitude: plannerV2.start.longitude,
+      latitude: plannerV2.start.latitude,
+    };
   const plannerState = { calls: 0, delayMs: 0, mismatch: false, messages: [] as string[] };
-  planner.on("connection", (socket) => {
-    socket.send("0{}");
-    socket.on("message", (data) => {
-      const value = (
-        Buffer.isBuffer(data) ? data : Array.isArray(data) ? Buffer.concat(data) : Buffer.from(data)
-      ).toString("utf8");
-      plannerState.messages.push(value);
-      if (value === "40") socket.send("40{}");
-      else if (value.startsWith("42")) {
-        const packet = JSON.parse(value.slice(2)) as [string, { points: [number, number][] }];
-        if (packet[0] !== "plan_route") return;
-        plannerState.calls++;
-        const points = [plannerState.mismatch ? [9999, 9999] : [-340, 100], ...packet[1].points];
-        setTimeout(() => {
-          if (socket.readyState === 1)
-            socket.send(
-              "42" +
-                JSON.stringify([
-                  "route_candidates",
-                  {
-                    target: "ugv",
-                    ok: true,
-                    candidates: [
-                      {
-                        id: "controlled-site-preview",
-                        points,
-                        num_points: points.length,
-                        length_m: 148,
-                      },
-                    ],
-                  },
-                ]),
-            );
-        }, plannerState.delayMs);
-      }
+  if (!plannerV2)
+    planner.on("connection", (socket) => {
+      socket.send("0{}");
+      socket.on("message", (data) => {
+        const value = (
+          Buffer.isBuffer(data)
+            ? data
+            : Array.isArray(data)
+              ? Buffer.concat(data)
+              : Buffer.from(data)
+        ).toString("utf8");
+        plannerState.messages.push(value);
+        if (value === "40") socket.send("40{}");
+        else if (value.startsWith("42")) {
+          const packet = JSON.parse(value.slice(2)) as [string, { points: [number, number][] }];
+          if (packet[0] !== "plan_route") return;
+          plannerState.calls++;
+          const points = [plannerState.mismatch ? [9999, 9999] : [-340, 100], ...packet[1].points];
+          setTimeout(() => {
+            if (socket.readyState === 1)
+              socket.send(
+                "42" +
+                  JSON.stringify([
+                    "route_candidates",
+                    {
+                      target: "ugv",
+                      ok: true,
+                      candidates: [
+                        {
+                          id: "controlled-site-preview",
+                          points,
+                          num_points: points.length,
+                          length_m: 148,
+                        },
+                      ],
+                    },
+                  ]),
+              );
+          }, plannerState.delayMs);
+        }
+      });
     });
-  });
   const providerOptions = {
     mode: "site_readonly" as const,
     databaseUrl: db(0),
@@ -122,8 +153,14 @@ export async function siteFixture(databaseUrl: string, v15 = false) {
       diagnosticPartition: "SIMULATED-site:" + suffix,
       flushIntervalMs: 5,
     }),
-    contractSha256: v15 ? checkContractsV2().contractSha256 : "b".repeat(64),
-    plannerFrame: "airport_south_positive_v1" as const,
+    contractSha256: interop
+      ? checkInteropContracts().contractSha256
+      : v15
+        ? checkContractsV2().contractSha256
+        : "b".repeat(64),
+    plannerFrame: interop
+      ? ("scene_enu_wgs84_v1" as const)
+      : ("airport_south_positive_v1" as const),
   };
   let provider = await openSiteReadonlyProvider(providerOptions);
   const runtime = createRuntime(
@@ -159,6 +196,7 @@ export async function siteFixture(databaseUrl: string, v15 = false) {
     resourceId: present(profile.providerBinding.resourceId),
     devices,
     plannerState,
+    plannerV2,
     providerOptions,
     mcp,
     runtime,
@@ -175,10 +213,13 @@ export async function siteFixture(databaseUrl: string, v15 = false) {
       await provider.close();
       await devices.close();
       releaseSimulatorEndpoints();
-      for (const socket of planner.clients) socket.terminate();
-      await new Promise<void>((resolve, reject) =>
-        planner.close((error) => (error ? reject(error) : resolve())),
-      );
+      if (plannerV2) await plannerV2.close();
+      else {
+        for (const socket of planner.clients) socket.terminate();
+        await new Promise<void>((resolve, reject) =>
+          planner.close((error) => (error ? reject(error) : resolve())),
+        );
+      }
       for (const schema of schemas.reverse())
         await admin.query(`DROP SCHEMA IF EXISTS ${schema} CASCADE`);
       await admin.end();

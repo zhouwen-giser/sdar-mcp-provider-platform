@@ -1,3 +1,4 @@
+import { crc16CcittFalse } from "../../packages/vehicle-zmq-contract/src/chassis.js";
 import jpeg from "jpeg-js";
 import {
   decodeChassisFrame,
@@ -30,6 +31,7 @@ export function releaseSimulatorEndpoints() {
 /** Loopback wire simulator. Accelerated 20Hz snapshots are test inputs, not provider qualification. */
 export class SimulatedZmqDevices {
   newProtocol = false;
+  businessCrcPublications = false;
   emitImageDetections = false;
   readonly frameRep = new Reply({ receiveTimeout: 100, sendTimeout: 100, linger: 0 });
   readonly jpegBytes = jpeg.encode({ width: 20, height: 15, data: Buffer.alloc(1200, 127) }, 80)
@@ -466,12 +468,22 @@ export class SimulatedZmqDevices {
     return frames.map((bytes) => {
       const p = decodeChassisFrame(bytes),
         start = bytes.indexOf(0x3a) + 1;
-      return encodeChassisFrame({
-        ...p,
-        protocolVersion: "2.1",
-        payload: bytes.subarray(start + 24),
-      });
+      return this.siteFrame(
+        encodeChassisFrame({
+          ...p,
+          protocolVersion: "2.1",
+          payload: bytes.subarray(start + 24),
+        }),
+      );
     });
+  }
+  private siteFrame(bytes: Buffer) {
+    if (!this.businessCrcPublications) return bytes;
+    const h = bytes.indexOf(0x3a) + 1,
+      body = bytes.subarray(h + 28);
+    bytes.writeUInt16LE(body.length, h + 20);
+    bytes.writeUInt16LE(crc16CcittFalse(body), h + 22);
+    return bytes;
   }
   private eoFrames(topic: string, data: unknown, utc: number) {
     const frames = eoFrames(topic, data, utc);
@@ -529,14 +541,16 @@ export class SimulatedZmqDevices {
     payload.writeDoubleLE(0, 57);
     payload.writeDoubleLE(0, 65);
     await this.chassisPub.send(
-      encodeChassisFrame({
-        topic: "ipc_message",
-        messageId: 0x10000002,
-        systemId: "1",
-        targetSystemId: "0",
-        payload,
-        protocolVersion: this.newProtocol ? "2.1" : "2.0",
-      }),
+      this.siteFrame(
+        encodeChassisFrame({
+          topic: "ipc_message",
+          messageId: 0x10000002,
+          systemId: "1",
+          targetSystemId: "0",
+          payload,
+          protocolVersion: this.newProtocol ? "2.1" : "2.0",
+        }),
+      ),
     );
   }
   completeNavigation() {

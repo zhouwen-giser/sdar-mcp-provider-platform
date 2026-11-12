@@ -1,3 +1,6 @@
+import { checkInteropContracts } from "../../scripts/ugv-zmq/interop-contract.js";
+import { SiteInteropDeploymentProfile } from "../../packages/vehicle-zmq-contract/src/interop-profile.js";
+import { binding } from "./dashboard-v2-fixture.js";
 import { checkContractsV2 } from "../../scripts/ugv-zmq/check-contracts-v2.js";
 import { OPERATION_ADMISSION_KEYS } from "../../packages/vehicle-zmq-control/src/operation-support.js";
 import type { ViewBackendSettings } from "../../packages/vehicle-zmq-control/src/simulation-view-contract.js";
@@ -34,7 +37,10 @@ export async function controlSiteFixture(
   databaseUrl: string,
   authMode: "jwt_hs256" | "site_anonymous" = "jwt_hs256",
   catalogProfile?:
-    "zmq_v1_3_0_site_control_13" | "zmq_v1_4_0_site_control_14" | "zmq_v1_5_0_site_control_15",
+    | "zmq_v1_3_0_site_control_13"
+    | "zmq_v1_4_0_site_control_14"
+    | "zmq_v1_5_0_site_control_15"
+    | "zmq_v1_5_1_site_control_15",
   simulationView?: ViewBackendSettings,
 ) {
   if (new URL(databaseUrl).hostname !== "127.0.0.1") throw Error("ISOLATED_DATABASE_REQUIRED");
@@ -56,12 +62,25 @@ export async function controlSiteFixture(
   await installObservationArchive(admin, present(schemas[2]));
   const devices = new SimulatedZmqDevices();
   devices.controllerSystemId = "0";
-  const v15 = catalogProfile === "zmq_v1_5_0_site_control_15";
+  const v151 = catalogProfile === "zmq_v1_5_1_site_control_15";
+  const v15 = v151 || catalogProfile === "zmq_v1_5_0_site_control_15";
+  devices.businessCrcPublications = v151;
   devices.newProtocol = v15;
   const original = await devices.start();
-  const profile = (v15 ? SiteControlDeploymentProfileV2 : SiteControlDeploymentProfile).parse({
+  const profile = (
+    v151
+      ? SiteInteropDeploymentProfile
+      : v15
+        ? SiteControlDeploymentProfileV2
+        : SiteControlDeploymentProfile
+  ).parse({
     ...original,
-    schemaVersion: v15 ? "ugv.zmq-site-deployment/2" : "ugv.zmq-site-deployment/1",
+    schemaVersion: v151
+      ? "ugv.zmq-site-deployment/3"
+      : v15
+        ? "ugv.zmq-site-deployment/2"
+        : "ugv.zmq-site-deployment/1",
+    ...(v151 ? { planner: { ...binding, policy: "disable", endpoint: null } } : {}),
     executionDomain: { mode: "live", simulationId: null },
     components: {
       ...original.components,
@@ -69,6 +88,12 @@ export async function controlSiteFixture(
         ...original.components.chassis,
         controllerSystemId: "0",
         ...(v15 ? { protocolVersion: "2.1" } : {}),
+        ...(v151
+          ? {
+              publicationFraming: "prefix_business_length_crc",
+              commandFraming: "prefix_wire_length_crc",
+            }
+          : {}),
       },
       ...(v15
         ? {
@@ -86,7 +111,8 @@ export async function controlSiteFixture(
   const plannerAddress = planner.address();
   if (!plannerAddress || typeof plannerAddress === "string")
     throw Error("FIXTURE_PLANNER_ADDRESS_REQUIRED");
-  profile.planner = { policy: "retain", endpoint: `http://127.0.0.1:${plannerAddress.port}` };
+  if (!v151)
+    profile.planner = { policy: "retain", endpoint: `http://127.0.0.1:${plannerAddress.port}` };
   const plannerState = { calls: 0, delayMs: 0, mismatch: false, messages: [] as string[] };
   planner.on("connection", (socket) => {
     socket.send("0{}");
@@ -153,7 +179,13 @@ export async function controlSiteFixture(
     controlSettings: {
       ...(simulationView ? { simulationView } : {}),
       ...testScope().settings,
-      ...(v15 ? { contractSha256: checkContractsV2().contractSha256 } : {}),
+      ...(v15
+        ? {
+            contractSha256: v151
+              ? checkInteropContracts().contractSha256
+              : checkContractsV2().contractSha256,
+          }
+        : {}),
       ...(catalogProfile
         ? {
             catalogProfile,
@@ -190,7 +222,7 @@ export async function controlSiteFixture(
       flushIntervalMs: 5,
     }),
     contractSha256: "b".repeat(64),
-    plannerFrame: "airport_south_positive_v1" as const,
+    plannerFrame: v151 ? ("scene_enu_wgs84_v1" as const) : ("airport_south_positive_v1" as const),
   };
   let provider = await openZmqProvider(providerOptions);
   const jwtSecret = "SIMULATED-site-control-secret-at-least-32-bytes";

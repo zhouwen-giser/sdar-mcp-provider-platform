@@ -1,7 +1,10 @@
-import type { ControlDeploymentProfile as DeploymentProfile } from "../../vehicle-zmq-contract/src/site-profile.js";
+import type { ControlDeploymentProfile as DeploymentProfile } from "../../vehicle-zmq-contract/src/interop-profile.js";
 import { randomUUID } from "node:crypto";
 import { ZodError } from "zod";
-import { decodeChassisFrame } from "../../vehicle-zmq-contract/src/chassis-versioned.js";
+import {
+  decodeChassisPublication,
+  CHASSIS_SITE_PUBLICATION,
+} from "../../vehicle-zmq-contract/src/chassis-site.js";
 import { parsePublication } from "../../vehicle-zmq-contract/src/wire-versioned.js";
 import { canonical, sha256, type Component, type ObserverSettings } from "./config.js";
 import {
@@ -62,6 +65,8 @@ export class ObservationNormalizer {
       receipt.observation = observation;
       receipt.valid = true;
       receipt.projectable = true;
+      if (observation.protocolVersion === "2.1-site-rx/1")
+        receipt.diagnostics.push("CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY");
       const camera =
         observation.key === "frame_header" ? `/${String(observation.data.camera_id)}` : "";
       const key = `${component}/${observation.key}${camera}`;
@@ -152,9 +157,12 @@ export class ObservationNormalizer {
       if (frames.length !== 1 || !frames[0]) throw Error("ZMQ_CHASSIS_MULTIPART_INVALID");
       const config = this.profile.components.chassis;
       if (config.systemId === null) throw Error("ZMQ_CHASSIS_SYSTEM_ID_UNBOUND");
-      const parsed = decodeChassisFrame(frames[0], {
+      const parsed = decodeChassisPublication(frames[0], {
         systemId: config.systemId,
         protocolVersion: config.protocolVersion,
+        ...("publicationFraming" in config
+          ? { publicationFraming: config.publicationFraming }
+          : {}),
       });
       if (parsed.topic !== "ipc_message") throw Error("ZMQ_CHASSIS_PUBLICATION_TOPIC_INVALID");
       if (parsed.targetSystemId !== "0" && parsed.targetSystemId !== config.controllerSystemId)
@@ -162,7 +170,10 @@ export class ObservationNormalizer {
       const data = parsed.body;
       return {
         key: String(data.type),
-        protocolVersion: parsed.protocolVersion,
+        protocolVersion:
+          "publicationFraming" in config && config.publicationFraming === CHASSIS_SITE_PUBLICATION
+            ? "2.1-site-rx/1"
+            : parsed.protocolVersion,
         versionEvidence: "selected_contract_not_in_band",
         deviceId: parsed.systemId,
         nativeTaskId: typeof data.missionId === "number" ? String(data.missionId) : null,

@@ -1,4 +1,9 @@
 import {
+  siteV151Tool,
+  SITE_CONTROL_V151_PROFILE,
+  SITE_READONLY_V151_PROFILE,
+} from "../../vehicle-zmq-control/src/site-v151.js";
+import {
   siteV15Tool,
   SITE_V15_TOOLS,
   SITE_CONTROL_V15_PROFILE,
@@ -136,36 +141,48 @@ export class OperationRegistry {
     ajv.addFormat("date-time", (value: string) => !Number.isNaN(Date.parse(value)));
     ajv.addFormat("uuid", /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
     const zmq = manifest.providerType === "isr.vehicle.ugv.zmq";
+    const v151 = zmq && manifest.providerVersion === "1.5.1";
     const v15 = zmq && manifest.providerVersion === "1.5.0";
-    const v15Profile = v15
-      ? (
-          protoStructToJson(
-            manifest.operations.find((o) => o.name === "vehicle_get_capabilities")?.outputSchema,
-          ) as { properties?: { catalogProfile?: { const?: unknown } } }
-        ).properties?.catalogProfile?.const
-      : null;
+    const v15Profile =
+      v15 || v151
+        ? (
+            protoStructToJson(
+              manifest.operations.find((o) => o.name === "vehicle_get_capabilities")?.outputSchema,
+            ) as { properties?: { catalogProfile?: { const?: unknown } } }
+          ).properties?.catalogProfile?.const
+        : null;
     if (v15 && v15Profile !== SITE_CONTROL_V15_PROFILE && v15Profile !== SITE_READONLY_V15_PROFILE)
       throw Error("ZMQ_CATALOG_PROFILE_INVALID");
+    if (
+      v151 &&
+      v15Profile !== SITE_CONTROL_V151_PROFILE &&
+      v15Profile !== SITE_READONLY_V151_PROFILE
+    )
+      throw Error("ZMQ_CATALOG_PROFILE_INVALID");
     const site =
-      zmq && ["1.1.0", "1.2.0", "1.3.0", "1.4.0", "1.5.0"].includes(manifest.providerVersion);
-    const nativeTool = v15
+      zmq &&
+      ["1.1.0", "1.2.0", "1.3.0", "1.4.0", "1.5.0", "1.5.1"].includes(manifest.providerVersion);
+    const nativeTool = v151
       ? (name: string, resource: string) =>
-          siteV15Tool(name, resource, v15Profile === SITE_READONLY_V15_PROFILE)
-      : manifest.providerVersion === "1.4.0"
-        ? siteControlV14Tool
-        : manifest.providerVersion === "1.3.0"
-          ? siteControlV13Tool
-          : manifest.providerVersion === "1.2.0"
-            ? siteControlTool
-            : site
-              ? siteTool
-              : zmqTool;
+          siteV151Tool(name, resource, v15Profile === SITE_READONLY_V151_PROFILE)
+      : v15
+        ? (name: string, resource: string) =>
+            siteV15Tool(name, resource, v15Profile === SITE_READONLY_V15_PROFILE)
+        : manifest.providerVersion === "1.4.0"
+          ? siteControlV14Tool
+          : manifest.providerVersion === "1.3.0"
+            ? siteControlV13Tool
+            : manifest.providerVersion === "1.2.0"
+              ? siteControlTool
+              : site
+                ? siteTool
+                : zmqTool;
     if (
       zmq &&
       canonicalize(manifest.operations.map((o) => o.name).sort()) !==
         canonicalize(
           [
-            ...(v15
+            ...(v15 || v151
               ? SITE_V15_TOOLS
               : manifest.providerVersion === "1.4.0"
                 ? SITE_VIEW_TOOLS

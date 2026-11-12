@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { Pool } from "pg";
 import { z } from "zod";
-import { ControlDeploymentProfile as DeploymentProfile } from "../../../packages/vehicle-zmq-contract/src/site-profile.js";
+import { ControlDeploymentProfile as DeploymentProfile } from "../../../packages/vehicle-zmq-contract/src/interop-profile.js";
 import { checkContractsV2 } from "../../../scripts/ugv-zmq/check-contracts-v2.js";
 import {
   ObserverSettings,

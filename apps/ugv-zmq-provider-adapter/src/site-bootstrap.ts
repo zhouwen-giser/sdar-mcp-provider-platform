@@ -1,10 +1,13 @@
+import { siteV151Manifest } from "../../../packages/vehicle-zmq-control/src/site-v151.js";
+import { checkInteropContracts } from "../../../scripts/ugv-zmq/interop-contract.js";
 import { checkContractsV2 } from "../../../scripts/ugv-zmq/check-contracts-v2.js";
 import { openFrames } from "./frames.js";
 import { siteV15Manifest } from "../../../packages/vehicle-zmq-control/src/site-v15.js";
 import {
   DeploymentProfileV2,
   SiteControlDeploymentProfileV2,
-} from "../../../packages/vehicle-zmq-contract/src/site-profile.js";
+  SiteInteropDeploymentProfile,
+} from "../../../packages/vehicle-zmq-contract/src/interop-profile.js";
 import { Pool } from "pg";
 import { z } from "zod";
 import { DeploymentProfile } from "../../../packages/vehicle-zmq-contract/src/index.js";
@@ -43,7 +46,7 @@ export interface SiteReadonlyOptions {
   observerSettings: unknown;
   contractSha256: string;
   frameSettings?: unknown;
-  plannerFrame?: "airport_south_positive_v1";
+  plannerFrame?: "airport_south_positive_v1" | "scene_enu_wgs84_v1";
   gowm?: GowmStorageConfig;
   host?: string;
   port?: number;
@@ -51,7 +54,12 @@ export interface SiteReadonlyOptions {
 export async function openSiteReadonlyProvider(options: SiteReadonlyOptions) {
   z.literal("site_readonly").parse(options.mode);
   const profile = z
-      .union([DeploymentProfile, DeploymentProfileV2, SiteControlDeploymentProfileV2])
+      .union([
+        DeploymentProfile,
+        DeploymentProfileV2,
+        SiteControlDeploymentProfileV2,
+        SiteInteropDeploymentProfile,
+      ])
       .parse(options.profile),
     settings = ObserverSettings.parse(options.observerSettings);
   const contract = z
@@ -60,7 +68,11 @@ export async function openSiteReadonlyProvider(options: SiteReadonlyOptions) {
     .parse(options.contractSha256);
   if (
     profile.components.eo.protocolVersion === "2.3" &&
-    contract !== checkContractsV2().contractSha256
+    contract !==
+      (profile.schemaVersion === "ugv.zmq-site-deployment/3"
+        ? checkInteropContracts()
+        : checkContractsV2()
+      ).contractSha256
   )
     throw Error("ZMQ_DEPLOYMENT_NATIVE_CONTRACT_HASH_MISMATCH");
   z.url().parse(options.databaseUrl);
@@ -71,7 +83,15 @@ export async function openSiteReadonlyProvider(options: SiteReadonlyOptions) {
     throw Error("ZMQ_OBSERVATION_OWNER_DATABASE_REQUIRED");
   if (!["127.0.0.1", "0.0.0.0"].includes(options.host ?? "127.0.0.1"))
     throw Error("ZMQ_SITE_GRPC_HOST_INVALID");
-  z.literal("airport_south_positive_v1").optional().parse(options.plannerFrame);
+  z.enum(["airport_south_positive_v1", "scene_enu_wgs84_v1"])
+    .optional()
+    .parse(options.plannerFrame);
+  if (
+    options.plannerFrame &&
+    (options.plannerFrame === "scene_enu_wgs84_v1") !==
+      (profile.schemaVersion === "ugv.zmq-site-deployment/3")
+  )
+    throw Error("UGV_PLANNER_DEPLOYMENT_VERSION_MISMATCH");
   const store = new PostgresProviderStore(options.databaseUrl, 8, "ugv", options.gowm);
   store.pool.options.query_timeout = settings.databaseTimeoutMs;
   store.pool.options.statement_timeout = settings.databaseTimeoutMs;
@@ -136,7 +156,11 @@ export async function openSiteReadonlyProvider(options: SiteReadonlyOptions) {
       );
     const planner =
       profile.planner.policy === "retain" && profile.planner.endpoint && options.plannerFrame
-        ? new SiteRoutePlanner(profile.planner.endpoint, pool)
+        ? new SiteRoutePlanner(
+            profile.planner.endpoint,
+            pool,
+            profile.schemaVersion === "ugv.zmq-site-deployment/3" ? profile.planner : undefined,
+          )
         : undefined;
     const runtime = new SiteReadonlyRuntime(
       profile,
@@ -156,7 +180,7 @@ export async function openSiteReadonlyProvider(options: SiteReadonlyOptions) {
         internalErrorCode: "ZMQ_PROVIDER_ERROR",
         manifest: () =>
           runtime.v15
-            ? siteV15Manifest(
+            ? (runtime.v151 ? siteV151Manifest : siteV15Manifest)(
                 profile.providerBinding.providerId ?? "",
                 runtime.resourceId,
                 store,

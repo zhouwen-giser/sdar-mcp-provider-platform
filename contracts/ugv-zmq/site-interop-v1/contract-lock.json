@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "ugv.zmq-site-interop-lock/1",
+  "parentContractSha256": "aa790fcd1c396def6c0bf7900b69621adbacd277d000e6de43594c8c6ae338c2",
+  "upstreamCommit": "a0be6a51e17fb9e85bc4ba0b62f7157a1b77c82e",
+  "publicationFraming": "prefix_business_length_crc",
+  "commandFraming": "prefix_wire_length_crc",
+  "planner": "dashboard-v2-scene-enu",
+  "files": [
+    {
+      "path": "packages/vehicle-zmq-contract/src/chassis-site.ts",
+      "sha256": "d548f5c17fa3315eeabeb4eac7cb94cf305185bc62518604a301a83a1abf23e1"
+    },
+    {
+      "path": "packages/vehicle-zmq-contract/src/interop-profile.ts",
+      "sha256": "583d50bd0b73457839efb6992a23d94d5f9acf88326c3c221ca6854fb23dc72e"
+    },
+    {
+      "path": "packages/vehicle-zmq-contract/src/dashboard-v2.ts",
+      "sha256": "68c3632aedf3196bfac3b28759ceaa16006e7c41c20acb7324036de2b4557e7c"
+    },
+    {
+      "path": "packages/provider-adapter-kit/src/scene-enu.ts",
+      "sha256": "69cff5900a9106afc09a48b7a109af661367c328944d3e4a8d4e3bf671304d32"
+    },
+    {
+      "path": "packages/provider-adapter-kit/src/dashboard-v2-planner.ts",
+      "sha256": "d7fce414da394b0ba2de6d7101462899deb80d6c22c6575d2b534b033f0e0b15"
+    },
+    {
+      "path": "packages/vehicle-zmq-control/src/planner-v2-contract.ts",
+      "sha256": "beb8b7596d357b9c9ff7cca739a78b65dada83336a860709e4f887bb6f5a0a3d"
+    },
+    {
+      "path": "contracts/ugv-zmq/site-interop-v1/chassis-captured.json",
+      "sha256": "401799dbd3debf9cfad2c2cf0b1b89fe17882722aa4765597049e03b0832a8ae"
+    },
+    {
+      "path": "contracts/ugv-zmq/site-interop-v1/enu-reference-observed.json",
+      "sha256": "93a0995389796897ca9a992ad196a686360db0d93f76e7c4a36ec458a5779a57"
+    },
+    {
+      "path": "contracts/ugv-zmq/site-interop-v1/scene-reference-source.json",
+      "sha256": "663aa211e96329601677fd50a7dab12a9f5a3e827e5fa295895706aa1cb3232e"
+    },
+    {
+      "path": "contracts/ugv-zmq/provider-v1.5.1-site-control/catalog.json",
+      "sha256": "05f822139827e3b075a115d2a3c72ed3bccbab5b9c746ffc03901fecdf05c9c3"
+    },
+    {
+      "path": "contracts/ugv-zmq/provider-v1.5.1-readonly/catalog.json",
+      "sha256": "c055093abbf01ce4876ad79947b95b19240526134395d042eae381c14262d196"
+    }
+  ]
+}

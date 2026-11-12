@@ -116,7 +116,10 @@ export function SiteReadonlyConsole({
             "UGV_PLANNER_PREVIEW_UNCONFIRMED",
         );
       const value = record(result.structuredContent);
-      if (value.adoption !== "preview_only" || value.schemaVersion !== "ugv.zmq-route-preview/1")
+      if (
+        value.adoption !== "preview_only" ||
+        !["ugv.zmq-route-preview/1", "ugv.zmq-route-preview/2"].includes(text(value.schemaVersion))
+      )
         throw Error("UGV_PLANNER_PREVIEW_UNCONFIRMED");
       setPreview(value);
       setPreviewCommandId(row.commandId);
@@ -347,7 +350,10 @@ export function SiteReadonlyConsole({
                 <div className="notice">
                   <strong>路线预览已生成 · 尚未采用</strong>
                   <p>
-                    {previewPoints.length} 个规划点；仅按几何匹配，规划器未提供请求 ID。
+                    {previewPoints.length} 个规划点；
+                    {preview.schemaVersion === "ugv.zmq-route-preview/2"
+                      ? "已校验请求标识、任务上下文与 ENU 几何。"
+                      : "仅按几何匹配，规划器未提供请求 ID。"}
                     {when(preview.createdAt)}
                   </p>
                   <small>来源 {text(preview.sourceRecordId)}</small>

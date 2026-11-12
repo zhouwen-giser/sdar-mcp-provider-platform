@@ -1,3 +1,4 @@
+import { checkInteropContracts } from "../../../scripts/ugv-zmq/interop-contract.js";
 import { checkContractsV2 } from "../../../scripts/ugv-zmq/check-contracts-v2.js";
 import { openFrames } from "./frames.js";
 import { readFileSync, statSync } from "node:fs";
@@ -8,7 +9,7 @@ import { SiteRoutePlanner } from "./site-planner.js";
 import { siteReadonlyBusiness } from "./business.js";
 import { Pool } from "pg";
 import { z } from "zod";
-import { ControlDeploymentProfile } from "../../../packages/vehicle-zmq-contract/src/site-profile.js";
+import { ControlDeploymentProfile } from "../../../packages/vehicle-zmq-contract/src/interop-profile.js";
 import {
   observerIdentity,
   ObserverSettings,
@@ -42,7 +43,7 @@ export interface ZmqProviderOptions {
   management?: { port: number; jwtSecretFile: string };
   handoffGrant?: unknown;
   frameSettings?: unknown;
-  plannerFrame?: "airport_south_positive_v1";
+  plannerFrame?: "airport_south_positive_v1" | "scene_enu_wgs84_v1";
   databaseUrl: string;
   /** Independent SMPP-owned archive; schema installation is an owner command, never startup DDL. */
   observationDatabaseUrl: string;
@@ -61,7 +62,11 @@ export async function openZmqProvider(options: ZmqProviderOptions) {
   if (
     profile.components.chassis.protocolVersion === "2.1" &&
     options.mode === "site_control" &&
-    limits.contractSha256 !== checkContractsV2().contractSha256
+    limits.contractSha256 !==
+      (profile.schemaVersion === "ugv.zmq-site-deployment/3"
+        ? checkInteropContracts()
+        : checkContractsV2()
+      ).contractSha256
   )
     throw Error("ZMQ_DEPLOYMENT_NATIVE_CONTRACT_HASH_MISMATCH");
   if (options.gowm)
@@ -73,6 +78,12 @@ export async function openZmqProvider(options: ZmqProviderOptions) {
     };
   if ((options.mode === "site_control") !== (limits.mode === "site_control"))
     throw Error("ZMQ_CONTROL_MODE_MISMATCH");
+  if (
+    options.plannerFrame &&
+    (options.plannerFrame === "scene_enu_wgs84_v1") !==
+      (profile.schemaVersion === "ugv.zmq-site-deployment/3")
+  )
+    throw Error("UGV_PLANNER_DEPLOYMENT_VERSION_MISMATCH");
   controlScope(profile, limits);
   if (options.observationDatabaseUrl === options.gowm?.databaseUrl)
     throw Error("ZMQ_OBSERVATION_OWNER_DATABASE_REQUIRED");
@@ -165,7 +176,13 @@ export async function openZmqProvider(options: ZmqProviderOptions) {
               profile.providerBinding.resourceId ?? "",
             ),
             profile.planner.policy === "retain" && profile.planner.endpoint && options.plannerFrame
-              ? new SiteRoutePlanner(profile.planner.endpoint, pool)
+              ? new SiteRoutePlanner(
+                  profile.planner.endpoint,
+                  pool,
+                  profile.schemaVersion === "ugv.zmq-site-deployment/3"
+                    ? profile.planner
+                    : undefined,
+                )
               : undefined,
             frames?.service,
           )
