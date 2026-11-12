@@ -20,7 +20,7 @@
 - [x] Unit, PostgreSQL/native MCP integration, frozen protocol, type/lint/build and browser gates, including final retention repair, at fixed application revision `ca33761`.
 - [ ] Candidate 19110/19111; real read-only acceptance; >=24 h stability with no OOM.
 - [ ] Verified new-protocol read-only rollback image, idle/lease handoff and formal 19100/19101 cutover.
-- [ ] Source commit/push, fixed images, deployment package, operator documentation and evidence SHA256.
+- [x] Source commit/push, fixed images, candidate deployment package, operator documentation and evidence SHA256. Formal acceptance remains open above.
 
 ## Acceptance and evidence
 
@@ -55,3 +55,5 @@ Field planner acceptance did not pass: a serialized read-only diagnostic obtaine
 Around 14:33 all three native subscriptions disconnected; probes at 14:35 found 10001, 11001, 5555–5559 and 7879 refusing connections. Local candidate and archive remain healthy. No physical control was dispatched. Source restoration and a conforming chassis 2.1 stream remain external acceptance blockers.
 
 The first soak is retained as superseded before 24 h. The replacement run started at 2026-11-12 14:37:37 Asia/Shanghai (`stability-24h-2`); earliest 24 h is 2026-11-13 14:37:37, subject to actual uninterrupted evidence. Native admission remains separate and false during source loss. Hourly follow-up is configured, quiet when unchanged. Delivery report: `reports/ugv-zmq-v15/evidence/REPORT.md`.
+
+2026-11-12 candidate package completed: `artifacts/ugv-zmq-v15-ca33761-candidate-20261112.tar.gz`, 196782330 bytes, SHA256 `1d47f6f92e30b0ee856d6017372cbecbf346a2501cc60da35335560d10944e40`. Bundle source is `c12601ba7a90b41d1ad659ddbcd92f4768da3e6b`; fixed application/image source remains `ca33761`. All 4,051 members and image save/load identities verified. Receipt is `reports/ugv-zmq-v15/package-receipt.json`. This delivery is explicitly not control-qualified or formally switched.
