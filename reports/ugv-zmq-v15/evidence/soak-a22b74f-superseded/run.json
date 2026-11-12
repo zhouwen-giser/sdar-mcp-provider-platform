@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "ugv.zmq-v15-soak/1",
+  "startedAt": "2026-11-12T03:00:46.747092+00:00",
+  "sourceCommit": "a22b74f6bede44fb1b671433c0c1c8d135be2bc6",
+  "durationSeconds": 86400,
+  "intervalSeconds": 60,
+  "containers": [
+    {
+      "name": "smpp-zmq-v15-candidate-provider-1",
+      "id": "92c6ca276105f5ee5f4850e3aeb0ac896dba352c30043c55f62f8c938ccfb1cb",
+      "image": "sha256:93de540298719ed6c8bab25ae05d4b425e3c5b1738801f2dee12b8ee863fe140",
+      "running": true,
+      "oomKilled": false,
+      "restartCount": 0,
+      "startedAt": "2026-11-12T02:42:29.179149561Z",
+      "health": null
+    },
+    {
+      "name": "smpp-zmq-v15-candidate-runtime-1",
+      "id": "97a0db585b715b0aff05516e6e79a2608034e1fabd4d73230876bec4753e3416",
+      "image": "sha256:a13d37627133137788b439291113681bd1eecb61a40d401f25b228da2a5ee1c0",
+      "running": true,
+      "oomKilled": false,
+      "restartCount": 0,
+      "startedAt": "2026-11-12T02:42:29.205120737Z",
+      "health": "healthy"
+    },
+    {
+      "name": "smpp-zmq-v15-candidate-console-1",
+      "id": "c377ea47afcf41bab03a7ca20729c8470f38c863d493ad9cc2e1be5cf73a4c29",
+      "image": "sha256:601f8ac20a9ac39545f6bbec6511d936de20aa9b56a240345244f7cf88216670",
+      "running": true,
+      "oomKilled": false,
+      "restartCount": 0,
+      "startedAt": "2026-11-12T02:42:29.172247603Z",
+      "health": "healthy"
+    }
+  ],
+  "physicalControlActions": 0,
+  "diagnosticOnly": false,
+  "nativeAcceptanceSeparate": true,
+  "monitorSha256": "bd7340ebe7afb459daef02ef749ba20cc0fb875ab0cc6ba03ab60251c1c3f4a9",
+  "configSha256": "8eb71b5feb30ba310f628903039f4323c2171941d3dd82d2ae29520773bce7c4"
+}

@@ -1,0 +1,21 @@
+{
+  "sourceCommit": "3849b77374b51230d0dd73ba7afd5e25871f6eda",
+  "command": [
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "tests/ugv-zmq-control-postgres/",
+    "tests/ugv-zmq-observer-postgres/",
+    "tests/ugv-zmq-provider/"
+  ],
+  "environmentFiles": [
+    "/home/sz/.smpp-debug/zmq-v15-20261112/test.json"
+  ],
+  "catalogProfile": null,
+  "startedAt": "2026-11-12T02:14:16.882953+00:00",
+  "elapsedSeconds": 153.97,
+  "exitCode": 1,
+  "log": "reports/ugv-zmq-v15/evidence/postgres.log",
+  "sha256": "c5a6371b9e5171e0b495b140f92aadf6bc4d96e3ac5360ebd5a6db5f9523d035"
+}

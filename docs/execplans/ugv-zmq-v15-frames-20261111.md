@@ -17,7 +17,7 @@
 - [x] Archive recovery and actionable health; reproduce/fix Runtime AJV retention and archive lease listener retention.
 - [x] Bounded FramePull client/cache and MCP 1.5 catalogs (control/read-only).
 - [x] Console original-image preview, exact-frame overlay, download and audit.
-- [x] Unit, PostgreSQL/native MCP integration, frozen protocol, type/lint/build and browser gates for application revision `a22b74f`; final console retention fix is being revalidated separately.
+- [x] Unit, PostgreSQL/native MCP integration, frozen protocol, type/lint/build and browser gates, including final retention repair, at fixed application revision `ca33761`.
 - [ ] Candidate 19110/19111; real read-only acceptance; >=24 h stability with no OOM.
 - [ ] Verified new-protocol read-only rollback image, idle/lease handoff and formal 19100/19101 cutover.
 - [ ] Source commit/push, fixed images, deployment package, operator documentation and evidence SHA256.
@@ -47,3 +47,11 @@ Field chassis discrepancy: 11001 currently publishes a 4-byte string prefix but 
 Live console acceptance found two upstream-expired tasks. Add a display/export-only retained snapshot path for `TASK_EXPIRED`, with original timestamps, explicit local provenance and unavailable business evidence. Authorization errors and unknown tasks must not fall back. Lifecycle commands retain the strict live query and cannot use retained snapshots. A PostgreSQL API regression covering these boundaries passed before the final gate run.
 
 The first 24-hour observation started at 2026-11-12 11:00:46 Asia/Shanghai with revision `a22b74f`. At 14:16 it had 197 hash-linked samples, no restart/OOM and healthy archival; chassis acceptance was still false. This is ongoing evidence, not a passed 24-hour gate. Replacing any candidate image for the retention fix requires a new continuous run; preserve the superseded run and its exact boundary.
+
+2026-11-12 delivery update: `ca33761c1d5c9c0a6cce3acc9105faa1735832da` is pushed. All prescribed SMPP gates passed (160 unit, 107 PostgreSQL integration with one external SDAR fixture not enabled, 10 v15 control regressions, 77 console tests and one browser test). Three fixed images built and round-tripped without identity changes. New candidate at 19110/19111 passed exact catalog, anonymous/invalid-JWT checks and retained historical report/browser download tests. Production remains unchanged.
+
+Field planner acceptance did not pass: a serialized read-only diagnostic obtained an explicit Socket.IO ACK `Dashboard controlled entity changed or is missing`. Upstream now checks V2 device/epoch/mission context. This disproves the assumption that the field 7879 endpoint still accepts the old request unchanged; do not invent those identities or silently claim a geometry match.
+
+Around 14:33 all three native subscriptions disconnected; probes at 14:35 found 10001, 11001, 5555–5559 and 7879 refusing connections. Local candidate and archive remain healthy. No physical control was dispatched. Source restoration and a conforming chassis 2.1 stream remain external acceptance blockers.
+
+The first soak is retained as superseded before 24 h. The replacement run started at 2026-11-12 14:37:37 Asia/Shanghai (`stability-24h-2`); earliest 24 h is 2026-11-13 14:37:37, subject to actual uninterrupted evidence. Native admission remains separate and false during source loss. Hourly follow-up is configured, quiet when unchanged. Delivery report: `reports/ugv-zmq-v15/evidence/REPORT.md`.

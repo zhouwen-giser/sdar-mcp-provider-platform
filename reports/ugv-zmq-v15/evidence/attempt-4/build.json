@@ -1,0 +1,14 @@
+{
+  "sourceCommit": "ca33761c1d5c9c0a6cce3acc9105faa1735832da",
+  "command": [
+    "pnpm",
+    "build"
+  ],
+  "environmentFiles": [],
+  "catalogProfile": null,
+  "startedAt": "2026-11-12T06:24:54.879834+00:00",
+  "elapsedSeconds": 22.512,
+  "exitCode": 0,
+  "log": "reports/ugv-zmq-v15/evidence/attempt-4/build.log",
+  "sha256": "536cc4f74bc927dcd4e9e023fc52b0871374c6ac34ebbfec8258499cfd7b634f"
+}

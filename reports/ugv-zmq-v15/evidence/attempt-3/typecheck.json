@@ -1,0 +1,14 @@
+{
+  "sourceCommit": "d8e6bb6a7f2860454fc97c8205073794e32e4dd6",
+  "command": [
+    "pnpm",
+    "typecheck"
+  ],
+  "environmentFiles": [],
+  "catalogProfile": null,
+  "startedAt": "2026-11-12T06:19:12.522585+00:00",
+  "elapsedSeconds": 25.525,
+  "exitCode": 0,
+  "log": "reports/ugv-zmq-v15/evidence/attempt-3/typecheck.log",
+  "sha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39"
+}

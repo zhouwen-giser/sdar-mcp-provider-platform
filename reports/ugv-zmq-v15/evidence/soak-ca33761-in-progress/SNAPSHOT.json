@@ -1,0 +1,10 @@
+{
+  "snapshotAt": "2026-11-12T06:44:13.164159+00:00",
+  "monitorOutput": "/home/sz/.smpp-debug/zmq-v15-20261112/stability-24h-2",
+  "status": "running_not_yet_24h",
+  "samples": 7,
+  "hashChainValid": true,
+  "passed24h": false,
+  "fieldAcceptanceComplete": false,
+  "sourceMustRecoverBeforeFieldAcceptance": true
+}

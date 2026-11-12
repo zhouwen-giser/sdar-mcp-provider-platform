@@ -1,0 +1,14 @@
+{
+  "sourceCommit": "d8e6bb6a7f2860454fc97c8205073794e32e4dd6",
+  "command": [
+    "pnpm",
+    "lint"
+  ],
+  "environmentFiles": [],
+  "catalogProfile": null,
+  "startedAt": "2026-11-12T06:19:38.048518+00:00",
+  "elapsedSeconds": 105.811,
+  "exitCode": 1,
+  "log": "reports/ugv-zmq-v15/evidence/attempt-3/lint.log",
+  "sha256": "8219553d404a5589730ea5d0e289b1222f8f97ec8b3141b7a0b588107f77180b"
+}

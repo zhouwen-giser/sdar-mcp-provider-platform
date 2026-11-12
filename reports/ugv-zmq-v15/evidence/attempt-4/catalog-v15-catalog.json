@@ -1,0 +1,17 @@
+{
+  "sourceCommit": "ca33761c1d5c9c0a6cce3acc9105faa1735832da",
+  "command": [
+    "node",
+    "--import",
+    "tsx",
+    "scripts/ugv-zmq/v15-catalog.ts",
+    "--check"
+  ],
+  "environmentFiles": [],
+  "catalogProfile": null,
+  "startedAt": "2026-11-12T06:25:25.142280+00:00",
+  "elapsedSeconds": 1.741,
+  "exitCode": 0,
+  "log": "reports/ugv-zmq-v15/evidence/attempt-4/catalog-v15-catalog.log",
+  "sha256": "39a6aa5750530a66da4ed178cf0d0375003c0c4ae6d1b4f8fccfa41329b6fcd3"
+}

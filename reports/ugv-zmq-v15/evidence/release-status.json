@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "ugv.zmq-v15-release-status/1",
+  "recordedAt": "2026-11-12T06:49:23.089755+00:00",
+  "applicationSourceCommit": "ca33761c1d5c9c0a6cce3acc9105faa1735832da",
+  "branch": "codex/zmq-v15-frames-20261111",
+  "softwareGates": "passed",
+  "candidate": "deployed_readonly",
+  "formalCutover": false,
+  "physicalControlActions": 0,
+  "fieldAcceptance": "incomplete",
+  "stable24Hours": "pending",
+  "currentMonitor": "/home/sz/.smpp-debug/zmq-v15-20261112/stability-24h-2",
+  "blockers": [
+    "UPSTREAM_ENDPOINTS_CONNECTION_REFUSED",
+    "CHASSIS_2_1_LENGTH_CRC_NONCONFORMING",
+    "PLANNER_V2_CONTEXT_CONTRACT_NOT_QUALIFIED",
+    "CANDIDATE_24H_GATE_PENDING"
+  ],
+  "verificationScripts": [
+    {
+      "path": "commands/run-gates-4.py",
+      "sha256": "b1ea6c6e769512135a7f21cd6c21ac3ad693377289669b044b9200fbbfabc84d",
+      "sourcePathOnHost": "/home/sz/.smpp-debug/zmq-v15-20261112/run-gates-4.py"
+    },
+    {
+      "path": "commands/build-images-4.py",
+      "sha256": "72ab06c794e56d397326bea9e62c7121c839df38e82b72574155c6b80239a36a",
+      "sourcePathOnHost": "/home/sz/.smpp-debug/zmq-v15-20261112/build-images-4.py"
+    },
+    {
+      "path": "commands/verify-readonly-4.mts",
+      "sha256": "e01cf387d4a9ecdaaea6f4bf4874680efbd788cbce05f0793688d02886f84a1f",
+      "sourcePathOnHost": "/home/sz/.smpp-debug/zmq-v15-20261112/verify-readonly-4.mts"
+    },
+    {
+      "path": "commands/verify-retained-console.mjs",
+      "sha256": "96164e140d4526c6c578a01b344a9dc6f261acb66d7dea1877d64e5535ba8e57",
+      "sourcePathOnHost": "/home/sz/.smpp-debug/zmq-v15-20261112/verify-retained-console.mjs"
+    },
+    {
+      "path": "commands/verify-candidate.mts",
+      "sha256": "3b7dfc55a008a250411f66ddc91e96eb0208d5e86646298a1fb374bb251df9fa",
+      "sourcePathOnHost": "/home/sz/.smpp-debug/zmq-v15-20261112/verify-candidate.mts"
+    },
+    {
+      "path": "commands/verify-console.mjs",
+      "sha256": "2501d747f283b516ff0c2cc11f90c73670ca47014d878e3ef23c3417ea6f7043",
+      "sourcePathOnHost": "/home/sz/.smpp-debug/zmq-v15-20261112/verify-console.mjs"
+    },
+    {
+      "path": "commands/verify-planner.mjs",
+      "sha256": "6325057fdd476ecbe0c8f2dcd7fe18f32f40daf113ed69417e0e925b4b594e42",
+      "sourcePathOnHost": "/home/sz/.smpp-debug/zmq-v15-20261112/verify-planner.mjs"
+    },
+    {
+      "path": "commands/probe-planner-ack.mts",
+      "sha256": "c8aa214aca73b5aac8b9714e34ded6b271d7595e8af658608689ee2f54bdbb4c",
+      "sourcePathOnHost": "/home/sz/.smpp-debug/zmq-v15-20261112/probe-planner-ack.mts"
+    }
+  ]
+}

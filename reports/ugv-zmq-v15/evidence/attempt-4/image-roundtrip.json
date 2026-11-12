@@ -1,0 +1,37 @@
+{
+  "startedAt": "2026-11-12T06:32:02.143092+00:00",
+  "elapsedSeconds": 11.634,
+  "sourceCommit": "ca33761c1d5c9c0a6cce3acc9105faa1735832da",
+  "before": [
+    {
+      "tag": "smpp-zmq-v15-provider:ca33761c1d5c",
+      "id": "sha256:fd1eaead2ef4fd21dff77b358e1229d62167c2ff403c8e9310a318a5e7316a7c"
+    },
+    {
+      "tag": "smpp-zmq-v15-runtime:ca33761c1d5c",
+      "id": "sha256:a456ce0aaf7354edcc8a02c5329905d211a46b1ad745df814ed96a88e0158788"
+    },
+    {
+      "tag": "smpp-zmq-v15-console:ca33761c1d5c",
+      "id": "sha256:85bb4a88685af269fac74d716f76064c07cea6126ee943044be99148b90a1860"
+    }
+  ],
+  "after": [
+    {
+      "tag": "smpp-zmq-v15-provider:ca33761c1d5c",
+      "id": "sha256:fd1eaead2ef4fd21dff77b358e1229d62167c2ff403c8e9310a318a5e7316a7c"
+    },
+    {
+      "tag": "smpp-zmq-v15-runtime:ca33761c1d5c",
+      "id": "sha256:a456ce0aaf7354edcc8a02c5329905d211a46b1ad745df814ed96a88e0158788"
+    },
+    {
+      "tag": "smpp-zmq-v15-console:ca33761c1d5c",
+      "id": "sha256:85bb4a88685af269fac74d716f76064c07cea6126ee943044be99148b90a1860"
+    }
+  ],
+  "identityPreserved": true,
+  "bytes": 162254336,
+  "sha256": "27fc43e8e13e7d4925ccf9845a138eeafdd8cac68bb9a2b8e53ccc1d46faecdf",
+  "exitCode": 0
+}

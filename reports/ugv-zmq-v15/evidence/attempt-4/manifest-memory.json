@@ -1,0 +1,17 @@
+{
+  "sourceCommit": "ca33761c1d5c9c0a6cce3acc9105faa1735832da",
+  "command": [
+    "node",
+    "--expose-gc",
+    "--import",
+    "tsx",
+    "scripts/ugv-zmq/check-manifest-memory.ts"
+  ],
+  "environmentFiles": [],
+  "catalogProfile": null,
+  "startedAt": "2026-11-12T06:25:26.883624+00:00",
+  "elapsedSeconds": 16.679,
+  "exitCode": 0,
+  "log": "reports/ugv-zmq-v15/evidence/attempt-4/manifest-memory.log",
+  "sha256": "d6f714114cf71aad7a40edf032227807bc033be823596077e22827c58758b379"
+}

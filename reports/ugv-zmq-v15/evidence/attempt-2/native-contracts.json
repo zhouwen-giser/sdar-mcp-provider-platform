@@ -1,0 +1,14 @@
+{
+  "sourceCommit": "a22b74f6bede44fb1b671433c0c1c8d135be2bc6",
+  "command": [
+    "pnpm",
+    "zmq:contract:check"
+  ],
+  "environmentFiles": [],
+  "catalogProfile": null,
+  "startedAt": "2026-11-12T02:28:59.443828+00:00",
+  "elapsedSeconds": 1.375,
+  "exitCode": 0,
+  "log": "reports/ugv-zmq-v15/evidence/attempt-2/native-contracts.log",
+  "sha256": "d8cb9cd65ba2d74204b298e18c7bd0f5edb95ac28250a04c4b38f1ac6526a42d"
+}

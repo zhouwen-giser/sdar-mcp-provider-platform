@@ -1,0 +1,32 @@
+{
+  "sourceCommit": "a22b74f6bede44fb1b671433c0c1c8d135be2bc6",
+  "verifiedAt": "2026-11-12T06:20:18.536Z",
+  "commandId": "a370168c-d96e-42f5-9764-ebe9eb87de9b",
+  "input": {
+    "resourceId": "vehicle:ugv",
+    "start": {
+      "longitude": 106.813064505,
+      "latitude": 29.720529508
+    },
+    "waypoints": [
+      {
+        "longitude": 106.81307318,
+        "latitude": 29.71952521
+      }
+    ],
+    "density": "adaptive"
+  },
+  "startSource": "user_confirmed_entry_point_manual_preview_not_current_localization",
+  "elapsedMs": 3356,
+  "httpStatus": 409,
+  "status": "not_accepted",
+  "reasonCode": "UGV_PLANNER_TIMEOUT",
+  "physicalControlActions": 0,
+  "navigationTaskCreated": false,
+  "result": {
+    "outcome": "admission_rejected",
+    "retryable": true,
+    "reasonCode": "UGV_PLANNER_TIMEOUT",
+    "completedAt": "2026-11-12T06:20:21.884Z"
+  }
+}

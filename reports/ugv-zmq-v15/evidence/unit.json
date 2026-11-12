@@ -1,0 +1,21 @@
+{
+  "sourceCommit": "3849b77374b51230d0dd73ba7afd5e25871f6eda",
+  "command": [
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "tests/ugv-zmq/",
+    "tests/ugv-zmq-observer/",
+    "tests/ugv-zmq-control/",
+    "tests/ugv-zmq-frames/",
+    "tests/integration/manifest-drift.test.ts"
+  ],
+  "environmentFiles": [],
+  "catalogProfile": null,
+  "startedAt": "2026-11-12T02:14:03.975338+00:00",
+  "elapsedSeconds": 12.859,
+  "exitCode": 0,
+  "log": "reports/ugv-zmq-v15/evidence/unit.log",
+  "sha256": "3bb25323cbe21d72acb7ded89678cd0400d885398ab3b9175ce85f3abfa522a2"
+}

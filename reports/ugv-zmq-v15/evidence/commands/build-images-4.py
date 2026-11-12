@@ -1,0 +1,19 @@
+from pathlib import Path
+import subprocess,json,hashlib,datetime,time
+root=Path('/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform');evidence=root/'reports/ugv-zmq-v15/evidence/attempt-4'
+head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip();short=head[:12]
+base='node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c'
+targets={}
+for role,stage,dockerfile in [('provider','ugv-zmq-site-control','Dockerfile'),('runtime','ugv-real-runtime','Dockerfile'),('console','runtime','deploy/ugv-control-console/Dockerfile')]:
+ targets[role]={'context':str(root),'dockerfile':dockerfile,'target':stage,'args':{'VCS_REF':head,'NODE_BASE_IMAGE':base},'tags':[f'smpp-zmq-v15-{role}:{short}'],'output':['type=docker']}
+config={'group':{'default':{'targets':list(targets)}},'target':targets};path=Path('/home/sz/.smpp-debug/zmq-v15-20261112/bake.json');path.write_text(json.dumps(config))
+cmd=['docker','buildx','bake','--file',str(path),'--progress=plain'];log=evidence/'images-build.log';start=datetime.datetime.now(datetime.timezone.utc).isoformat();tick=time.monotonic()
+with log.open('wb') as out:r=subprocess.run(cmd,cwd=root,stdout=out,stderr=subprocess.STDOUT)
+record={'sourceCommit':head,'baseImage':base,'command':cmd,'startedAt':start,'elapsedSeconds':round(time.monotonic()-tick,3),'exitCode':r.returncode,'log':str(log.relative_to(root)),'sha256':hashlib.sha256(log.read_bytes()).hexdigest()}
+if not r.returncode:
+ record['images']=[]
+ for role,target in targets.items():
+  value=json.loads(subprocess.check_output(['docker','image','inspect',target['tags'][0]]))[0]
+  record['images'].append({'role':role,'tag':target['tags'][0],'id':value['Id'],'sourceRevision':value['Config'].get('Labels',{}).get('org.opencontainers.image.revision')})
+(evidence/'images-build.json').write_text(json.dumps(record,indent=2)+'\n');print(json.dumps(record),flush=True)
+raise SystemExit(r.returncode)

@@ -1,0 +1,30 @@
+{
+  "sourceCommit": "a22b74f6bede44fb1b671433c0c1c8d135be2bc6",
+  "verifiedAt": "2026-11-12T03:00:07.100Z",
+  "url": "http://127.0.0.1:19111/",
+  "httpLogin": true,
+  "archiveHealthy": true,
+  "originalImage": {
+    "width": 640,
+    "height": 480,
+    "complete": true
+  },
+  "download": {
+    "bytes": 53403,
+    "sha256": "b3e20b6eb6d695b30300cad6af1ccb2db076e2e934067aaefe396ebbcc031d39",
+    "filename": "2c8eb9aa520049b19901050-1794451049538044343-1352522446795.jpg"
+  },
+  "visibleHistoryTasks": 2,
+  "historicalReport": {
+    "status": "not_accepted",
+    "taskId": "f74681e6-4ffe-479f-b24f-e973402c4d61",
+    "http": 409,
+    "reason": "TASK_EXPIRED"
+  },
+  "mobileNoHorizontalOverflow": true,
+  "pageErrors": 0,
+  "physicalControlActions": 0,
+  "exitCode": 0,
+  "acceptanceScope": "http_login_frame_download_layout",
+  "historicalReportAcceptance": "not_accepted_upstream_task_expired_before_retention_fix"
+}

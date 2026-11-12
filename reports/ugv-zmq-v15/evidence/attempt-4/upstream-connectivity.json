@@ -1,0 +1,62 @@
+{
+  "verifiedAt": "2026-11-12T06:35:08.062619+00:00",
+  "target": "192.168.2.63",
+  "probes": [
+    {
+      "port": 10001,
+      "status": "unreachable",
+      "errno": 111,
+      "error": "ConnectionRefusedError",
+      "elapsedMs": 5
+    },
+    {
+      "port": 11001,
+      "status": "unreachable",
+      "errno": 111,
+      "error": "ConnectionRefusedError",
+      "elapsedMs": 5
+    },
+    {
+      "port": 5555,
+      "status": "unreachable",
+      "errno": 111,
+      "error": "ConnectionRefusedError",
+      "elapsedMs": 6
+    },
+    {
+      "port": 5556,
+      "status": "unreachable",
+      "errno": 111,
+      "error": "ConnectionRefusedError",
+      "elapsedMs": 6
+    },
+    {
+      "port": 5557,
+      "status": "unreachable",
+      "errno": 111,
+      "error": "ConnectionRefusedError",
+      "elapsedMs": 3
+    },
+    {
+      "port": 5558,
+      "status": "unreachable",
+      "errno": 111,
+      "error": "ConnectionRefusedError",
+      "elapsedMs": 2
+    },
+    {
+      "port": 5559,
+      "status": "unreachable",
+      "errno": 111,
+      "error": "ConnectionRefusedError",
+      "elapsedMs": 4
+    },
+    {
+      "port": 7879,
+      "status": "unreachable",
+      "errno": 111,
+      "error": "ConnectionRefusedError",
+      "elapsedMs": 5
+    }
+  ]
+}

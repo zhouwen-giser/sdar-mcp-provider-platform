@@ -1,0 +1,13 @@
+{
+  "command": [
+    "git",
+    "ls-remote",
+    "--heads",
+    "origin",
+    "codex/zmq-v15-frames-20261111"
+  ],
+  "verifiedAt": "2026-11-12T06:49:23.940521+00:00",
+  "remoteCommit": "ca33761c1d5c9c0a6cce3acc9105faa1735832da",
+  "ref": "refs/heads/codex/zmq-v15-frames-20261111",
+  "exitCode": 0
+}

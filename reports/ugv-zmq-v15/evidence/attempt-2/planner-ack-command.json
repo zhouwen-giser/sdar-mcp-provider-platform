@@ -1,0 +1,13 @@
+{
+  "command": [
+    "node",
+    "--import",
+    "tsx",
+    "/home/sz/.smpp-debug/zmq-v15-20261112/probe-planner-ack.mts"
+  ],
+  "exitCode": 143,
+  "terminationReason": "diagnostic client explicitly ended after capturing ACK; WebSocket close remained pending",
+  "capturedEvidence": "planner-socketio-ack.json",
+  "scriptSha256": "c8aa214aca73b5aac8b9714e34ded6b271d7595e8af658608689ee2f54bdbb4c",
+  "physicalControlActions": 0
+}

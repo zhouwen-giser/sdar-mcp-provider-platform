@@ -1,0 +1,75 @@
+{
+  "verifiedAt": "2026-11-12T06:25:35.904783+00:00",
+  "requests": [
+    {
+      "path": "/api/simulation/zmq/chassis",
+      "http": 200,
+      "sha256": "c22526dd458dda58179dce1807507ef18ed0598cbe6d9c9799a1fa680b0d11ef",
+      "topLevelKeys": [
+        "accepted_feedback_sent",
+        "action_request_id",
+        "available",
+        "avoid_obstacles",
+        "cancel_pending",
+        "controller_instance_id",
+        "entity_id",
+        "entity_type",
+        "error",
+        "executing",
+        "fault_mask",
+        "faults_fresh",
+        "feedback_pending",
+        "has_task",
+        "header",
+        "mission_state",
+        "mission_type",
+        "mode",
+        "observation_fresh",
+        "planning",
+        "progress",
+        "run_state",
+        "sequence",
+        "settings_fresh",
+        "simulation_epoch",
+        "speed_limit_mps",
+        "starting",
+        "system_id",
+        "task_current",
+        "task_id",
+        "task_identity",
+        "task_message_id",
+        "task_owner",
+        "task_simulation_epoch"
+      ],
+      "selectedStatus": {
+        "mode": 1,
+        "available": true,
+        "error": "",
+        "simulation_epoch": "1794464066849685477"
+      }
+    },
+    {
+      "path": "/api/simulation/status",
+      "http": 200,
+      "sha256": "42ae6e7531255548b1fa6e4d6dc6f46dd4d90e2b64154a994bfd77fb303d3e89",
+      "topLevelKeys": [
+        "backend_type",
+        "capabilities",
+        "connected",
+        "control_mode",
+        "error",
+        "ready",
+        "scene_id",
+        "simulation_epoch",
+        "simulation_time"
+      ],
+      "selectedStatus": {
+        "error": "",
+        "backend_type": "carla",
+        "ready": true,
+        "connected": true,
+        "simulation_epoch": "1794464066849685477"
+      }
+    }
+  ]
+}

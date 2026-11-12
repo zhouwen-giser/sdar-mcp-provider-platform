@@ -1,0 +1,18 @@
+{
+  "sourceCommit": "ca33761c1d5c9c0a6cce3acc9105faa1735832da",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@sdar/ugv-control-console",
+    "test"
+  ],
+  "environmentFiles": [
+    "/home/sz/.smpp-debug/zmq-v15-20261112/test.json"
+  ],
+  "catalogProfile": null,
+  "startedAt": "2026-11-12T06:23:14.897521+00:00",
+  "elapsedSeconds": 70.415,
+  "exitCode": 0,
+  "log": "reports/ugv-zmq-v15/evidence/attempt-4/console-tests.log",
+  "sha256": "35bd1b26dcd40337f8467e1a79ea4c8fa1bf8f778d570ed912d464f53eac7ab4"
+}

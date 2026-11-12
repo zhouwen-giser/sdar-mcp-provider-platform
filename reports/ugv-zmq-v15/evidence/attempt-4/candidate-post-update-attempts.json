@@ -1,0 +1,27 @@
+{
+  "sourceCommit": "ca33761c1d5c9c0a6cce3acc9105faa1735832da",
+  "attempts": [
+    {
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "/home/sz/.smpp-debug/zmq-v15-20261112/verify-candidate-4.mts"
+      ],
+      "exitCode": 1,
+      "reason": "LIVE_FRAME_HEADER_NOT_FRESH",
+      "fieldStatus": "not_accepted"
+    },
+    {
+      "command": [
+        "node",
+        "/home/sz/.smpp-debug/zmq-v15-20261112/verify-console-4.mjs"
+      ],
+      "exitCode": 1,
+      "reason": "Original image did not become visible within 15000 ms while upstream ports refused connections",
+      "fieldStatus": "not_accepted"
+    }
+  ],
+  "subsequentHistoryOnlyAcceptance": "candidate-console-history.json",
+  "subsequentReadonlyBootAcceptance": "candidate-readonly.json"
+}

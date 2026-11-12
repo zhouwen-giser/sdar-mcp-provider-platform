@@ -1,0 +1,14 @@
+{
+  "sourceCommit": "ca33761c1d5c9c0a6cce3acc9105faa1735832da",
+  "command": [
+    "pnpm",
+    "protocol:check"
+  ],
+  "environmentFiles": [],
+  "catalogProfile": null,
+  "startedAt": "2026-11-12T06:25:17.392321+00:00",
+  "elapsedSeconds": 1.427,
+  "exitCode": 0,
+  "log": "reports/ugv-zmq-v15/evidence/attempt-4/frozen-mcp.log",
+  "sha256": "b211fded711fc0109091affb9a8bcc281769bdd5f30159cdbbd4e0f9196b9434"
+}

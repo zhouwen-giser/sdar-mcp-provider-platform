@@ -1,0 +1,22 @@
+{
+  "sourceCommit": "ca33761c1d5c9c0a6cce3acc9105faa1735832da",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@sdar/ugv-control-console",
+    "exec",
+    "playwright",
+    "test",
+    "--config",
+    "playwright.v15.config.ts"
+  ],
+  "environmentFiles": [
+    "/home/sz/.smpp-debug/zmq-v15-20261112/test.json"
+  ],
+  "catalogProfile": null,
+  "startedAt": "2026-11-12T06:24:25.313142+00:00",
+  "elapsedSeconds": 10.425,
+  "exitCode": 0,
+  "log": "reports/ugv-zmq-v15/evidence/attempt-4/browser.log",
+  "sha256": "a1b34cd8f8f7c130638f413c92e7cd347eee6b94e941458b7c00b99553b067f9"
+}

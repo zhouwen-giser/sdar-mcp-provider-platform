@@ -1,0 +1,39 @@
+{
+  "sourceCommit": "ca33761c1d5c9c0a6cce3acc9105faa1735832da",
+  "verifiedAt": "2026-11-12T06:36:36.246Z",
+  "acceptanceScope": "http_login_retained_history_export_and_readonly_controls",
+  "httpLogin": true,
+  "reports": [
+    {
+      "taskId": "f49b6c69-048c-48d4-b935-4aca6d343348",
+      "bytes": 1065,
+      "sha256": "95d81120e5ae29dbf355b7cffdf287d5a6b5fe10f23836581ea6403307d60f2c",
+      "schemaVersion": "smpp.ugv-console-report/1",
+      "retention": {
+        "source": "retained_local_snapshot",
+        "upstreamReasonCode": "TASK_EXPIRED",
+        "recordedAt": "2026-10-29T11:06:31.510Z",
+        "readOnly": true
+      }
+    },
+    {
+      "taskId": "f74681e6-4ffe-479f-b24f-e973402c4d61",
+      "bytes": 3650,
+      "sha256": "a2e58a2015c45605a3a562d3a7637c1b64139f9043a4d4ffb87d83389c8a91f0",
+      "schemaVersion": "smpp.ugv-console-report/1",
+      "retention": {
+        "source": "retained_local_snapshot",
+        "upstreamReasonCode": "TASK_EXPIRED",
+        "recordedAt": "2026-10-29T11:06:31.326Z",
+        "readOnly": true
+      }
+    }
+  ],
+  "retainedLifecycleDisabled": true,
+  "retainedBrowserDownload": true,
+  "mobileNoHorizontalOverflow": true,
+  "pageErrors": 0,
+  "frameAcceptance": "pending_upstream_ports_refused",
+  "physicalControlActions": 0,
+  "exitCode": 0
+}

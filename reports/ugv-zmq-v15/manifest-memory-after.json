@@ -3,40 +3,40 @@
   "samples": [
     {
       "round": 0,
-      "heapUsed": 35694384,
+      "heapUsed": 35743936,
       "cacheEntries": 0
     },
     {
       "round": 10,
-      "heapUsed": 39965392,
+      "heapUsed": 40007216,
       "cacheEntries": 36
     },
     {
       "round": 20,
-      "heapUsed": 41466176,
+      "heapUsed": 41728248,
       "cacheEntries": 36
     },
     {
       "round": 30,
-      "heapUsed": 41698272,
+      "heapUsed": 42138112,
       "cacheEntries": 36
     },
     {
       "round": 40,
-      "heapUsed": 41667632,
+      "heapUsed": 42130216,
       "cacheEntries": 36
     },
     {
       "round": 50,
-      "heapUsed": 42313792,
+      "heapUsed": 42574808,
       "cacheEntries": 36
     },
     {
       "round": 60,
-      "heapUsed": 42845952,
+      "heapUsed": 41512856,
       "cacheEntries": 36
     }
   ],
-  "retainedGrowthAfterWarmup": 1379776,
+  "retainedGrowthAfterWarmup": -215392,
   "status": "passed"
 }

@@ -1,0 +1,202 @@
+{
+  "sourceCommit": "ca33761c1d5c9c0a6cce3acc9105faa1735832da",
+  "verifiedAt": "2026-11-12T06:44:13.030Z",
+  "acceptanceScope": "readonly_boot_catalog_auth_history_in_offline_source_state",
+  "profile": "zmq_v1_5_0_readonly_15",
+  "tools": 15,
+  "anonymous": true,
+  "invalidJwtRejected": true,
+  "readOnly": true,
+  "sessionId": "57b50e55-6d20-46f9-82af-00f6bd70807b",
+  "partitionHash": "9801a6f506c3785d14afbb5e6a24393161e19030a4d1b9d99883fad61fa37923",
+  "archive": {
+    "status": "running",
+    "pendingRecords": 0,
+    "pendingBytes": 0,
+    "committedEvents": 974,
+    "receivedMessages": 962,
+    "committedReceptions": 962,
+    "unconfirmedReceptions": 0,
+    "locallyDiscardedMessages": 0,
+    "failureCode": null,
+    "failureRecorded": null
+  },
+  "channels": {
+    "chassis": {
+      "state": "disconnected",
+      "lastReceptionAt": "2026-11-12T06:33:51.398Z",
+      "lastValidCommittedAt": null,
+      "receiptFresh": false,
+      "sourceFreshness": "unverified",
+      "diagnostics": [
+        "TRANSPORT_DISCONNECTED_SOURCE_LOSS_UNKNOWN"
+      ]
+    },
+    "eo": {
+      "state": "disconnected",
+      "lastReceptionAt": "2026-11-12T06:33:52.200Z",
+      "lastValidCommittedAt": "2026-11-12T06:33:51.520Z",
+      "receiptFresh": false,
+      "sourceFreshness": "unverified",
+      "diagnostics": [
+        "TRANSPORT_DISCONNECTED_SOURCE_LOSS_UNKNOWN"
+      ]
+    },
+    "simulationEffect": {
+      "state": "disconnected",
+      "lastReceptionAt": "2026-11-12T06:33:51.206Z",
+      "lastValidCommittedAt": "2026-11-12T06:33:51.206Z",
+      "receiptFresh": false,
+      "sourceFreshness": "unverified",
+      "diagnostics": [
+        "TRANSPORT_DISCONNECTED_SOURCE_LOSS_UNKNOWN"
+      ]
+    }
+  },
+  "capabilityAdmission": [
+    {
+      "name": "vehicle_get_state",
+      "available": true,
+      "blockers": []
+    },
+    {
+      "name": "vehicle_get_capabilities",
+      "available": true,
+      "blockers": []
+    },
+    {
+      "name": "vehicle_get_payload_status",
+      "available": true,
+      "blockers": []
+    },
+    {
+      "name": "vehicle_get_targets",
+      "available": true,
+      "blockers": []
+    },
+    {
+      "name": "vehicle_zmq_navigate",
+      "available": false,
+      "blockers": [
+        "ZMQ_SITE_READONLY_CONTROL_DISABLED",
+        "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE",
+        "CHASSIS_FEEDBACK_UNCORRELATED",
+        "SIMULATION_ID_UNCONFIRMED",
+        "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+        "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+        "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+        "EVIDENCE_CAPABILITYSCOPE_MISSING",
+        "EVIDENCE_PLANNERPOLICY_MISSING"
+      ]
+    },
+    {
+      "name": "vehicle_zmq_area_recon",
+      "available": false,
+      "blockers": [
+        "ZMQ_SITE_READONLY_CONTROL_DISABLED",
+        "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE",
+        "SIMULATION_ID_UNCONFIRMED",
+        "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+        "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+        "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+        "EVIDENCE_CAPABILITYSCOPE_MISSING",
+        "EVIDENCE_PLANNERPOLICY_MISSING"
+      ]
+    },
+    {
+      "name": "vehicle_zmq_circular_recon",
+      "available": false,
+      "blockers": [
+        "ZMQ_SITE_READONLY_CONTROL_DISABLED",
+        "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE",
+        "SIMULATION_ID_UNCONFIRMED",
+        "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+        "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+        "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+        "EVIDENCE_CAPABILITYSCOPE_MISSING",
+        "EVIDENCE_PLANNERPOLICY_MISSING"
+      ]
+    },
+    {
+      "name": "vehicle_zmq_camera",
+      "available": false,
+      "blockers": [
+        "ZMQ_SITE_READONLY_CONTROL_DISABLED",
+        "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE",
+        "SIMULATION_ID_UNCONFIRMED",
+        "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+        "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+        "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+        "EVIDENCE_CAPABILITYSCOPE_MISSING",
+        "EVIDENCE_PLANNERPOLICY_MISSING"
+      ]
+    },
+    {
+      "name": "vehicle_zmq_inspect_area",
+      "available": false,
+      "blockers": [
+        "ZMQ_SITE_READONLY_CONTROL_DISABLED",
+        "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE",
+        "INSPECTION_SOURCE_STREAM_NOT_RECOVERABLE",
+        "SIMULATION_ID_UNCONFIRMED",
+        "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+        "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+        "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+        "EVIDENCE_CAPABILITYSCOPE_MISSING",
+        "EVIDENCE_PLANNERPOLICY_MISSING"
+      ]
+    },
+    {
+      "name": "simulation_apply_effect",
+      "available": false,
+      "blockers": [
+        "ZMQ_SITE_READONLY_CONTROL_DISABLED",
+        "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE",
+        "SIMULATION_ID_UNCONFIRMED",
+        "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+        "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+        "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+        "EVIDENCE_CAPABILITYSCOPE_MISSING",
+        "EVIDENCE_PLANNERPOLICY_MISSING"
+      ]
+    },
+    {
+      "name": "vehicle_get_inspection_result",
+      "available": true,
+      "blockers": []
+    },
+    {
+      "name": "simulation_get_effect_result",
+      "available": true,
+      "blockers": []
+    },
+    {
+      "name": "vehicle_zmq_plan_route",
+      "available": true,
+      "blockers": []
+    },
+    {
+      "name": "simulation_adjust_view",
+      "available": false,
+      "blockers": [
+        "ZMQ_SITE_READONLY_CONTROL_DISABLED",
+        "SOURCE_RESTART_RECONCILIATION_UNAVAILABLE",
+        "SIMULATION_ID_UNCONFIRMED",
+        "EVIDENCE_DEPLOYMENTIDENTITY_MISSING",
+        "EVIDENCE_TIMEANDCOORDINATES_MISSING",
+        "EVIDENCE_OPTICALGEOMETRYANDLIMITS_MISSING",
+        "EVIDENCE_CAPABILITYSCOPE_MISSING",
+        "EVIDENCE_PLANNERPOLICY_MISSING"
+      ]
+    },
+    {
+      "name": "vehicle_zmq_get_frame",
+      "available": true,
+      "blockers": []
+    }
+  ],
+  "overallFieldAcceptance": "incomplete",
+  "frameAcceptance": "pending_upstream_connectivity_restore",
+  "physicalControlActions": 0,
+  "exitCode": 0
+}

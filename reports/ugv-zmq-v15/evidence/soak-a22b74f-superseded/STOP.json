@@ -1,0 +1,12 @@
+{
+  "status": "superseded_before_24h_gate",
+  "endedAt": "2026-11-12T06:33:11.417996+00:00",
+  "reason": "candidate_image_replacement_for_expired_task_retention_fix",
+  "previousRun": "/home/sz/.smpp-debug/zmq-v15-20261112/stability-24h-1",
+  "passed24h": false,
+  "files": {
+    "samples.ndjson": "72d2dc8c80e85e1569c9215ec92c6e80f3803a6585a5f12fc5a7466fca496fe7",
+    "run.json": "b4e34136c0c5a0ef9ce1f2769265f6244f17e2d9121e786838282d0f4d700ba8",
+    "summary.json": "d8a54fd25ea2687576f9098ab539109d34fa02fa3e3d7059fa168928a3017fc3"
+  }
+}

@@ -1,0 +1,16 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+import {randomUUID,createHash} from 'node:crypto';
+const root='/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform';
+const origin='http://127.0.0.1:19111';
+const text=readFileSync('/home/sz/.smpp-debug/ugv-control-console/operator-login.txt','utf8');
+const value=(label)=>{const line=text.split('\n').find(s=>s.includes(label));if(!line)throw Error('CREDENTIAL_MISSING');return line.split(/[:：]/).slice(1).join(':').trim().replace(/^`|`$/g,'');};
+const login=await fetch(origin+'/api/session/login',{method:'POST',headers:{origin,'content-type':'application/json'},body:JSON.stringify({username:value('账号'),password:value('初始密码')})});if(!login.ok)throw Error('LOGIN_FAILED');
+const cookie=login.headers.get('set-cookie')?.split(';')[0];if(!cookie)throw Error('COOKIE_MISSING');
+const device=await (await fetch(origin+'/api/device',{headers:{cookie}})).json();
+const input={resourceId:'vehicle:ugv',start:{longitude:106.813064505,latitude:29.720529508},waypoints:[{longitude:106.81307318,latitude:29.71952521}],density:'adaptive'};
+const commandId=randomUUID(),at=new Date().toISOString(),clock=performance.now();
+const response=await fetch(origin+'/api/commands',{method:'POST',headers:{cookie,origin,'content-type':'application/json'},body:JSON.stringify({commandId,kind:'tool',tool:'vehicle_zmq_plan_route',arguments:input,catalogHash:device.catalogHash})});
+const row=await response.json();const result=row.response?.structuredContent;
+const record={sourceCommit:'a22b74f6bede44fb1b671433c0c1c8d135be2bc6',verifiedAt:at,commandId,input,startSource:'user_confirmed_entry_point_manual_preview_not_current_localization',elapsedMs:Math.round(performance.now()-clock),httpStatus:response.status,status:row.status==='completed'&&result?.adoption==='preview_only'?'passed':'not_accepted',reasonCode:row.response?.reasonCode??result?.reasonCode,physicalControlActions:0,navigationTaskCreated:false,...(result?{result}:{})};
+writeFileSync(root+'/reports/ugv-zmq-v15/evidence/attempt-2/candidate-planner-manual.json',JSON.stringify(record,null,2)+'\n');console.log(JSON.stringify({...record,result:result?{schemaVersion:result.schemaVersion,adoption:result.adoption,points:result.waypoints?.length,sourceMessageSha256:result.sourceMessageSha256}:undefined}));
+await fetch(origin+'/api/session/logout',{method:'POST',headers:{cookie,origin,'content-type':'application/json'},body:'{}'});
