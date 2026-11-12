@@ -36,9 +36,9 @@ Optical zoom and next_follow remain unsupported. Upstream FramePull is enabled o
 
 ### SMPP-only interoperability follow-up
 
-- [ ] Explicit receive framing/deployment contract and captured-frame regressions; strict 2.1 remains strict.
-- [ ] Dashboard V2 context/ACK/request-ID adapter and ENU transform; context changes and errors fail explicitly.
-- [ ] Versioned 1.5.1 catalogs, Runtime/Provider/console exact validation and diagnostics.
+- [x] Explicit receive framing/deployment contract and captured-frame regressions; strict 2.1 remains strict.
+- [x] Dashboard V2 context/ACK/request-ID adapter and ENU transform; context changes and errors fail explicitly.
+- [x] Versioned 1.5.1 catalogs, Runtime/Provider/console exact validation and diagnostics.
 - [ ] Isolated protocol/planner/PostgreSQL/MCP/browser regression and engineering gates.
 - [ ] Real read-only chassis/planner verification, new fixed candidate images/package and fresh 24-hour run.
 
@@ -69,3 +69,5 @@ The first soak is retained as superseded before 24 h. The replacement run starte
 2026-11-12 candidate package completed: `artifacts/ugv-zmq-v15-ca33761-candidate-20261112.tar.gz`, 196782330 bytes, SHA256 `1d47f6f92e30b0ee856d6017372cbecbf346a2501cc60da35335560d10944e40`. Bundle source is `c12601ba7a90b41d1ad659ddbcd92f4768da3e6b`; fixed application/image source remains `ca33761`. All 4,051 members and image save/load identities verified. Receipt is `reports/ugv-zmq-v15/package-receipt.json`. This delivery is explicitly not control-qualified or formally switched.
 
 2026-11-12 15:05 follow-up: upstream endpoints have recovered (first fresh EO/effect monitor sample at 14:55:37, all eight TCP endpoints verified at 15:06). The unchanged `ca33761` candidate now passed actual exact-frame MCP retrieval and browser original-image/download/history checks. Images are 640×480 with unknown exposure UTC; no field detection boxes were observed. Archive retained all three disconnect gaps. A fresh four-message chassis capture still fails the 2.1 length/CRC contract, and serialized 7879 probing still returns the explicit missing-controlled-entity ACK. No physical control was sent. The second soak remains uninterrupted and below 24 hours. Evidence: `reports/ugv-zmq-v15/followups/20261112-1505/SUMMARY.md`; application, fixed images, bindings and existing bundle are unchanged. Remaining gates: conforming chassis data, qualified planner context, 24 h evidence and final idle/lease handoff.
+
+2026-11-12 interoperability implementation: a separate deployment /3 selects the publication framing without changing the frozen standard codec or outgoing command encoding. Current field scene was read as yuan_qu (22.506858333333, 114.048222222222, reference height 500), matching the local a0be6a5 scenario configuration; live map conversion outputs are retained as independent PROJ fixtures. V2 preview checks scene/epoch, real context, ACK, request ID and ENU geometry. Preliminary checks passed 22 unit, five PostgreSQL/MCP and ten 1.5.1 isolated control cases; a mission/identity diagnostic ambiguity found in console validation was corrected before the fixed-source engineering gates. Upstream and SDAR source remain unchanged; no physical action was sent. Full gates and replacement candidate/24 h evidence remain pending. Operations: deploy/ugv-zmq/v151/README.md.
