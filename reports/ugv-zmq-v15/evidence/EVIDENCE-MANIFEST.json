@@ -11,8 +11,8 @@
     },
     {
       "path": "REPORT.md",
-      "bytes": 8439,
-      "sha256": "bb0249c4029fe714a0f4db4fd86367402d075ad195780c32dce2c16c74297cf7"
+      "bytes": 8801,
+      "sha256": "1ac0fda4b4f6741a9d8c74d9da50dbf1aebb37bad97551ea1ce01a54e7c59f7f"
     },
     {
       "path": "attempt-2/browser.json",
@@ -651,8 +651,8 @@
     },
     {
       "path": "release-status.json",
-      "bytes": 2551,
-      "sha256": "aa0d05a7dda944e1d340160f35a1405bfb0d9745b2621588a847509805898c41"
+      "bytes": 2700,
+      "sha256": "d0164ae5300c2676a1bbcf55d815cd77b3746675d3c6700e9b21a41dd03fa825"
     },
     {
       "path": "soak-a22b74f-superseded/STOP.json",

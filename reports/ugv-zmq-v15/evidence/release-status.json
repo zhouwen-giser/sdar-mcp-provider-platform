@@ -11,7 +11,6 @@
   "stable24Hours": "pending",
   "currentMonitor": "/home/sz/.smpp-debug/zmq-v15-20261112/stability-24h-2",
   "blockers": [
-    "UPSTREAM_ENDPOINTS_CONNECTION_REFUSED",
     "CHASSIS_2_1_LENGTH_CRC_NONCONFORMING",
     "PLANNER_V2_CONTEXT_CONTRACT_NOT_QUALIFIED",
     "CANDIDATE_24H_GATE_PENDING"
@@ -57,5 +56,9 @@
       "sha256": "c8aa214aca73b5aac8b9714e34ded6b271d7595e8af658608689ee2f54bdbb4c",
       "sourcePathOnHost": "/home/sz/.smpp-debug/zmq-v15-20261112/probe-planner-ack.mts"
     }
-  ]
+  ],
+  "updatedAt": "2026-11-12T07:12:45.029727+00:00",
+  "upstreamConnectivity": "restored",
+  "candidateLiveFrameAcceptance": "passed",
+  "latestFollowup": "../followups/20261112-1505/SUMMARY.md"
 }

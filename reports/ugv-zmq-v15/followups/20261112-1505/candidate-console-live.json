@@ -1,0 +1,36 @@
+{
+  "sourceCommit": "ca33761c1d5c9c0a6cce3acc9105faa1735832da",
+  "verifiedAt": "2026-11-12T07:06:40.381Z",
+  "url": "http://127.0.0.1:19111/",
+  "httpLogin": true,
+  "archiveHealthy": true,
+  "originalImage": {
+    "width": 640,
+    "height": 480,
+    "complete": true
+  },
+  "download": {
+    "bytes": 53512,
+    "sha256": "35f707a43080326c95476323374721fd8eeaef1063095154f3d566f672697c27",
+    "filename": "5560cfa58cac416da4dc2e6-1794466480151134637-714948736101.jpg"
+  },
+  "visibleHistoryTasks": 2,
+  "historicalReport": {
+    "status": "passed",
+    "taskId": "f49b6c69-048c-48d4-b935-4aca6d343348",
+    "schemaVersion": "smpp.ugv-console-report/1",
+    "retention": {
+      "source": "retained_local_snapshot",
+      "upstreamReasonCode": "TASK_EXPIRED",
+      "recordedAt": "2026-10-29T11:06:31.510Z",
+      "readOnly": true
+    },
+    "upstreamReasonCode": "TASK_EXPIRED",
+    "bytes": 1065,
+    "sha256": "4b3d43b54358efc28a73f36d6615c9d7d2e4a889ff16b89c30fabfb5a039700b"
+  },
+  "mobileNoHorizontalOverflow": true,
+  "pageErrors": 0,
+  "physicalControlActions": 0,
+  "exitCode": 0
+}

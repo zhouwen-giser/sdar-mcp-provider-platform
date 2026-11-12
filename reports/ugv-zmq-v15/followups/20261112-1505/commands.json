@@ -1,0 +1,40 @@
+[
+  {
+    "command": [
+      "node",
+      "--import",
+      "tsx",
+      "/home/sz/.smpp-debug/zmq-v15-20261112/verify-candidate-1505.mts"
+    ],
+    "exitCode": 0,
+    "scriptSha256": "6f1d51fe8e1268cf2ae4b6ebd0b81183d2988e77aebe56181bfb47d92c7d9af2"
+  },
+  {
+    "command": [
+      "node",
+      "/home/sz/.smpp-debug/zmq-v15-20261112/verify-console-1505.mjs"
+    ],
+    "exitCode": 0,
+    "scriptSha256": "04d11c9db3c4866594ebe35e23cb006065ab693018c1a7e74fcbd34a0ac07cd9"
+  },
+  {
+    "command": [
+      "node",
+      "--import",
+      "tsx",
+      "/home/sz/.smpp-debug/zmq-v15-20261112/probe-planner-ack-1505.mts"
+    ],
+    "exitCode": 0,
+    "scriptSha256": "9516db9c46d45cbb44e37e5e42b44af26d2ae2f6b6ad7cf6b11975cafab2fc50"
+  },
+  {
+    "command": [
+      "node",
+      "--import",
+      "tsx",
+      "/home/sz/.smpp-debug/zmq-v15-20261112/chassis-debug-1505.mts"
+    ],
+    "exitCode": 0,
+    "scriptSha256": "aafe3ff5331d8f474ce345b03cff706dca8cfa1e1d6ed2f766cc46bac45986f1"
+  }
+]

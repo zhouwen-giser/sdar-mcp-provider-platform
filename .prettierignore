@@ -52,3 +52,4 @@ reports/ugv-zmq-phase4/raw/**
 contracts/ugv-zmq/v2/sources/**
 contracts/ugv-zmq/v2/fixtures/**
 reports/ugv-zmq-v15/evidence/**
+reports/ugv-zmq-v15/followups/**

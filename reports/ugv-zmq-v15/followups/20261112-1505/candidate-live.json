@@ -1,0 +1,137 @@
+{
+  "sourceCommit": "ca33761c1d5c9c0a6cce3acc9105faa1735832da",
+  "verifiedAt": "2026-11-12T07:06:38.204Z",
+  "runtime": "http://127.0.0.1:19110/mcp",
+  "profile": "zmq_v1_5_0_readonly_15",
+  "tools": 15,
+  "readOnly": true,
+  "anonymous": true,
+  "invalidJwtRejected": true,
+  "identityOverrideIgnored": true,
+  "archive": {
+    "status": "running",
+    "pendingRecords": 1,
+    "pendingBytes": 1111,
+    "committedEvents": 27048,
+    "receivedMessages": 27034,
+    "committedReceptions": 27033,
+    "unconfirmedReceptions": 0,
+    "locallyDiscardedMessages": 0,
+    "failureCode": null,
+    "failureRecorded": null
+  },
+  "archiveGaps": [
+    {
+      "schemaVersion": "ugv.zmq-observation-event/2.0",
+      "eventId": "5eabc6fc-c47a-4d6f-96a1-dd857022293e",
+      "receivedAt": "2026-11-12T06:33:51.213Z",
+      "monotonicNs": "12366840986117723",
+      "clockId": "zmq-receiver:0f875493-0efc-4aec-83d3-3e0e1b5a94f5",
+      "type": "gap",
+      "component": "simulationEffect",
+      "code": "TRANSPORT_DISCONNECTED_SOURCE_LOSS_UNKNOWN",
+      "locallyDiscardedMessages": null,
+      "sourceLossCount": null
+    },
+    {
+      "schemaVersion": "ugv.zmq-observation-event/2.0",
+      "eventId": "0229eb60-5631-4210-9494-14b429a73047",
+      "receivedAt": "2026-11-12T06:33:51.404Z",
+      "monotonicNs": "12366841177317873",
+      "clockId": "zmq-receiver:0f875493-0efc-4aec-83d3-3e0e1b5a94f5",
+      "type": "gap",
+      "component": "chassis",
+      "code": "TRANSPORT_DISCONNECTED_SOURCE_LOSS_UNKNOWN",
+      "locallyDiscardedMessages": null,
+      "sourceLossCount": null
+    },
+    {
+      "schemaVersion": "ugv.zmq-observation-event/2.0",
+      "eventId": "076d4491-09d4-44e8-ae41-918c41451e3b",
+      "receivedAt": "2026-11-12T06:33:52.201Z",
+      "monotonicNs": "12366841973732494",
+      "clockId": "zmq-receiver:0f875493-0efc-4aec-83d3-3e0e1b5a94f5",
+      "type": "gap",
+      "component": "eo",
+      "code": "TRANSPORT_DISCONNECTED_SOURCE_LOSS_UNKNOWN",
+      "locallyDiscardedMessages": null,
+      "sourceLossCount": null
+    }
+  ],
+  "channels": {
+    "chassis": {
+      "state": "connected",
+      "lastReceptionAt": "2026-11-12T07:06:37.828Z",
+      "lastValidCommittedAt": null,
+      "receiptFresh": false,
+      "sourceFreshness": "unverified",
+      "diagnostics": [
+        "ZMQ_BINARY_PAYLOAD_LENGTH_INVALID"
+      ]
+    },
+    "eo": {
+      "state": "connected",
+      "lastReceptionAt": "2026-11-12T07:06:37.809Z",
+      "lastValidCommittedAt": "2026-11-12T07:06:37.189Z",
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+        "IMAGE_DEDUPLICATION_BOUNDED_TO_RECEIVER_SESSION",
+        "ACQUISITION_TIME_UNKNOWN"
+      ]
+    },
+    "simulationEffect": {
+      "state": "connected",
+      "lastReceptionAt": "2026-11-12T07:06:37.039Z",
+      "lastValidCommittedAt": "2026-11-12T07:06:37.039Z",
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+      ]
+    }
+  },
+  "sessionId": "57b50e55-6d20-46f9-82af-00f6bd70807b",
+  "partitionHash": "9801a6f506c3785d14afbb5e6a24393161e19030a4d1b9d99883fad61fa37923",
+  "protocols": [
+    "simulationEffect@1.0",
+    "eo@2.3"
+  ],
+  "frame": {
+    "metadata": {
+      "camera_id": "eo",
+      "frame_id": "5560cfa58cac416da4dc2e6-1794466480151134637-714150833116",
+      "exposure_utc_ms": null,
+      "width_px": 640,
+      "height_px": 480
+    },
+    "sha256": "9aacbd354142f6b781fe055f77af5dc45c769c3d17ea66e127fdef018e365809",
+    "byteLength": 53496,
+    "blocks": 1,
+    "reference": {
+      "receptionId": "bd6c20c6-5a15-4edc-a670-e7bacf2b8612",
+      "sessionId": "57b50e55-6d20-46f9-82af-00f6bd70807b",
+      "receivedAt": "2026-11-12T07:06:37.809Z"
+    },
+    "overlays": 0,
+    "diagnostics": [
+      "SHORT_TERM_CACHE_EARLY_EVICTION_POSSIBLE",
+      "FRAME_NOT_COVERAGE_OR_STREAM_COMPLETENESS_EVIDENCE",
+      "EXPOSURE_UTC_UNKNOWN",
+      "SAME_FRAME_DETECTIONS_NOT_AVAILABLE"
+    ],
+    "rawImagePersisted": false
+  },
+  "planner": {
+    "status": "not_attempted",
+    "reason": "POSITION_NOT_FRESH"
+  },
+  "physicalControlActions": 0,
+  "acceptanceScope": "readonly_catalog_eo_effect_frame",
+  "overallFieldAcceptance": "incomplete",
+  "fieldProtocolAccepted": false,
+  "exitCode": 0
+}
