@@ -200,7 +200,12 @@ export class PostgresObservationArchive implements ObservationArchive {
             old.components.chassis.systemId !== current.components.chassis.systemId ||
             old.components.eo.deviceId !== current.components.eo.deviceId ||
             old.components.simulationEffect.deviceId !==
-              current.components.simulationEffect.deviceId
+              current.components.simulationEffect.deviceId ||
+            (recovery.boundaryReason === "source_restart_operator_reconciliation" &&
+              (row.status !== "closed" ||
+                old.profileSha256 !== current.profileSha256 ||
+                old.contractSha256 !== current.contractSha256 ||
+                canonical(old.components) !== canonical(current.components)))
           )
             throw Error("ZMQ_ARCHIVE_RECOVERY_PREDECESSOR_INVALID");
           predecessor = row;
@@ -219,7 +224,9 @@ export class PostgresObservationArchive implements ObservationArchive {
             ...gap(
               stamp(`recovery:${sessionId}`),
               external
-                ? "RECEIVER_SESSION_STARTED_AFTER_NATIVE_PROTOCOL_UPGRADE"
+                ? recovery?.boundaryReason === "source_restart_operator_reconciliation"
+                  ? "RECEIVER_SESSION_STARTED_AFTER_SOURCE_RESTART_RECONCILIATION"
+                  : "RECEIVER_SESSION_STARTED_AFTER_NATIVE_PROTOCOL_UPGRADE"
                 : "RECEIVER_SESSION_RECOVERED_AFTER_ARCHIVE_FAILURE",
             ),
             recovery: {

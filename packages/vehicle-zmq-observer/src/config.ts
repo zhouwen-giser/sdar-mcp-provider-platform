@@ -35,6 +35,9 @@ export const ObserverSettings = z
       .object({
         partitionHash: z.string().regex(/^[a-f0-9]{64}$/),
         sessionId: z.uuid(),
+        boundaryReason: z
+          .enum(["native_protocol_upgrade", "source_restart_operator_reconciliation"])
+          .optional(),
       })
       .strict()
       .optional(),

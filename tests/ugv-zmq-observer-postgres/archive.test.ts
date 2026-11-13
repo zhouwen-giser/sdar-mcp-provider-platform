@@ -241,6 +241,97 @@ describe.skipIf(!configFile)("SIMULATED real PostgreSQL and native ZMQ observati
     expect(page.entries[0]?.payload.type).toBe("gap");
     await observer.stop();
   });
+  it("reconciles a clean source-restart boundary without clearing or rewriting old watermarks", async () => {
+    const { archive, s, identity } = store();
+    const observer = new ZmqObservationObserver(profile(), s, identity, archive);
+    await observer.start();
+    const oldSession = present(observer.sessionId);
+    observer.receive("chassis", localization(19_716_530_657n), clock(1));
+    observer.receive("chassis", localization(1_591_681_897n), clock(2));
+    await observer.flush();
+    const rejected = (await archive.page(oldSession)).entries.at(-1)?.payload;
+    expect(rejected).toMatchObject({ valid: true, projectable: false });
+    if (rejected?.type !== "reception") throw Error("RECEPTION_REQUIRED");
+    expect(rejected.diagnostics).toContain("SOURCE_TIME_REGRESSED_OR_REPLAYED");
+    await observer.stop();
+    const before = await archive.page(oldSession);
+    const partition = "SIMULATED-reconciled:" + randomUUID();
+    const nextIdentity = scope(profile(), partition);
+    const nextSettings = settings({
+      ...s,
+      diagnosticPartition: partition,
+      recoveryPredecessor: {
+        partitionHash: identity.partitionHash,
+        sessionId: oldSession,
+        boundaryReason: "source_restart_operator_reconciliation",
+      },
+    });
+    const next = new PostgresObservationArchive(pool, nextIdentity, nextSettings);
+    stores.push(next);
+    const receiver = new ZmqObservationObserver(profile(), nextSettings, nextIdentity, next);
+    await receiver.start();
+    receiver.receive("chassis", localization(1_591_681_898n), clock(3));
+    receiver.receive("chassis", localization(1_591_681_899n), clock(4));
+    await receiver.flush();
+    const page = await next.page(present(receiver.sessionId));
+    expect(page.entries[0]?.payload).toMatchObject({
+      code: "RECEIVER_SESSION_STARTED_AFTER_SOURCE_RESTART_RECONCILIATION",
+      recovery: {
+        predecessorSessionId: oldSession,
+        predecessorPartitionHash: identity.partitionHash,
+        predecessorStatus: "closed",
+        durableHeadHash: before.sessionHeadHash,
+        durableLastOrdinal: before.entries.at(-1)?.ordinal,
+      },
+    });
+    const receptions = page.entries.map((e) => e.payload).filter((e) => e.type === "reception");
+    expect(receptions).toHaveLength(2);
+    expect(
+      receptions.every((r) => r.projectable && r.observation?.sourceProducerEpoch === null),
+    ).toBe(true);
+    expect(nextIdentity.identity.sourceProducerEpoch).toBeNull();
+    expect(await archive.page(oldSession)).toEqual(before);
+    await receiver.stop();
+  });
+  it.each(["open", "failed", "profile", "contract", "component"] as const)(
+    "rejects source-restart reconciliation with %s predecessor conflict",
+    async (conflict) => {
+      const { archive, s, identity } = store();
+      const old = await archive.start();
+      if (conflict === "failed") await archive.fail("ZMQ_ARCHIVE_OBSERVATION_FAILED", 0);
+      if (conflict !== "open") await archive.close();
+      const original = profile();
+      const nextProfile =
+        conflict === "component"
+          ? {
+              ...original,
+              components: {
+                ...original.components,
+                chassis: { ...original.components.chassis, controllerSystemId: "123" },
+              },
+            }
+          : original;
+      const partition = "SIMULATED-reconcile-conflict:" + randomUUID();
+      const nextIdentity = observerIdentity(
+        nextProfile,
+        partition,
+        conflict === "profile" ? "c".repeat(64) : identity.identity.profileSha256,
+        conflict === "contract" ? "c".repeat(64) : identity.identity.contractSha256,
+      );
+      const nextSettings = settings({
+        ...s,
+        diagnosticPartition: partition,
+        recoveryPredecessor: {
+          partitionHash: identity.partitionHash,
+          sessionId: old.sessionId,
+          boundaryReason: "source_restart_operator_reconciliation",
+        },
+      });
+      const next = new PostgresObservationArchive(pool, nextIdentity, nextSettings);
+      stores.push(next);
+      await expect(next.start()).rejects.toThrow("ZMQ_ARCHIVE_RECOVERY_PREDECESSOR_INVALID");
+    },
+  );
   it("releases lease error listeners across repeated receiver generations", async () => {
     const local = new Pool({ connectionString: pool.options.connectionString, max: 2 });
     const { s, identity } = store();
