@@ -1,0 +1,80 @@
+{
+  "checkedAt": "2026-11-13T01:56:14.659407+00:00",
+  "applicationSourceCommit": "ada745829c635b9bb56d6017c2c2faf7f31e544e",
+  "oldProjectedPositionReceivedAt": "2026-11-13T01:32:14.383Z",
+  "oldProjectedTimeUs": "59986050325",
+  "newTimeUs": [
+    "1290851678",
+    "1290914663"
+  ],
+  "timeRegressed": true,
+  "nativeFramingStillValid": true,
+  "quarantinedByExistingTimeWatermark": true,
+  "producerEpochAttestedByChassis": false,
+  "lastNativeAcceptance": {
+    "allComponentsFresh": true,
+    "protocols": [
+      "chassis@2.1-site-rx/1",
+      "eo@2.3",
+      "simulationEffect@1.0"
+    ],
+    "chassisContractVerified": false,
+    "chassisWire": {
+      "publicationFraming": "prefix_business_length_crc",
+      "commandFraming": "prefix_wire_length_crc",
+      "baseBusinessProtocol": "2.1",
+      "standard21Conformance": false
+    },
+    "plannerLastCheck": {
+      "status": "blocked",
+      "reason": "MONITOR_PLANNER_FRESH_START_MISSING",
+      "at": "2026-11-13T01:51:12.227547+00:00"
+    },
+    "plannerChecks": 94,
+    "plannerFailures": 72,
+    "siteReadOnlyQualified": false
+  },
+  "previewStatus": "verified",
+  "previewStartSource": "independent SUB reception immediately before MCP readonly preview",
+  "previewSourceEpoch": "1794533570536448707",
+  "previewSourceSha256": "7a6684a8a831f0beaf09a26b5bca3e0a8d6edc7827bcad297916a93b4e56ffe7",
+  "projectionAdmissionUnchanged": true,
+  "soakStatus": "running",
+  "soakElapsedSeconds": 56143.73113907315,
+  "samples": 936,
+  "prefixHashVerified": "e0500315384c6684b8fd2171fa914e441b43aedb05825b1425654c2aca6a5f0f",
+  "qualifies24h": false,
+  "physicalControlActions": 0,
+  "candidateRestarted": false,
+  "upstreamModified": false,
+  "commands": [
+    {
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "/home/sz/.smpp-debug/zmq-v15-20261112/interop-20261112/localization-followup-20261113-0952/capture-localization.mts"
+      ],
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "/home/sz/.smpp-debug/zmq-v15-20261112/interop-20261112/localization-followup-20261113-0952/capture-and-preview.mts"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "sourceEvidence": [
+    {
+      "path": "packages/vehicle-zmq-observer/src/normalize.ts",
+      "sha256": "43b3cee2df226dde148dfdd9adfb65e416bbabf05e18df4f8f1fc2608eb450a5"
+    },
+    {
+      "path": "packages/provider-adapter-kit/src/dashboard-v2-planner.ts",
+      "sha256": "d7fce414da394b0ba2de6d7101462899deb80d6c22c6575d2b534b033f0e0b15"
+    }
+  ]
+}

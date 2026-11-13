@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "ugv.zmq-v151-soak/1",
+  "startedAt": "2026-11-12T10:20:30.763833+00:00",
+  "sourceCommit": "ada745829c635b9bb56d6017c2c2faf7f31e544e",
+  "durationSeconds": 86400,
+  "intervalSeconds": 60,
+  "containers": [
+    {
+      "name": "smpp-zmq-v15-candidate-provider-1",
+      "id": "25af10bcbc4d00cbff8fb987922b1f49ed46afe69950552a74bc606882470430",
+      "image": "sha256:b1a92b1c166bda4a2af7dfc7cb2fda6122e2f12aa42dbddc100455a026a5471e",
+      "running": true,
+      "oomKilled": false,
+      "restartCount": 0,
+      "startedAt": "2026-11-12T10:12:52.543175Z",
+      "health": null
+    },
+    {
+      "name": "smpp-zmq-v15-candidate-runtime-1",
+      "id": "ae41fb8bee50f35ba0adc25cc350b5dc243bf83ce08bdb385c193a452728d64f",
+      "image": "sha256:26f3f21764e813a02a7f4728ad2610e3a2bf6e8e528f0fe108f13941da27e1a7",
+      "running": true,
+      "oomKilled": false,
+      "restartCount": 0,
+      "startedAt": "2026-11-12T10:12:57.994114834Z",
+      "health": "healthy"
+    },
+    {
+      "name": "smpp-zmq-v15-candidate-console-1",
+      "id": "975f25e9f05442e411b03ba12fdff52d6c6eb7ed8307de827bb73edb3b362538",
+      "image": "sha256:4a65816fb5e9ad1a04ada741e57174c31d1ae0ab7dd4295e423581da49dbe3eb",
+      "running": true,
+      "oomKilled": false,
+      "restartCount": 0,
+      "startedAt": "2026-11-12T10:13:03.668172765Z",
+      "health": "healthy"
+    }
+  ],
+  "physicalControlActions": 0,
+  "diagnosticOnly": false,
+  "nativeAcceptanceSeparate": true,
+  "monitorSha256": "376c55fad6431a80678527b3041da548353aa8f32b0c932bc11614b1a356e35a",
+  "configSha256": "9ab2f3159fdbefabe8b64b7f4a8762920fb693150d58160aa20fbe843e3bed5e",
+  "updatedAt": "2026-11-13T01:56:14.495025+00:00",
+  "samples": 936,
+  "elapsedSeconds": 56143.73113907315,
+  "lastSampleSha256": "e0500315384c6684b8fd2171fa914e441b43aedb05825b1425654c2aca6a5f0f",
+  "failures": [],
+  "status": "running",
+  "lastNativeAcceptance": {
+    "allComponentsFresh": true,
+    "protocols": [
+      "chassis@2.1-site-rx/1",
+      "eo@2.3",
+      "simulationEffect@1.0"
+    ],
+    "chassisContractVerified": false,
+    "chassisWire": {
+      "publicationFraming": "prefix_business_length_crc",
+      "commandFraming": "prefix_wire_length_crc",
+      "baseBusinessProtocol": "2.1",
+      "standard21Conformance": false
+    },
+    "plannerLastCheck": {
+      "status": "blocked",
+      "reason": "MONITOR_PLANNER_FRESH_START_MISSING",
+      "at": "2026-11-13T01:51:12.227547+00:00"
+    },
+    "plannerChecks": 94,
+    "plannerFailures": 72,
+    "siteReadOnlyQualified": false
+  },
+  "formalCutoverAuthorizedByThisReport": false
+}

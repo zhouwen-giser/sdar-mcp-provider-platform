@@ -1,0 +1,223 @@
+{
+  "at": "2026-11-13T01:56:14.598338+00:00",
+  "scope": "readonly_GET",
+  "responses": [
+    {
+      "url": "http://192.168.2.63:7879/api/simulation/scenarios",
+      "httpStatus": 200,
+      "bytes": 1448,
+      "sha256": "cc809a4703c8d0cceb50a7e3ad219b43ff5e02e8448c9b4277a41f27e26b3268",
+      "body": {
+        "active_scenario": "yuan_qu",
+        "available_maps": [
+          "airport2",
+          "yuan_qu"
+        ],
+        "busy": false,
+        "can_switch": true,
+        "current_map": "yuan_qu",
+        "default_scenario": "yuan_qu",
+        "error": "",
+        "ok": true,
+        "owner_id": "ad45810ed1244d8b85e4b34b0ab79693",
+        "phase": "ready",
+        "profile_run_id": "09579040c60d48f19a119ee158347e96",
+        "request_id": "",
+        "scenarios": {
+          "airport": {
+            "label": "机场",
+            "map": "airport2",
+            "units": {
+              "npc_tank1": {
+                "blueprint": "vehicle.bov_3.bov_3",
+                "position": [
+                  20.915161,
+                  -112.916397,
+                  2.0
+                ],
+                "rotation": [
+                  0.0,
+                  -290.0,
+                  0.0
+                ]
+              },
+              "quadruped": {
+                "blueprint": "static.prop.robotic_dog",
+                "position": [
+                  -338.792419,
+                  82.540146,
+                  0.0
+                ],
+                "rotation": [
+                  0.0,
+                  90.0,
+                  0.0
+                ]
+              },
+              "soldier_1": {
+                "blueprint": "static.prop.german_soldier",
+                "position": [
+                  -202.792419,
+                  -122.540146,
+                  0.12
+                ],
+                "rotation": [
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              },
+              "uav": {
+                "blueprint": "static.prop.uav",
+                "position": [
+                  -277.233,
+                  94.306,
+                  5.0
+                ],
+                "rotation": [
+                  0.0,
+                  90.0,
+                  0.0
+                ]
+              },
+              "ugv": {
+                "blueprint": "vehicle.chinese_zbd_09_body.chinese_zbd_09_body",
+                "position": [
+                  -340.18,
+                  109.45,
+                  2.0
+                ],
+                "rotation": [
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            }
+          },
+          "yuan_qu": {
+            "label": "园区",
+            "map": "yuan_qu",
+            "map_reference": {
+              "altitude": 500.0,
+              "latitude": 22.506858333333,
+              "longitude": 114.048222222222
+            },
+            "units": {
+              "ugv": {
+                "blueprint": "vehicle.songling.songling",
+                "position": [
+                  -46.819,
+                  100.064,
+                  2.0
+                ],
+                "rotation": [
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            }
+          }
+        },
+        "simulation_epoch": "1794533570536448707",
+        "target_scenario": "yuan_qu",
+        "unit_reset": {
+          "operation": null,
+          "pending_intent": null,
+          "ready": true,
+          "units": [
+            {
+              "camp": "red",
+              "entity_id": "ugv",
+              "entity_type": "ugv"
+            }
+          ]
+        },
+        "units": {
+          "ugv": {
+            "loaded": true
+          }
+        }
+      }
+    },
+    {
+      "url": "http://192.168.2.63:7879/api/watchdog",
+      "httpStatus": 200,
+      "bytes": 1441,
+      "sha256": "7d4a1671361ff3abc5952c8d536e90102768795ae330f2242eb3ddc9cd3dbc38",
+      "body": {
+        "available": true,
+        "components": [
+          {
+            "level": 0,
+            "message": "Backend ready",
+            "name": "backend",
+            "values": {
+              "backend_type": "carla",
+              "connected": "True",
+              "profile_run_id": "09579040c60d48f19a119ee158347e96",
+              "ready": "True",
+              "scene_id": "yuan_qu",
+              "simulation_epoch": "1794533570536448707",
+              "simulation_time": "1400.398943448905",
+              "status_age_sec": "0.04679538891650736"
+            }
+          },
+          {
+            "level": 0,
+            "message": "Configured nodes discovered",
+            "name": "nodes",
+            "values": {
+              "missing_nodes": "",
+              "required_component_count": "5",
+              "required_count": "21",
+              "stale_components": ""
+            }
+          },
+          {
+            "level": 0,
+            "message": "Host resources within configured limits",
+            "name": "resources",
+            "values": {
+              "host_cpus": "20",
+              "host_load1": "17.56396484375",
+              "host_mem_available_bytes": "18060509184",
+              "host_mem_total_bytes": "33280671744",
+              "host_memory_used_percent": "45.732738440725626"
+            }
+          }
+        ],
+        "error": "",
+        "level": 0,
+        "mode": "v2",
+        "runtime": {
+          "accepting_commands": true,
+          "auto_recovery_enabled": false,
+          "available": true,
+          "config_digest": "7a648e58aaabf05213922ebb16211260ecda1fa3054efa4cc8cfb4af10b56c97",
+          "fault_component": "",
+          "incident_id": "",
+          "operation_id": "",
+          "operation_state": "idle",
+          "operator_required": false,
+          "owner_id": "ad45810ed1244d8b85e4b34b0ab79693",
+          "phase": "RUNNING",
+          "profile_run_id": "09579040c60d48f19a119ee158347e96",
+          "ready_control_groups": [
+            "adjudication",
+            "eo:ugv",
+            "motion:ugv",
+            "scene"
+          ],
+          "reason": "",
+          "revision": "2",
+          "simulation_epoch": "1794533570536448707",
+          "stage": "ready"
+        },
+        "simulation_epoch": "1794533570536448707",
+        "valid_for_sec": 1.5158464908599854
+      }
+    }
+  ]
+}

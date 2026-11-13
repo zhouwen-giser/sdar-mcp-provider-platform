@@ -1,0 +1,151 @@
+{
+  "at": "2026-11-13T01:55:14.065Z",
+  "intent": "readonly_preview_with_independently_observed_fresh_start",
+  "scope": "does_not_release_projector_quarantine_or_control_admission",
+  "sourceSample": {
+    "receivedAt": "2026-11-13T01:55:14.063Z",
+    "sha256": "6a6f4597da2e0d7380afe22f5efeca161275af8075f275093022bd62c60105f7",
+    "wireBase64": "aXBjX21lc3NhZ2U6AgAAEAEAAAAAAAAAAAAAAAAAAADUAGWu1AAAAFsb5U8AAAAAtawXuB5gBgC1rBe4HmAGAAG15kSeDoNcQO6OwECGgTZAAADEdXRCf0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAJFLhNo0ZvyiHkuj/P/o+nJaPdEbfoT4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADWAVL////vP2ZocP42jQm/AABgH/4/6j5KZ6dfwemRPqLd9WsXN2hBMFEPSC6gQ0EAAMR1dEJ/QAAAAAAAAAAAAQED",
+    "parsed": {
+      "protocolVersion": "2.1",
+      "topic": "ipc_message",
+      "messageId": 268435458,
+      "systemId": "1",
+      "targetSystemId": "0",
+      "payloadBytes": 216,
+      "body": {
+        "type": "localization",
+        "timeUs": "1340414811",
+        "systemTimeUs": "1794534914108597",
+        "utcTimeUs": "1794534914108597",
+        "timebase": "unconfirmed",
+        "ahrsStatus": 1,
+        "longitude": 114.04776722649224,
+        "latitude": 22.505954787265118,
+        "altitude": 500.1534326225519,
+        "velocityEnu": [
+          0,
+          0,
+          0
+        ],
+        "attitudeRaw": [
+          -0.00009747168981468022,
+          0.00002503394947395775,
+          5.326321367265263e-7
+        ],
+        "accelerationRaw": [
+          0,
+          0,
+          0
+        ],
+        "angularVelocityRaw": [
+          0,
+          0,
+          0
+        ],
+        "quaternion": [
+          0.9999999987340356,
+          -0.0000487358482176993,
+          0.000012516961742647936,
+          2.6692609336535595e-7
+        ],
+        "mercatorRaw": [
+          12695739.37376291,
+          2572380.562967442,
+          500.1534326225519
+        ],
+        "curvature": 0,
+        "fixType": 1,
+        "fixQuality": 1,
+        "alignmentMode": 3
+      }
+    }
+  },
+  "input": {
+    "resourceId": "vehicle:ugv",
+    "start": {
+      "longitude": 114.04776722649224,
+      "latitude": 22.505954787265118
+    },
+    "waypoints": [
+      {
+        "longitude": 114.04791186669047,
+        "latitude": 22.506389083393916
+      }
+    ],
+    "density": "adaptive"
+  },
+  "physicalControlActions": 0,
+  "result": {
+    "schemaVersion": "ugv.zmq-route-preview/2",
+    "previewId": "03cc2a4e-d29b-49d6-9514-ae79441bd6b5",
+    "resourceId": "vehicle:ugv",
+    "adoption": "preview_only",
+    "correlation": "request_id_epoch_context_and_geometry",
+    "createdAt": "2026-11-13T01:55:14.800Z",
+    "requestHash": "0a9116389fc6555ee7caea56b7d18496dfcf418b4a32bedd61793640e04d06c9",
+    "routeSource": "isr.dashboard.road-planner/v2",
+    "sourceRecordId": "5c0b4368e9ea4969b02aece1fd7f222014359a7d3c2a6d0ab7b573a10fb04b06",
+    "sourceMessageSha256": "7a6684a8a831f0beaf09a26b5bca3e0a8d6edc7827bcad297916a93b4e56ffe7",
+    "sourceMessage": "42[\"route_candidates\",{\"ok\":true,\"candidates\":[{\"id\":\"straight\",\"label\":\"\\u4e3b\\u7ebf\\u76f4\\u7ebf\",\"color\":\"#00e5ff\",\"frame_id\":\"map\",\"points\":[[-46.82901028456964,-97.0922892635457],[-36.532881638206625,-96.65604858633007],[-32.13083364546029,-91.8675357710345],[-32.033144597293706,-71.91750436898582],[-31.935455549127123,-51.96747296693714]],\"length_m\":57.0,\"num_points\":5}],\"error\":null,\"target\":\"ugv\",\"simulation_epoch\":\"1794533570536448707\",\"planning_request_id\":\"7593cd02-ec83-483e-be80-2463d563661f\"}]",
+    "transform": {
+      "policy": "scene_enu_wgs84_v1",
+      "sha256": "88f00905d6dd0e697b102e8e9d086d4ae6d52c7f651641bb51d8f301b3df8496",
+      "reference": {
+        "sceneId": "yuan_qu",
+        "mapId": "yuan_qu",
+        "sceneSha256": "0cec5045348e5863475c24a215a2d54933cdff99161f8baaa3eba86cc97cca51",
+        "latitude": 22.506858333333,
+        "longitude": 114.048222222222,
+        "altitude": 500
+      },
+      "heightPolicy": "scene_reference_plane_not_measured"
+    },
+    "start": {
+      "longitude": 114.04776722649224,
+      "latitude": 22.505954787265118
+    },
+    "waypoints": [
+      {
+        "longitude": 114.04776712929954,
+        "latitude": 22.505981620386436
+      },
+      {
+        "longitude": 114.04786718895863,
+        "latitude": 22.50598555975196
+      },
+      {
+        "longitude": 114.04790996877361,
+        "latitude": 22.50602879858123
+      },
+      {
+        "longitude": 114.04791091773082,
+        "latitude": 22.506208940989584
+      },
+      {
+        "longitude": 114.04791186669047,
+        "latitude": 22.506389083393916
+      }
+    ],
+    "requestedWaypoints": [
+      {
+        "longitude": 114.04791186669047,
+        "latitude": 22.506389083393916
+      }
+    ],
+    "sourceFreshness": "context_and_scene_verified",
+    "completeSpatialEvidence": false,
+    "planningRequestId": "7593cd02-ec83-483e-be80-2463d563661f",
+    "context": {
+      "entity_id": "ugv",
+      "simulation_epoch": "1794533570536448707",
+      "controller_instance_id": "3385235372:1644059325",
+      "mission_id": -1,
+      "mission_request_id": ""
+    },
+    "contextReceivedAt": "2026-11-13T01:55:14.541Z",
+    "contextMessageSha256": "7f454d9b37f2093eae1e70930d22b53e151d350905ec55b117bb0abb54fe1995",
+    "sceneVerificationSha256": "b4bd44776cdeb5c05de4fe4fc75b95ea491effe17acd2d72253b8bdcbea58b9a"
+  },
+  "status": "verified"
+}

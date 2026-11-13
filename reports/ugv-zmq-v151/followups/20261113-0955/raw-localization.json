@@ -1,0 +1,129 @@
+{
+  "at": "2026-11-13T01:54:24.566Z",
+  "scope": "SUB_only_no_command_socket",
+  "endpoint": "tcp://192.168.2.63:11001",
+  "publicationFraming": "prefix_business_length_crc",
+  "received": 2,
+  "samples": [
+    {
+      "receivedAt": "2026-11-13T01:54:24.516Z",
+      "sha256": "e909b2ab2bf8eb455eeb63ef33f5ccbbde507246a30a9483040447ff90f083f4",
+      "wireBase64": "aXBjX21lc3NhZ2U6AgAAEAEAAAAAAAAAAAAAAAAAAADUAMA+1AAAAF7V8EwAAAAAhp0jtR5gBgCGnSO1HmAGAAG15kSeDoNcQO6OwECGgTZAAADEdXRCf0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAJFLhNo0ZvyiHkuj/P/o+nJaPdEbfoT4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADWAVL////vP2ZocP42jQm/AABgH/4/6j5KZ6dfwemRPqLd9WsXN2hBMFEPSC6gQ0EAAMR1dEJ/QAAAAAAAAAAAAQED",
+      "parsed": {
+        "protocolVersion": "2.1",
+        "topic": "ipc_message",
+        "messageId": 268435458,
+        "systemId": "1",
+        "targetSystemId": "0",
+        "payloadBytes": 216,
+        "body": {
+          "type": "localization",
+          "timeUs": "1290851678",
+          "systemTimeUs": "1794534864559494",
+          "utcTimeUs": "1794534864559494",
+          "timebase": "unconfirmed",
+          "ahrsStatus": 1,
+          "longitude": 114.04776722649224,
+          "latitude": 22.505954787265118,
+          "altitude": 500.1534326225519,
+          "velocityEnu": [
+            0,
+            0,
+            0
+          ],
+          "attitudeRaw": [
+            -0.00009747168981468022,
+            0.00002503394947395775,
+            5.326321367265263e-7
+          ],
+          "accelerationRaw": [
+            0,
+            0,
+            0
+          ],
+          "angularVelocityRaw": [
+            0,
+            0,
+            0
+          ],
+          "quaternion": [
+            0.9999999987340356,
+            -0.0000487358482176993,
+            0.000012516961742647936,
+            2.6692609336535595e-7
+          ],
+          "mercatorRaw": [
+            12695739.37376291,
+            2572380.562967442,
+            500.1534326225519
+          ],
+          "curvature": 0,
+          "fixType": 1,
+          "fixQuality": 1,
+          "alignmentMode": 3
+        }
+      }
+    },
+    {
+      "receivedAt": "2026-11-13T01:54:24.565Z",
+      "sha256": "74cdef4debe5b916fb98f3459f4ef36e89ff556118e7c5525ce8a896a600694c",
+      "wireBase64": "aXBjX21lc3NhZ2U6AgAAEAEAAAAAAAAAAAAAAAAAAADUAIc81AAAAGfL8UwAAAAACmAktR5gBgAKYCS1HmAGAAG15kSeDoNcQO6OwECGgTZAAADEdXRCf0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAJFLhNo0ZvyiHkuj/P/o+nJaPdEbfoT4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADWAVL////vP2ZocP42jQm/AABgH/4/6j5KZ6dfwemRPqLd9WsXN2hBMFEPSC6gQ0EAAMR1dEJ/QAAAAAAAAAAAAQED",
+      "parsed": {
+        "protocolVersion": "2.1",
+        "topic": "ipc_message",
+        "messageId": 268435458,
+        "systemId": "1",
+        "targetSystemId": "0",
+        "payloadBytes": 216,
+        "body": {
+          "type": "localization",
+          "timeUs": "1290914663",
+          "systemTimeUs": "1794534864609290",
+          "utcTimeUs": "1794534864609290",
+          "timebase": "unconfirmed",
+          "ahrsStatus": 1,
+          "longitude": 114.04776722649224,
+          "latitude": 22.505954787265118,
+          "altitude": 500.1534326225519,
+          "velocityEnu": [
+            0,
+            0,
+            0
+          ],
+          "attitudeRaw": [
+            -0.00009747168981468022,
+            0.00002503394947395775,
+            5.326321367265263e-7
+          ],
+          "accelerationRaw": [
+            0,
+            0,
+            0
+          ],
+          "angularVelocityRaw": [
+            0,
+            0,
+            0
+          ],
+          "quaternion": [
+            0.9999999987340356,
+            -0.0000487358482176993,
+            0.000012516961742647936,
+            2.6692609336535595e-7
+          ],
+          "mercatorRaw": [
+            12695739.37376291,
+            2572380.562967442,
+            500.1534326225519
+          ],
+          "curvature": 0,
+          "fixType": 1,
+          "fixQuality": 1,
+          "alignmentMode": 3
+        }
+      }
+    }
+  ],
+  "errors": [],
+  "physicalControlActions": 0
+}
