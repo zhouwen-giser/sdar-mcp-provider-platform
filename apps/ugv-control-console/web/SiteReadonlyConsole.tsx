@@ -1,6 +1,12 @@
 import { FrameViewer } from "./FrameViewer.js";
 import { FRAME_TOOL } from "../shared/zmq-native.js";
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { PreviewNavigation } from "./PreviewNavigation.js";
+import {
+  plannerDegradationDetail,
+  previewNavigations,
+  recoverPreviewNavigation,
+} from "../shared/preview-navigation.js";
 import { api, describe, download } from "./api.js";
 import { newCommandId } from "./command-id.js";
 import { Diagram } from "./Diagram.js";
@@ -60,7 +66,7 @@ export function SiteReadonlyConsole({
   siteControl?: boolean;
   controls?: ReactNode;
   stopControl?: ReactNode;
-  onAdoptPreview?: (commandId: string, preview: Json) => void;
+  onAdoptPreview?: (commandId: string, preview: Json) => Promise<CommandRow | undefined>;
 }) {
   const state = record(record(device.data).vehicle_get_state),
     capabilities = record(record(device.data).vehicle_get_capabilities);
@@ -73,9 +79,52 @@ export function SiteReadonlyConsole({
     [error, setError] = useState<unknown>(),
     [preview, setPreview] = useState<Json>();
   const [previewCommandId, setPreviewCommandId] = useState("");
+  const restored = useRef(false);
+  const [adopting, setAdopting] = useState(false),
+    [adoptAttempted, setAdoptAttempted] = useState(false),
+    [adoptError, setAdoptError] = useState<unknown>(),
+    [submittedNavigation, setSubmittedNavigation] = useState<CommandRow>();
   const [selected, setSelected] = useState(""),
     [importId, setImportId] = useState("");
   const planAvailable = record(capabilities.planner).available === true;
+  const navigations = previewNavigations(
+    submittedNavigation && !commands.some((c) => c.commandId === submittedNavigation.commandId)
+      ? [submittedNavigation, ...commands]
+      : commands,
+    previewCommandId,
+  );
+  const hasAdoption = adoptAttempted || navigations.length > 0;
+  useEffect(() => {
+    if (
+      restored.current ||
+      !commands.length ||
+      !resourceId ||
+      !device.catalogHash ||
+      busy ||
+      preview
+    )
+      return;
+    if (start.trim() || coordinates.trim()) {
+      restored.current = true;
+      return;
+    }
+    const command = recoverPreviewNavigation(commands, resourceId, text(device.catalogHash));
+    if (!command) return;
+    restored.current = true;
+    const saved = record(record(command.response).structuredContent),
+      args = command.request.arguments;
+    setPreview(saved);
+    setPreviewCommandId(command.commandId);
+    setStart(
+      `lon: ${text(record(args.start).longitude)}, lat: ${text(record(args.start).latitude)}`,
+    );
+    setCoordinates(
+      array(args.waypoints)
+        .map((p) => `lon: ${text(record(p).longitude)}, lat: ${text(record(p).latitude)}`)
+        .join("\n"),
+    );
+    setDensity(text(args.density) || "adaptive");
+  }, [commands, resourceId, device.catalogHash, start, coordinates, busy, preview]);
   const previewPoints = array(preview?.waypoints)
     .map(record)
     .flatMap((p) =>
@@ -90,8 +139,13 @@ export function SiteReadonlyConsole({
     /* Keep incomplete input editable. */
   }
   async function plan() {
+    restored.current = true;
     setError(undefined);
     setPreview(undefined);
+    setPreviewCommandId("");
+    setAdoptAttempted(false);
+    setAdoptError(undefined);
+    setSubmittedNavigation(undefined);
     setBusy(true);
     try {
       const origin = parseCoordinates(start);
@@ -129,6 +183,22 @@ export function SiteReadonlyConsole({
       setError(e);
     } finally {
       setBusy(false);
+      refresh();
+    }
+  }
+  async function adopt() {
+    if (!preview || !onAdoptPreview || adopting || hasAdoption) return;
+    setAdopting(true);
+    setAdoptAttempted(true);
+    setAdoptError(undefined);
+    try {
+      const row = await onAdoptPreview(previewCommandId, preview);
+      if (row) setSubmittedNavigation(row);
+      else setAdoptError(Error("采用请求结果未确认，请查看命令记录与原任务"));
+    } catch (error) {
+      setAdoptError(error);
+    } finally {
+      setAdopting(false);
       refresh();
     }
   }
@@ -254,7 +324,7 @@ export function SiteReadonlyConsole({
             <section className="panel">
               <div className="section-head">
                 <h2>7879 路线预览</h2>
-                <span className="badge warning">尚未采用</span>
+                <span className="badge warning">{hasAdoption ? "已关联导航请求" : "尚未采用"}</span>
               </div>
               <p>WGS84，经度在前、纬度在后。支持 lon: …, lat: … 多行坐标；起点用于核对返回路线。</p>
               {!planAvailable && (
@@ -346,17 +416,38 @@ export function SiteReadonlyConsole({
               </div>
               {onAdoptPreview && (
                 <button
-                  disabled={!preview}
+                  disabled={!preview || adopting || hasAdoption}
                   onClick={() => {
-                    if (preview) onAdoptPreview(previewCommandId, preview);
+                    void adopt();
                   }}
                 >
-                  采用并导航
+                  {adopting ? "正在提交导航…" : hasAdoption ? "本预览已有导航请求" : "采用并导航"}
                 </button>
               )}
+              {adoptError !== undefined && (
+                <div className="notice warning" role="alert">
+                  {describe(adoptError)}。请查询原命令；重新预览后才能再次提交。
+                </div>
+              )}
+              {navigations.map((command) => (
+                <PreviewNavigation
+                  key={command.commandId}
+                  command={command}
+                  onOpen={(id) => {
+                    setSelected(id);
+                    requestAnimationFrame(() =>
+                      document
+                        .getElementById("site-selected-task")
+                        ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+                    );
+                  }}
+                />
+              ))}
               {preview && (
                 <div className="notice">
-                  <strong>路线预览已生成 · 尚未采用</strong>
+                  <strong>
+                    {hasAdoption ? "路线预览已生成 · 已关联导航请求" : "路线预览已生成 · 尚未采用"}
+                  </strong>
                   <p>
                     {previewPoints.length} 个规划点；
                     {["ugv.zmq-route-preview/2", "ugv.zmq-route-preview/3"].includes(
@@ -385,11 +476,7 @@ export function SiteReadonlyConsole({
                         {text(record(preview.plannerAdmission).runtimePhase)}
                       </p>
                       {record(preview.plannerAdmission).degraded === true && (
-                        <p>
-                          {text(record(preview.plannerAdmission).faultComponent)}：
-                          {text(record(preview.plannerAdmission).reason) ||
-                            text(record(preview.plannerAdmission).sceneError)}
-                        </p>
+                        <p>{plannerDegradationDetail(record(preview.plannerAdmission))}</p>
                       )}
                     </div>
                   )}
@@ -489,7 +576,7 @@ export function SiteReadonlyConsole({
             </button>
           ))}
         </section>
-        {selected && renderTask(selected)}
+        {selected && <div id="site-selected-task">{renderTask(selected)}</div>}
         <section className="panel">
           <div className="section-head">
             <h2>规划与命令记录</h2>
@@ -509,7 +596,9 @@ export function SiteReadonlyConsole({
                     ? "结果未确认"
                     : c.status === "rejected"
                       ? "已拒绝"
-                      : c.status}{" "}
+                      : c.status === "accepted"
+                        ? "已受理，设备结果另行核实"
+                        : c.status}{" "}
                 · {when(c.createdAt)}
               </summary>
               <pre>{JSON.stringify(c, null, 2)}</pre>

@@ -67,6 +67,8 @@ export const reasons: Record<string, string> = {
   UGV_PLANNER_SCENE_MISMATCH: "规划器地图与部署配置不一致",
   UGV_PLANNER_SCENE_TRANSFORM_MISMATCH: "规划器坐标转换与配置的 ENU 参考不一致",
   UGV_PLANNER_RESPONSE_INVALID: "规划响应结构或坐标不符合合同",
+  ZMQ_MODE_ECHO_TIMEOUT:
+    "驾驶模式切换未收到设备回显，路线尚未下发、导航尚未启动；请核实底盘命令接收端",
 
   ZMQ_FRAME_AUDIT_UNAVAILABLE: "图像读取审计存储不可用，本次读取未完成",
   ZMQ_FRAME_ENDPOINT_UNCONFIGURED: "未配置独立取帧端点",

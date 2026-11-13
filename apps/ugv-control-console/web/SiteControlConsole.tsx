@@ -253,9 +253,12 @@ export function SiteControlConsole(props: ComponentProps<typeof SiteReadonlyCons
         row.status === "accepted"
           ? "任务已受理，请查看任务与设备结果"
           : row.status === "completed"
-            ? "对账完成，原任务结果保持不变"
+            ? request.kind === "reconcile"
+              ? "对账完成，原任务结果保持不变"
+              : "操作已返回，请查看设备结果"
             : "请求结果未确认，请查看命令记录",
       );
+      return row;
     } catch (e) {
       setNotice(describe(e));
     } finally {
@@ -641,7 +644,7 @@ export function SiteControlConsole(props: ComponentProps<typeof SiteReadonlyCons
         </button>
       }
       onAdoptPreview={(previewId, preview) => {
-        void send({
+        return send({
           kind: "tool",
           tool: "vehicle_zmq_navigate",
           previewCommandId: previewId,
