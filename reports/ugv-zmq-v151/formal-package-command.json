@@ -1,0 +1,29 @@
+{
+  "recordedAt": "2026-11-13T06:35:19.222250+00:00",
+  "sourceCommit": "13dbfddd58b3e3c0b6e1d656a8c016c5a53f7e3a",
+  "command": [
+    "python3",
+    "scripts/package-zmq-site-readonly.py",
+    "--output",
+    "artifacts/ugv-zmq-v151-formal-20261113.tar.gz",
+    "--provider-image",
+    "smpp-zmq-v151-provider:ada745829c63",
+    "--runtime-image",
+    "smpp-zmq-v151-runtime:ada745829c63",
+    "--console-image",
+    "smpp-zmq-v151-console:eafe1ac2e2db",
+    "--evidence-root",
+    "reports/ugv-zmq-v151/formal-20261113",
+    "--catalog-profile",
+    "zmq_v1_5_1_site_control_15"
+  ],
+  "exitCode": 0,
+  "allMembersVerified": true,
+  "fileCount": 4158,
+  "imageRoundTripVerified": true,
+  "bundleSha256": "91798814a16693b7185beb6dff7b4e219538b5b87803ddffb6ba0a6d74e11836",
+  "receiptSha256": "fdcd046ffb91154bb1436d1005821b9c3fa80c6bccd1625eaa2d2ba557af01e1",
+  "stabilityAcceptedByOperator": true,
+  "actualFull24HoursObserved": false,
+  "physicalControlActions": 0
+}
