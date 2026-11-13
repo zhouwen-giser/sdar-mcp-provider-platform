@@ -21,7 +21,11 @@ export function SiteControlConsole(props: ComponentProps<typeof SiteReadonlyCons
   const profile = text(
     record(record(record(array(props.device.tools)[0])._meta)["io.sdar/ugvZmq"]).catalogProfile,
   );
-  const v14 = profile === "zmq_v1_4_0_site_control_14";
+  const v14 = [
+    "zmq_v1_4_0_site_control_14",
+    "zmq_v1_5_0_site_control_15",
+    "zmq_v1_5_1_site_control_15",
+  ].includes(profile);
   const v13 = v14 || profile === "zmq_v1_3_0_site_control_13";
   const [fov, setFov] = useState("60"),
     [recreate, setRecreate] = useState(false);
