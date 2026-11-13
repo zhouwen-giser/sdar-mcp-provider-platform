@@ -1,0 +1,7 @@
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/tests/ugv-zmq-provider/v152-catalog.test.ts
+  15:7  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  23:5  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+✖ 2 problems (2 errors, 0 warnings)
+
