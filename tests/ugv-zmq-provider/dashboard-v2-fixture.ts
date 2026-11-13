@@ -52,6 +52,9 @@ export function interopProfile() {
 export async function dashboardFixture() {
   const frame = new SceneEnu(mapReference);
   const state = {
+    scenePhase: "ready",
+    sceneOverrides: {} as Record<string, unknown>,
+    runtimeOverrides: {} as Record<string, unknown>,
     calls: 0,
     delayMs: 0,
     mismatch: false,
@@ -75,10 +78,30 @@ export async function dashboardFixture() {
       value = { map: state.mapMismatch ? "other" : mapReference.mapId };
     else if (u.pathname === "/api/simulation/scenarios")
       value = {
-        phase: "ready",
+        phase: state.scenePhase,
+        owner_id: "a".repeat(32),
+        profile_run_id: "b".repeat(32),
+        error: "",
         active_scenario: mapReference.sceneId,
         current_map: mapReference.mapId,
         simulation_epoch: state.epoch,
+        ...state.sceneOverrides,
+      };
+    else if (u.pathname === "/api/watchdog")
+      value = {
+        runtime: {
+          available: true,
+          owner_id: "a".repeat(32),
+          profile_run_id: "b".repeat(32),
+          simulation_epoch: state.epoch,
+          revision: "1",
+          phase: "RUNNING",
+          accepting_commands: true,
+          ready_control_groups: ["scene", "motion:ugv", "eo:ugv"],
+          fault_component: "",
+          reason: "",
+          ...state.runtimeOverrides,
+        },
       };
     else if (u.pathname === "/api/simulation/map/gnss") {
       const x = Number(u.searchParams.get("x")),

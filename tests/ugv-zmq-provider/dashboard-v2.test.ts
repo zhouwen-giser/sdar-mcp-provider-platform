@@ -15,6 +15,13 @@ describe("Dashboard V2 route preview", () => {
       input: { start: fixture.start, waypoints: [fixture.destination] },
     };
   }
+  it("keeps the frozen 1.5.1 ready-only admission even when component groups are open", async () => {
+    const { f, planner, input } = await setup();
+    f.state.scenePhase = "failed";
+    f.state.runtimeOverrides = { phase: "DEGRADED" };
+    await expect(planner.plan(input)).rejects.toThrow("SCENE_UNAVAILABLE");
+    expect(f.state.calls).toBe(0);
+  });
   it("uses authoritative context, correlates request IDs and ENU route without motion", async () => {
     const { f, planner, input } = await setup();
     f.state.wrongIdFirst = true;

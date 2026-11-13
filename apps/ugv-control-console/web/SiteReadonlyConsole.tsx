@@ -118,7 +118,9 @@ export function SiteReadonlyConsole({
       const value = record(result.structuredContent);
       if (
         value.adoption !== "preview_only" ||
-        !["ugv.zmq-route-preview/1", "ugv.zmq-route-preview/2"].includes(text(value.schemaVersion))
+        !["ugv.zmq-route-preview/1", "ugv.zmq-route-preview/2", "ugv.zmq-route-preview/3"].includes(
+          text(value.schemaVersion),
+        )
       )
         throw Error("UGV_PLANNER_PREVIEW_UNCONFIRMED");
       setPreview(value);
@@ -314,6 +316,12 @@ export function SiteReadonlyConsole({
                   <option value="sparse">稀疏</option>
                 </select>
               </label>
+              {text(record(record(capabilities.planner).mapReference).mapId) && (
+                <p className="field-help">
+                  当前地图：{text(record(record(capabilities.planner).mapReference).mapId)}
+                  。请使用本场景的 WGS84 经纬度；起点可由新鲜定位填入。
+                </p>
+              )}
               {error !== undefined && (
                 <div className="notice error" role="alert">
                   {describe(error)}
@@ -351,12 +359,40 @@ export function SiteReadonlyConsole({
                   <strong>路线预览已生成 · 尚未采用</strong>
                   <p>
                     {previewPoints.length} 个规划点；
-                    {preview.schemaVersion === "ugv.zmq-route-preview/2"
+                    {["ugv.zmq-route-preview/2", "ugv.zmq-route-preview/3"].includes(
+                      text(preview.schemaVersion),
+                    )
                       ? "已校验请求标识、任务上下文与 ENU 几何。"
                       : "仅按几何匹配，规划器未提供请求 ID。"}
                     {when(preview.createdAt)}
                   </p>
                   <small>来源 {text(preview.sourceRecordId)}</small>
+                  {preview.schemaVersion === "ugv.zmq-route-preview/3" && (
+                    <div
+                      className={
+                        record(preview.plannerAdmission).degraded === true
+                          ? "notice warning"
+                          : "notice"
+                      }
+                    >
+                      <strong>
+                        {record(preview.plannerAdmission).degraded === true
+                          ? "上游整体降级；场景与车辆组件已开放，只读预览已校验"
+                          : "场景与车辆组件准入已核实"}
+                      </strong>
+                      <p>
+                        地图 {text(record(record(preview.transform).reference).mapId)} · 运行阶段{" "}
+                        {text(record(preview.plannerAdmission).runtimePhase)}
+                      </p>
+                      {record(preview.plannerAdmission).degraded === true && (
+                        <p>
+                          {text(record(preview.plannerAdmission).faultComponent)}：
+                          {text(record(preview.plannerAdmission).reason) ||
+                            text(record(preview.plannerAdmission).sceneError)}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </section>

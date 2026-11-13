@@ -1,4 +1,8 @@
 import {
+  siteV152Tool,
+  SITE_CONTROL_V152_PROFILE,
+} from "../../../packages/vehicle-zmq-control/src/site-v152.js";
+import {
   siteV151Tool,
   SITE_CONTROL_V151_PROFILE,
 } from "../../../packages/vehicle-zmq-control/src/site-v151.js";
@@ -132,17 +136,19 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
       this.validators.set(
         name,
         ajv.compile(
-          (this.v151
-            ? siteV151Tool
-            : this.v15
-              ? siteV15Tool
-              : this.v14
-                ? siteControlV14Tool
-                : this.v13
-                  ? siteControlV13Tool
-                  : this.siteReads
-                    ? siteControlTool
-                    : zmqTool)(name, this.resourceId).inputSchema,
+          (this.v152
+            ? siteV152Tool
+            : this.v151
+              ? siteV151Tool
+              : this.v15
+                ? siteV15Tool
+                : this.v14
+                  ? siteControlV14Tool
+                  : this.v13
+                    ? siteControlV13Tool
+                    : this.siteReads
+                      ? siteControlTool
+                      : zmqTool)(name, this.resourceId).inputSchema,
         ),
       );
     for (const name of [
@@ -175,8 +181,11 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
   get v13() {
     return this.engine.scope.settings.catalogProfile === SITE_CONTROL_V13_PROFILE;
   }
+  get v152() {
+    return this.engine.scope.settings.catalogProfile === SITE_CONTROL_V152_PROFILE;
+  }
   get v151() {
-    return this.engine.scope.settings.catalogProfile === SITE_CONTROL_V151_PROFILE;
+    return this.v152 || this.engine.scope.settings.catalogProfile === SITE_CONTROL_V151_PROFILE;
   }
   get v15() {
     return this.v151 || this.engine.scope.settings.catalogProfile === SITE_CONTROL_V15_PROFILE;
@@ -197,17 +206,19 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
     return this.v14 || this.v15 ? new Set([...ZMQ_CONTROL_TOOLS, VIEW_TOOL]) : ZMQ_CONTROL_TOOLS;
   }
   get catalogProfile() {
-    return this.v151
-      ? SITE_CONTROL_V151_PROFILE
-      : this.v15
-        ? SITE_CONTROL_V15_PROFILE
-        : this.v14
-          ? VIEW_PROFILE
-          : this.v13
-            ? SITE_CONTROL_V13_PROFILE
-            : this.siteReads
-              ? SITE_CONTROL_PROFILE
-              : "zmq_v1_0_1_12";
+    return this.v152
+      ? SITE_CONTROL_V152_PROFILE
+      : this.v151
+        ? SITE_CONTROL_V151_PROFILE
+        : this.v15
+          ? SITE_CONTROL_V15_PROFILE
+          : this.v14
+            ? VIEW_PROFILE
+            : this.v13
+              ? SITE_CONTROL_V13_PROFILE
+              : this.siteReads
+                ? SITE_CONTROL_PROFILE
+                : "zmq_v1_0_1_12";
   }
   snapshot() {
     return this.observer.snapshot();
@@ -564,6 +575,7 @@ export class ZmqProviderRuntime implements VehicleAdapterRuntime<
               VIEW_PROFILE,
               SITE_CONTROL_V15_PROFILE,
               SITE_CONTROL_V151_PROFILE,
+              SITE_CONTROL_V152_PROFILE,
             ].includes(e.zmqAdmission?.catalogProfile ?? "")
           ? this.resultValidators
           : this.legacySiteResultValidators

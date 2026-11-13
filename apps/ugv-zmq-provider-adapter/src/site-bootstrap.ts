@@ -1,3 +1,5 @@
+import { siteV152Manifest } from "../../../packages/vehicle-zmq-control/src/site-v152.js";
+import { checkPlannerAdmissionContracts } from "../../../scripts/ugv-zmq/planner-admission-contract.js";
 import { siteV151Manifest } from "../../../packages/vehicle-zmq-control/src/site-v151.js";
 import { checkInteropContracts } from "../../../scripts/ugv-zmq/interop-contract.js";
 import { checkContractsV2 } from "../../../scripts/ugv-zmq/check-contracts-v2.js";
@@ -7,7 +9,8 @@ import {
   DeploymentProfileV2,
   SiteControlDeploymentProfileV2,
   SiteInteropDeploymentProfile,
-} from "../../../packages/vehicle-zmq-contract/src/interop-profile.js";
+  SitePlannerAdmissionProfile,
+} from "../../../packages/vehicle-zmq-contract/src/planner-admission-profile.js";
 import { Pool } from "pg";
 import { z } from "zod";
 import { DeploymentProfile } from "../../../packages/vehicle-zmq-contract/src/index.js";
@@ -59,6 +62,7 @@ export async function openSiteReadonlyProvider(options: SiteReadonlyOptions) {
         DeploymentProfileV2,
         SiteControlDeploymentProfileV2,
         SiteInteropDeploymentProfile,
+        SitePlannerAdmissionProfile,
       ])
       .parse(options.profile),
     settings = ObserverSettings.parse(options.observerSettings);
@@ -69,9 +73,11 @@ export async function openSiteReadonlyProvider(options: SiteReadonlyOptions) {
   if (
     profile.components.eo.protocolVersion === "2.3" &&
     contract !==
-      (profile.schemaVersion === "ugv.zmq-site-deployment/3"
-        ? checkInteropContracts()
-        : checkContractsV2()
+      (profile.schemaVersion === "ugv.zmq-site-deployment/4"
+        ? checkPlannerAdmissionContracts()
+        : profile.schemaVersion === "ugv.zmq-site-deployment/3"
+          ? checkInteropContracts()
+          : checkContractsV2()
       ).contractSha256
   )
     throw Error("ZMQ_DEPLOYMENT_NATIVE_CONTRACT_HASH_MISMATCH");
@@ -89,7 +95,7 @@ export async function openSiteReadonlyProvider(options: SiteReadonlyOptions) {
   if (
     options.plannerFrame &&
     (options.plannerFrame === "scene_enu_wgs84_v1") !==
-      (profile.schemaVersion === "ugv.zmq-site-deployment/3")
+      ["ugv.zmq-site-deployment/3", "ugv.zmq-site-deployment/4"].includes(profile.schemaVersion)
   )
     throw Error("UGV_PLANNER_DEPLOYMENT_VERSION_MISMATCH");
   const store = new PostgresProviderStore(options.databaseUrl, 8, "ugv", options.gowm);
@@ -159,7 +165,7 @@ export async function openSiteReadonlyProvider(options: SiteReadonlyOptions) {
         ? new SiteRoutePlanner(
             profile.planner.endpoint,
             pool,
-            profile.schemaVersion === "ugv.zmq-site-deployment/3" ? profile.planner : undefined,
+            "mapReference" in profile.planner ? profile.planner : undefined,
           )
         : undefined;
     const runtime = new SiteReadonlyRuntime(
@@ -180,7 +186,7 @@ export async function openSiteReadonlyProvider(options: SiteReadonlyOptions) {
         internalErrorCode: "ZMQ_PROVIDER_ERROR",
         manifest: () =>
           runtime.v15
-            ? (runtime.v151 ? siteV151Manifest : siteV15Manifest)(
+            ? (runtime.v152 ? siteV152Manifest : runtime.v151 ? siteV151Manifest : siteV15Manifest)(
                 profile.providerBinding.providerId ?? "",
                 runtime.resourceId,
                 store,

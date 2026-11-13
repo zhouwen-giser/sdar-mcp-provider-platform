@@ -1,3 +1,5 @@
+import { checkPlannerAdmissionContracts } from "../../scripts/ugv-zmq/planner-admission-contract.js";
+import { SitePlannerAdmissionProfile } from "../../packages/vehicle-zmq-contract/src/planner-admission-profile.js";
 import { checkInteropContracts } from "../../scripts/ugv-zmq/interop-contract.js";
 import { SiteInteropDeploymentProfile } from "../../packages/vehicle-zmq-contract/src/interop-profile.js";
 import { binding } from "./dashboard-v2-fixture.js";
@@ -40,7 +42,8 @@ export async function controlSiteFixture(
     | "zmq_v1_3_0_site_control_13"
     | "zmq_v1_4_0_site_control_14"
     | "zmq_v1_5_0_site_control_15"
-    | "zmq_v1_5_1_site_control_15",
+    | "zmq_v1_5_1_site_control_15"
+    | "zmq_v1_5_2_site_control_15",
   simulationView?: ViewBackendSettings,
 ) {
   if (new URL(databaseUrl).hostname !== "127.0.0.1") throw Error("ISOLATED_DATABASE_REQUIRED");
@@ -62,25 +65,39 @@ export async function controlSiteFixture(
   await installObservationArchive(admin, present(schemas[2]));
   const devices = new SimulatedZmqDevices();
   devices.controllerSystemId = "0";
-  const v151 = catalogProfile === "zmq_v1_5_1_site_control_15";
+  const v152 = catalogProfile === "zmq_v1_5_2_site_control_15";
+  const v151 = v152 || catalogProfile === "zmq_v1_5_1_site_control_15";
   const v15 = v151 || catalogProfile === "zmq_v1_5_0_site_control_15";
   devices.businessCrcPublications = v151;
   devices.newProtocol = v15;
   const original = await devices.start();
   const profile = (
-    v151
-      ? SiteInteropDeploymentProfile
-      : v15
-        ? SiteControlDeploymentProfileV2
-        : SiteControlDeploymentProfile
+    v152
+      ? SitePlannerAdmissionProfile
+      : v151
+        ? SiteInteropDeploymentProfile
+        : v15
+          ? SiteControlDeploymentProfileV2
+          : SiteControlDeploymentProfile
   ).parse({
     ...original,
-    schemaVersion: v151
-      ? "ugv.zmq-site-deployment/3"
-      : v15
-        ? "ugv.zmq-site-deployment/2"
-        : "ugv.zmq-site-deployment/1",
-    ...(v151 ? { planner: { ...binding, policy: "disable", endpoint: null } } : {}),
+    schemaVersion: v152
+      ? "ugv.zmq-site-deployment/4"
+      : v151
+        ? "ugv.zmq-site-deployment/3"
+        : v15
+          ? "ugv.zmq-site-deployment/2"
+          : "ugv.zmq-site-deployment/1",
+    ...(v151
+      ? {
+          planner: {
+            ...binding,
+            policy: "disable",
+            endpoint: null,
+            ...(v152 ? { readinessPolicy: "runtime_scene_and_entity_v1" } : {}),
+          },
+        }
+      : {}),
     executionDomain: { mode: "live", simulationId: null },
     components: {
       ...original.components,
@@ -181,9 +198,11 @@ export async function controlSiteFixture(
       ...testScope().settings,
       ...(v15
         ? {
-            contractSha256: v151
-              ? checkInteropContracts().contractSha256
-              : checkContractsV2().contractSha256,
+            contractSha256: v152
+              ? checkPlannerAdmissionContracts().contractSha256
+              : v151
+                ? checkInteropContracts().contractSha256
+                : checkContractsV2().contractSha256,
           }
         : {}),
       ...(catalogProfile

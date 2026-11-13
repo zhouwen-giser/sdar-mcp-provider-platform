@@ -1,4 +1,4 @@
-import type { ControlDeploymentProfile as DeploymentProfile } from "../../vehicle-zmq-contract/src/interop-profile.js";
+import type { ControlDeploymentProfile as DeploymentProfile } from "../../vehicle-zmq-contract/src/planner-admission-profile.js";
 import { randomUUID } from "node:crypto";
 import { ZodError } from "zod";
 import {

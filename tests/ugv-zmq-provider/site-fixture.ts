@@ -1,3 +1,5 @@
+import { checkPlannerAdmissionContracts } from "../../scripts/ugv-zmq/planner-admission-contract.js";
+import { SitePlannerAdmissionProfile } from "../../packages/vehicle-zmq-contract/src/planner-admission-profile.js";
 import { checkInteropContracts } from "../../scripts/ugv-zmq/interop-contract.js";
 import { SiteInteropDeploymentProfile } from "../../packages/vehicle-zmq-contract/src/interop-profile.js";
 import { dashboardFixture, binding } from "./dashboard-v2-fixture.js";
@@ -26,7 +28,12 @@ export const siteDestination = {
   longitude: 106.81485 - 192 / 111320,
   latitude: 29.7195 - 100 / 110540,
 };
-export async function siteFixture(databaseUrl: string, v15 = false, interop = false) {
+export async function siteFixture(
+  databaseUrl: string,
+  v15 = false,
+  interop = false,
+  componentAdmission = false,
+) {
   if (new URL(databaseUrl).hostname !== "127.0.0.1") throw Error("ISOLATED_DATABASE_REQUIRED");
   const suffix = randomUUID().replaceAll("-", ""),
     schemas = ["site_provider_", "site_runtime_", "site_archive_"].map((s) => s + suffix);
@@ -79,7 +86,7 @@ export async function siteFixture(databaseUrl: string, v15 = false, interop = fa
   if (!plannerAddress || typeof plannerAddress === "string")
     throw Error("FIXTURE_PLANNER_ADDRESS_REQUIRED");
   const endpoint = `http://127.0.0.1:${plannerAddress.port}/`;
-  const profile = interop
+  const previousProfile = interop
     ? SiteInteropDeploymentProfile.parse({
         ...baseProfile,
         schemaVersion: "ugv.zmq-site-deployment/3",
@@ -94,6 +101,13 @@ export async function siteFixture(databaseUrl: string, v15 = false, interop = fa
         planner: { ...binding, endpoint },
       })
     : baseProfile;
+  const profile = componentAdmission
+    ? SitePlannerAdmissionProfile.parse({
+        ...previousProfile,
+        schemaVersion: "ugv.zmq-site-deployment/4",
+        planner: { ...previousProfile.planner, readinessPolicy: "runtime_scene_and_entity_v1" },
+      })
+    : previousProfile;
   if (!interop) profile.planner = { policy: "retain", endpoint };
   if (plannerV2)
     devices.positionOverride = {
@@ -153,11 +167,13 @@ export async function siteFixture(databaseUrl: string, v15 = false, interop = fa
       diagnosticPartition: "SIMULATED-site:" + suffix,
       flushIntervalMs: 5,
     }),
-    contractSha256: interop
-      ? checkInteropContracts().contractSha256
-      : v15
-        ? checkContractsV2().contractSha256
-        : "b".repeat(64),
+    contractSha256: componentAdmission
+      ? checkPlannerAdmissionContracts().contractSha256
+      : interop
+        ? checkInteropContracts().contractSha256
+        : v15
+          ? checkContractsV2().contractSha256
+          : "b".repeat(64),
     plannerFrame: interop
       ? ("scene_enu_wgs84_v1" as const)
       : ("airport_south_positive_v1" as const),

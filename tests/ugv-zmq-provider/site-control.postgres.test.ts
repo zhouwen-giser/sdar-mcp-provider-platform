@@ -11,7 +11,8 @@ import { nativeCatalogReason } from "../../apps/ugv-control-console/shared/zmq-n
 import { siteControlOperation } from "../../packages/vehicle-zmq-control/src/site-control-catalog.js";
 import type { Tool } from "../../apps/ugv-control-console/shared/model.js";
 const file = process.env.SMPP_ZMQ_TEST_CONFIG_FILE;
-const v151 = process.env.SMPP_ZMQ_TEST_CATALOG_PROFILE === "zmq_v1_5_1_site_control_15";
+const v152 = process.env.SMPP_ZMQ_TEST_CATALOG_PROFILE === "zmq_v1_5_2_site_control_15";
+const v151 = v152 || process.env.SMPP_ZMQ_TEST_CATALOG_PROFILE === "zmq_v1_5_1_site_control_15";
 const v15 = v151 || process.env.SMPP_ZMQ_TEST_CATALOG_PROFILE === "zmq_v1_5_0_site_control_15";
 let f: Awaited<ReturnType<typeof controlSiteFixture>>;
 const timing = { start: { mode: "immediate", startToleranceMs: 60000 }, maxElapsedMs: 10000 };
@@ -47,7 +48,13 @@ describe.skipIf(!file)("site-control JWT / real PostgreSQL / native sockets", ()
     f = await controlSiteFixture(
       cfg.databaseUrl,
       "jwt_hs256",
-      v151 ? "zmq_v1_5_1_site_control_15" : v15 ? "zmq_v1_5_0_site_control_15" : undefined,
+      v152
+        ? "zmq_v1_5_2_site_control_15"
+        : v151
+          ? "zmq_v1_5_1_site_control_15"
+          : v15
+            ? "zmq_v1_5_0_site_control_15"
+            : undefined,
     );
     await until(
       () =>

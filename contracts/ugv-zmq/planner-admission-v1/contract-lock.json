@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "ugv.zmq-planner-admission-lock/1",
+  "parentContractSha256": "0e2df6125e060d997cdc9eedd986cd2863592fbcecc6bb7210c7b47627efa2f5",
+  "plannerReadinessPolicy": "runtime_scene_and_entity_v1",
+  "files": [
+    {
+      "path": "packages/vehicle-zmq-contract/src/planner-admission-profile.ts",
+      "sha256": "72a9b2830622468349dbb67b6b5a19c6ea3e525c0630c1090963dff86bcd95e4"
+    },
+    {
+      "path": "packages/provider-adapter-kit/src/dashboard-v2-component-planner.ts",
+      "sha256": "518d4091169c31c35c98b03671674c07da82f75d0b80d62165e8e8c287fe787f"
+    },
+    {
+      "path": "packages/vehicle-zmq-control/src/planner-v3-contract.ts",
+      "sha256": "9812544ee5be9ecc007644a214b28ea2f7653c813730dfc821268f1511e38858"
+    },
+    {
+      "path": "contracts/ugv-zmq/provider-v1.5.2-site-control/catalog.json",
+      "sha256": "689fecfab6a14a13b63832bf4965055182cf0b8182c619592cf47f9afd6ea44b"
+    },
+    {
+      "path": "contracts/ugv-zmq/provider-v1.5.2-readonly/catalog.json",
+      "sha256": "dbf9692e057d8509d75780139f831201c478750e25ad0becdc0383313a2f951b"
+    }
+  ]
+}

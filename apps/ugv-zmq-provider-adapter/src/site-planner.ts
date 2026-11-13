@@ -1,3 +1,6 @@
+import { DashboardV2ComponentPlanner } from "../../../packages/provider-adapter-kit/src/dashboard-v2-component-planner.js";
+import { PlanRouteResultV3 } from "../../../packages/vehicle-zmq-control/src/planner-v3-contract.js";
+import type { SitePlannerAdmissionProfile } from "../../../packages/vehicle-zmq-contract/src/planner-admission-profile.js";
 import { randomUUID } from "node:crypto";
 import { DashboardV2Planner } from "../../../packages/provider-adapter-kit/src/dashboard-v2-planner.js";
 import type { SiteInteropDeploymentProfile } from "../../../packages/vehicle-zmq-contract/src/interop-profile.js";
@@ -19,7 +22,8 @@ export class SiteRoutePlanner {
   constructor(
     endpoint: string,
     readonly pool: Pool,
-    readonly binding?: SiteInteropDeploymentProfile["planner"],
+    readonly binding?:
+      SiteInteropDeploymentProfile["planner"] | SitePlannerAdmissionProfile["planner"],
   ) {
     new AirportRoadPlanner(endpoint, 3000);
     this.endpoint = new URL(endpoint).href;
@@ -38,15 +42,17 @@ export class SiteRoutePlanner {
       locked = lock.rows[0]?.locked === true;
       if (!locked) throw Error("UGV_PLANNER_BUSY");
       if (this.binding) {
-        const selected = await new DashboardV2Planner(this.endpoint, this.binding).plan(
+        const componentAdmission = "readinessPolicy" in this.binding;
+        const Planner = componentAdmission ? DashboardV2ComponentPlanner : DashboardV2Planner;
+        const selected = await new Planner(this.endpoint, this.binding).plan(
           { start: input.start, waypoints: input.waypoints, density: input.density },
           signal,
         );
         if (Buffer.byteLength(selected.sourceMessage) > 262144)
           throw Error("UGV_PLANNER_SOURCE_TOO_LARGE");
         const { sourceMessage, observedAt, ...source } = selected;
-        return PlanRouteResultV2.parse({
-          schemaVersion: "ugv.zmq-route-preview/2",
+        return (componentAdmission ? PlanRouteResultV3 : PlanRouteResultV2).parse({
+          schemaVersion: componentAdmission ? "ugv.zmq-route-preview/3" : "ugv.zmq-route-preview/2",
           previewId: randomUUID(),
           resourceId: input.resourceId,
           adoption: "preview_only",

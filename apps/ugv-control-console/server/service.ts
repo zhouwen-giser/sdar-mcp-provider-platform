@@ -526,7 +526,9 @@ export class Service {
             ...previous.request.arguments,
             density: previous.request.arguments.density ?? "adaptive",
           }) !== preview.requestHash ||
-          (preview.schemaVersion === "ugv.zmq-route-preview/2"
+          (["ugv.zmq-route-preview/2", "ugv.zmq-route-preview/3"].includes(
+            text(preview.schemaVersion),
+          )
             ? record(preview.transform).policy !== "scene_enu_wgs84_v1" ||
               wireHash(record(preview.transform).reference) !== record(preview.transform).sha256
             : wireHash(preview.transform) !==
@@ -545,7 +547,11 @@ export class Service {
             preview.sourceMessageSha256
         )
           throw Error("ZMQ_PREVIEW_PROVENANCE_INVALID");
-        if (preview.schemaVersion === "ugv.zmq-route-preview/2") {
+        if (
+          ["ugv.zmq-route-preview/2", "ugv.zmq-route-preview/3"].includes(
+            text(preview.schemaVersion),
+          )
+        ) {
           const current = record((await this.state()).data),
             planner = record(record(current.vehicle_get_capabilities).planner);
           if (

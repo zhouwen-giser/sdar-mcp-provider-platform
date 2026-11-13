@@ -1,4 +1,8 @@
 import {
+  siteV152Tool,
+  SITE_READONLY_V152_PROFILE,
+} from "../../../packages/vehicle-zmq-control/src/site-v152.js";
+import {
   siteV151Tool,
   SITE_READONLY_V151_PROFILE,
 } from "../../../packages/vehicle-zmq-control/src/site-v151.js";
@@ -18,7 +22,7 @@ import { EventEmitter } from "node:events";
 import AjvImport, { type Options, type ValidateFunction } from "ajv";
 import addFormatsImport from "ajv-formats";
 import { z } from "zod";
-import type { ControlDeploymentProfile as DeploymentProfile } from "../../../packages/vehicle-zmq-contract/src/interop-profile.js";
+import type { ControlDeploymentProfile as DeploymentProfile } from "../../../packages/vehicle-zmq-contract/src/planner-admission-profile.js";
 import type { ZmqObservationObserver } from "../../../packages/vehicle-zmq-observer/src/index.js";
 import { canonical, sha256 } from "../../../packages/vehicle-zmq-observer/src/index.js";
 import { metadataPredicate } from "../../../packages/vehicle-zmq-control/src/metadata-scope.js";
@@ -102,14 +106,21 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
         name,
         ajv.compile(
           (this.v15
-            ? (this.v151 ? siteV151Tool : siteV15Tool)(name, this.resourceId, true)
+            ? (this.v152 ? siteV152Tool : this.v151 ? siteV151Tool : siteV15Tool)(
+                name,
+                this.resourceId,
+                true,
+              )
             : siteTool(name, this.resourceId)
           ).inputSchema,
         ),
       );
   }
+  get v152() {
+    return this.profile.schemaVersion === "ugv.zmq-site-deployment/4";
+  }
   get v151() {
-    return this.profile.schemaVersion === "ugv.zmq-site-deployment/3";
+    return this.v152 || this.profile.schemaVersion === "ugv.zmq-site-deployment/3";
   }
   get v15() {
     return this.profile.components.eo.protocolVersion === "2.3";
@@ -118,11 +129,13 @@ export class SiteReadonlyRuntime implements VehicleAdapterRuntime<
     return this.v15 ? SITE_V15_TOOLS : SITE_TOOLS;
   }
   get catalogProfile() {
-    return this.v151
-      ? SITE_READONLY_V151_PROFILE
-      : this.v15
-        ? SITE_READONLY_V15_PROFILE
-        : SITE_PROFILE;
+    return this.v152
+      ? SITE_READONLY_V152_PROFILE
+      : this.v151
+        ? SITE_READONLY_V151_PROFILE
+        : this.v15
+          ? SITE_READONLY_V15_PROFILE
+          : SITE_PROFILE;
   }
   isControl(name: string) {
     return ZMQ_CONTROL_TOOLS.has(name) || name === VIEW_TOOL;

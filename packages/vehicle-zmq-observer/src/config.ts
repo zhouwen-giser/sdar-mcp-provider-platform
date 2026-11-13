@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
-import { ControlDeploymentProfile } from "../../vehicle-zmq-contract/src/interop-profile.js";
+import { ControlDeploymentProfile } from "../../vehicle-zmq-contract/src/planner-admission-profile.js";
 
 export const COMPONENTS = ["chassis", "eo", "simulationEffect"] as const;
 export type Component = (typeof COMPONENTS)[number];

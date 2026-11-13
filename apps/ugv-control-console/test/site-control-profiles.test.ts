@@ -25,6 +25,7 @@ describe("published control form versions", () => {
     "zmq_v1_4_0_site_control_14",
     "zmq_v1_5_0_site_control_15",
     "zmq_v1_5_1_site_control_15",
+    "zmq_v1_5_2_site_control_15",
   ])("keeps km/h defaults and the simulation view entry for %s", (profile) => {
     const html = render(profile);
     expect(html).toContain("速度上限（km/h）");

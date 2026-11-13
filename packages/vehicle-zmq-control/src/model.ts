@@ -1,8 +1,12 @@
-import { SITE_CONTROL_V15_PROFILE, SITE_CONTROL_V151_PROFILE } from "./catalog-profiles.js";
+import {
+  SITE_CONTROL_V15_PROFILE,
+  SITE_CONTROL_V151_PROFILE,
+  SITE_CONTROL_V152_PROFILE,
+} from "./catalog-profiles.js";
 import {
   ControlDeploymentProfile,
   type ControlDeploymentProfile as DeploymentProfile,
-} from "../../vehicle-zmq-contract/src/interop-profile.js";
+} from "../../vehicle-zmq-contract/src/planner-admission-profile.js";
 import { z } from "zod";
 import { EoRequest, SimulationEffectRequest } from "../../vehicle-zmq-contract/src/index.js";
 import { OperationSupportMap } from "./operation-support.js";
@@ -188,6 +192,7 @@ export const StartControl = z
             VIEW_PROFILE,
             SITE_CONTROL_V15_PROFILE,
             SITE_CONTROL_V151_PROFILE,
+            SITE_CONTROL_V152_PROFILE,
           ])
           .optional(),
         parameterResolution: z.record(z.string(), z.unknown()).optional(),
@@ -214,6 +219,7 @@ export const ControlSettings = z
         VIEW_PROFILE,
         SITE_CONTROL_V15_PROFILE,
         SITE_CONTROL_V151_PROFILE,
+        SITE_CONTROL_V152_PROFILE,
       ])
       .optional(),
     simulationView: ViewBackendSettings.optional(),
@@ -289,9 +295,12 @@ export function controlScope(profileInput: unknown, settingsInput: unknown): Con
   if (
     settings.simulationView &&
     settings.mode === "site_control" &&
-    ![VIEW_PROFILE, SITE_CONTROL_V15_PROFILE, SITE_CONTROL_V151_PROFILE].includes(
-      settings.catalogProfile ?? "",
-    )
+    ![
+      VIEW_PROFILE,
+      SITE_CONTROL_V15_PROFILE,
+      SITE_CONTROL_V151_PROFILE,
+      SITE_CONTROL_V152_PROFILE,
+    ].includes(settings.catalogProfile ?? "")
   )
     throw Error("ZMQ_VIEW_CATALOG_REQUIRED");
   const components = [
@@ -320,21 +329,28 @@ export function controlScope(profileInput: unknown, settingsInput: unknown): Con
           "ugv.zmq-site-deployment/1",
           "ugv.zmq-site-deployment/2",
           "ugv.zmq-site-deployment/3",
+          "ugv.zmq-site-deployment/4",
         ].includes(profile.schemaVersion))
   )
     throw Error("ZMQ_CONTROL_BINDING_REQUIRED");
   if (
-    [SITE_CONTROL_V15_PROFILE, SITE_CONTROL_V151_PROFILE].includes(
+    [SITE_CONTROL_V15_PROFILE, SITE_CONTROL_V151_PROFILE, SITE_CONTROL_V152_PROFILE].includes(
       settings.catalogProfile ?? "",
     ) !==
     (profile.components.chassis.protocolVersion === "2.1")
   )
     throw Error("ZMQ_CATALOG_NATIVE_VERSION_MISMATCH");
   if (
-    (settings.catalogProfile === SITE_CONTROL_V151_PROFILE) !==
-    (profile.schemaVersion === "ugv.zmq-site-deployment/3")
+    [SITE_CONTROL_V151_PROFILE, SITE_CONTROL_V152_PROFILE].includes(
+      settings.catalogProfile ?? "",
+    ) !== ["ugv.zmq-site-deployment/3", "ugv.zmq-site-deployment/4"].includes(profile.schemaVersion)
   )
     throw Error("ZMQ_CATALOG_SITE_FRAMING_MISMATCH");
+  if (
+    (settings.catalogProfile === SITE_CONTROL_V152_PROFILE) !==
+    (profile.schemaVersion === "ugv.zmq-site-deployment/4")
+  )
+    throw Error("ZMQ_CATALOG_PLANNER_ADMISSION_MISMATCH");
   const stableSettings = { ...settings, observerSessionId: null };
   const hash = sha256(canonical({ profile, settings: stableSettings }));
   // Endpoints, independent of requested identity, prevent two identities controlling one simulator.

@@ -1,3 +1,4 @@
+import { checkPlannerAdmissionContracts } from "../../../scripts/ugv-zmq/planner-admission-contract.js";
 import { checkInteropContracts } from "../../../scripts/ugv-zmq/interop-contract.js";
 import { checkContractsV2 } from "../../../scripts/ugv-zmq/check-contracts-v2.js";
 import { openFrames } from "./frames.js";
@@ -9,7 +10,7 @@ import { SiteRoutePlanner } from "./site-planner.js";
 import { siteReadonlyBusiness } from "./business.js";
 import { Pool } from "pg";
 import { z } from "zod";
-import { ControlDeploymentProfile } from "../../../packages/vehicle-zmq-contract/src/interop-profile.js";
+import { ControlDeploymentProfile } from "../../../packages/vehicle-zmq-contract/src/planner-admission-profile.js";
 import {
   observerIdentity,
   ObserverSettings,
@@ -63,9 +64,11 @@ export async function openZmqProvider(options: ZmqProviderOptions) {
     profile.components.chassis.protocolVersion === "2.1" &&
     options.mode === "site_control" &&
     limits.contractSha256 !==
-      (profile.schemaVersion === "ugv.zmq-site-deployment/3"
-        ? checkInteropContracts()
-        : checkContractsV2()
+      (profile.schemaVersion === "ugv.zmq-site-deployment/4"
+        ? checkPlannerAdmissionContracts()
+        : profile.schemaVersion === "ugv.zmq-site-deployment/3"
+          ? checkInteropContracts()
+          : checkContractsV2()
       ).contractSha256
   )
     throw Error("ZMQ_DEPLOYMENT_NATIVE_CONTRACT_HASH_MISMATCH");
@@ -81,7 +84,7 @@ export async function openZmqProvider(options: ZmqProviderOptions) {
   if (
     options.plannerFrame &&
     (options.plannerFrame === "scene_enu_wgs84_v1") !==
-      (profile.schemaVersion === "ugv.zmq-site-deployment/3")
+      ["ugv.zmq-site-deployment/3", "ugv.zmq-site-deployment/4"].includes(profile.schemaVersion)
   )
     throw Error("UGV_PLANNER_DEPLOYMENT_VERSION_MISMATCH");
   controlScope(profile, limits);
@@ -179,9 +182,7 @@ export async function openZmqProvider(options: ZmqProviderOptions) {
               ? new SiteRoutePlanner(
                   profile.planner.endpoint,
                   pool,
-                  profile.schemaVersion === "ugv.zmq-site-deployment/3"
-                    ? profile.planner
-                    : undefined,
+                  "mapReference" in profile.planner ? profile.planner : undefined,
                 )
               : undefined,
             frames?.service,

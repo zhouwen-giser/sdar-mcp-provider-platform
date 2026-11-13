@@ -1,4 +1,8 @@
-import { SITE_CONTROL_V15_PROFILE, SITE_CONTROL_V151_PROFILE } from "./catalog-profiles.js";
+import {
+  SITE_CONTROL_V15_PROFILE,
+  SITE_CONTROL_V151_PROFILE,
+  SITE_CONTROL_V152_PROFILE,
+} from "./catalog-profiles.js";
 import { z } from "zod";
 import type { ControlSettings, Operation } from "./model.js";
 import { VIEW_PROFILE } from "./simulation-view-contract.js";
@@ -77,7 +81,10 @@ export const operationSupportCatalog = (settings: ControlSettings) =>
   OPERATION_ADMISSION_KEYS.filter(
     (key) =>
       key !== "camera.simulationView" ||
-      [VIEW_PROFILE, SITE_CONTROL_V15_PROFILE, SITE_CONTROL_V151_PROFILE].includes(
-        settings.catalogProfile ?? "",
-      ),
+      [
+        VIEW_PROFILE,
+        SITE_CONTROL_V15_PROFILE,
+        SITE_CONTROL_V151_PROFILE,
+        SITE_CONTROL_V152_PROFILE,
+      ].includes(settings.catalogProfile ?? ""),
   ).map((key) => operationSupport(settings, key));

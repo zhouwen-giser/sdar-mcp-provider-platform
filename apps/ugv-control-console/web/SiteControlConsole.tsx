@@ -25,6 +25,7 @@ export function SiteControlConsole(props: ComponentProps<typeof SiteReadonlyCons
     "zmq_v1_4_0_site_control_14",
     "zmq_v1_5_0_site_control_15",
     "zmq_v1_5_1_site_control_15",
+    "zmq_v1_5_2_site_control_15",
   ].includes(profile);
   const v13 = v14 || profile === "zmq_v1_3_0_site_control_13";
   const [fov, setFov] = useState("60"),
