@@ -1,0 +1,91 @@
+{
+  "checkedAt": "2026-11-13T01:22:17.605772+00:00",
+  "status": "running",
+  "startedAt": "2026-11-12T10:20:30.763833+00:00",
+  "updatedAt": "2026-11-13T01:22:13.030487+00:00",
+  "summaryAgeSeconds": 4.575285,
+  "elapsedSeconds": 54102.266601707786,
+  "actualWallSeconds": 54106.841939,
+  "earliest24h": "2026-11-13T10:20:30.763833+00:00",
+  "samples": 902,
+  "lastSampleSha256": "de64c923092d144ebe8416132f948a3cfb60649d0a5f3a92b15147b0b44ff7d6",
+  "hashChainVerified": true,
+  "monitorProcessAlive": true,
+  "failures": [],
+  "archive": {
+    "committedEvents": 2072308,
+    "committedReceptions": 2072292,
+    "failureCode": null,
+    "failureRecorded": null,
+    "locallyDiscardedMessages": 0,
+    "pendingBytes": 7496,
+    "pendingRecords": 4,
+    "receivedMessages": 2072296,
+    "status": "running",
+    "unconfirmedReceptions": 0
+  },
+  "native": {
+    "allComponentsFresh": true,
+    "protocols": [
+      "chassis@2.1-site-rx/1",
+      "eo@2.3",
+      "simulationEffect@1.0"
+    ],
+    "chassisContractVerified": true,
+    "chassisWire": {
+      "publicationFraming": "prefix_business_length_crc",
+      "commandFraming": "prefix_wire_length_crc",
+      "baseBusinessProtocol": "2.1",
+      "standard21Conformance": false
+    },
+    "plannerLastCheck": {
+      "status": "blocked",
+      "reason": "UGV_PLANNER_SCENE_UNAVAILABLE",
+      "at": "2026-11-13T01:21:10.897492+00:00"
+    },
+    "plannerChecks": 91,
+    "plannerFailures": 69,
+    "siteReadOnlyQualified": false
+  },
+  "latestFrame": {
+    "sample": 900,
+    "at": "2026-11-13T01:21:10.897492+00:00",
+    "status": "verified",
+    "sha256": "419625c199f0e46d00d3d619b94abc026c30e0cc3992348c235cec373b05d0ec"
+  },
+  "frameChecks": 91,
+  "frameFailures": 0,
+  "containers": [
+    {
+      "name": "smpp-zmq-v15-candidate-provider-1",
+      "id": "25af10bcbc4d00cbff8fb987922b1f49ed46afe69950552a74bc606882470430",
+      "image": "sha256:b1a92b1c166bda4a2af7dfc7cb2fda6122e2f12aa42dbddc100455a026a5471e",
+      "identityMatches": true,
+      "continuousHealth": true,
+      "restartCount": 0,
+      "oomKilled": false,
+      "health": null
+    },
+    {
+      "name": "smpp-zmq-v15-candidate-runtime-1",
+      "id": "ae41fb8bee50f35ba0adc25cc350b5dc243bf83ce08bdb385c193a452728d64f",
+      "image": "sha256:26f3f21764e813a02a7f4728ad2610e3a2bf6e8e528f0fe108f13941da27e1a7",
+      "identityMatches": true,
+      "continuousHealth": true,
+      "restartCount": 0,
+      "oomKilled": false,
+      "health": "healthy"
+    },
+    {
+      "name": "smpp-zmq-v15-candidate-console-1",
+      "id": "975f25e9f05442e411b03ba12fdff52d6c6eb7ed8307de827bb73edb3b362538",
+      "image": "sha256:4a65816fb5e9ad1a04ada741e57174c31d1ae0ab7dd4295e423581da49dbe3eb",
+      "identityMatches": true,
+      "continuousHealth": true,
+      "restartCount": 0,
+      "oomKilled": false,
+      "health": "healthy"
+    }
+  ],
+  "qualifies24h": false
+}

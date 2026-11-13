@@ -1,0 +1,193 @@
+{
+  "checkedAt": "2026-11-13T01:22:49.359358+00:00",
+  "scope": "anonymous_readonly",
+  "physicalControlActions": 0,
+  "results": [
+    {
+      "port": 19110,
+      "queries": {
+        "tools/list": {
+          "httpStatus": 200,
+          "toolCount": 15,
+          "toolNames": [
+            "vehicle_get_state",
+            "vehicle_get_capabilities",
+            "vehicle_get_payload_status",
+            "vehicle_get_targets",
+            "vehicle_zmq_navigate",
+            "vehicle_zmq_area_recon",
+            "vehicle_zmq_circular_recon",
+            "vehicle_zmq_camera",
+            "vehicle_zmq_inspect_area",
+            "simulation_apply_effect",
+            "vehicle_get_inspection_result",
+            "simulation_get_effect_result",
+            "vehicle_zmq_plan_route",
+            "simulation_adjust_view",
+            "vehicle_zmq_get_frame"
+          ],
+          "rpcError": null
+        },
+        "vehicle_get_capabilities": {
+          "httpStatus": 200,
+          "isError": false,
+          "catalogProfile": "zmq_v1_5_1_readonly_15",
+          "controlAvailable": false,
+          "chassisWire": {
+            "publicationFraming": "prefix_business_length_crc",
+            "commandFraming": "prefix_wire_length_crc",
+            "baseBusinessProtocol": "2.1",
+            "standard21Conformance": false
+          },
+          "reasonCode": null,
+          "rpcError": null
+        },
+        "vehicle_get_state": {
+          "httpStatus": 200,
+          "isError": false,
+          "archive": {
+            "status": "running",
+            "pendingRecords": 1,
+            "pendingBytes": 2272,
+            "committedEvents": 2073690,
+            "receivedMessages": 2073675,
+            "committedReceptions": 2073674,
+            "unconfirmedReceptions": 0,
+            "locallyDiscardedMessages": 0,
+            "failureCode": null,
+            "failureRecorded": null
+          },
+          "channels": {
+            "chassis": {
+              "state": "connected",
+              "lastReceptionAt": "2026-11-13T01:22:49.214Z",
+              "lastValidCommittedAt": "2026-11-13T01:22:49.214Z",
+              "receiptFresh": true,
+              "sourceFreshness": "unverified",
+              "diagnostics": [
+                "SOURCE_CONTINUITY_UNVERIFIED",
+                "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+                "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+                "SOURCE_TIMEBASE_UNCONFIRMED"
+              ]
+            },
+            "eo": {
+              "state": "connected",
+              "lastReceptionAt": "2026-11-13T01:22:49.201Z",
+              "lastValidCommittedAt": "2026-11-13T01:22:49.125Z",
+              "receiptFresh": true,
+              "sourceFreshness": "unverified",
+              "diagnostics": [
+                "SOURCE_CONTINUITY_UNVERIFIED",
+                "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+                "IMAGE_DEDUPLICATION_BOUNDED_TO_RECEIVER_SESSION",
+                "ACQUISITION_TIME_UNKNOWN"
+              ]
+            },
+            "simulationEffect": {
+              "state": "connected",
+              "lastReceptionAt": "2026-11-13T01:22:48.384Z",
+              "lastValidCommittedAt": "2026-11-13T01:22:48.384Z",
+              "receiptFresh": true,
+              "sourceFreshness": "unverified",
+              "diagnostics": [
+                "SOURCE_CONTINUITY_UNVERIFIED",
+                "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+              ]
+            }
+          },
+          "reasonCode": null,
+          "rpcError": null
+        }
+      }
+    },
+    {
+      "port": 19100,
+      "queries": {
+        "tools/list": {
+          "httpStatus": 200,
+          "toolCount": 14,
+          "toolNames": [
+            "vehicle_get_state",
+            "vehicle_get_capabilities",
+            "vehicle_get_payload_status",
+            "vehicle_get_targets",
+            "vehicle_zmq_navigate",
+            "vehicle_zmq_area_recon",
+            "vehicle_zmq_circular_recon",
+            "vehicle_zmq_camera",
+            "vehicle_zmq_inspect_area",
+            "simulation_apply_effect",
+            "vehicle_get_inspection_result",
+            "simulation_get_effect_result",
+            "vehicle_zmq_plan_route",
+            "simulation_adjust_view"
+          ],
+          "rpcError": null
+        },
+        "vehicle_get_capabilities": {
+          "httpStatus": 200,
+          "isError": false,
+          "catalogProfile": "zmq_v1_4_0_site_control_14",
+          "controlAvailable": true,
+          "chassisWire": null,
+          "reasonCode": null,
+          "rpcError": null
+        },
+        "vehicle_get_state": {
+          "httpStatus": 200,
+          "isError": false,
+          "archive": {
+            "status": "failed",
+            "pendingRecords": 0,
+            "pendingBytes": 0,
+            "committedEvents": 2021645,
+            "receivedMessages": 1898253,
+            "committedReceptions": 1898253,
+            "unconfirmedReceptions": 0,
+            "locallyDiscardedMessages": 0,
+            "failureCode": "ZMQ_OBSERVATION_FAILED",
+            "failureRecorded": true
+          },
+          "channels": {
+            "chassis": {
+              "state": "connected",
+              "lastReceptionAt": "2026-11-02T17:05:03.470Z",
+              "lastValidCommittedAt": "2026-11-02T17:05:02.573Z",
+              "receiptFresh": false,
+              "sourceFreshness": "unverified",
+              "diagnostics": [
+                "SOURCE_CONTINUITY_UNVERIFIED",
+                "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+                "SOURCE_TIME_REGRESSED_OR_REPLAYED",
+                "SOURCE_TIMEBASE_UNCONFIRMED"
+              ]
+            },
+            "eo": {
+              "state": "disconnected",
+              "lastReceptionAt": "2026-11-02T05:55:51.532Z",
+              "lastValidCommittedAt": "2026-11-02T05:55:51.532Z",
+              "receiptFresh": false,
+              "sourceFreshness": "unverified",
+              "diagnostics": [
+                "TRANSPORT_DISCONNECTED_SOURCE_LOSS_UNKNOWN"
+              ]
+            },
+            "simulationEffect": {
+              "state": "disconnected",
+              "lastReceptionAt": "2026-11-02T05:55:51.408Z",
+              "lastValidCommittedAt": "2026-11-02T05:55:51.408Z",
+              "receiptFresh": false,
+              "sourceFreshness": "unverified",
+              "diagnostics": [
+                "TRANSPORT_DISCONNECTED_SOURCE_LOSS_UNKNOWN"
+              ]
+            }
+          },
+          "reasonCode": null,
+          "rpcError": null
+        }
+      }
+    }
+  ]
+}

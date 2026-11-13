@@ -1,0 +1,35 @@
+{
+  "observedAt": "2026-11-13T01:22:17.640478+00:00",
+  "evidenceType": "selected_fields_from_readonly_HTTP_probe_output",
+  "scene": {
+    "url": "http://192.168.2.63:7879/api/simulation/scenarios",
+    "httpStatus": 200,
+    "phase": "failed",
+    "active_scenario": "yuan_qu",
+    "current_map": "yuan_qu",
+    "busy": true,
+    "can_switch": false,
+    "simulation_epoch": "1794479074995276039",
+    "error": "dashboard: Dashboard HTTP 检查失败: http://127.0.0.1:7879/api/watchdog, timed out"
+  },
+  "watchdog": {
+    "url": "http://192.168.2.63:7879/api/watchdog",
+    "httpStatus": 200,
+    "available": true,
+    "level": 0,
+    "runtime": {
+      "phase": "DEGRADED",
+      "fault_component": "dashboard",
+      "accepting_commands": false,
+      "ready_control_groups": [],
+      "revision": "5",
+      "auto_recovery_enabled": false
+    }
+  },
+  "candidateRuntimeHealthHTTP": 200,
+  "candidateConsoleHealthHTTP": 200,
+  "formalRuntimeHealthHTTP": 200,
+  "formalConsoleHealthHTTP": 200,
+  "physicalControlActions": 0,
+  "upstreamModified": false
+}
