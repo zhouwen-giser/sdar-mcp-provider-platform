@@ -10,6 +10,7 @@ import { SiteReadonlyConsole } from "./SiteReadonlyConsole.js";
 import { siteReadonlyTools, siteControlTools } from "../shared/zmq-native.js";
 import { ZmqResults } from "./ZmqResults.js";
 import { SimulationViewResult } from "./SimulationViewResult.js";
+import { TaskEvidence, TaskExecutionConclusion } from "./TaskEvidence.js";
 import {
   NATIVE_CONTROL_TOOLS,
   isZmqControl,
@@ -1394,11 +1395,7 @@ function TaskDetail({
           <strong>{text(context.effectivePlanRevision) || "—"}</strong>
         </div>
       </div>
-      {!!(snapshot.statusMessage ?? record(snapshot.error).message) && (
-        <div className="notice">
-          {text(snapshot.statusMessage) || text(record(snapshot.error).message)}
-        </div>
-      )}
+      <TaskExecutionConclusion task={snapshot} />
       <div className="button-group task-actions">
         <button
           disabled={!active || sending || profile.supportsPauseResume !== true}
@@ -1449,14 +1446,14 @@ function TaskDetail({
                 <div className="evidence-cards">
                   <div>
                     <small>业务结论</small>
-                    <strong>
-                      {text(content.outcome) || text(report.completion) || "查看原始结果"}
-                    </strong>
+                    <strong>{status.label}</strong>
                   </div>
                   <div>
                     <small>报告完整性</small>
                     <strong>
-                      {text(report.completion) || text(content.completeness) || "未提供"}
+                      {text(report.completion) ||
+                        text(content.completeness) ||
+                        (array(content.missingEvidence).length ? "证据待核实" : "未提供")}
                     </strong>
                   </div>
                   <div>
@@ -1468,11 +1465,7 @@ function TaskDetail({
                     <strong>{anomalies.length} 项</strong>
                   </div>
                 </div>
-                {array(content.missingEvidence).length > 0 && (
-                  <div className="notice warning">
-                    缺失证据：{array(content.missingEvidence).map(text).join("、")}
-                  </div>
-                )}
+                <TaskEvidence missing={content.missingEvidence} />
                 {(content.truncated === true ||
                   record(content.truncation).truncated === true ||
                   report.truncated === true) && (

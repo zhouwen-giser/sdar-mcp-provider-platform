@@ -42,7 +42,16 @@ test("adoption shows original task failure, blocks repeat clicks and only querie
     statusMessage: "ZMQ_MODE_ECHO_TIMEOUT",
     result: {
       isError: true,
-      structuredContent: { outcome: "business_failure", reasonCode: "ZMQ_MODE_ECHO_TIMEOUT" },
+      structuredContent: {
+        outcome: "business_failure",
+        reasonCode: "ZMQ_MODE_ECHO_TIMEOUT",
+        missingEvidence: [
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_INITIAL_MISSION_STATE_NOT_OBSERVED",
+          "CHASSIS_FEEDBACK_UNCORRELATED",
+          "MODE_PUBLICATION_ORDER_UNVERIFIED",
+        ],
+      },
     },
   };
   page.on("pageerror", (e) => faults.push(e.message));
@@ -159,6 +168,20 @@ test("adoption shows original task failure, blocks repeat clicks and only querie
   ).toBeDisabled();
   expect(navigationCalls).toBe(1);
   await expect(page.getByText("dashboard：dashboard:", { exact: false })).toHaveCount(0);
+  await page.getByRole("button", { name: "查看导航任务详情", exact: true }).click();
+  const conclusion = page.getByRole("status", { name: "任务执行结论", exact: true });
+  await expect(conclusion).toContainText("业务失败");
+  await expect(conclusion).toContainText("ZMQ_MODE_ECHO_TIMEOUT");
+  await expect(conclusion).toContainText("路线尚未下发");
+  const evidence = page.getByRole("note", { name: "报告证据说明", exact: true });
+  await expect(evidence).toContainText("报告证据待核实 · 4 项");
+  await expect(evidence).toContainText("设备来源纪元未认证");
+  await expect(evidence).toContainText("受理时缺少设备任务状态基线");
+  await expect(evidence).toContainText("底盘反馈与本次任务的关联不足");
+  await expect(evidence).toContainText("模式回显的命令关联与顺序未核实");
+  for (const code of failed.result.structuredContent.missingEvidence)
+    await expect(evidence).toContainText(code);
+  expect(navigationCalls).toBe(1);
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   expect(faults).toEqual([]);
@@ -169,6 +192,7 @@ test("adoption shows original task failure, blocks repeat clicks and only querie
     completedBusinessFailureShown: true,
     previewUnchanged: true,
     reloadDidNotRedispatch: true,
+    taskDetailSeparatesFailureAndEvidence: true,
   };
   await test.info().attach("preview-navigation-result", {
     body: JSON.stringify(result),
