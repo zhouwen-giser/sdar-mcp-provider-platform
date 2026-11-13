@@ -1,0 +1,37 @@
+{
+  "at": "2026-11-13T07:10:53.764Z",
+  "scope": "read_only_counts_and_non_acquiring_lock_probe",
+  "writerLocks": [
+    {
+      "key": "0b8d1b35779b68ec9e1e391d5157d16156aab1968492b50e6c8bac85fbfbf5db",
+      "heldByFormalWriter": true
+    },
+    {
+      "key": "a8392844c25b934254b7ff763078d9ac3da1584e9318f2409ea3ae9417b2f578",
+      "heldByFormalWriter": true
+    },
+    {
+      "key": "c224c4538a5d1d06430f3960fbe8454312ad41525fa2c1079bea7980ba05ee1b",
+      "heldByFormalWriter": true
+    }
+  ],
+  "exclusiveWriterVerified": true,
+  "idle": {
+    "schemaVersion": "ugv.zmq-handoff-snapshot/1",
+    "observedAt": "2026-11-13T07:10:53.763Z",
+    "providerId": "isr.vehicle.ugv.ugv",
+    "runtimeActive": 0,
+    "unresolvedAdmissions": 0,
+    "providerActive": 0,
+    "unresolvedNativeOccupancy": 0,
+    "databaseIdle": true,
+    "switchAuthorized": false,
+    "missingEvidence": [
+      "ADMISSION_DRAIN_FENCE_REQUIRED",
+      "OLD_WRITER_STOP_CONFIRMATION_REQUIRED",
+      "QUALIFIED_SOURCE_IDLE_REQUIRED"
+    ],
+    "authority": "read_only_point_in_time_not_a_handoff_lease"
+  },
+  "physicalControlActions": 0
+}

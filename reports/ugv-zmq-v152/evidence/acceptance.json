@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "ugv.zmq-v152-acceptance/1",
+  "verifiedAt": "2026-11-13T07:22:20.036810+00:00",
+  "sourceCommit": "47770101e2950045bc8fb37a50c8c95d258dc4d3",
+  "status": "formal_route_preview_fix_accepted",
+  "catalogProfile": "zmq_v1_5_2_site_control_15",
+  "toolCount": 15,
+  "mapId": "yuan_qu",
+  "candidateReadOnlyQualified": true,
+  "formalReadOnlyQualified": true,
+  "upstreamOverallDegraded": true,
+  "sceneComponentAdmitted": true,
+  "motionComponentAdmitted": true,
+  "upstreamModified": false,
+  "sdarModified": false,
+  "physicalControlActionsByThisVerification": 0,
+  "physicalControlAcceptance": "not_performed",
+  "archiveRunning": true,
+  "threeSubscriptionsFresh": true,
+  "historyReadable": true,
+  "writerLeaseHandoffVerified": true,
+  "handoffCommandId": "d78c280c-2430-4b2e-bb84-51594daffa34",
+  "retiredTasks": [],
+  "new24HourPassClaimed": false,
+  "priorDurationGate": "operator accepted shortened 1.5.1 observation; no restart of that monitor",
+  "finalImages": [
+    {
+      "role": "provider",
+      "tag": "smpp-zmq-v152-provider:47770101e295",
+      "id": "sha256:36d18a47a08c29da489aca627853a7e86d79f65250fcc48642e5fb90ee3cb5c4",
+      "sourceRevision": "47770101e2950045bc8fb37a50c8c95d258dc4d3"
+    },
+    {
+      "role": "runtime",
+      "tag": "smpp-zmq-v152-runtime:47770101e295",
+      "id": "sha256:35319451a9570ac9375f28b659599e7834ea177b6ab3165748cd6a403bd8ba4d",
+      "sourceRevision": "47770101e2950045bc8fb37a50c8c95d258dc4d3"
+    },
+    {
+      "role": "console",
+      "tag": "smpp-zmq-v152-console:47770101e295",
+      "id": "sha256:17d464551bcab979bea0806a881ccd1cd072692a09f04adb6a3c230c9ed946f5",
+      "sourceRevision": "47770101e2950045bc8fb37a50c8c95d258dc4d3"
+    }
+  ],
+  "rollback": "new-protocol 1.5.2 readonly configuration prepared; not executed",
+  "scope": "SMPP isolated worktree only"
+}

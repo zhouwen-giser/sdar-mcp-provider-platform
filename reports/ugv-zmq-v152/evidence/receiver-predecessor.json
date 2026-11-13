@@ -1,0 +1,19 @@
+{
+  "at": "2026-11-13T07:01:22.035Z",
+  "partitionHash": "bec02016d7cc4706e7cf996685258ee3c46a5e928dcbf5ed9260ff00f2592a78",
+  "sessionId": "8239e0ce-900f-49bb-9357-230c96774ec3",
+  "archive": {
+    "status": "running",
+    "pendingRecords": 0,
+    "pendingBytes": 0,
+    "committedEvents": 100430,
+    "receivedMessages": 100423,
+    "committedReceptions": 100423,
+    "unconfirmedReceptions": 0,
+    "locallyDiscardedMessages": 0,
+    "failureCode": null,
+    "failureRecorded": null
+  },
+  "sourceProducerEpoch": null,
+  "purpose": "explicit_new_version_receiver_boundary_after_verified_shutdown"
+}

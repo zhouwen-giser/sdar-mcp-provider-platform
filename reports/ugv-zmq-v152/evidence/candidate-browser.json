@@ -1,0 +1,54 @@
+{
+  "at": "2026-11-13T07:06:19.263Z",
+  "url": "http://127.0.0.1:19111",
+  "sourceCommit": "4777010",
+  "profile": "zmq_v1_5_2_readonly_15",
+  "tools": 15,
+  "httpLogin": true,
+  "map": "yuan_qu",
+  "planner": {
+    "status": "verified",
+    "commandId": "9b67a657-a018-4c45-8f68-d9bde9fef7e4",
+    "planningRequestId": "6bd55b86-31dd-43ce-8daf-5c6a41776936",
+    "points": 5,
+    "adoption": "preview_only",
+    "admission": {
+      "policy": "runtime_scene_and_entity_v1",
+      "reason": "dashboard: Dashboard HTTP 检查失败: http://127.0.0.1:7879/api/watchdog, timed out",
+      "ownerId": "d7b3dbe9aa52484689de39fda79e13ef",
+      "degraded": true,
+      "revision": "4",
+      "observedAt": "2026-11-13T07:06:17.544Z",
+      "sceneError": "dashboard: Dashboard HTTP 检查失败: http://127.0.0.1:7879/api/watchdog, timed out",
+      "scenePhase": "failed",
+      "profileRunId": "a5b9a79e83184dbba4a5b565c2b54621",
+      "runtimePhase": "DEGRADED",
+      "sourceSha256": "b7b4febd810754d15d783e971912a57ea86de6f371737ff1e5e338eb98ca9353",
+      "faultComponent": "dashboard",
+      "simulationEpoch": "1794539300201245707",
+      "acceptingCommands": true,
+      "readyControlGroups": [
+        "adjudication",
+        "eo:ugv",
+        "motion:ugv",
+        "scene"
+      ],
+      "requiredControlGroups": [
+        "scene",
+        "motion:ugv"
+      ]
+    },
+    "reportDownloadSha256": "22e9367e5d601920a0558e87e3c30539fed3f1cc7a6f1e7a91b37592bcea2aaa"
+  },
+  "frame": {
+    "width": 1280,
+    "height": 720,
+    "complete": true,
+    "byteLength": 149990,
+    "sha256": "33c72b443dddc2dd29ab5b50c785e72144a23d20f272d56fd0a993a8410277a0"
+  },
+  "mobileNoOverflow": true,
+  "pageErrors": 0,
+  "physicalControlActions": 0,
+  "exitCode": 0
+}

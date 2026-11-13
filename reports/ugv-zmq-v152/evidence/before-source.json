@@ -1,0 +1,289 @@
+{
+  "at": "2026-11-13T06:39:31.656227+00:00",
+  "scope": "readonly_GET",
+  "responses": [
+    {
+      "path": "/api/simulation/scenarios",
+      "httpStatus": 200,
+      "sha256": "49bf3f82962d02b8f9bdddf7dd9f5ab1ec2836c9e2ce458ea9daa4773f6849f7",
+      "body": {
+        "active_scenario": "yuan_qu",
+        "available_maps": [
+          "airport2",
+          "yuan_qu"
+        ],
+        "busy": true,
+        "can_switch": false,
+        "current_map": "yuan_qu",
+        "default_scenario": "yuan_qu",
+        "error": "dashboard: Dashboard HTTP 检查失败: http://127.0.0.1:7879/api/watchdog, timed out",
+        "ok": true,
+        "owner_id": "d7b3dbe9aa52484689de39fda79e13ef",
+        "phase": "failed",
+        "profile_run_id": "a5b9a79e83184dbba4a5b565c2b54621",
+        "request_id": "reset-820727931-1365867284-3855909021-2207571523",
+        "scenarios": {
+          "airport": {
+            "label": "机场",
+            "map": "airport2",
+            "units": {
+              "npc_tank1": {
+                "blueprint": "vehicle.bov_3.bov_3",
+                "position": [
+                  20.915161,
+                  -112.916397,
+                  2.0
+                ],
+                "rotation": [
+                  0.0,
+                  -290.0,
+                  0.0
+                ]
+              },
+              "quadruped": {
+                "blueprint": "static.prop.robotic_dog",
+                "position": [
+                  -338.792419,
+                  82.540146,
+                  0.0
+                ],
+                "rotation": [
+                  0.0,
+                  90.0,
+                  0.0
+                ]
+              },
+              "soldier_1": {
+                "blueprint": "static.prop.german_soldier",
+                "position": [
+                  -202.792419,
+                  -122.540146,
+                  0.12
+                ],
+                "rotation": [
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              },
+              "uav": {
+                "blueprint": "static.prop.uav",
+                "position": [
+                  -277.233,
+                  94.306,
+                  5.0
+                ],
+                "rotation": [
+                  0.0,
+                  90.0,
+                  0.0
+                ]
+              },
+              "ugv": {
+                "blueprint": "vehicle.chinese_zbd_09_body.chinese_zbd_09_body",
+                "position": [
+                  -340.18,
+                  109.45,
+                  2.0
+                ],
+                "rotation": [
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            }
+          },
+          "yuan_qu": {
+            "label": "园区",
+            "map": "yuan_qu",
+            "map_reference": {
+              "altitude": 500.0,
+              "latitude": 22.506858333333,
+              "longitude": 114.048222222222
+            },
+            "units": {
+              "ugv": {
+                "blueprint": "vehicle.songling.songling",
+                "position": [
+                  -46.819,
+                  100.064,
+                  2.0
+                ],
+                "rotation": [
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            }
+          }
+        },
+        "simulation_epoch": "1794539300201245707",
+        "target_scenario": "yuan_qu",
+        "unit_reset": {
+          "operation": null,
+          "pending_intent": null,
+          "ready": true,
+          "units": [
+            {
+              "camp": "red",
+              "entity_id": "ugv",
+              "entity_type": "ugv"
+            }
+          ]
+        },
+        "units": {}
+      }
+    },
+    {
+      "path": "/api/watchdog",
+      "httpStatus": 200,
+      "sha256": "d8d85123d8953486d0bc965c8411ac128df98631793c4e58122711fe9af74e16",
+      "body": {
+        "available": true,
+        "components": [
+          {
+            "level": 0,
+            "message": "Backend ready",
+            "name": "backend",
+            "values": {
+              "backend_type": "carla",
+              "connected": "True",
+              "profile_run_id": "a5b9a79e83184dbba4a5b565c2b54621",
+              "ready": "True",
+              "scene_id": "yuan_qu",
+              "simulation_epoch": "1794539300201245707",
+              "simulation_time": "16395.000901287538",
+              "status_age_sec": "0.047410327941179276"
+            }
+          },
+          {
+            "level": 0,
+            "message": "Configured nodes discovered",
+            "name": "nodes",
+            "values": {
+              "missing_nodes": "",
+              "required_component_count": "5",
+              "required_count": "21",
+              "stale_components": ""
+            }
+          },
+          {
+            "level": 0,
+            "message": "Host resources within configured limits",
+            "name": "resources",
+            "values": {
+              "host_cpus": "20",
+              "host_load1": "10.72900390625",
+              "host_mem_available_bytes": "19341303808",
+              "host_mem_total_bytes": "33280671744",
+              "host_memory_used_percent": "41.8842745820269"
+            }
+          }
+        ],
+        "error": "",
+        "level": 0,
+        "mode": "v2",
+        "runtime": {
+          "accepting_commands": true,
+          "auto_recovery_enabled": false,
+          "available": true,
+          "config_digest": "7a648e58aaabf05213922ebb16211260ecda1fa3054efa4cc8cfb4af10b56c97",
+          "fault_component": "dashboard",
+          "incident_id": "2702a57841204b49a2546d756938e4f1",
+          "operation_id": "94f69e00d8f042e7809c159fd29d2c73",
+          "operation_state": "succeeded",
+          "operator_required": false,
+          "owner_id": "d7b3dbe9aa52484689de39fda79e13ef",
+          "phase": "DEGRADED",
+          "profile_run_id": "a5b9a79e83184dbba4a5b565c2b54621",
+          "ready_control_groups": [
+            "adjudication",
+            "eo:ugv",
+            "motion:ugv",
+            "scene"
+          ],
+          "reason": "dashboard: Dashboard HTTP 检查失败: http://127.0.0.1:7879/api/watchdog, timed out",
+          "revision": "4",
+          "simulation_epoch": "1794539300201245707",
+          "stage": "dashboard"
+        },
+        "simulation_epoch": "1794539300201245707",
+        "valid_for_sec": 1.5865986347198486
+      }
+    },
+    {
+      "path": "/api/simulation/map/assets",
+      "httpStatus": 200,
+      "sha256": "b032f42941f03249331d4b12539647968553b2b0e11d36e585a06a5c1e4746ba",
+      "body": {
+        "calibration": "/assets/maps/yuan_qu/calibration?v=map.jpeg:1794368556908263207-2475637:1794368556908263207-1069:1794390569829104153-16527:1793927821000000000-980036:1794365764521702056-2346783",
+        "error": "",
+        "image": "/assets/maps/yuan_qu/image?v=map.jpeg:1794368556908263207-2475637:1794368556908263207-1069:1794390569829104153-16527:1793927821000000000-980036:1794365764521702056-2346783",
+        "image3d": "/assets/maps/yuan_qu/image3d?v=map.jpeg:1794368556908263207-2475637:1794368556908263207-1069:1794390569829104153-16527:1793927821000000000-980036:1794365764521702056-2346783",
+        "key": "yuan_qu:map.jpeg:1794368556908263207-2475637:1794368556908263207-1069:1794390569829104153-16527:1793927821000000000-980036:1794365764521702056-2346783",
+        "map": "yuan_qu",
+        "regions": "/assets/maps/yuan_qu/regions?v=map.jpeg:1794368556908263207-2475637:1794368556908263207-1069:1794390569829104153-16527:1793927821000000000-980036:1794365764521702056-2346783",
+        "roads": "/assets/maps/yuan_qu/roads?v=map.jpeg:1794368556908263207-2475637:1794368556908263207-1069:1794390569829104153-16527:1793927821000000000-980036:1794365764521702056-2346783"
+      }
+    },
+    {
+      "path": "/api/simulation/map/gnss?x=0&y=0&z=0",
+      "httpStatus": 200,
+      "sha256": "33088e3b159b7b23496675c73e4e0231c28e60d6498d5559577d376d835e571a",
+      "body": {
+        "frame_id": "map",
+        "gnss": {
+          "altitude": 500.0,
+          "latitude": 22.50685833333301,
+          "longitude": 114.048222222222
+        },
+        "ok": true,
+        "position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        }
+      }
+    },
+    {
+      "path": "/api/simulation/map/gnss?x=100&y=0&z=0",
+      "httpStatus": 200,
+      "sha256": "84d32be471d58b57701bc50d95ae0c8bf9845db638af3e6390a8a1ca2dd309ca",
+      "body": {
+        "frame_id": "map",
+        "gnss": {
+          "altitude": 500.00078348163515,
+          "latitude": 22.506858330401624,
+          "longitude": 114.04919404671402
+        },
+        "ok": true,
+        "position": {
+          "x": 100.0,
+          "y": 0.0,
+          "z": 0.0
+        }
+      }
+    },
+    {
+      "path": "/api/simulation/map/gnss?x=0&y=100&z=0",
+      "httpStatus": 200,
+      "sha256": "208055251ad09ea6addc11d877156d030a849139a91dc8502611459c803afc0e",
+      "body": {
+        "frame_id": "map",
+        "gnss": {
+          "altitude": 500.0007879883051,
+          "latitude": 22.507761301234588,
+          "longitude": 114.048222222222
+        },
+        "ok": true,
+        "position": {
+          "x": 0.0,
+          "y": 100.0,
+          "z": 0.0
+        }
+      }
+    }
+  ]
+}

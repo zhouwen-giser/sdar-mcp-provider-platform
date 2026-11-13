@@ -1,0 +1,99 @@
+{
+  "at": "2026-11-13T07:13:00.988231+00:00",
+  "scope": "only_owned_candidate_and_test_postgres",
+  "candidateDatabaseVolumeRetained": true,
+  "objects": [
+    {
+      "id": "67ffd3f3267395f971a4570aab7a073480c28c7fcbc9ebf92fb171c06ff7f6ce",
+      "name": "/smpp-zmq-v152-candidate-provider-1",
+      "image": "sha256:36d18a47a08c29da489aca627853a7e86d79f65250fcc48642e5fb90ee3cb5c4",
+      "mounts": [
+        {
+          "type": "bind",
+          "name": null,
+          "destination": "/run/secrets/provider.json"
+        }
+      ]
+    },
+    {
+      "id": "3ddcec19e95dcafb951a3353db7296b4df905b82801e163433aab40a77dcab1f",
+      "name": "/smpp-zmq-v152-candidate-runtime-1",
+      "image": "sha256:35319451a9570ac9375f28b659599e7834ea177b6ab3165748cd6a403bd8ba4d",
+      "mounts": [
+        {
+          "type": "bind",
+          "name": null,
+          "destination": "/var/lib/sdar"
+        }
+      ]
+    },
+    {
+      "id": "18d7172b14f12f720a582ca35c42450104e55b9d854f20963c84e73c453ac87b",
+      "name": "/smpp-zmq-v152-candidate-console-1",
+      "image": "sha256:17d464551bcab979bea0806a881ccd1cd072692a09f04adb6a3c230c9ed946f5",
+      "mounts": [
+        {
+          "type": "bind",
+          "name": null,
+          "destination": "/run/secrets/console-db.url"
+        },
+        {
+          "type": "bind",
+          "name": null,
+          "destination": "/run/secrets/credentials.json"
+        }
+      ]
+    },
+    {
+      "id": "a416b3b976db517d8f0e15b62e0dfd0aa7f9a01464a98c5c990a61bb42dd85df",
+      "name": "/smpp-v152-planner-test-20261113",
+      "image": "sha256:8189a1f6e40904781fc9e2612687877791d21679866db58b1de996b31fc312e4",
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "47577e9da56a24883b81a28e127df8441444cecacf3190bd06077d4f21ec7fd1",
+          "destination": "/var/lib/postgresql/data"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "command": [
+        "docker",
+        "compose",
+        "-p",
+        "smpp-zmq-v152-candidate",
+        "-f",
+        "/home/sz/.smpp-debug/zmq-planner-scene-20261113/candidate/compose.json",
+        "down"
+      ],
+      "exitCode": 0,
+      "log": "cleanup-0.log",
+      "sha256": "98054d0de6a9cbc4d5b976dd7597cc7e7d1435ecf33ffc3dceb6f479654aaafb"
+    },
+    {
+      "command": [
+        "docker",
+        "update",
+        "--restart=no",
+        "smpp-v152-planner-test-20261113"
+      ],
+      "exitCode": 0,
+      "log": "cleanup-1.log",
+      "sha256": "7bb5be16ae11523a0cc40facd5883c75f84e9bec4818b43f3be98231e50f2c0a"
+    },
+    {
+      "command": [
+        "docker",
+        "stop",
+        "--time",
+        "10",
+        "smpp-v152-planner-test-20261113"
+      ],
+      "exitCode": 0,
+      "log": "cleanup-2.log",
+      "sha256": "a6eb47276916f322fa610ebfde710280636d8a31fa338f30bd4ea9a41024d02e"
+    }
+  ]
+}

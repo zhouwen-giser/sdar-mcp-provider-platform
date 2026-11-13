@@ -1,0 +1,235 @@
+{
+  "schemaVersion": "ugv.zmq-v152-formal-cutover/1",
+  "startedAt": "2026-11-13T07:09:46.456671+00:00",
+  "authorization": "existing_user_formal_cutover_and_current_route_preview_fix",
+  "sourceCommit": "47770101e2950045bc8fb37a50c8c95d258dc4d3",
+  "steps": [
+    {
+      "command": [
+        "docker",
+        "update",
+        "--restart=no",
+        "smpp-zmq-site-formal-console-1"
+      ],
+      "exitCode": 0,
+      "log": "cutover-00.log",
+      "sha256": "327c513bd61154ba6d3a12809abe54a48bf2f503f04f8c21d1cc63a86f1825eb"
+    },
+    {
+      "command": [
+        "docker",
+        "stop",
+        "--time",
+        "20",
+        "smpp-zmq-site-formal-console-1"
+      ],
+      "exitCode": 0,
+      "log": "cutover-01.log",
+      "sha256": "828a35111c8aef28e5edae2bebce5d4cec921fb36ae739d2c736aaa1501e6c4a"
+    },
+    {
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/ugv-zmq/site-control-handoff.ts",
+        "plan",
+        "--config",
+        "/home/sz/.smpp-debug/zmq-planner-scene-20261113/handoff-config.json",
+        "--plan",
+        "/home/sz/.smpp-debug/zmq-planner-scene-20261113/handoff-plan-final.json"
+      ],
+      "exitCode": 0,
+      "log": "cutover-02.log",
+      "sha256": "4bf4c20f011b8911bc1a6c9bd5ed0df250c4cc8554b59d511046664e29edbe92"
+    },
+    {
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/ugv-zmq/site-control-handoff.ts",
+        "apply",
+        "--config",
+        "/home/sz/.smpp-debug/zmq-planner-scene-20261113/handoff-config.json",
+        "--plan",
+        "/home/sz/.smpp-debug/zmq-planner-scene-20261113/handoff-plan-final.json",
+        "--grant",
+        "/home/sz/.smpp-debug/zmq-planner-scene-20261113/handoff-grant.json",
+        "--command-id",
+        "d78c280c-2430-4b2e-bb84-51594daffa34",
+        "--actor",
+        "operator-authorized-maintenance",
+        "--reason",
+        "SMPP-only planner component-admission fix; no physical dispatch authorized",
+        "--plan-hash",
+        "e759b87364bf1ff7501ab60ca9d8714a9880ad9f797f87f67b14e81349d9ce78"
+      ],
+      "exitCode": 0,
+      "log": "cutover-03.log",
+      "sha256": "698242eb3a2541a4b35c6d72fdde79d9dc873eab972370c5bff8c3c19bea4a33"
+    },
+    {
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/ugv-zmq/site-control-handoff.ts",
+        "verify",
+        "--config",
+        "/home/sz/.smpp-debug/zmq-planner-scene-20261113/handoff-config.json",
+        "--grant",
+        "/home/sz/.smpp-debug/zmq-planner-scene-20261113/handoff-grant.json"
+      ],
+      "exitCode": 0,
+      "log": "cutover-04.log",
+      "sha256": "bd0e9a8cec133494c9b77b23a7f053dc29a3469f35ae90271fecfc5a75bf167d"
+    },
+    {
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "/home/sz/.smpp-debug/zmq-planner-scene-20261113/receiver-tail.mts"
+      ],
+      "exitCode": 0,
+      "log": "cutover-05.log",
+      "sha256": "5d6b2ea5fb3a5c229f91b157b6ada1c417b8bca51c726c1b8579f9dff851c1a3"
+    },
+    {
+      "command": [
+        "docker",
+        "compose",
+        "--env-file",
+        "/home/sz/.smpp-debug/zmq-planner-scene-20261113/formal/site-images.env",
+        "-p",
+        "smpp-zmq-site-formal",
+        "-f",
+        "deploy/ugv-zmq/site-control/compose.formal.yaml",
+        "-f",
+        "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/pms-readonly-override.json",
+        "-f",
+        "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/resources.json",
+        "config",
+        "--quiet"
+      ],
+      "exitCode": 0,
+      "log": "cutover-06.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "docker",
+        "compose",
+        "--env-file",
+        "/home/sz/.smpp-debug/zmq-planner-scene-20261113/formal/site-images.env",
+        "-p",
+        "smpp-zmq-site-formal",
+        "-f",
+        "deploy/ugv-zmq/site-control/compose.formal.yaml",
+        "-f",
+        "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/pms-readonly-override.json",
+        "-f",
+        "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/resources.json",
+        "up",
+        "-d",
+        "--no-deps",
+        "--force-recreate",
+        "--no-build",
+        "--pull",
+        "never",
+        "provider"
+      ],
+      "exitCode": 0,
+      "log": "cutover-07.log",
+      "sha256": "0874ad26c5a48cc6d5ed67483079e9d0ee0b6a2e451878670f5bc0ca9e5ef23e"
+    },
+    {
+      "command": [
+        "docker",
+        "compose",
+        "--env-file",
+        "/home/sz/.smpp-debug/zmq-planner-scene-20261113/formal/site-images.env",
+        "-p",
+        "smpp-zmq-site-formal",
+        "-f",
+        "deploy/ugv-zmq/site-control/compose.formal.yaml",
+        "-f",
+        "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/pms-readonly-override.json",
+        "-f",
+        "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/resources.json",
+        "up",
+        "-d",
+        "--no-deps",
+        "--force-recreate",
+        "--no-build",
+        "--pull",
+        "never",
+        "runtime"
+      ],
+      "exitCode": 0,
+      "log": "cutover-08.log",
+      "sha256": "e6213a8db3feb2da34bd1db919f4fab88ebbe8a3a390abc8a54bdb83a81b8a50"
+    },
+    {
+      "command": [
+        "docker",
+        "compose",
+        "--env-file",
+        "/home/sz/.smpp-debug/zmq-planner-scene-20261113/formal/site-images.env",
+        "-p",
+        "smpp-zmq-site-formal",
+        "-f",
+        "deploy/ugv-zmq/site-control/compose.formal.yaml",
+        "-f",
+        "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/pms-readonly-override.json",
+        "-f",
+        "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/resources.json",
+        "up",
+        "-d",
+        "--no-deps",
+        "--force-recreate",
+        "--no-build",
+        "--pull",
+        "never",
+        "console"
+      ],
+      "exitCode": 0,
+      "log": "cutover-09.log",
+      "sha256": "2fefbdc8ad52e8ed17314035206d8d2d1f3279493ba434b646d44514a757a0ee"
+    }
+  ],
+  "physicalControlActions": 0,
+  "pmsAndSdarBindingModified": false,
+  "completedAt": "2026-11-13T07:10:03.737316+00:00",
+  "status": "formal_services_replaced_pending_readonly_acceptance",
+  "formalPorts": [
+    19100,
+    19101
+  ],
+  "catalogProfile": "zmq_v1_5_2_site_control_15",
+  "handoffCommandId": "d78c280c-2430-4b2e-bb84-51594daffa34",
+  "newContainers": [
+    {
+      "id": "7c4f2e91611d057cd208b1ca1b40101aba0f1a8872249de7a26e9f69b7d35d5d",
+      "name": "/smpp-zmq-site-formal-provider-1",
+      "image": "sha256:36d18a47a08c29da489aca627853a7e86d79f65250fcc48642e5fb90ee3cb5c4",
+      "startedAt": "2026-11-13T07:09:54.249192218Z",
+      "restartCount": 0
+    },
+    {
+      "id": "996bf5e84827ec1e2bf589e0d413a3a92afcb14193a7d1e8a2c432465dff24d5",
+      "name": "/smpp-zmq-site-formal-runtime-1",
+      "image": "sha256:35319451a9570ac9375f28b659599e7834ea177b6ab3165748cd6a403bd8ba4d",
+      "startedAt": "2026-11-13T07:09:57.649253919Z",
+      "restartCount": 0
+    },
+    {
+      "id": "411b4609f449b53d2d56ac21f093032363c0f61431f2fa6b8b4fe50fa7024fde",
+      "name": "/smpp-zmq-site-formal-console-1",
+      "image": "sha256:17d464551bcab979bea0806a881ccd1cd072692a09f04adb6a3c230c9ed946f5",
+      "startedAt": "2026-11-13T07:10:02.94241135Z",
+      "restartCount": 0
+    }
+  ]
+}

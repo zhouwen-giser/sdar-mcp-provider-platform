@@ -1,0 +1,19 @@
+{
+  "command": [
+    "docker",
+    "compose",
+    "-p",
+    "smpp-zmq-v152-candidate",
+    "-f",
+    "/home/sz/.smpp-debug/zmq-planner-scene-20261113/candidate/compose.json",
+    "up",
+    "-d",
+    "--no-build",
+    "--pull",
+    "never"
+  ],
+  "exitCode": 0,
+  "at": "2026-11-13T07:06:02.901488+00:00",
+  "log": "candidate-start.log",
+  "sha256": "9fe0f248daf921ff8228a6d43959ff9fa7be515008e8650e163e5c0c6c826173"
+}

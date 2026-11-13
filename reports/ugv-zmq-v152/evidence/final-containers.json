@@ -1,0 +1,60 @@
+{
+  "at": "2026-11-13T07:14:22.861525+00:00",
+  "containers": [
+    {
+      "id": "7c4f2e91611d057cd208b1ca1b40101aba0f1a8872249de7a26e9f69b7d35d5d",
+      "name": "/smpp-zmq-site-formal-provider-1",
+      "image": "sha256:36d18a47a08c29da489aca627853a7e86d79f65250fcc48642e5fb90ee3cb5c4",
+      "startedAt": "2026-11-13T07:09:54.249192218Z",
+      "running": true,
+      "restartCount": 0,
+      "oomKilled": false,
+      "health": null,
+      "restartPolicy": "unless-stopped"
+    },
+    {
+      "id": "996bf5e84827ec1e2bf589e0d413a3a92afcb14193a7d1e8a2c432465dff24d5",
+      "name": "/smpp-zmq-site-formal-runtime-1",
+      "image": "sha256:35319451a9570ac9375f28b659599e7834ea177b6ab3165748cd6a403bd8ba4d",
+      "startedAt": "2026-11-13T07:09:57.649253919Z",
+      "running": true,
+      "restartCount": 0,
+      "oomKilled": false,
+      "health": "healthy",
+      "restartPolicy": "unless-stopped"
+    },
+    {
+      "id": "411b4609f449b53d2d56ac21f093032363c0f61431f2fa6b8b4fe50fa7024fde",
+      "name": "/smpp-zmq-site-formal-console-1",
+      "image": "sha256:17d464551bcab979bea0806a881ccd1cd072692a09f04adb6a3c230c9ed946f5",
+      "startedAt": "2026-11-13T07:10:02.94241135Z",
+      "running": true,
+      "restartCount": 0,
+      "oomKilled": false,
+      "health": "healthy",
+      "restartPolicy": "unless-stopped"
+    },
+    {
+      "id": "dd5a7ec889735236670f694c43f08108b56d5af8646235d8387cb56dad17dce3",
+      "name": "/gowm-analysis-dev-f3dc6f4b8e-smpp-runtime-1",
+      "image": "sha256:11abe9156fe610a28cfb4f261532a95be04a306d40e96adacdcc464fa8511a9e",
+      "startedAt": "2026-11-02T02:28:23.50245046Z",
+      "running": true,
+      "restartCount": 0,
+      "oomKilled": false,
+      "health": "healthy",
+      "restartPolicy": "unless-stopped"
+    },
+    {
+      "id": "a416b3b976db517d8f0e15b62e0dfd0aa7f9a01464a98c5c990a61bb42dd85df",
+      "name": "/smpp-v152-planner-test-20261113",
+      "image": "sha256:8189a1f6e40904781fc9e2612687877791d21679866db58b1de996b31fc312e4",
+      "startedAt": "2026-11-13T06:51:45.26741203Z",
+      "running": false,
+      "restartCount": 0,
+      "oomKilled": false,
+      "health": null,
+      "restartPolicy": "no"
+    }
+  ]
+}

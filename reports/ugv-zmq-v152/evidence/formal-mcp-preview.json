@@ -1,0 +1,97 @@
+{
+  "schemaVersion": "ugv.zmq-route-preview/3",
+  "previewId": "ef836140-0bc2-4206-b40d-8e5fdd154e98",
+  "resourceId": "vehicle:ugv",
+  "adoption": "preview_only",
+  "correlation": "request_id_epoch_context_and_geometry",
+  "createdAt": "2026-11-13T07:10:53.588Z",
+  "requestHash": "cff49e8e86109311d088daf13cae11a6d37f354ce0659213a5eb36367ec2b4a7",
+  "routeSource": "isr.dashboard.road-planner/v2",
+  "sourceRecordId": "38d171b5461819aa9a5dd205b91f80dab1c179da444045a9fcb869c7491a6c17",
+  "sourceMessageSha256": "7220172a67ea8074b11c803f9886fc9ee88e24dd9aba1907e0c3fcb604d2dba0",
+  "sourceMessage": "42[\"route_candidates\",{\"ok\":true,\"candidates\":[{\"id\":\"straight\",\"label\":\"\\u4e3b\\u7ebf\\u76f4\\u7ebf\",\"color\":\"#00e5ff\",\"frame_id\":\"map\",\"points\":[[-46.829068299543096,-97.09228945859682],[-36.532881638206625,-96.65604858633007],[-32.13083364546029,-91.8675357710345],[-32.033144597293706,-71.91750436898582],[-31.935455549127123,-51.96747296693714]],\"length_m\":57.0,\"num_points\":5}],\"error\":null,\"target\":\"ugv\",\"simulation_epoch\":\"1794539300201245707\",\"planning_request_id\":\"566a3a4b-ca96-4ca9-81ac-c5c5c2d541f5\"}]",
+  "transform": {
+    "policy": "scene_enu_wgs84_v1",
+    "sha256": "88f00905d6dd0e697b102e8e9d086d4ae6d52c7f651641bb51d8f301b3df8496",
+    "reference": {
+      "sceneId": "yuan_qu",
+      "mapId": "yuan_qu",
+      "sceneSha256": "0cec5045348e5863475c24a215a2d54933cdff99161f8baaa3eba86cc97cca51",
+      "latitude": 22.506858333333,
+      "longitude": 114.048222222222,
+      "altitude": 500
+    },
+    "heightPolicy": "scene_reference_plane_not_measured"
+  },
+  "start": {
+    "longitude": 114.04776722593608,
+    "latitude": 22.505954785129326
+  },
+  "waypoints": [
+    {
+      "longitude": 114.04776712873574,
+      "latitude": 22.505981620384677
+    },
+    {
+      "longitude": 114.04786718895863,
+      "latitude": 22.50598555975196
+    },
+    {
+      "longitude": 114.04790996877361,
+      "latitude": 22.50602879858123
+    },
+    {
+      "longitude": 114.04791091773082,
+      "latitude": 22.506208940989584
+    },
+    {
+      "longitude": 114.04791186669047,
+      "latitude": 22.506389083393916
+    }
+  ],
+  "requestedWaypoints": [
+    {
+      "longitude": 114.04791186669047,
+      "latitude": 22.506389083393916
+    }
+  ],
+  "sourceFreshness": "context_and_scene_verified",
+  "completeSpatialEvidence": false,
+  "planningRequestId": "566a3a4b-ca96-4ca9-81ac-c5c5c2d541f5",
+  "context": {
+    "entity_id": "ugv",
+    "simulation_epoch": "1794539300201245707",
+    "controller_instance_id": "1191002276:3398897717",
+    "mission_id": -1,
+    "mission_request_id": ""
+  },
+  "contextReceivedAt": "2026-11-13T07:10:53.297Z",
+  "contextMessageSha256": "d1000be46ade3f2776976557c67fdd9994bf8fd21866060a9235b74f51438639",
+  "sceneVerificationSha256": "9b6b6ecd2f73e5d24c8bcda348f493aa00480884fec841dd470df138e887a9c6",
+  "plannerAdmission": {
+    "policy": "runtime_scene_and_entity_v1",
+    "observedAt": "2026-11-13T07:10:53.305Z",
+    "scenePhase": "failed",
+    "runtimePhase": "DEGRADED",
+    "ownerId": "d7b3dbe9aa52484689de39fda79e13ef",
+    "profileRunId": "a5b9a79e83184dbba4a5b565c2b54621",
+    "simulationEpoch": "1794539300201245707",
+    "revision": "4",
+    "readyControlGroups": [
+      "adjudication",
+      "eo:ugv",
+      "motion:ugv",
+      "scene"
+    ],
+    "requiredControlGroups": [
+      "scene",
+      "motion:ugv"
+    ],
+    "acceptingCommands": true,
+    "degraded": true,
+    "faultComponent": "dashboard",
+    "reason": "dashboard: Dashboard HTTP 检查失败: http://127.0.0.1:7879/api/watchdog, timed out",
+    "sceneError": "dashboard: Dashboard HTTP 检查失败: http://127.0.0.1:7879/api/watchdog, timed out",
+    "sourceSha256": "376b2be235e63318c2558e444726a91515ddaabe41be8fc7520a0eb1ab0ee497"
+  }
+}

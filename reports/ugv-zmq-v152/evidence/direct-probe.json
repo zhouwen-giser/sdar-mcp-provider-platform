@@ -1,0 +1,83 @@
+{
+  "at": "2026-11-13T06:52:50.721Z",
+  "scope": "direct_readonly_plan_route_component_admission_no_device_command",
+  "input": {
+    "start": {
+      "longitude": 114.04776722593608,
+      "latitude": 22.505954785129326
+    },
+    "waypoints": [
+      {
+        "longitude": 114.04791186669047,
+        "latitude": 22.506389083393916
+      }
+    ],
+    "density": "adaptive"
+  },
+  "result": {
+    "observedAt": "2026-11-13T06:52:50.719Z",
+    "waypoints": [
+      {
+        "longitude": 114.04776712873574,
+        "latitude": 22.505981620384677
+      },
+      {
+        "longitude": 114.04786718895863,
+        "latitude": 22.50598555975196
+      },
+      {
+        "longitude": 114.04790996877361,
+        "latitude": 22.50602879858123
+      },
+      {
+        "longitude": 114.04791091773082,
+        "latitude": 22.506208940989584
+      },
+      {
+        "longitude": 114.04791186669047,
+        "latitude": 22.506389083393916
+      }
+    ],
+    "sourceRecordId": "47044937a227b6b8213708c634c00392dfcd621c784dc98fd6138b317ec7eca2",
+    "routeSource": "isr.dashboard.road-planner/v2",
+    "sourceMessage": "42[\"route_candidates\",{\"ok\":true,\"candidates\":[{\"id\":\"straight\",\"label\":\"\\u4e3b\\u7ebf\\u76f4\\u7ebf\",\"color\":\"#00e5ff\",\"frame_id\":\"map\",\"points\":[[-46.829068299543096,-97.09228945859682],[-36.532881638206625,-96.65604858633007],[-32.13083364546029,-91.8675357710345],[-32.033144597293706,-71.91750436898582],[-31.935455549127123,-51.96747296693714]],\"length_m\":57.0,\"num_points\":5}],\"error\":null,\"target\":\"ugv\",\"simulation_epoch\":\"1794539300201245707\",\"planning_request_id\":\"66838460-955c-4eb6-af9f-1e48d5c645be\"}]",
+    "planningRequestId": "66838460-955c-4eb6-af9f-1e48d5c645be",
+    "context": {
+      "entity_id": "ugv",
+      "simulation_epoch": "1794539300201245707",
+      "controller_instance_id": "1191002276:3398897717",
+      "mission_id": -1,
+      "mission_request_id": ""
+    },
+    "contextReceivedAt": "2026-11-13T06:52:50.513Z",
+    "contextMessageSha256": "3a7cf3f5869eb5a9e23e109b1b5b53828be211017d6e67a02ab8090693ffb7b7",
+    "sceneVerificationSha256": "ff827e95340ca8c66ac5d6684a8ec77f89dda5b92c5ef84fc314abfb05b357ba",
+    "plannerAdmission": {
+      "policy": "runtime_scene_and_entity_v1",
+      "observedAt": "2026-11-13T06:52:50.072Z",
+      "scenePhase": "failed",
+      "runtimePhase": "DEGRADED",
+      "ownerId": "d7b3dbe9aa52484689de39fda79e13ef",
+      "profileRunId": "a5b9a79e83184dbba4a5b565c2b54621",
+      "simulationEpoch": "1794539300201245707",
+      "revision": "4",
+      "readyControlGroups": [
+        "adjudication",
+        "eo:ugv",
+        "motion:ugv",
+        "scene"
+      ],
+      "requiredControlGroups": [
+        "scene",
+        "motion:ugv"
+      ],
+      "acceptingCommands": true,
+      "degraded": true,
+      "faultComponent": "dashboard",
+      "reason": "dashboard: Dashboard HTTP 检查失败: http://127.0.0.1:7879/api/watchdog, timed out",
+      "sceneError": "dashboard: Dashboard HTTP 检查失败: http://127.0.0.1:7879/api/watchdog, timed out",
+      "sourceSha256": "e5b4abd43b84a262922300d21a26ab6dfa3092eb29922dbb5de9c06d4b914616"
+    }
+  },
+  "physicalControlActions": 0
+}

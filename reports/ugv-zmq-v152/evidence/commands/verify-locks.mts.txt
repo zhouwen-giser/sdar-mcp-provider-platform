@@ -1,0 +1,8 @@
+import{readFileSync,writeFileSync}from'node:fs';
+import{loadGowmStorageConfig,createGowmPool}from'/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/gowm-shared-storage-adapter/src/index.ts';
+import{controlScope}from'/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/vehicle-zmq-control/src/model.ts';
+import{readZmqHandoffState}from'/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/vehicle-zmq-control/src/handoff.ts';
+const root='/home/sz/.smpp-debug/zmq-planner-scene-20261113',cfg=JSON.parse(readFileSync(root+'/formal/provider.json','utf8')),owner=loadGowmStorageConfig(JSON.parse(readFileSync('/home/sz/.smpp-debug/zmq-v151-formal-20261113/owner.json','utf8')))!;const pool=createGowmPool(owner,2);const scope=controlScope(cfg.profile,cfg.controlSettings);const locks:any[]=[];
+try{const c=await pool.connect();try{for(const key of scope.writerKeys){const r=await c.query('SELECT pg_try_advisory_lock(hashtextextended($1,790025)) AS locked',[key]);if(r.rows[0].locked){await c.query('SELECT pg_advisory_unlock(hashtextextended($1,790025))',[key]);throw Error('WRITER_ENDPOINT_NOT_EXCLUSIVELY_HELD');}locks.push({key,heldByFormalWriter:true});}}finally{c.release();}
+const idle=await readZmqHandoffState(pool,pool,cfg.profile.providerBinding.providerId);if(!idle.databaseIdle)throw Error('POST_CUTOVER_NOT_IDLE');
+const result={at:new Date().toISOString(),scope:'read_only_counts_and_non_acquiring_lock_probe',writerLocks:locks,exclusiveWriterVerified:true,idle,physicalControlActions:0};writeFileSync(root+'/writer-locks.json',JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result));}finally{await pool.end()}

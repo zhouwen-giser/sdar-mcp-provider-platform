@@ -1,0 +1,362 @@
+{
+  "sourceCommit": "47770101e2950045bc8fb37a50c8c95d258dc4d3",
+  "verifiedAt": "2026-11-13T07:10:53.610Z",
+  "runtime": "http://127.0.0.1:19100/mcp",
+  "profile": "zmq_v1_5_2_site_control_15",
+  "tools": 15,
+  "readOnly": false,
+  "controlEnabled": true,
+  "anonymous": true,
+  "invalidJwtRejected": true,
+  "identityOverrideIgnored": true,
+  "archive": {
+    "status": "running",
+    "pendingRecords": 0,
+    "pendingBytes": 0,
+    "committedEvents": 2084,
+    "receivedMessages": 2077,
+    "committedReceptions": 2077,
+    "unconfirmedReceptions": 0,
+    "locallyDiscardedMessages": 0,
+    "failureCode": null,
+    "failureRecorded": null
+  },
+  "archiveGaps": [
+    {
+      "schemaVersion": "ugv.zmq-observation-event/2.0",
+      "eventId": "f94d8a1d-f9a5-48c2-9415-994227d94083",
+      "receivedAt": "2026-11-13T07:09:55.563Z",
+      "monotonicNs": "12455405336448195",
+      "clockId": "recovery:820fe511-bd30-4db2-9734-a763dc9d34eb",
+      "type": "gap",
+      "component": null,
+      "code": "RECEIVER_SESSION_STARTED_AFTER_NATIVE_PROTOCOL_UPGRADE",
+      "locallyDiscardedMessages": null,
+      "sourceLossCount": null,
+      "recovery": {
+        "predecessorSessionId": "8239e0ce-900f-49bb-9357-230c96774ec3",
+        "durableLastOrdinal": "119256",
+        "durableHeadHash": "5dc65c25c657f71bcdc412f03adc6878ad00fd782a0cf3c0138a74413d21e8cb",
+        "predecessorStatus": "closed",
+        "predecessorPartitionHash": "bec02016d7cc4706e7cf996685258ee3c46a5e928dcbf5ed9260ff00f2592a78",
+        "failureCode": null,
+        "persistenceBoundary": "database_tail_verified_no_batch_replay"
+      }
+    }
+  ],
+  "channels": {
+    "chassis": {
+      "state": "connected",
+      "lastReceptionAt": "2026-11-13T07:10:52.683Z",
+      "lastValidCommittedAt": "2026-11-13T07:10:52.683Z",
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+        "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+        "SOURCE_TIMEBASE_UNCONFIRMED"
+      ]
+    },
+    "eo": {
+      "state": "connected",
+      "lastReceptionAt": "2026-11-13T07:10:52.708Z",
+      "lastValidCommittedAt": "2026-11-13T07:10:52.380Z",
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+        "IMAGE_DEDUPLICATION_BOUNDED_TO_RECEIVER_SESSION",
+        "ACQUISITION_TIME_UNKNOWN"
+      ]
+    },
+    "simulationEffect": {
+      "state": "connected",
+      "lastReceptionAt": "2026-11-13T07:10:52.585Z",
+      "lastValidCommittedAt": "2026-11-13T07:10:52.585Z",
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+      ]
+    }
+  },
+  "sessionId": "820fe511-bd30-4db2-9734-a763dc9d34eb",
+  "partitionHash": "9852168d7de308dd7c1baf121807742731ffe568158807ec605f55eb205d5b50",
+  "protocols": [
+    "chassis@2.1-site-rx/1",
+    "eo@2.3",
+    "simulationEffect@1.0"
+  ],
+  "frame": {
+    "metadata": {
+      "camera_id": "eo",
+      "frame_id": "b4bd52a0b0de48d89b90189-1794539300201245707-18276284574000",
+      "exposure_utc_ms": null,
+      "width_px": 1280,
+      "height_px": 720
+    },
+    "sha256": "c4a7377d2ae4d10b214434bd4bf56507ca93597e380b78ae10858b8a948477c5",
+    "byteLength": 150533,
+    "blocks": 1,
+    "reference": {
+      "receptionId": "defc0585-4ea4-4f31-811e-e82b8df1366e",
+      "sessionId": "820fe511-bd30-4db2-9734-a763dc9d34eb",
+      "receivedAt": "2026-11-13T07:10:52.708Z"
+    },
+    "overlays": 0,
+    "diagnostics": [
+      "SHORT_TERM_CACHE_EARLY_EVICTION_POSSIBLE",
+      "FRAME_NOT_COVERAGE_OR_STREAM_COMPLETENESS_EVIDENCE",
+      "EXPOSURE_UTC_UNKNOWN",
+      "SAME_FRAME_DETECTIONS_NOT_AVAILABLE"
+    ],
+    "rawImagePersisted": false
+  },
+  "planner": {
+    "status": "passed",
+    "context": {
+      "entity_id": "ugv",
+      "simulation_epoch": "1794539300201245707",
+      "controller_instance_id": "1191002276:3398897717",
+      "mission_id": -1,
+      "mission_request_id": ""
+    },
+    "planningRequestId": "566a3a4b-ca96-4ca9-81ac-c5c5c2d541f5",
+    "transform": {
+      "policy": "scene_enu_wgs84_v1",
+      "sha256": "88f00905d6dd0e697b102e8e9d086d4ae6d52c7f651641bb51d8f301b3df8496",
+      "reference": {
+        "sceneId": "yuan_qu",
+        "mapId": "yuan_qu",
+        "sceneSha256": "0cec5045348e5863475c24a215a2d54933cdff99161f8baaa3eba86cc97cca51",
+        "latitude": 22.506858333333,
+        "longitude": 114.048222222222,
+        "altitude": 500
+      },
+      "heightPolicy": "scene_reference_plane_not_measured"
+    },
+    "schemaVersion": "ugv.zmq-route-preview/3",
+    "adoption": "preview_only",
+    "correlation": "request_id_epoch_context_and_geometry",
+    "points": 5,
+    "sourceMessageSha256": "7220172a67ea8074b11c803f9886fc9ee88e24dd9aba1907e0c3fcb604d2dba0"
+  },
+  "physicalControlActions": 0,
+  "receiveFraming": {
+    "publicationFraming": "prefix_business_length_crc",
+    "commandFraming": "prefix_wire_length_crc",
+    "baseBusinessProtocol": "2.1",
+    "standard21Conformance": false
+  },
+  "operationSupport": [
+    {
+      "operation": "navigation.point",
+      "status": "supported",
+      "available": true,
+      "reasonCode": "ZMQ_OPERATION_SUPPORTED",
+      "description": "已观察到单点执行、暂停恢复和停稳；来源及完整业务报告资格另行核实。",
+      "evidenceRef": "field:20261029:sdar-task:9b4343de-74a1-44aa-81da-9d2bef274c32",
+      "qualification": "deployment_configured"
+    },
+    {
+      "operation": "navigation.route",
+      "status": "supported",
+      "available": true,
+      "reasonCode": "ZMQ_OPERATION_SUPPORTED",
+      "description": "操作员批准正式启用；现有原生协议与隔离软件验证支持该操作。现场动作及完整报告仍需分别验收，派发前复核实时状态和参数。",
+      "evidenceRef": "repo:58d3d734:reports/ugv-zmq-simulation-view-20261030/software/verification.json:native-and-lifecycle",
+      "qualification": "deployment_configured"
+    },
+    {
+      "operation": "navigation.returnHome",
+      "status": "supported",
+      "available": true,
+      "reasonCode": "ZMQ_OPERATION_SUPPORTED",
+      "description": "操作员批准正式启用；现有原生协议与隔离软件验证支持该操作。现场动作及完整报告仍需分别验收，派发前复核实时状态和参数。",
+      "evidenceRef": "repo:58d3d734:reports/ugv-zmq-simulation-view-20261030/software/verification.json:native-and-lifecycle",
+      "qualification": "deployment_configured"
+    },
+    {
+      "operation": "camera.position",
+      "status": "supported",
+      "available": true,
+      "reasonCode": "ZMQ_OPERATION_SUPPORTED",
+      "description": "已观察到角度状态、停止和占用解除；报告仍有证据缺口。",
+      "evidenceRef": "field:20261029:sdar-task:ac854c6f-33e5-448a-98e4-04b763b74ab7",
+      "qualification": "deployment_configured"
+    },
+    {
+      "operation": "camera.velocity",
+      "status": "supported",
+      "available": true,
+      "reasonCode": "ZMQ_OPERATION_SUPPORTED",
+      "description": "已观察到有限租期角速度及停止反馈；报告仍有证据缺口。",
+      "evidenceRef": "field:20261029:sdar-task:1d71bcbb-035d-46e4-a894-da930628ed0c",
+      "qualification": "deployment_configured"
+    },
+    {
+      "operation": "camera.zoom",
+      "status": "unsupported",
+      "available": false,
+      "reasonCode": "ZMQ_OPTICAL_ZOOM_UNSUPPORTED",
+      "description": "当前仿真通过重建相机调整视场，缺少光学镜头稳定和停止反馈。",
+      "evidenceRef": "field:20261029:req-3abd3d98-7fea-4755-872b-96695144a4df:UNSUPPORTED",
+      "qualification": "deployment_configured"
+    },
+    {
+      "operation": "camera.simulationView",
+      "status": "unverified",
+      "available": false,
+      "reasonCode": "ZMQ_VIEW_BACKEND_NOT_CONFIGURED",
+      "description": "独立仿真视图已发布；站点 CARLA 067529e82-dirty 缺少匹配 SDK、真实场景及车辆 Actor 映射，尚未配置真实后端。",
+      "evidenceRef": "site:20261102:carla-client-0.9.16-server-067529e82-dirty-version-mismatch",
+      "qualification": "deployment_configured"
+    },
+    {
+      "operation": "recon.area",
+      "status": "supported",
+      "available": true,
+      "reasonCode": "ZMQ_OPERATION_SUPPORTED",
+      "description": "操作员批准正式启用；现有原生协议与隔离软件验证支持该操作。现场动作及完整报告仍需分别验收，派发前复核实时状态和参数。",
+      "evidenceRef": "repo:58d3d734:reports/ugv-zmq-simulation-view-20261030/software/verification.json:native-and-lifecycle",
+      "qualification": "deployment_configured"
+    },
+    {
+      "operation": "recon.sector",
+      "status": "supported",
+      "available": true,
+      "reasonCode": "ZMQ_OPERATION_SUPPORTED",
+      "description": "操作员批准正式启用；现有原生协议与隔离软件验证支持该操作。现场动作及完整报告仍需分别验收，派发前复核实时状态和参数。",
+      "evidenceRef": "repo:58d3d734:reports/ugv-zmq-simulation-view-20261030/software/verification.json:native-and-lifecycle",
+      "qualification": "deployment_configured"
+    },
+    {
+      "operation": "recon.circular",
+      "status": "supported",
+      "available": true,
+      "reasonCode": "ZMQ_OPERATION_SUPPORTED",
+      "description": "操作员批准正式启用；现有原生协议与隔离软件验证支持该操作。现场动作及完整报告仍需分别验收，派发前复核实时状态和参数。",
+      "evidenceRef": "repo:58d3d734:reports/ugv-zmq-simulation-view-20261030/software/verification.json:native-and-lifecycle",
+      "qualification": "deployment_configured"
+    },
+    {
+      "operation": "inspection.area",
+      "status": "supported",
+      "available": true,
+      "reasonCode": "ZMQ_OPERATION_SUPPORTED",
+      "description": "操作员批准正式启用；现有原生协议与隔离软件验证支持该操作。现场动作及完整报告仍需分别验收，派发前复核实时状态和参数。",
+      "evidenceRef": "repo:58d3d734:reports/ugv-zmq-simulation-view-20261030/software/verification.json:native-and-lifecycle",
+      "qualification": "deployment_configured"
+    },
+    {
+      "operation": "simulation.applyEffect.observation",
+      "status": "supported",
+      "available": true,
+      "reasonCode": "ZMQ_OPERATION_SUPPORTED",
+      "description": "与人工分支共用已受理的原生位置交互合同；仍须逐次核实有效地理观测引用。",
+      "evidenceRef": "field:20261029:sdar-task:cda53d01-e45a-47bc-8756-b76e4bea05a8",
+      "qualification": "deployment_configured"
+    },
+    {
+      "operation": "simulation.applyEffect.manual",
+      "status": "supported",
+      "available": true,
+      "reasonCode": "ZMQ_OPERATION_SUPPORTED",
+      "description": "原生位置交互已受理并执行；该次无有效实体，业务失败，不代表能力不支持。",
+      "evidenceRef": "field:20261029:sdar-task:cda53d01-e45a-47bc-8756-b76e4bea05a8",
+      "qualification": "deployment_configured"
+    }
+  ],
+  "simulationView": null,
+  "localization": {
+    "component": "chassis",
+    "receivedAt": "2026-11-13T07:10:52.683Z",
+    "ageMs": 31.771361,
+    "receiptFresh": true,
+    "sourceFreshness": "unverified",
+    "receptionId": "9a79c09f-155a-4cd0-8b56-dab10d42bbdd",
+    "diagnostics": [
+      "SOURCE_CONTINUITY_UNVERIFIED",
+      "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+      "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+      "SOURCE_TIMEBASE_UNCONFIRMED"
+    ],
+    "observation": {
+      "key": "localization",
+      "protocolVersion": "2.1-site-rx/1",
+      "versionEvidence": "selected_contract_not_in_band",
+      "deviceId": "1",
+      "nativeTaskId": null,
+      "nativeRequestId": null,
+      "runtimeTaskId": null,
+      "sourceProducerEpoch": null,
+      "sourceTime": {
+        "unit": "unconfirmed_us",
+        "value": "18276296967"
+      },
+      "acquisitionUtcMs": null,
+      "reportedOrigin": "unattested",
+      "position": {
+        "longitude": 114.04776722593608,
+        "latitude": 22.505954785129326,
+        "altitude": 500.1522523816675,
+        "altitudeDatum": "unconfirmed",
+        "crs": "OGC:CRS84"
+      },
+      "data": {
+        "type": "localization",
+        "timeUs": "18276296967",
+        "systemTimeUs": "1794553852625926",
+        "utcTimeUs": "1794553852625926",
+        "timebase": "unconfirmed",
+        "ahrsStatus": 1,
+        "longitude": 114.04776722593608,
+        "latitude": 22.505954785129326,
+        "altitude": 500.1522523816675,
+        "velocityEnu": [
+          0,
+          0,
+          0
+        ],
+        "attitudeRaw": [
+          -0.00013635385693514603,
+          0.00047993661849715294,
+          0.000012783175545251029
+        ],
+        "accelerationRaw": [
+          0,
+          0,
+          0
+        ],
+        "angularVelocityRaw": [
+          0,
+          0,
+          0
+        ],
+        "quaternion": [
+          0.9999999688630277,
+          -0.00006817846022888088,
+          0.00023996787062408043,
+          0.0000064079478757826316
+        ],
+        "mercatorRaw": [
+          12695739.373701,
+          2572380.5627100863,
+          500.1522523816675
+        ],
+        "curvature": 0,
+        "fixType": 1,
+        "fixQuality": 1,
+        "alignmentMode": 3
+      }
+    }
+  },
+  "standard21Conformance": false,
+  "acceptanceScope": "formal_deployment_readonly_verification_no_physical_commands",
+  "overallFieldAcceptance": "readonly_gates_passed_physical_acceptance_pending",
+  "fieldProtocolAccepted": true,
+  "exitCode": 0
+}

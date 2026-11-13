@@ -1,0 +1,37 @@
+{
+  "sourceCommit": "47770101e2950045bc8fb37a50c8c95d258dc4d3",
+  "baseImage": "node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c",
+  "command": [
+    "docker",
+    "buildx",
+    "bake",
+    "--file",
+    "/home/sz/.smpp-debug/zmq-planner-scene-20261113/bake.json",
+    "--progress=plain"
+  ],
+  "startedAt": "2026-11-13T07:00:12.054630+00:00",
+  "elapsedSeconds": 296.447,
+  "exitCode": 0,
+  "log": "images-build.log",
+  "sha256": "510c421de8d7b73896443978f52df9be967ae0825d4746f54b07f8b414b00834",
+  "images": [
+    {
+      "role": "provider",
+      "tag": "smpp-zmq-v152-provider:47770101e295",
+      "id": "sha256:36d18a47a08c29da489aca627853a7e86d79f65250fcc48642e5fb90ee3cb5c4",
+      "sourceRevision": "47770101e2950045bc8fb37a50c8c95d258dc4d3"
+    },
+    {
+      "role": "runtime",
+      "tag": "smpp-zmq-v152-runtime:47770101e295",
+      "id": "sha256:35319451a9570ac9375f28b659599e7834ea177b6ab3165748cd6a403bd8ba4d",
+      "sourceRevision": "47770101e2950045bc8fb37a50c8c95d258dc4d3"
+    },
+    {
+      "role": "console",
+      "tag": "smpp-zmq-v152-console:47770101e295",
+      "id": "sha256:17d464551bcab979bea0806a881ccd1cd072692a09f04adb6a3c230c9ed946f5",
+      "sourceRevision": "47770101e2950045bc8fb37a50c8c95d258dc4d3"
+    }
+  ]
+}

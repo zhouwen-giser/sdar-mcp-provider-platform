@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "ugv.zmq-site-handoff-grant/1",
+  "commandId": "d78c280c-2430-4b2e-bb84-51594daffa34",
+  "planHash": "e759b87364bf1ff7501ab60ca9d8714a9880ad9f797f87f67b14e81349d9ce78",
+  "profileHash": "70a6528a8bd721c0924a1e6aea90f199943c28e2162e99daa6f7b1cc7b758646",
+  "providerId": "isr.vehicle.ugv.ugv",
+  "resourceId": "vehicle:ugv",
+  "actor": "operator-authorized-maintenance",
+  "reason": "SMPP-only planner component-admission fix; no physical dispatch authorized",
+  "createdAt": "2026-11-13T07:09:51.867Z",
+  "oldWriters": [
+    {
+      "id": "1c51e3744634220e0375c96d0ea8659ee1e88c0dedc1821261e7e212e5bced20",
+      "image": "sha256:26f3f21764e813a02a7f4728ad2610e3a2bf6e8e528f0fe108f13941da27e1a7",
+      "restartPolicy": "no",
+      "running": false
+    },
+    {
+      "id": "4073b4046525bf2368a1777faf787692354afe33a65c01c35403798552446912",
+      "image": "sha256:b1a92b1c166bda4a2af7dfc7cb2fda6122e2f12aa42dbddc100455a026a5471e",
+      "restartPolicy": "no",
+      "running": false
+    }
+  ],
+  "retiredTasks": [],
+  "outcome": "legacy_outcome_unknown_writers_stopped"
+}

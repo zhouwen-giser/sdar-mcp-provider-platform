@@ -1,0 +1,47 @@
+from pathlib import Path
+import subprocess,json,hashlib,datetime,socket,time,os,uuid
+root=Path('/home/sz/.smpp-debug/zmq-planner-scene-20261113');repo=Path('/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform');proof={'schemaVersion':'ugv.zmq-v152-formal-cutover/1','startedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'authorization':'existing_user_formal_cutover_and_current_route_preview_fix','sourceCommit':'47770101e2950045bc8fb37a50c8c95d258dc4d3','steps':[],'physicalControlActions':0,'pmsAndSdarBindingModified':False}
+def save():
+ p=root/'cutover.json';p.write_text(json.dumps(proof,ensure_ascii=False,indent=2)+'\n');p.chmod(0o600)
+def run(cmd,timeout=55,env=None):
+ r=subprocess.run(cmd,cwd=repo,capture_output=True,text=True,timeout=timeout,env=env);i=len(proof['steps']);p=root/f'cutover-{i:02d}.log';p.write_text(r.stdout+r.stderr);p.chmod(0o600);proof['steps'].append({'command':cmd,'exitCode':r.returncode,'log':p.name,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()});save();print(json.dumps({'step':i,'operation':cmd[:5],'exitCode':r.returncode}),flush=True)
+ if r.returncode:raise RuntimeError('CUTOVER_STEP_FAILED_'+str(i))
+ return r.stdout
+def wait_http(port):
+ import urllib.request
+ deadline=time.monotonic()+40
+ while time.monotonic()<deadline:
+  try:
+   with urllib.request.urlopen(f'http://127.0.0.1:{port}/health/ready',timeout=2) as r:
+    if r.status==200:return
+  except Exception:pass
+  time.sleep(.5)
+ raise RuntimeError('FORMAL_HEALTH_TIMEOUT_'+str(port))
+assert json.loads((root/'candidate-browser.json').read_text())['exitCode']==0
+assert json.loads((root/'source-preflight.json').read_text())['stationaryVerified']
+assert all(x['exitCode']==0 for x in json.loads((root/'gates-final/gates.json').read_text()))
+run(['docker','update','--restart=no','smpp-zmq-site-formal-console-1']);run(['docker','stop','--time','20','smpp-zmq-site-formal-console-1'],timeout=40)
+cli=['node','--import','tsx','scripts/ugv-zmq/site-control-handoff.ts']
+run([*cli,'plan','--config',str(root/'handoff-config.json'),'--plan',str(root/'handoff-plan-final.json')])
+plan=json.loads((root/'handoff-plan-final.json').read_text());assert all(len(v)==0 for v in plan['snapshot'].values())
+command=str(uuid.uuid4());run([*cli,'apply','--config',str(root/'handoff-config.json'),'--plan',str(root/'handoff-plan-final.json'),'--grant',str(root/'handoff-grant.json'),'--command-id',command,'--actor','operator-authorized-maintenance','--reason','SMPP-only planner component-admission fix; no physical dispatch authorized','--plan-hash',plan['planHash']],timeout=60)
+run([*cli,'verify','--config',str(root/'handoff-config.json'),'--grant',str(root/'handoff-grant.json')])
+grant=json.loads((root/'handoff-grant.json').read_text());assert grant['retiredTasks']==[]
+provider=json.loads((root/'formal/provider.json').read_text());provider['controlSettings']['handoffGrantHash']=hashlib.sha256(json.dumps(grant,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()).hexdigest();(root/'formal/provider.json').write_text(json.dumps(provider,ensure_ascii=False,indent=2)+'\n')
+run(['node','--import','tsx',str(root/'receiver-tail.mts')])
+for port in [7010,19108,19100,19101]:
+ with socket.socket()as s:
+  if s.connect_ex(('127.0.0.1',port))==0:raise RuntimeError('FORMAL_PORT_CONFLICT_'+str(port))
+compose=['docker','compose','--env-file',str(root/'formal/site-images.env'),'-p','smpp-zmq-site-formal','-f','deploy/ugv-zmq/site-control/compose.formal.yaml','-f','/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/pms-readonly-override.json','-f','/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/resources.json']
+run([*compose,'config','--quiet'])
+run([*compose,'up','-d','--no-deps','--force-recreate','--no-build','--pull','never','provider'])
+end=time.monotonic()+25
+while time.monotonic()<end:
+ with socket.socket()as s:
+  if s.connect_ex(('127.0.0.1',7010))==0:break
+ time.sleep(.5)
+else:raise RuntimeError('FORMAL_PROVIDER_START_FAILED')
+run([*compose,'up','-d','--no-deps','--force-recreate','--no-build','--pull','never','runtime']);wait_http(19100)
+run([*compose,'up','-d','--no-deps','--force-recreate','--no-build','--pull','never','console']);wait_http(19101)
+rows=json.loads(subprocess.check_output(['docker','inspect','smpp-zmq-site-formal-provider-1','smpp-zmq-site-formal-runtime-1','smpp-zmq-site-formal-console-1']))
+proof.update(completedAt=datetime.datetime.now(datetime.timezone.utc).isoformat(),status='formal_services_replaced_pending_readonly_acceptance',formalPorts=[19100,19101],catalogProfile='zmq_v1_5_2_site_control_15',handoffCommandId=command,newContainers=[{'id':r['Id'],'name':r['Name'],'image':r['Image'],'startedAt':r['State']['StartedAt'],'restartCount':r['RestartCount']}for r in rows]);save();print(json.dumps({'status':proof['status'],'ports':proof['formalPorts'],'catalogProfile':proof['catalogProfile'],'physicalControlActions':0}),flush=True)

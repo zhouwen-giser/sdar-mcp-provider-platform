@@ -1,0 +1,64 @@
+{
+  "at": "2026-11-13T07:10:56.394Z",
+  "url": "http://17.26.1.20:19101",
+  "sourceCommit": "4777010",
+  "profile": "zmq_v1_5_2_site_control_15",
+  "tools": 15,
+  "httpLogin": true,
+  "map": "yuan_qu",
+  "planner": {
+    "status": "verified",
+    "commandId": "277b4ba4-1bf8-47e9-a2b8-9ac775f8d5cd",
+    "planningRequestId": "6fa91af5-2165-4604-b518-42b26e3b692d",
+    "points": 5,
+    "adoption": "preview_only",
+    "admission": {
+      "policy": "runtime_scene_and_entity_v1",
+      "reason": "dashboard: Dashboard HTTP 检查失败: http://127.0.0.1:7879/api/watchdog, timed out",
+      "ownerId": "d7b3dbe9aa52484689de39fda79e13ef",
+      "degraded": true,
+      "revision": "4",
+      "observedAt": "2026-11-13T07:10:54.777Z",
+      "sceneError": "dashboard: Dashboard HTTP 检查失败: http://127.0.0.1:7879/api/watchdog, timed out",
+      "scenePhase": "failed",
+      "profileRunId": "a5b9a79e83184dbba4a5b565c2b54621",
+      "runtimePhase": "DEGRADED",
+      "sourceSha256": "5a9ad64de4ff982cb935380a051fa02dfb032eec6f0ef3a3e69ca2cee74ff12c",
+      "faultComponent": "dashboard",
+      "simulationEpoch": "1794539300201245707",
+      "acceptingCommands": true,
+      "readyControlGroups": [
+        "adjudication",
+        "eo:ugv",
+        "motion:ugv",
+        "scene"
+      ],
+      "requiredControlGroups": [
+        "scene",
+        "motion:ugv"
+      ]
+    },
+    "reportDownloadSha256": "0012e54f7c408830b4f6767f7ea45bfeed42291058c475cb701b29181b4335d4"
+  },
+  "frame": {
+    "width": 1280,
+    "height": 720,
+    "complete": true,
+    "byteLength": 150526,
+    "sha256": "18dc21caed1d3b2bc7c546e9e7876d011e9b37fbef13eba21d78940f897815ae"
+  },
+  "forms": {
+    "speedUnit": "km/h",
+    "defaultSpeed": 60,
+    "controlSubmitClicked": false
+  },
+  "history": {
+    "taskId": "46a8aa6c-50d3-4602-9bfa-607a198a1049",
+    "bytes": 4545,
+    "sha256": "815ac4a0b5bead7f0a90056353500b13ed6a1cd384e588b60d887002d65e6103"
+  },
+  "mobileNoOverflow": true,
+  "pageErrors": 0,
+  "physicalControlActions": 0,
+  "exitCode": 0
+}

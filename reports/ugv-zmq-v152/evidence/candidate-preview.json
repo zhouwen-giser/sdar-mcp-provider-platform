@@ -1,0 +1,100 @@
+{
+  "commandId": "9b67a657-a018-4c45-8f68-d9bde9fef7e4",
+  "response": {
+    "start": {
+      "latitude": 22.505954785129326,
+      "longitude": 114.04776722593608
+    },
+    "context": {
+      "entity_id": "ugv",
+      "mission_id": -1,
+      "simulation_epoch": "1794539300201245707",
+      "mission_request_id": "",
+      "controller_instance_id": "1191002276:3398897717"
+    },
+    "adoption": "preview_only",
+    "createdAt": "2026-11-13T07:06:18.180Z",
+    "previewId": "264e72d6-8d99-4c97-b4d4-b62fa9001cf0",
+    "transform": {
+      "policy": "scene_enu_wgs84_v1",
+      "sha256": "88f00905d6dd0e697b102e8e9d086d4ae6d52c7f651641bb51d8f301b3df8496",
+      "reference": {
+        "mapId": "yuan_qu",
+        "sceneId": "yuan_qu",
+        "altitude": 500,
+        "latitude": 22.506858333333,
+        "longitude": 114.048222222222,
+        "sceneSha256": "0cec5045348e5863475c24a215a2d54933cdff99161f8baaa3eba86cc97cca51"
+      },
+      "heightPolicy": "scene_reference_plane_not_measured"
+    },
+    "waypoints": [
+      {
+        "latitude": 22.505981620384677,
+        "longitude": 114.04776712873574
+      },
+      {
+        "latitude": 22.50598555975196,
+        "longitude": 114.04786718895863
+      },
+      {
+        "latitude": 22.50602879858123,
+        "longitude": 114.04790996877361
+      },
+      {
+        "latitude": 22.506208940989584,
+        "longitude": 114.04791091773082
+      },
+      {
+        "latitude": 22.506389083393916,
+        "longitude": 114.04791186669047
+      }
+    ],
+    "resourceId": "vehicle:ugv",
+    "correlation": "request_id_epoch_context_and_geometry",
+    "requestHash": "cff49e8e86109311d088daf13cae11a6d37f354ce0659213a5eb36367ec2b4a7",
+    "routeSource": "isr.dashboard.road-planner/v2",
+    "schemaVersion": "ugv.zmq-route-preview/3",
+    "sourceMessage": "42[\"route_candidates\",{\"ok\":true,\"candidates\":[{\"id\":\"straight\",\"label\":\"\\u4e3b\\u7ebf\\u76f4\\u7ebf\",\"color\":\"#00e5ff\",\"frame_id\":\"map\",\"points\":[[-46.829068299543096,-97.09228945859682],[-36.532881638206625,-96.65604858633007],[-32.13083364546029,-91.8675357710345],[-32.033144597293706,-71.91750436898582],[-31.935455549127123,-51.96747296693714]],\"length_m\":57.0,\"num_points\":5}],\"error\":null,\"target\":\"ugv\",\"simulation_epoch\":\"1794539300201245707\",\"planning_request_id\":\"6bd55b86-31dd-43ce-8daf-5c6a41776936\"}]",
+    "sourceRecordId": "d7de3d59f72e735083af8c7073adaa106c9efef32e075c4099c76864653ef7ff",
+    "sourceFreshness": "context_and_scene_verified",
+    "plannerAdmission": {
+      "policy": "runtime_scene_and_entity_v1",
+      "reason": "dashboard: Dashboard HTTP 检查失败: http://127.0.0.1:7879/api/watchdog, timed out",
+      "ownerId": "d7b3dbe9aa52484689de39fda79e13ef",
+      "degraded": true,
+      "revision": "4",
+      "observedAt": "2026-11-13T07:06:17.544Z",
+      "sceneError": "dashboard: Dashboard HTTP 检查失败: http://127.0.0.1:7879/api/watchdog, timed out",
+      "scenePhase": "failed",
+      "profileRunId": "a5b9a79e83184dbba4a5b565c2b54621",
+      "runtimePhase": "DEGRADED",
+      "sourceSha256": "b7b4febd810754d15d783e971912a57ea86de6f371737ff1e5e338eb98ca9353",
+      "faultComponent": "dashboard",
+      "simulationEpoch": "1794539300201245707",
+      "acceptingCommands": true,
+      "readyControlGroups": [
+        "adjudication",
+        "eo:ugv",
+        "motion:ugv",
+        "scene"
+      ],
+      "requiredControlGroups": [
+        "scene",
+        "motion:ugv"
+      ]
+    },
+    "contextReceivedAt": "2026-11-13T07:06:17.902Z",
+    "planningRequestId": "6bd55b86-31dd-43ce-8daf-5c6a41776936",
+    "requestedWaypoints": [
+      {
+        "latitude": 22.506389083393916,
+        "longitude": 114.04791186669047
+      }
+    ],
+    "sourceMessageSha256": "012474a48b6a5d9d7e41e50783174612a10939a56371e2b45e077d39bfaa8604",
+    "contextMessageSha256": "7edb8d464fad8fa1ebb11d7daf710ccfb1ffb8f61637997743a098591753faff",
+    "completeSpatialEvidence": false,
+    "sceneVerificationSha256": "7d5c4ec4d647e98b09ea2e36d7aee3d16214084898f6c6971401c4ff87184d11"
+  }
+}

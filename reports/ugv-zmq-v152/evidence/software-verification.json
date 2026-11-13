@@ -1,0 +1,194 @@
+{
+  "schemaVersion": "ugv.zmq-v152-software-verification/1",
+  "applicationCommit": "47770101e2950045bc8fb37a50c8c95d258dc4d3",
+  "sourceDuringTests": "isolated working tree based on e791179, committed as 4777010; final lint-only test assertion tidy and Docker contract-source COPY were also type/build/image verified",
+  "gates": [
+    {
+      "command": [
+        "pnpm",
+        "exec",
+        "eslint",
+        "apps/ugv-control-console/test/site-v152.test.ts",
+        "packages/provider-adapter-kit/src/dashboard-v2-component-planner.ts",
+        "packages/vehicle-zmq-contract/src/planner-admission-profile.ts",
+        "packages/vehicle-zmq-control/src/planner-v3-contract.ts",
+        "packages/vehicle-zmq-control/src/site-v152.ts",
+        "scripts/ugv-zmq/planner-admission-contract.ts",
+        "scripts/ugv-zmq/v152-catalog.ts",
+        "tests/ugv-zmq-provider/dashboard-v2-component.test.ts",
+        "tests/ugv-zmq-provider/v152-catalog.test.ts",
+        "tests/ugv-zmq-provider/v152-planner-admission.postgres.test.ts",
+        "apps/runtime/src/runtime.ts",
+        "apps/ugv-control-console/server/service.ts",
+        "apps/ugv-control-console/shared/zmq-native.ts",
+        "apps/ugv-control-console/test/site-control-profiles.test.ts",
+        "apps/ugv-control-console/web/SiteControlConsole.tsx",
+        "apps/ugv-control-console/web/SiteReadonlyConsole.tsx",
+        "apps/ugv-control-console/web/api.ts",
+        "apps/ugv-zmq-provider-adapter/src/bootstrap.ts",
+        "apps/ugv-zmq-provider-adapter/src/runtime.ts",
+        "apps/ugv-zmq-provider-adapter/src/server.ts",
+        "apps/ugv-zmq-provider-adapter/src/site-bootstrap.ts",
+        "apps/ugv-zmq-provider-adapter/src/site-planner.ts",
+        "apps/ugv-zmq-provider-adapter/src/site-runtime.ts",
+        "packages/operation-registry/src/registry.ts",
+        "packages/vehicle-zmq-control/src/catalog-profiles.ts",
+        "packages/vehicle-zmq-control/src/model.ts",
+        "packages/vehicle-zmq-control/src/operation-support.ts",
+        "packages/vehicle-zmq-control/src/site-handoff.ts",
+        "packages/vehicle-zmq-observer/src/config.ts",
+        "packages/vehicle-zmq-observer/src/normalize.ts",
+        "packages/vehicle-zmq-observer/src/observer.ts",
+        "scripts/ugv-zmq/site-handoff-check.ts",
+        "tests/ugv-zmq-provider/dashboard-v2-fixture.ts",
+        "tests/ugv-zmq-provider/dashboard-v2.test.ts",
+        "tests/ugv-zmq-provider/site-control-fixture.ts",
+        "tests/ugv-zmq-provider/site-control.postgres.test.ts",
+        "tests/ugv-zmq-provider/site-fixture.ts"
+      ],
+      "startedAt": "2026-11-13T06:57:12.783477+00:00",
+      "exitCode": 0,
+      "log": "gate-00.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "pnpm",
+        "typecheck"
+      ],
+      "startedAt": "2026-11-13T06:57:40.228540+00:00",
+      "exitCode": 0,
+      "log": "gate-01.log",
+      "sha256": "70685b4df7789c854b9e1ceab7d78a6d0f9a0831c11eb0010b7b5fdbe0e50c39"
+    },
+    {
+      "command": [
+        "pnpm",
+        "build"
+      ],
+      "startedAt": "2026-11-13T06:58:06.658327+00:00",
+      "exitCode": 0,
+      "log": "gate-02.log",
+      "sha256": "536cc4f74bc927dcd4e9e023fc52b0871374c6ac34ebbfec8258499cfd7b634f"
+    },
+    {
+      "command": [
+        "pnpm",
+        "--filter",
+        "@sdar/ugv-control-console",
+        "build"
+      ],
+      "startedAt": "2026-11-13T06:58:29.348444+00:00",
+      "exitCode": 0,
+      "log": "gate-03.log",
+      "sha256": "167286076937b913353093f01b6198e82d8af705b16398a05e82ce04bddd5f0d"
+    },
+    {
+      "command": [
+        "pnpm",
+        "protocol:check"
+      ],
+      "startedAt": "2026-11-13T06:58:44.405391+00:00",
+      "exitCode": 0,
+      "log": "gate-04.log",
+      "sha256": "092e31177e32feedb3855c9109a9661833234e89dd9caaef23d90da03b9dba0f"
+    },
+    {
+      "command": [
+        "pnpm",
+        "exec",
+        "tsx",
+        "scripts/ugv-zmq/interop-contract.ts"
+      ],
+      "startedAt": "2026-11-13T06:58:45.783708+00:00",
+      "exitCode": 0,
+      "log": "gate-05.log",
+      "sha256": "40ff44c86b5b372f3df6cf93625a049010c4f45bd9f005257c8d1ba92963b2ad"
+    },
+    {
+      "command": [
+        "pnpm",
+        "exec",
+        "tsx",
+        "scripts/ugv-zmq/planner-admission-contract.ts"
+      ],
+      "startedAt": "2026-11-13T06:58:47.002998+00:00",
+      "exitCode": 0,
+      "log": "gate-06.log",
+      "sha256": "d04e208aacea3ac9d80c7fc3c81a02a6f52bbc60138a186157042449d599df45"
+    },
+    {
+      "command": [
+        "pnpm",
+        "exec",
+        "tsx",
+        "scripts/ugv-zmq/v151-catalog.ts",
+        "--check"
+      ],
+      "startedAt": "2026-11-13T06:58:48.196991+00:00",
+      "exitCode": 0,
+      "log": "gate-07.log",
+      "sha256": "cc25bd95bd4322b443a1cefe9c9937b7afabb56123a5b5c54b36f59001d26afc"
+    },
+    {
+      "command": [
+        "pnpm",
+        "exec",
+        "tsx",
+        "scripts/ugv-zmq/v152-catalog.ts",
+        "--check"
+      ],
+      "startedAt": "2026-11-13T06:58:51.103302+00:00",
+      "exitCode": 0,
+      "log": "gate-08.log",
+      "sha256": "6c6c425b8056a824d5686436ef717f3dae8fd2f46ac4f8c2e547478c55cb809f"
+    }
+  ],
+  "tests": [
+    {
+      "command": "pnpm exec vitest run tests/ugv-zmq-provider/dashboard-v2.test.ts tests/ugv-zmq-provider/dashboard-v2-component.test.ts",
+      "exitCode": 0,
+      "files": 2,
+      "passed": 38,
+      "durationSeconds": 3.1
+    },
+    {
+      "command": "pnpm exec vitest run tests/ugv-zmq-provider/v152-catalog.test.ts",
+      "exitCode": 0,
+      "files": 1,
+      "passed": 4,
+      "durationSeconds": 2.14
+    },
+    {
+      "command": "SMPP_ZMQ_TEST_CONFIG_FILE=<private isolated config> pnpm exec vitest run tests/ugv-zmq-provider/v152-planner-admission.postgres.test.ts tests/ugv-zmq-provider/v151-interop.postgres.test.ts",
+      "exitCode": 0,
+      "files": 2,
+      "passed": 11,
+      "durationSeconds": 12.84
+    },
+    {
+      "command": "SMPP_ZMQ_TEST_CONFIG_FILE=<private isolated config> SMPP_ZMQ_TEST_CATALOG_PROFILE=zmq_v1_5_2_site_control_15 pnpm exec vitest run tests/ugv-zmq-provider/site-control.postgres.test.ts",
+      "exitCode": 0,
+      "files": 1,
+      "passed": 10,
+      "durationSeconds": 22.99
+    },
+    {
+      "command": "pnpm --filter @sdar/ugv-control-console typecheck; SMPP_ZMQ_TEST_CONFIG_FILE=<private isolated config> pnpm --filter @sdar/ugv-control-console exec vitest run --config vitest.config.ts test/site-v152.test.ts test/site-v151.test.ts test/site-control-profiles.test.ts",
+      "exitCode": 0,
+      "files": 3,
+      "passed": 11,
+      "durationSeconds": 12.23
+    }
+  ],
+  "testResultProvenance": "actual tool command results from this chat; these summaries are not reconstructed raw stdout files",
+  "initialAttempts": [
+    "catalog generation found a JSON Schema strict tuple representation error; changed the evidence list schema before final generation",
+    "initial typecheck found the temporary catalogs absent and a Zod issue typing mismatch, both resolved",
+    "initial lint rejected two non-null test assertions; replaced them with checked present() assertions; final lint passed",
+    "candidate preparation initially used a CJS named import in the private script, before any database initialization; corrected before successful preparation"
+  ],
+  "fieldPhysicalControlActions": 0,
+  "parentFrozenContractSha256": "0e2df6125e060d997cdc9eedd986cd2863592fbcecc6bb7210c7b47627efa2f5",
+  "newContractSha256": "cb1b6ecec5999a4edc075c7c78da0e4198706ad4baffe71dadb409873bf6cd8c"
+}

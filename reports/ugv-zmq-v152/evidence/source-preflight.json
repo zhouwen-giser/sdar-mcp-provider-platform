@@ -1,0 +1,456 @@
+{
+  "at": "2026-11-13T07:07:16.018Z",
+  "scope": "readonly_no_device_commands",
+  "scene": {
+    "phase": "failed",
+    "scene": "yuan_qu",
+    "simulationEpoch": "1794539300201245707",
+    "error": "dashboard: Dashboard HTTP 检查失败: http://127.0.0.1:7879/api/watchdog, timed out",
+    "overallSceneReady": false
+  },
+  "sourceContext": {
+    "entity_id": "ugv",
+    "simulation_epoch": "1794539300201245707",
+    "controller_instance_id": "1191002276:3398897717",
+    "mission_id": -1,
+    "mission_request_id": ""
+  },
+  "sourceChassis": {
+    "header": {
+      "stamp": {
+        "sec": 18059,
+        "nanosec": 371306499
+      },
+      "frame_id": "map"
+    },
+    "simulation_epoch": "1794539300201245707",
+    "entity_id": "ugv",
+    "entity_type": "ugv",
+    "system_id": "1",
+    "controller_instance_id": "1191002276:3398897717",
+    "sequence": "143279",
+    "observation_fresh": true,
+    "settings_fresh": true,
+    "faults_fresh": true,
+    "fault_mask": 0,
+    "run_state": 1,
+    "mode": 0,
+    "speed_limit_mps": 8.333333015441895,
+    "avoid_obstacles": false,
+    "has_task": false,
+    "task_simulation_epoch": "0",
+    "task_owner": "0",
+    "task_id": 0,
+    "task_message_id": 0,
+    "task_identity": "",
+    "mission_type": 0,
+    "mission_state": 0,
+    "progress": 0,
+    "planning": false,
+    "feedback_pending": false,
+    "accepted_feedback_sent": false,
+    "starting": false,
+    "executing": false,
+    "cancel_pending": false,
+    "action_request_id": "",
+    "available": true,
+    "task_current": false,
+    "error": ""
+  },
+  "sourceActor": {
+    "move_status": "无当前任务",
+    "move_code": -1,
+    "mission_id": "N/A",
+    "mission_type": "N/A",
+    "mission_state": "N/A",
+    "mission_code": -1,
+    "mission_progress": 0,
+    "system_run_state": "N/A",
+    "system_mode": "N/A",
+    "system_speed_limit": 29.99999885559082,
+    "system_errors": [],
+    "position_x": -46.81907653808594,
+    "position_y": -100.0641860961914,
+    "position_z": 0.1512916386127472,
+    "speed_kmh": 0,
+    "distance_remaining": null,
+    "battery_range_km": null,
+    "energy_percent": null,
+    "gnss_lat": 22.505954785129326,
+    "gnss_lon": 114.04776722593608,
+    "vehicle_state": null,
+    "component_health": {
+      "power_battery": 0,
+      "lvbattery": 0,
+      "fuel": 0,
+      "water_temp": 0,
+      "motor": 0,
+      "sensor": 0,
+      "gnss": 0,
+      "comms": 0,
+      "weapon": 0,
+      "navigation": 0
+    },
+    "available": true,
+    "frame_id": "map",
+    "entity_id": "ugv",
+    "entity_type": "ugv",
+    "simulation_epoch": "1794539300201245707",
+    "mission_available": false,
+    "component_health_source": "controller_faults",
+    "camp": "red",
+    "anomaly_entity_id": "ugv",
+    "active_anomalies": []
+  },
+  "positions": [
+    {
+      "receivedAt": "2026-11-13T07:07:15.835Z",
+      "wireSha256": "23fb1edaa1e082b85f915dc5db443413fa4c13336e5cdc99378e724446c01aaa",
+      "body": {
+        "type": "localization",
+        "timeUs": "18059467616",
+        "systemTimeUs": "1794553635777955",
+        "utcTimeUs": "1794553635777955",
+        "timebase": "unconfirmed",
+        "ahrsStatus": 1,
+        "longitude": 114.04776722593608,
+        "latitude": 22.505954785129326,
+        "altitude": 500.1522523816675,
+        "velocityEnu": [
+          0,
+          0,
+          0
+        ],
+        "attitudeRaw": [
+          -0.00013635385693514603,
+          0.00047993661849715294,
+          0.000012783175545251029
+        ],
+        "accelerationRaw": [
+          0,
+          0,
+          0
+        ],
+        "angularVelocityRaw": [
+          0,
+          0,
+          0
+        ],
+        "quaternion": [
+          0.9999999688630277,
+          -0.00006817846022888088,
+          0.00023996787062408043,
+          0.0000064079478757826316
+        ],
+        "mercatorRaw": [
+          12695739.373701,
+          2572380.5627100863,
+          500.1522523816675
+        ],
+        "curvature": 0,
+        "fixType": 1,
+        "fixQuality": 1,
+        "alignmentMode": 3
+      }
+    },
+    {
+      "receivedAt": "2026-11-13T07:07:15.883Z",
+      "wireSha256": "d1507f475f0743602d36910eff0bb5e2a89248b14dba9111055b5500b6475445",
+      "body": {
+        "type": "localization",
+        "timeUs": "18059518509",
+        "systemTimeUs": "1794553635828347",
+        "utcTimeUs": "1794553635828347",
+        "timebase": "unconfirmed",
+        "ahrsStatus": 1,
+        "longitude": 114.04776722593608,
+        "latitude": 22.505954785129326,
+        "altitude": 500.1522523816675,
+        "velocityEnu": [
+          0,
+          0,
+          0
+        ],
+        "attitudeRaw": [
+          -0.00013635385693514603,
+          0.00047993661849715294,
+          0.000012783175545251029
+        ],
+        "accelerationRaw": [
+          0,
+          0,
+          0
+        ],
+        "angularVelocityRaw": [
+          0,
+          0,
+          0
+        ],
+        "quaternion": [
+          0.9999999688630277,
+          -0.00006817846022888088,
+          0.00023996787062408043,
+          0.0000064079478757826316
+        ],
+        "mercatorRaw": [
+          12695739.373701,
+          2572380.5627100863,
+          500.1522523816675
+        ],
+        "curvature": 0,
+        "fixType": 1,
+        "fixQuality": 1,
+        "alignmentMode": 3
+      }
+    },
+    {
+      "receivedAt": "2026-11-13T07:07:15.932Z",
+      "wireSha256": "a01674bc28849c768fb70b3c4db6f864dcb1c0215253bbd55095ef72604da809",
+      "body": {
+        "type": "localization",
+        "timeUs": "18059566124",
+        "systemTimeUs": "1794553635877383",
+        "utcTimeUs": "1794553635877383",
+        "timebase": "unconfirmed",
+        "ahrsStatus": 1,
+        "longitude": 114.04776722593608,
+        "latitude": 22.505954785129326,
+        "altitude": 500.1522523816675,
+        "velocityEnu": [
+          0,
+          0,
+          0
+        ],
+        "attitudeRaw": [
+          -0.00013635385693514603,
+          0.00047993661849715294,
+          0.000012783175545251029
+        ],
+        "accelerationRaw": [
+          0,
+          0,
+          0
+        ],
+        "angularVelocityRaw": [
+          0,
+          0,
+          0
+        ],
+        "quaternion": [
+          0.9999999688630277,
+          -0.00006817846022888088,
+          0.00023996787062408043,
+          0.0000064079478757826316
+        ],
+        "mercatorRaw": [
+          12695739.373701,
+          2572380.5627100863,
+          500.1522523816675
+        ],
+        "curvature": 0,
+        "fixType": 1,
+        "fixQuality": 1,
+        "alignmentMode": 3
+      }
+    },
+    {
+      "receivedAt": "2026-11-13T07:07:15.983Z",
+      "wireSha256": "f4b8b8d4f26df42c86793cf768d15dac2c0001defcf25c8b5b703e6bef491af8",
+      "body": {
+        "type": "localization",
+        "timeUs": "18059619086",
+        "systemTimeUs": "1794553635925793",
+        "utcTimeUs": "1794553635925793",
+        "timebase": "unconfirmed",
+        "ahrsStatus": 1,
+        "longitude": 114.04776722593608,
+        "latitude": 22.505954785129326,
+        "altitude": 500.1522523816675,
+        "velocityEnu": [
+          0,
+          0,
+          0
+        ],
+        "attitudeRaw": [
+          -0.00013635385693514603,
+          0.00047993661849715294,
+          0.000012783175545251029
+        ],
+        "accelerationRaw": [
+          0,
+          0,
+          0
+        ],
+        "angularVelocityRaw": [
+          0,
+          0,
+          0
+        ],
+        "quaternion": [
+          0.9999999688630277,
+          -0.00006817846022888088,
+          0.00023996787062408043,
+          0.0000064079478757826316
+        ],
+        "mercatorRaw": [
+          12695739.373701,
+          2572380.5627100863,
+          500.1522523816675
+        ],
+        "curvature": 0,
+        "fixType": 1,
+        "fixQuality": 1,
+        "alignmentMode": 3
+      }
+    }
+  ],
+  "stationaryVerified": true,
+  "candidateSessionId": "a79f29e4-1a55-4b6a-a5ae-97137554e8ea",
+  "candidatePartitionHash": "40d9448af464379c2c8a715b338d99c3cbf453ea72ea6c61e378a288eb375727",
+  "archive": {
+    "status": "running",
+    "pendingRecords": 1,
+    "pendingBytes": 2279,
+    "committedEvents": 2653,
+    "receivedMessages": 2648,
+    "committedReceptions": 2647,
+    "unconfirmedReceptions": 0,
+    "locallyDiscardedMessages": 0,
+    "failureCode": null,
+    "failureRecorded": null
+  },
+  "componentSnapshots": [
+    {
+      "component": "chassis",
+      "receivedAt": "2026-11-13T07:07:14.858Z",
+      "ageMs": 849.00714,
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "receptionId": "997084fc-64dd-4c18-a044-61f8d302a2a5",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+        "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+        "REPEATED_WIRE_BYTES",
+        "SOURCE_TIME_NOT_SUPPLIED"
+      ],
+      "observation": {
+        "key": "systemState",
+        "protocolVersion": "2.1-site-rx/1",
+        "versionEvidence": "selected_contract_not_in_band",
+        "deviceId": "1",
+        "nativeTaskId": null,
+        "nativeRequestId": null,
+        "runtimeTaskId": null,
+        "sourceProducerEpoch": null,
+        "sourceTime": {
+          "unit": "not_supplied",
+          "value": null
+        },
+        "acquisitionUtcMs": null,
+        "reportedOrigin": "unattested",
+        "position": null,
+        "data": {
+          "type": "systemState",
+          "runState": 1,
+          "mode": 0,
+          "speedLimitMetresPerSecond": 8.333333015441895,
+          "videoConfig": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "errorCodes": []
+        }
+      }
+    },
+    {
+      "component": "chassis",
+      "receivedAt": "2026-11-13T07:07:15.630Z",
+      "ageMs": 76.520671,
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "receptionId": "a223fb4d-27c3-4e1b-b94d-55e5b73886e0",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+        "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+        "SOURCE_TIMEBASE_UNCONFIRMED"
+      ],
+      "observation": {
+        "key": "localization",
+        "protocolVersion": "2.1-site-rx/1",
+        "versionEvidence": "selected_contract_not_in_band",
+        "deviceId": "1",
+        "nativeTaskId": null,
+        "nativeRequestId": null,
+        "runtimeTaskId": null,
+        "sourceProducerEpoch": null,
+        "sourceTime": {
+          "unit": "unconfirmed_us",
+          "value": "18059268498"
+        },
+        "acquisitionUtcMs": null,
+        "reportedOrigin": "unattested",
+        "position": {
+          "longitude": 114.04776722593608,
+          "latitude": 22.505954785129326,
+          "altitude": 500.1522523816675,
+          "altitudeDatum": "unconfirmed",
+          "crs": "OGC:CRS84"
+        },
+        "data": {
+          "type": "localization",
+          "timeUs": "18059268498",
+          "systemTimeUs": "1794553635575774",
+          "utcTimeUs": "1794553635575774",
+          "timebase": "unconfirmed",
+          "ahrsStatus": 1,
+          "longitude": 114.04776722593608,
+          "latitude": 22.505954785129326,
+          "altitude": 500.1522523816675,
+          "velocityEnu": [
+            0,
+            0,
+            0
+          ],
+          "attitudeRaw": [
+            -0.00013635385693514603,
+            0.00047993661849715294,
+            0.000012783175545251029
+          ],
+          "accelerationRaw": [
+            0,
+            0,
+            0
+          ],
+          "angularVelocityRaw": [
+            0,
+            0,
+            0
+          ],
+          "quaternion": [
+            0.9999999688630277,
+            -0.00006817846022888088,
+            0.00023996787062408043,
+            0.0000064079478757826316
+          ],
+          "mercatorRaw": [
+            12695739.373701,
+            2572380.5627100863,
+            500.1522523816675
+          ],
+          "curvature": 0,
+          "fixType": 1,
+          "fixQuality": 1,
+          "alignmentMode": 3
+        }
+      }
+    }
+  ],
+  "sourceProducerEpochAttested": false,
+  "physicalControlActions": 0
+}

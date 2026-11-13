@@ -1,0 +1,13 @@
+import {readFileSync, writeFileSync} from 'node:fs';
+import {Mcp,toolContent} from '/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-control-console/server/mcp.ts';
+import {DashboardV2ComponentPlanner} from '/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/provider-adapter-kit/src/dashboard-v2-component-planner.ts';
+const profile=JSON.parse(readFileSync('/home/sz/.smpp-debug/zmq-v151-formal-20261113/profile.json','utf8'));
+const m=new Mcp('http://127.0.0.1:19100/mcp',{'x-sdar-execution-mode':'live'});
+const state=toolContent(await m.tool('vehicle_get_state',{resourceId:'vehicle:ugv'}));
+const p=(state.observations as any[]).find(o=>o.component==='chassis'&&o.receiptFresh===true&&o.observation.key==='localization')?.observation.position;
+if(!p)throw Error('FRESH_POSITION_REQUIRED');
+const input={start:{longitude:p.longitude,latitude:p.latitude},waypoints:[{longitude:114.04791186669047,latitude:22.506389083393916}],density:'adaptive' as const};
+const result=await new DashboardV2ComponentPlanner(profile.planner.endpoint,profile.planner).plan(input);
+const report={at:new Date().toISOString(),scope:'direct_readonly_plan_route_component_admission_no_device_command',input,result,physicalControlActions:0};
+writeFileSync('/home/sz/.smpp-debug/zmq-planner-scene-20261113/direct-probe.json',JSON.stringify(report,null,2)+'\n');
+console.log(JSON.stringify({at:report.at,points:result.waypoints.length,admission:result.plannerAdmission,physicalControlActions:0}));
