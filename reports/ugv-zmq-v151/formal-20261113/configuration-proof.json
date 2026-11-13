@@ -1,0 +1,59 @@
+{
+  "sourceCommit": "ada745829c635b9bb56d6017c2c2faf7f31e544e",
+  "profile": "zmq_v1_5_1_site_control_15",
+  "mode": "site_control",
+  "newObservationPartition": "site-control-v151-formal-20261113",
+  "sourceProducerEpoch": null,
+  "receiverBoundary": "explicit_operator_authorized_formal_handoff_not_automatic_clock_reset",
+  "protectedBefore": {
+    "SITE_GOWM_URL_FILE": {
+      "path": "/home/sz/.smpp-debug/zmq-site-control-20261026/formal-readonly/gowm.url",
+      "sha256": "4356edf83577b13e633f833517e36e5e9e02bc5b71e0fbfc914d6e46338a77db"
+    },
+    "SITE_HANDOFF_GRANT_FILE": {
+      "path": "/home/sz/.smpp-debug/zmq-site-control-20261026/handoff-grant.json",
+      "sha256": "f18c17d1e24818348296e27f4f43eb19e2c4171b7681f8f17f32dbf40643f89a"
+    },
+    "SITE_JWT_SECRET_FILE": {
+      "path": "/home/sz/.smpp-debug/zmq-site-control-20261026/site-jwt.key",
+      "sha256": "9b945400b3e0361fb1209fd29be046b25163393b479d7caab6643a289b64a566"
+    },
+    "SITE_CONSOLE_DATABASE_URL_FILE": {
+      "path": "/home/sz/.smpp-debug/zmq-site-control-20261026/formal-readonly/console.url",
+      "sha256": "1035afdb8ab1cfc723b3467877789bc3971112a03e71b2703c8d368accd31366"
+    },
+    "SITE_CONSOLE_CREDENTIALS_FILE": {
+      "path": "/home/sz/.smpp-debug/ugv-control-console/credentials.json",
+      "sha256": "56495ff152ded1c46186c542777854a8cce9145f5e5fff5313e248a02afca1e3"
+    },
+    "SITE_CONSOLE_AUTHORIZATION_FILE": {
+      "path": "/home/sz/.smpp-debug/zmq-site-control-20261026/upstream-authorization",
+      "sha256": "26bb82b10442b05aefdc4b82ad7e3ffbf89539672b17eda35eb7d16123f9dc14"
+    }
+  },
+  "providerBinding": {
+    "providerId": "isr.vehicle.ugv.ugv",
+    "resourceId": "vehicle:ugv",
+    "sourceSessionKey": "gowm-analysis-dev-f3dc6f4b8e-smpp-ugv-mqtt"
+  },
+  "sameDatabaseUrl": true,
+  "sameObservationDatabaseUrl": true,
+  "images": {
+    "SITE_PROVIDER_IMAGE": "sha256:b1a92b1c166bda4a2af7dfc7cb2fda6122e2f12aa42dbddc100455a026a5471e",
+    "SITE_CONSOLE_IMAGE": "sha256:4a65816fb5e9ad1a04ada741e57174c31d1ae0ab7dd4295e423581da49dbe3eb",
+    "SITE_RUNTIME_IMAGE": "sha256:26f3f21764e813a02a7f4728ad2610e3a2bf6e8e528f0fe108f13941da27e1a7"
+  },
+  "oldWriters": [
+    {
+      "id": "deeaa95d0868ff64a47ccddddc831b11573dbaf5351c3962d9ff98b502a37070",
+      "image": "sha256:11abe9156fe610a28cfb4f261532a95be04a306d40e96adacdcc464fa8511a9e"
+    },
+    {
+      "id": "6b2fb419a7b7750cc2928e516f7e8b6b2ae10d0e9bcb02e64ec9f3ac0d95546a",
+      "image": "sha256:a48f3bf79bf3db6fbe54d1009b8402b425ec1f5fdbe75ef2d7b17152554a59fb"
+    }
+  ],
+  "preservedPmsGateway": true,
+  "sdarModified": false,
+  "upstreamModified": false
+}

@@ -1,0 +1,51 @@
+[
+  {
+    "command": [
+      "node",
+      "--import",
+      "tsx",
+      "/home/sz/.smpp-debug/zmq-v151-formal-20261113/verify-formal.mts"
+    ],
+    "exitCode": 0,
+    "result": "mcp-live.json"
+  },
+  {
+    "command": [
+      "node",
+      "--import",
+      "tsx",
+      "/home/sz/.smpp-debug/zmq-v151-formal-20261113/verify-locks.mts"
+    ],
+    "exitCode": 0,
+    "result": "writer-locks.json"
+  },
+  {
+    "command": [
+      "node",
+      "--import",
+      "tsx",
+      "/home/sz/.smpp-debug/zmq-v151-formal-20261113/check-availability.mts"
+    ],
+    "exitCode": 0,
+    "result": "availability.json"
+  },
+  {
+    "command": [
+      "node",
+      "/home/sz/.smpp-debug/zmq-v151-formal-20261113/verify-browser.mjs"
+    ],
+    "exitCode": 0,
+    "result": "browser-verification.json"
+  },
+  {
+    "command": [
+      "node",
+      "--import",
+      "tsx",
+      "/home/sz/.smpp-debug/zmq-v151-formal-20261113/source-preflight-initial.mts"
+    ],
+    "exitCode": 1,
+    "reason": "source scene returned failed; code deployment proceeded under user authorization while keeping planner rejection",
+    "siteAcceptanceClaimed": false
+  }
+]

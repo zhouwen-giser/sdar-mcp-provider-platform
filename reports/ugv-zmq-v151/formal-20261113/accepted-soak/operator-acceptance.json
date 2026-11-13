@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "ugv.zmq-stability-operator-acceptance/1",
+  "acceptedAt": "2026-11-13T06:08:25.377568+00:00",
+  "authorization": "可以提前结束24 小时验证! 认可当前稳定性通过, 允许切换为正式服务",
+  "authority": "human_user_in_this_chat",
+  "applicationSourceCommit": "ada745829c635b9bb56d6017c2c2faf7f31e544e",
+  "observedElapsedSeconds": 71215.17805113085,
+  "actualFull24HoursObserved": false,
+  "runtimeFailures": [],
+  "sampleCount": 1187,
+  "hashChainVerified": true,
+  "lastSampleSha256": "7d242131ce92a5dfc28627871a14de4a11707b626795e2ee4ac10b6d300a1dcb",
+  "containerContinuityVerified": true,
+  "stabilityAccepted": true,
+  "acceptanceBasis": "operator_approved_shortened_observation",
+  "siteQualificationAcceptedByThisReceipt": false,
+  "physicalControlActions": 0,
+  "monitorStopped": true
+}

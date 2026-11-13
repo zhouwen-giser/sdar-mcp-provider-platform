@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "ugv.zmq-site-handoff-plan/1",
+  "profileHash": "a8b757883f85010649205fb714a59cb65d6a66c91cd204c14daa2670863496f2",
+  "binding": {
+    "deviceId": "ugv:ugv",
+    "bindingId": "0ab6028b-f367-4953-819f-ecca220a9a71",
+    "serviceKey": "smpp.sz-gowm.ugv",
+    "sourceSessionKey": "gowm-analysis-dev-f3dc6f4b8e-smpp-ugv-mqtt"
+  },
+  "snapshot": {
+    "runtime": [],
+    "provider": [],
+    "commands": [],
+    "admissions": []
+  },
+  "oldWriters": [
+    {
+      "id": "deeaa95d0868ff64a47ccddddc831b11573dbaf5351c3962d9ff98b502a37070",
+      "image": "sha256:11abe9156fe610a28cfb4f261532a95be04a306d40e96adacdcc464fa8511a9e"
+    },
+    {
+      "id": "6b2fb419a7b7750cc2928e516f7e8b6b2ae10d0e9bcb02e64ec9f3ac0d95546a",
+      "image": "sha256:a48f3bf79bf3db6fbe54d1009b8402b425ec1f5fdbe75ef2d7b17152554a59fb"
+    }
+  ],
+  "planHash": "50f2645d09df04df5b0ddf8f9c201639ec208c37eefc090dd7e5eb670cec9086"
+}

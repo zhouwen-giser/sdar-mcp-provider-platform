@@ -1,0 +1,27 @@
+{
+  "at": "2026-11-13T06:13:16.217749+00:00",
+  "command": [
+    "node",
+    "--import",
+    "tsx",
+    "scripts/ugv-zmq/site-control-handoff.ts",
+    "apply",
+    "--config",
+    "/home/sz/.smpp-debug/zmq-v151-formal-20261113/handoff-config.json",
+    "--plan",
+    "/home/sz/.smpp-debug/zmq-v151-formal-20261113/handoff-plan.json",
+    "--grant",
+    "/home/sz/.smpp-debug/zmq-v151-formal-20261113/handoff-grant.json",
+    "--plan-hash",
+    "50f2645d09df04df5b0ddf8f9c201639ec208c37eefc090dd7e5eb670cec9086",
+    "--command-id",
+    "a3a3b833-6a37-4c40-9702-1677215e47e2",
+    "--actor",
+    "human-operator-authorized-cutover",
+    "--reason",
+    "操作员认可提前结束稳定性并授权正式升级；无活动任务，旧写端退役，保留历史与已知现场能力阻塞"
+  ],
+  "exitCode": 0,
+  "logSha256": "e7137b5bc09c463662c8096024c9e7f98c44d2fba7df9969891763a8eb9b71ee",
+  "commandId": "a3a3b833-6a37-4c40-9702-1677215e47e2"
+}

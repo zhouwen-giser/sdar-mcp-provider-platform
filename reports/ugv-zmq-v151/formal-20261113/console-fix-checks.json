@@ -1,0 +1,48 @@
+{
+  "sourceCommit": "eafe1ac2e2db053503f28ad06719c63650b01d7d",
+  "recordedAt": "2026-11-13T06:20:50.648173+00:00",
+  "checks": [
+    {
+      "command": [
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "apps/ugv-control-console/vitest.config.ts",
+        "apps/ugv-control-console/test/site-control-profiles.test.ts"
+      ],
+      "exitCode": 0,
+      "passed": 4
+    },
+    {
+      "command": [
+        "pnpm",
+        "--filter",
+        "@sdar/ugv-control-console",
+        "typecheck"
+      ],
+      "exitCode": 0
+    },
+    {
+      "command": [
+        "pnpm",
+        "exec",
+        "eslint",
+        "apps/ugv-control-console/web/SiteControlConsole.tsx",
+        "apps/ugv-control-console/test/site-control-profiles.test.ts"
+      ],
+      "exitCode": 0
+    },
+    {
+      "command": [
+        "pnpm",
+        "--filter",
+        "@sdar/ugv-control-console",
+        "build"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "scope": "UI_profile_inheritance_only_backend_images_unchanged"
+}

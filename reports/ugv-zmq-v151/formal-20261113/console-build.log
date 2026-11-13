@@ -1,0 +1,145 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load local bake definitions
+#1 reading /home/sz/.smpp-debug/zmq-v151-formal-20261113/console-bake.json 485B / 485B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile:
+#2 transferring dockerfile: 1.88kB 0.0s done
+#2 DONE 0.2s
+
+#3 [internal] load metadata for docker.io/library/node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c
+#3 DONE 1.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context:
+#4 transferring context: 446B 0.0s done
+#4 DONE 0.2s
+
+#5 [internal] load build context
+#5 DONE 0.0s
+
+#6 [build 1/8] FROM docker.io/library/node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c
+#6 resolve docker.io/library/node@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c 0.0s done
+#6 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 4.90MB 0.3s done
+#5 DONE 0.4s
+
+#7 [build 2/8] WORKDIR /workspace
+#7 CACHED
+
+#8 [build 3/8] RUN corepack enable
+#8 CACHED
+
+#9 [build 4/8] COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+#9 CACHED
+
+#10 [build 5/8] COPY apps/ugv-control-console/package.json apps/ugv-control-console/package.json
+#10 CACHED
+
+#11 [build 6/8] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     pnpm install --filter @sdar/ugv-control-console --frozen-lockfile --ignore-scripts --prefer-offline --store-dir=/pnpm/store
+#11 CACHED
+
+#12 [build 7/8] COPY apps/ugv-control-console apps/ugv-control-console
+#12 DONE 1.3s
+
+#13 [build 8/8] RUN --mount=type=cache,id=sdar-corepack,target=/root/.cache/node/corepack,sharing=locked     --mount=type=cache,id=sdar-pnpm-store,target=/pnpm/store,sharing=locked     pnpm --filter @sdar/ugv-control-console build     && pnpm --filter @sdar/ugv-control-console deploy --legacy --prod /release
+#13 2.517 $ tsc --noEmit -p tsconfig.build.json && vite build && tsc -p tsconfig.server.json
+#13 15.17 vite v8.1.5 building client environment for production...
+#13 15.20 [2Ktransforming...✓ 163 modules transformed.
+#13 16.47 rendering chunks...
+#13 16.87 computing gzip size...
+#13 16.88 dist/index.html                     0.46 kB │ gzip:   0.32 kB
+#13 16.88 dist/assets/index-CK6xs5jj.css     11.88 kB │ gzip:   3.48 kB
+#13 16.88 dist/assets/index-DM5nrbJS.js   1,281.78 kB │ gzip: 183.30 kB
+#13 16.88 
+#13 16.88 ✓ built in 1.70s
+#13 16.88 [plugin builtin:vite-reporter] 
+#13 16.88 (!) Some chunks are larger than 500 kB after minification. Consider:
+#13 16.88 - Using dynamic import() to code-split the application
+#13 16.88 - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+#13 16.88 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+#13 24.17 [WARN] Shared workspace lockfile detected but configuration forces legacy deploy implementation.
+#13 24.50 Packages are copied from the content-addressable store to the virtual store.
+#13 24.50   Content-addressable store is at: /pnpm/store/v11
+#13 24.50   Virtual store is at:             ../release/node_modules/.pnpm
+#13 24.54 ✓ Lockfile passes supply-chain policies (verified 20h ago)
+#13 24.90 Progress: resolved 1, reused 0, downloaded 0, added 0
+#13 25.58 .                                        | [WARN] deprecated @opentelemetry/sdk-trace-node@2.9.0
+#13 25.91 Progress: resolved 51, reused 51, downloaded 0, added 0
+#13 26.91 Progress: resolved 54, reused 54, downloaded 0, added 0
+#13 32.05 Progress: resolved 55, reused 54, downloaded 0, added 0
+#13 33.05 Progress: resolved 56, reused 56, downloaded 0, added 0
+#13 34.05 Progress: resolved 232, reused 231, downloaded 0, added 0
+#13 35.05 Progress: resolved 238, reused 237, downloaded 0, added 0
+#13 46.11 Progress: resolved 239, reused 237, downloaded 0, added 0
+#13 47.13 Progress: resolved 418, reused 404, downloaded 0, added 0
+#13 48.14 Progress: resolved 444, reused 407, downloaded 0, added 0
+#13 49.14 Progress: resolved 455, reused 408, downloaded 0, added 0
+#13 50.14 Progress: resolved 459, reused 408, downloaded 0, added 0
+#13 63.98 [WARN] Request took 17177ms: https://registry.npmjs.org/playwright-core
+#13 73.54 Progress: resolved 460, reused 408, downloaded 0, added 0
+#13 74.54 Progress: resolved 553, reused 502, downloaded 0, added 0
+#13 75.54 Progress: resolved 554, reused 503, downloaded 0, added 0
+#13 76.55 Progress: resolved 585, reused 534, downloaded 0, added 0
+#13 80.17 Progress: resolved 586, reused 534, downloaded 0, added 0
+#13 81.17 Progress: resolved 587, reused 536, downloaded 0, added 0
+#13 82.95 Progress: resolved 588, reused 536, downloaded 0, added 0
+#13 83.13 [WARN] 3 deprecated subdependencies found: @opentelemetry/propagator-jaeger@2.9.0, @opentelemetry/sdk-trace-base@2.9.0, node-domexception@1.0.0
+#13 83.15 .                                        | +324 ++++++++++++++++++++++++++++++++
+#13 83.95 Progress: resolved 588, reused 537, downloaded 0, added 3
+#13 84.95 Progress: resolved 588, reused 537, downloaded 0, added 29
+#13 85.95 Progress: resolved 588, reused 537, downloaded 0, added 53
+#13 86.95 Progress: resolved 588, reused 537, downloaded 0, added 59
+#13 87.95 Progress: resolved 588, reused 537, downloaded 0, added 89
+#13 88.95 Progress: resolved 588, reused 537, downloaded 0, added 99
+#13 89.95 Progress: resolved 588, reused 537, downloaded 0, added 163
+#13 90.95 Progress: resolved 588, reused 537, downloaded 0, added 180
+#13 91.95 Progress: resolved 588, reused 537, downloaded 0, added 186
+#13 92.95 Progress: resolved 588, reused 537, downloaded 0, added 193
+#13 93.95 Progress: resolved 588, reused 537, downloaded 0, added 217
+#13 94.95 Progress: resolved 588, reused 537, downloaded 0, added 238
+#13 95.95 Progress: resolved 588, reused 537, downloaded 0, added 251
+#13 96.95 Progress: resolved 588, reused 537, downloaded 0, added 269
+#13 97.95 Progress: resolved 588, reused 537, downloaded 0, added 283
+#13 98.95 Progress: resolved 588, reused 537, downloaded 0, added 305
+#13 99.95 Progress: resolved 588, reused 537, downloaded 0, added 315
+#13 101.0 Progress: resolved 588, reused 537, downloaded 0, added 321
+#13 102.0 Progress: resolved 588, reused 537, downloaded 0, added 322
+#13 103.4 Progress: resolved 588, reused 537, downloaded 0, added 323
+#13 108.3 Progress: resolved 588, reused 537, downloaded 0, added 324
+#13 108.3 Progress: resolved 588, reused 537, downloaded 0, added 324, done
+#13 108.5 .../node_modules/protobufjs postinstall$ node scripts/postinstall
+#13 108.5 .../zeromq@6.8.0/node_modules/zeromq install$ node ./script/install.js
+#13 108.5 .../node_modules/protobufjs postinstall: Done
+#13 108.6 .../zeromq@6.8.0/node_modules/zeromq install: Done
+#13 108.8 [WARN] Failed to create bin at /release/node_modules/.bin/tsx. ENOENT: no such file or directory, open '/release/node_modules/.pnpm/tsx@4.23.1/node_modules/tsx/dist/cli.mjs'
+#13 108.8 [WARN] Failed to create bin at /release/node_modules/.bin/esbuild. ENOENT: no such file or directory, open '/release/node_modules/.pnpm/esbuild@0.28.1/node_modules/esbuild/bin/esbuild'
+#13 108.8 [WARN] Failed to create bin at /release/node_modules/.bin/acorn. ENOENT: no such file or directory, open '/release/node_modules/.pnpm/acorn@8.17.0/node_modules/acorn/bin/acorn'
+#13 108.8 [WARN] Failed to create bin at /release/node_modules/.bin/vite. ENOENT: no such file or directory, open '/release/node_modules/.pnpm/vite@8.1.5_@types+node@22.20.1_esbuild@0.28.1_tsx@4.23.1_yaml@2.9.0/node_modules/vite/bin/vite.js'
+#13 108.8 [WARN] Failed to create bin at /release/node_modules/.bin/esbuild. ENOENT: no such file or directory, open '/release/node_modules/.pnpm/esbuild@0.28.1/node_modules/esbuild/bin/esbuild'
+#13 DONE 109.8s
+
+#14 [runtime 2/3] WORKDIR /app
+#14 CACHED
+
+#15 [runtime 3/3] COPY --from=build --chown=node:node /release/ ./
+#15 DONE 6.5s
+
+#16 exporting to image
+#16 exporting layers
+#16 exporting layers 9.6s done
+#16 exporting manifest sha256:9201cc5721efb0170ab08159a4b51355b1599956c9e5896926fb111715a36dc0 0.0s done
+#16 exporting config sha256:d421313bd17ee3678efa7e5ee6142153ad3fce6831c45938ec9b33f909ac0234 0.1s done
+#16 exporting attestation manifest sha256:0879bbd1ed7afe39fed75ec934d52537af832023a3ef717e8112631f7565492a
+#16 exporting attestation manifest sha256:0879bbd1ed7afe39fed75ec934d52537af832023a3ef717e8112631f7565492a 0.2s done
+#16 exporting manifest list sha256:096d6fac887e4231f1a65f1302a771ceced28f67203cd55fb5da3f3b587f0a1c
+#16 exporting manifest list sha256:096d6fac887e4231f1a65f1302a771ceced28f67203cd55fb5da3f3b587f0a1c 0.1s done
+#16 naming to docker.io/library/smpp-zmq-v151-console:eafe1ac2e2db
+#16 naming to docker.io/library/smpp-zmq-v151-console:eafe1ac2e2db done
+#16 unpacking to docker.io/library/smpp-zmq-v151-console:eafe1ac2e2db
+#16 unpacking to docker.io/library/smpp-zmq-v151-console:eafe1ac2e2db 5.4s done
+#16 DONE 15.6s

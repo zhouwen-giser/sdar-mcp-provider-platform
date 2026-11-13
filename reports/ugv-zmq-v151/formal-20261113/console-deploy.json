@@ -1,0 +1,51 @@
+{
+  "at": "2026-11-13T06:24:41.707298+00:00",
+  "sourceCommit": "eafe1ac2e2db053503f28ad06719c63650b01d7d",
+  "consoleImage": "sha256:096d6fac887e4231f1a65f1302a771ceced28f67203cd55fb5da3f3b587f0a1c",
+  "steps": [
+    {
+      "command": [
+        "docker",
+        "update",
+        "--memory",
+        "1g",
+        "--memory-swap",
+        "2g",
+        "--cpus",
+        "2",
+        "smpp-zmq-site-formal-provider-1",
+        "smpp-zmq-site-formal-runtime-1"
+      ],
+      "exitCode": 0,
+      "logSha256": "d6ac8e0f25f941da8ef3e57a7c04956c6b2e8cbab30af10d75a721f8cc3e3f8b"
+    },
+    {
+      "command": [
+        "docker",
+        "compose",
+        "--env-file",
+        "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/site-images.env",
+        "-p",
+        "smpp-zmq-site-formal",
+        "-f",
+        "deploy/ugv-zmq/site-control/compose.formal.yaml",
+        "-f",
+        "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/pms-readonly-override.json",
+        "-f",
+        "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/resources.json",
+        "up",
+        "-d",
+        "--no-deps",
+        "--force-recreate",
+        "--no-build",
+        "--pull",
+        "never",
+        "console"
+      ],
+      "exitCode": 0,
+      "logSha256": "2fefbdc8ad52e8ed17314035206d8d2d1f3279493ba434b646d44514a757a0ee"
+    }
+  ],
+  "backendApplicationImagesUnchanged": true,
+  "physicalControlActions": 0
+}

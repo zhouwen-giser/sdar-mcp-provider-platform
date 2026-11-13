@@ -1,0 +1,16 @@
+{
+  "sourceCommit": "eafe1ac2e2db053503f28ad06719c63650b01d7d",
+  "command": [
+    "docker",
+    "buildx",
+    "bake",
+    "--file",
+    "/home/sz/.smpp-debug/zmq-v151-formal-20261113/console-bake.json",
+    "--progress=plain"
+  ],
+  "exitCode": 0,
+  "logSha256": "d21d109d2ee5bfb7fb141394a58d0a7c391eb2ded219d71508849fd9c4aa5318",
+  "tag": "smpp-zmq-v151-console:eafe1ac2e2db",
+  "id": "sha256:096d6fac887e4231f1a65f1302a771ceced28f67203cd55fb5da3f3b587f0a1c",
+  "revision": "eafe1ac2e2db053503f28ad06719c63650b01d7d"
+}

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "ugv.zmq-site-handoff-grant/1",
+  "commandId": "a3a3b833-6a37-4c40-9702-1677215e47e2",
+  "planHash": "50f2645d09df04df5b0ddf8f9c201639ec208c37eefc090dd7e5eb670cec9086",
+  "profileHash": "a8b757883f85010649205fb714a59cb65d6a66c91cd204c14daa2670863496f2",
+  "providerId": "isr.vehicle.ugv.ugv",
+  "resourceId": "vehicle:ugv",
+  "actor": "human-operator-authorized-cutover",
+  "reason": "操作员认可提前结束稳定性并授权正式升级；无活动任务，旧写端退役，保留历史与已知现场能力阻塞",
+  "createdAt": "2026-11-13T06:13:16.187Z",
+  "oldWriters": [
+    {
+      "id": "deeaa95d0868ff64a47ccddddc831b11573dbaf5351c3962d9ff98b502a37070",
+      "image": "sha256:11abe9156fe610a28cfb4f261532a95be04a306d40e96adacdcc464fa8511a9e",
+      "restartPolicy": "no",
+      "running": false
+    },
+    {
+      "id": "6b2fb419a7b7750cc2928e516f7e8b6b2ae10d0e9bcb02e64ec9f3ac0d95546a",
+      "image": "sha256:a48f3bf79bf3db6fbe54d1009b8402b425ec1f5fdbe75ef2d7b17152554a59fb",
+      "restartPolicy": "no",
+      "running": false
+    }
+  ],
+  "retiredTasks": [],
+  "outcome": "legacy_outcome_unknown_writers_stopped"
+}

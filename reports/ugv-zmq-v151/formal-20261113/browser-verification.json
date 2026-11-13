@@ -1,0 +1,40 @@
+{
+  "verifiedAt": "2026-11-13T06:25:58.073Z",
+  "url": "http://17.26.1.20:19101",
+  "profile": "zmq_v1_5_1_site_control_15",
+  "toolCount": 15,
+  "httpLogin": true,
+  "archiveHealthy": true,
+  "originalImage": {
+    "width": 1280,
+    "height": 720,
+    "complete": true,
+    "byteLength": 149618,
+    "sha256": "30aa1425b9fe300a8ae93728638223c58a817562e9dd0d2a1ed48125854f2a29",
+    "rawImagePersisted": false
+  },
+  "controlForms": {
+    "speedUnit": "km/h",
+    "defaultSpeed": 60,
+    "heightDefaultZeroLabel": true,
+    "viewEntryVisible": true,
+    "unconfiguredViewBlocked": true,
+    "navigationAvailability": "available",
+    "controlSubmitClicked": false
+  },
+  "planner": {
+    "status": "site_blocked",
+    "commandId": "2a95a61d-1662-4a9b-8ab7-77323fc5577d",
+    "reasonCode": "UGV_PLANNER_SCENE_UNAVAILABLE"
+  },
+  "history": {
+    "taskId": "f49b6c69-048c-48d4-b935-4aca6d343348",
+    "source": "retained_local_snapshot",
+    "bytes": 1065,
+    "sha256": "c23a252d6439bdfc46739183aa99e8d04d607a283f6e3f8948bb91d5a0df6521"
+  },
+  "mobileNoHorizontalOverflow": true,
+  "pageErrors": 0,
+  "physicalControlActions": 0,
+  "exitCode": 0
+}

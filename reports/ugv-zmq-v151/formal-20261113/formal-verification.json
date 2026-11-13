@@ -1,0 +1,177 @@
+{
+  "verifiedAt": "2026-11-13T06:29:28.124189+00:00",
+  "formalPorts": [
+    19100,
+    19101
+  ],
+  "profile": "zmq_v1_5_1_site_control_15",
+  "backendApplicationSource": "ada745829c635b9bb56d6017c2c2faf7f31e544e",
+  "consoleApplicationSource": "eafe1ac2e2db053503f28ad06719c63650b01d7d",
+  "protected": [
+    {
+      "key": "SITE_GOWM_URL_FILE",
+      "sha256": "4356edf83577b13e633f833517e36e5e9e02bc5b71e0fbfc914d6e46338a77db",
+      "unchanged": true
+    },
+    {
+      "key": "SITE_HANDOFF_GRANT_FILE",
+      "sha256": "f18c17d1e24818348296e27f4f43eb19e2c4171b7681f8f17f32dbf40643f89a",
+      "unchanged": true
+    },
+    {
+      "key": "SITE_JWT_SECRET_FILE",
+      "sha256": "9b945400b3e0361fb1209fd29be046b25163393b479d7caab6643a289b64a566",
+      "unchanged": true
+    },
+    {
+      "key": "SITE_CONSOLE_DATABASE_URL_FILE",
+      "sha256": "1035afdb8ab1cfc723b3467877789bc3971112a03e71b2703c8d368accd31366",
+      "unchanged": true
+    },
+    {
+      "key": "SITE_CONSOLE_CREDENTIALS_FILE",
+      "sha256": "56495ff152ded1c46186c542777854a8cce9145f5e5fff5313e248a02afca1e3",
+      "unchanged": true
+    },
+    {
+      "key": "SITE_CONSOLE_AUTHORIZATION_FILE",
+      "sha256": "26bb82b10442b05aefdc4b82ad7e3ffbf89539672b17eda35eb7d16123f9dc14",
+      "unchanged": true
+    },
+    {
+      "repository": "/home/sz/code/sdar-mcp-provider-platform",
+      "commit": "f1d399631a1447da467de6ebec2612998b96b83b",
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "statusEntries": 0,
+      "modifiedByThisTask": false
+    },
+    {
+      "repository": "/home/sz/code/isr-simulation",
+      "commit": "a0be6a51e17fb9e85bc4ba0b62f7157a1b77c82e",
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "statusEntries": 0,
+      "modifiedByThisTask": false
+    }
+  ],
+  "containers": [
+    {
+      "name": "/smpp-zmq-site-formal-provider-1",
+      "id": "4073b4046525bf2368a1777faf787692354afe33a65c01c35403798552446912",
+      "image": "sha256:b1a92b1c166bda4a2af7dfc7cb2fda6122e2f12aa42dbddc100455a026a5471e",
+      "startedAt": "2026-11-13T06:15:59.439287291Z",
+      "restartCount": 0,
+      "oomKilled": false,
+      "running": true,
+      "health": null,
+      "memoryLimit": 1073741824,
+      "cpuLimit": 2000000000,
+      "mounts": [
+        {
+          "source": "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/provider.json",
+          "destination": "/run/secrets/provider.json",
+          "rw": false
+        },
+        {
+          "source": "/home/sz/.smpp-debug/zmq-site-control-20261026/formal-readonly/gowm.url",
+          "destination": "/run/secrets/gowm.url",
+          "rw": false
+        },
+        {
+          "source": "/home/sz/.smpp-debug/zmq-v151-formal-20261113/handoff-grant.json",
+          "destination": "/run/secrets/handoff.json",
+          "rw": false
+        },
+        {
+          "source": "/home/sz/.smpp-debug/zmq-site-control-20261026/site-jwt.key",
+          "destination": "/run/secrets/site-jwt.key",
+          "rw": false
+        }
+      ]
+    },
+    {
+      "name": "/smpp-zmq-site-formal-runtime-1",
+      "id": "1c51e3744634220e0375c96d0ea8659ee1e88c0dedc1821261e7e212e5bced20",
+      "image": "sha256:26f3f21764e813a02a7f4728ad2610e3a2bf6e8e528f0fe108f13941da27e1a7",
+      "startedAt": "2026-11-13T06:16:07.575229549Z",
+      "restartCount": 0,
+      "oomKilled": false,
+      "running": true,
+      "health": "healthy",
+      "memoryLimit": 1073741824,
+      "cpuLimit": 2000000000,
+      "mounts": [
+        {
+          "source": "/home/sz/.smpp-debug/zmq-site-control-20261026/formal-readonly/gowm.url",
+          "destination": "/run/secrets/gowm.url",
+          "rw": false
+        },
+        {
+          "source": "/home/sz/.smpp-debug/refresh-cfda8c7f-20261013-2i1s3dqr/smpp/deploy/development/server/config",
+          "destination": "/run/config",
+          "rw": false
+        },
+        {
+          "source": "/mnt/data/docker/volumes/gowm-analysis-dev-f3dc6f4b8e-smpp_runtime-state/_data",
+          "destination": "/var/lib/sdar",
+          "rw": true
+        }
+      ]
+    },
+    {
+      "name": "/smpp-zmq-site-formal-console-1",
+      "id": "d0cbff1ccc92594f42585e4cd37ea693d284affd719c5d47b8b2737bd2c5bdc4",
+      "image": "sha256:096d6fac887e4231f1a65f1302a771ceced28f67203cd55fb5da3f3b587f0a1c",
+      "startedAt": "2026-11-13T06:24:40.946092555Z",
+      "restartCount": 0,
+      "oomKilled": false,
+      "running": true,
+      "health": "healthy",
+      "memoryLimit": 536870912,
+      "cpuLimit": 1000000000,
+      "mounts": [
+        {
+          "source": "/home/sz/.smpp-debug/zmq-site-control-20261026/upstream-authorization",
+          "destination": "/run/secrets/upstream-authorization",
+          "rw": false
+        },
+        {
+          "source": "/home/sz/.smpp-debug/zmq-site-control-20261026/formal-readonly/console.url",
+          "destination": "/run/secrets/console-database.url",
+          "rw": false
+        },
+        {
+          "source": "/home/sz/.smpp-debug/ugv-control-console/credentials.json",
+          "destination": "/run/secrets/credentials.json",
+          "rw": false
+        }
+      ]
+    },
+    {
+      "name": "/gowm-analysis-dev-f3dc6f4b8e-smpp-runtime-1",
+      "id": "dd5a7ec889735236670f694c43f08108b56d5af8646235d8387cb56dad17dce3",
+      "image": "sha256:11abe9156fe610a28cfb4f261532a95be04a306d40e96adacdcc464fa8511a9e",
+      "startedAt": "2026-11-02T02:28:23.50245046Z",
+      "restartCount": 0,
+      "oomKilled": false,
+      "running": true,
+      "health": "healthy",
+      "memoryLimit": 0,
+      "cpuLimit": 0,
+      "mounts": []
+    }
+  ],
+  "pmsGatewayContainerIdentityUnchanged": true,
+  "pmsGatewayStillUsesReadonlyCompatibility": true,
+  "sdarBindingUpdated": false,
+  "rollbackConfigurationPrepared": true,
+  "physicalControlActions": 0,
+  "versionCutoverComplete": true,
+  "physicalAcceptanceComplete": false,
+  "remainingSiteBlockers": [
+    "UGV_PLANNER_SCENE_UNAVAILABLE",
+    "ZMQ_OPTICAL_ZOOM_UNSUPPORTED",
+    "ZMQ_VIEW_BACKEND_NOT_CONFIGURED"
+  ],
+  "stabilityAcceptanceBasis": "operator_approved_shortened_observation",
+  "actualFull24HoursObserved": false
+}
