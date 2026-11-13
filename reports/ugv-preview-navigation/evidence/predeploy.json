@@ -1,0 +1,16 @@
+{
+  "at": "2026-11-13T07:50:22.411Z",
+  "dispatching": [],
+  "original": [
+    {
+      "command_id": "88615ac3-25bd-4188-a090-c722ec0face1",
+      "status": "accepted",
+      "task_id": "2c9d0e50-b9d2-408f-aa95-d5af2532cc02"
+    },
+    {
+      "command_id": "4a5a6d94-41d1-4747-a243-6098afb9e4f4",
+      "status": "completed",
+      "task_id": null
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "at": "2026-11-13T07:27:36.066Z",
+  "scope": "offline_validate_persisted_frames_no_send",
+  "checks": [
+    {
+      "stepId": "zmq-mode-d95992ca-9b40-474b-b671-a5b1aa1d6251",
+      "action": "mode",
+      "dispatchAt": "2026-11-13T07:27:27.059Z",
+      "messageId": 1,
+      "sender": 0,
+      "target": 1,
+      "headerLength": 8,
+      "wireBytes": 8,
+      "businessPrefix": 4,
+      "requestedMode": 1,
+      "prefixValid": true,
+      "strict21LengthValid": true,
+      "strict21CrcValid": true,
+      "transportOutcome": "sent_unconfirmed"
+    },
+    {
+      "stepId": "zmq-mode-a41b414e-ac79-4409-aaff-d64efd0941dc",
+      "action": "mode",
+      "dispatchAt": "2026-11-13T07:27:30.060Z",
+      "messageId": 1,
+      "sender": 0,
+      "target": 1,
+      "headerLength": 8,
+      "wireBytes": 8,
+      "businessPrefix": 4,
+      "requestedMode": 1,
+      "prefixValid": true,
+      "strict21LengthValid": true,
+      "strict21CrcValid": true,
+      "transportOutcome": "sent_unconfirmed"
+    },
+    {
+      "stepId": "zmq-mode-a10f9efa-837d-49e2-b13c-4448ecaf98bb",
+      "action": "mode",
+      "dispatchAt": "2026-11-13T07:27:33.071Z",
+      "messageId": 1,
+      "sender": 0,
+      "target": 1,
+      "headerLength": 8,
+      "wireBytes": 8,
+      "businessPrefix": 4,
+      "requestedMode": 1,
+      "prefixValid": true,
+      "strict21LengthValid": true,
+      "strict21CrcValid": true,
+      "transportOutcome": "sent_unconfirmed"
+    }
+  ],
+  "routeOrStartDispatched": false
+}

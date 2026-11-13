@@ -1,0 +1,11 @@
+{
+  "referenceDecoderAccepted": true,
+  "messageId": 1,
+  "sender": 0,
+  "target": 1,
+  "mode": 1,
+  "applicationFramesSent": 0,
+  "exitCode": 0,
+  "referenceSource": "a0be6a51e17fb9e85bc4ba0b62f7157a1b77c82e",
+  "scope": "offline_reference_decoder_no_network"
+}

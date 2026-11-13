@@ -1,0 +1,24 @@
+{
+  "at": "2026-11-13T07:50:41.630Z",
+  "url": "http://17.26.1.20:19101",
+  "source": "cf5b0ae",
+  "catalogProfile": "zmq_v1_5_2_site_control_15",
+  "tools": 15,
+  "taskId": "2c9d0e50-b9d2-408f-aa95-d5af2532cc02",
+  "outcome": "business_failure",
+  "reasonCode": "ZMQ_MODE_ECHO_TIMEOUT",
+  "originalFailureShown": true,
+  "originalPreviewUnchanged": true,
+  "samePreviewAdoptionDisabled": true,
+  "reloadRecoveredOriginalTask": true,
+  "openedOriginalTask": true,
+  "mobileNoOverflow": true,
+  "mutations": [
+    {
+      "path": "/api/session/login",
+      "method": "POST"
+    }
+  ],
+  "blockedCommandPosts": 0,
+  "pageErrors": []
+}

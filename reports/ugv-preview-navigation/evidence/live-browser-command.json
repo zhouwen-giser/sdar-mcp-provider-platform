@@ -1,0 +1,7 @@
+{
+  "command": [
+    "node",
+    "/home/sz/.smpp-debug/zmq-preview-adopt-20261113/verify-live-browser.mjs"
+  ],
+  "exitCode": 0
+}

@@ -1,0 +1,51 @@
+[
+  {
+    "command": [
+      "pnpm",
+      "exec",
+      "eslint",
+      "apps/ugv-control-console/shared/preview-navigation.ts",
+      "apps/ugv-control-console/web/PreviewNavigation.tsx",
+      "apps/ugv-control-console/web/SiteReadonlyConsole.tsx",
+      "apps/ugv-control-console/web/SiteControlConsole.tsx",
+      "apps/ugv-control-console/web/api.ts",
+      "apps/ugv-control-console/test/preview-navigation.test.ts",
+      "apps/ugv-control-console/e2e/preview-navigation.spec.ts",
+      "apps/ugv-control-console/playwright.preview-navigation.config.ts"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "pnpm",
+      "--filter",
+      "@sdar/ugv-control-console",
+      "typecheck"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "pnpm",
+      "--filter",
+      "@sdar/ugv-control-console",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "test/preview-navigation.test.ts",
+      "test/site-control-profiles.test.ts"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "pnpm",
+      "--filter",
+      "@sdar/ugv-control-console",
+      "build"
+    ],
+    "exitCode": 0
+  }
+]

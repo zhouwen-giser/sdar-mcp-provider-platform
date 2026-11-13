@@ -1,0 +1,15 @@
+
+/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/apps/ugv-control-console/e2e/preview-navigation.spec.ts
+   80:13  error  Unsafe assignment of an `any` value                       @typescript-eslint/no-unsafe-assignment
+   81:17  error  Unsafe member access .tool on an `any` value              @typescript-eslint/no-unsafe-member-access
+   98:11  error  Unsafe assignment of an `any` value                       @typescript-eslint/no-unsafe-assignment
+   98:28  error  Unsafe member access .commandId on an `any` value         @typescript-eslint/no-unsafe-member-access
+  100:11  error  Unsafe assignment of an `any` value                       @typescript-eslint/no-unsafe-assignment
+  109:22  error  Unsafe member access .tool on an `any` value              @typescript-eslint/no-unsafe-member-access
+  110:22  error  Unsafe member access .previewCommandId on an `any` value  @typescript-eslint/no-unsafe-member-access
+  114:11  error  Unsafe assignment of an `any` value                       @typescript-eslint/no-unsafe-assignment
+  114:28  error  Unsafe member access .commandId on an `any` value         @typescript-eslint/no-unsafe-member-access
+  116:11  error  Unsafe assignment of an `any` value                       @typescript-eslint/no-unsafe-assignment
+
+✖ 10 problems (10 errors, 0 warnings)
+

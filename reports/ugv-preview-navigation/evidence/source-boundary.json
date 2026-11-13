@@ -1,0 +1,228 @@
+{
+  "at": "2026-11-13T07:51:03.325Z",
+  "archive": {
+    "status": "running",
+    "pendingRecords": 1,
+    "pendingBytes": 1755,
+    "committedEvents": 88082,
+    "receivedMessages": 88049,
+    "committedReceptions": 88048,
+    "unconfirmedReceptions": 0,
+    "locallyDiscardedMessages": 0,
+    "failureCode": null,
+    "failureRecorded": null
+  },
+  "chassisChannel": {
+    "state": "connected",
+    "lastReceptionAt": "2026-11-13T07:51:03.275Z",
+    "lastValidCommittedAt": "2026-11-13T07:51:03.039Z",
+    "receiptFresh": true,
+    "sourceFreshness": "unverified",
+    "diagnostics": [
+      "SOURCE_CONTINUITY_UNVERIFIED",
+      "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+      "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+      "SOURCE_TIME_REGRESSED_OR_REPLAYED",
+      "SOURCE_TIMEBASE_UNCONFIRMED"
+    ]
+  },
+  "lastProjectableLocalization": {
+    "component": "chassis",
+    "receivedAt": "2026-11-13T07:34:53.037Z",
+    "ageMs": 970281.130717,
+    "receiptFresh": false,
+    "sourceFreshness": "unverified",
+    "receptionId": "5e120b60-7c19-4c63-8138-8151c36caf8b",
+    "diagnostics": [
+      "SOURCE_CONTINUITY_UNVERIFIED",
+      "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+      "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+      "SOURCE_TIMEBASE_UNCONFIRMED"
+    ],
+    "observation": {
+      "key": "localization",
+      "protocolVersion": "2.1-site-rx/1",
+      "versionEvidence": "selected_contract_not_in_band",
+      "deviceId": "1",
+      "nativeTaskId": null,
+      "nativeRequestId": null,
+      "runtimeTaskId": null,
+      "sourceProducerEpoch": null,
+      "sourceTime": {
+        "unit": "unconfirmed_us",
+        "value": "19716530657"
+      },
+      "acquisitionUtcMs": null,
+      "reportedOrigin": "unattested",
+      "position": {
+        "longitude": 114.04821079498646,
+        "latitude": 22.505887009571627,
+        "altitude": 500.15233227144927,
+        "altitudeDatum": "unconfirmed",
+        "crs": "OGC:CRS84"
+      },
+      "data": {
+        "type": "localization",
+        "timeUs": "19716530657",
+        "systemTimeUs": "1794555292977666",
+        "utcTimeUs": "1794555292977666",
+        "timebase": "unconfirmed",
+        "ahrsStatus": 1,
+        "longitude": 114.04821079498646,
+        "latitude": 22.505887009571627,
+        "altitude": 500.15233227144927,
+        "velocityEnu": [
+          0,
+          0,
+          0
+        ],
+        "attitudeRaw": [
+          -0.00013741910472475475,
+          0.0005588531254805196,
+          -0.20111287003725536
+        ],
+        "accelerationRaw": [
+          0,
+          0,
+          0
+        ],
+        "angularVelocityRaw": [
+          0,
+          0,
+          0
+        ],
+        "quaternion": [
+          0.994948421171675,
+          -4.0311650956446896e-05,
+          0.0002849125735573388,
+          -0.10038703306596909
+        ],
+        "mercatorRaw": [
+          12695788.751581818,
+          2572372.3959921235,
+          500.15233227144927
+        ],
+        "curvature": 0,
+        "fixType": 1,
+        "fixQuality": 1,
+        "alignmentMode": 3
+      }
+    }
+  },
+  "dashboardChassisBefore": {
+    "at": "2026-11-13T07:32:57.362Z",
+    "status": 200,
+    "data": {
+      "accepted_feedback_sent": false,
+      "action_request_id": "",
+      "available": true,
+      "avoid_obstacles": false,
+      "cancel_pending": false,
+      "controller_instance_id": "1191002276:3398897717",
+      "entity_id": "ugv",
+      "entity_type": "ugv",
+      "error": "",
+      "executing": false,
+      "fault_mask": 0,
+      "faults_fresh": true,
+      "feedback_pending": false,
+      "has_task": false,
+      "header": {
+        "frame_id": "map",
+        "stamp": {
+          "nanosec": 783042124,
+          "sec": 19600
+        }
+      },
+      "mission_state": 0,
+      "mission_type": 0,
+      "mode": 0,
+      "observation_fresh": true,
+      "planning": false,
+      "progress": 0,
+      "run_state": 1,
+      "sequence": "158693",
+      "settings_fresh": true,
+      "simulation_epoch": "1794539300201245707",
+      "speed_limit_mps": 8.333333015441895,
+      "starting": false,
+      "system_id": "1",
+      "task_current": false,
+      "task_id": 0,
+      "task_identity": "",
+      "task_message_id": 0,
+      "task_owner": "0",
+      "task_simulation_epoch": "0"
+    }
+  },
+  "dashboardChassisAfter": {
+    "at": "2026-11-13T07:52:17.711763+00:00",
+    "data": {
+      "accepted_feedback_sent": false,
+      "action_request_id": "",
+      "available": true,
+      "avoid_obstacles": false,
+      "cancel_pending": false,
+      "controller_instance_id": "2251915442:1090047516",
+      "entity_id": "ugv",
+      "entity_type": "ugv",
+      "error": "",
+      "executing": false,
+      "fault_mask": 0,
+      "faults_fresh": true,
+      "feedback_pending": false,
+      "has_task": false,
+      "header": {
+        "frame_id": "map",
+        "stamp": {
+          "nanosec": 268946537,
+          "sec": 1024
+        }
+      },
+      "mission_state": 0,
+      "mission_type": 0,
+      "mode": 0,
+      "observation_fresh": true,
+      "planning": false,
+      "progress": 0,
+      "run_state": 1,
+      "sequence": "5366",
+      "settings_fresh": true,
+      "simulation_epoch": "1794555793256633993",
+      "speed_limit_mps": 8.333333015441895,
+      "starting": false,
+      "system_id": "1",
+      "task_current": false,
+      "task_id": 0,
+      "task_identity": "",
+      "task_message_id": 0,
+      "task_owner": "0",
+      "task_simulation_epoch": "0"
+    }
+  },
+  "runtimeAfter": {
+    "accepting_commands": true,
+    "auto_recovery_enabled": false,
+    "available": true,
+    "config_digest": "7a648e58aaabf05213922ebb16211260ecda1fa3054efa4cc8cfb4af10b56c97",
+    "fault_component": "",
+    "incident_id": "",
+    "operation_id": "755266f7a4404561bbe0a4f3295220ed",
+    "operation_state": "succeeded",
+    "operator_required": false,
+    "owner_id": "30057507135c4609903027778eccdc67",
+    "phase": "RUNNING",
+    "profile_run_id": "655c5c7898ef452aae410a13d5509cde",
+    "ready_control_groups": [
+      "adjudication",
+      "eo:ugv",
+      "motion:ugv",
+      "scene"
+    ],
+    "reason": "",
+    "revision": "6",
+    "simulation_epoch": "1794555793256633993",
+    "stage": "ready"
+  },
+  "interpretation": "Dashboard epoch/controller changed. Chassis source time regression remains quarantined; Dashboard epoch is not authenticated chassis producer identity. No watermark clearing, receiver rotation, or device recovery command was performed."
+}

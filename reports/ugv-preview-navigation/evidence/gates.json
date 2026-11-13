@@ -1,0 +1,21 @@
+[
+  {
+    "command": [
+      "pnpm",
+      "exec",
+      "eslint",
+      "apps/ugv-control-console/shared/preview-navigation.ts",
+      "apps/ugv-control-console/web/PreviewNavigation.tsx",
+      "apps/ugv-control-console/web/SiteReadonlyConsole.tsx",
+      "apps/ugv-control-console/web/SiteControlConsole.tsx",
+      "apps/ugv-control-console/web/api.ts",
+      "apps/ugv-control-console/test/preview-navigation.test.ts",
+      "apps/ugv-control-console/e2e/preview-navigation.spec.ts",
+      "apps/ugv-control-console/playwright.preview-navigation.config.ts"
+    ],
+    "startedAt": "2026-11-13T07:41:43.416721+00:00",
+    "exitCode": 1,
+    "log": "gate-0.log",
+    "sha256": "0f3392144920f3031f59afe2b20e0c128ee6a1ed62798680a28881b827481ea3"
+  }
+]

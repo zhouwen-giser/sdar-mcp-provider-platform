@@ -11,3 +11,7 @@
 - 临时候选已关闭，隔离数据库容器已停止并保留卷。原稳定性监控继续暂停；本修复不声明新的 24 小时运行结果。
 
 详细证据：[evidence/REPORT.md](evidence/REPORT.md)。操作说明：[部署记录](../../deploy/ugv-zmq/v152/README.md)。上游、SDAR 和主目录未修改；旧 PMS 兼容网关及 SDAR 精确绑定沿用此前版本。
+
+## 15:50 面板结果关联修复
+
+用户 15:27 的 8 点预览已成功采用为独立导航 Task，但任务在模式回显阶段以 `ZMQ_MODE_ECHO_TIMEOUT` 失败，未下发路线或 START。Console 已单独更新至 `cf5b0ae`，展示关联任务的真实结果并防止重复提交；Provider/Runtime 未重启，原任务与账本未变。15:52 另发现上游运行纪元改变后的定位时间回退，保持隔离。模式接收端原因、定位恢复及现场导航仍未通过，详见 [排障证据](../ugv-preview-navigation/evidence/REPORT.md)。

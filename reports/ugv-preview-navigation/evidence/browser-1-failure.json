@@ -1,0 +1,15 @@
+{
+  "command": [
+    "pnpm",
+    "--filter",
+    "@sdar/ugv-control-console",
+    "exec",
+    "playwright",
+    "test",
+    "--config",
+    "playwright.preview-navigation.config.ts"
+  ],
+  "exitCode": 1,
+  "originalConfiguration": "Vite development server",
+  "failure": "Refresh could not load application modules: net::ERR_NETWORK_CHANGED; original navigation failure and duplicate click assertions had passed. Trace was inspected before succeeding run replaced test-results."
+}

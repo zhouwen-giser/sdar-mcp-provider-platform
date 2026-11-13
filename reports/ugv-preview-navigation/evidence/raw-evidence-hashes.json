@@ -1,0 +1,67 @@
+[
+  {
+    "privateEvidencePath": "/home/sz/.smpp-debug/zmq-preview-adopt-20261113/records-before.json",
+    "sha256": "b1e59ea819fd418ab6241ce94cfb9a6e0dc0705bf7faaeb121ffc2cf55024af7",
+    "bytes": 10946
+  },
+  {
+    "privateEvidencePath": "/home/sz/.smpp-debug/zmq-preview-adopt-20261113/execution-before.json",
+    "sha256": "7c2a2ece352bb509daf1aa11086fa4ad82d7c29a4428606fc4f09677b0aed0c5",
+    "bytes": 9880
+  },
+  {
+    "privateEvidencePath": "/home/sz/.smpp-debug/zmq-preview-adopt-20261113/execution-after.json",
+    "sha256": "7c2a2ece352bb509daf1aa11086fa4ad82d7c29a4428606fc4f09677b0aed0c5",
+    "bytes": 9880
+  },
+  {
+    "privateEvidencePath": "/home/sz/.smpp-debug/zmq-preview-adopt-20261113/task-before.json",
+    "sha256": "5c658bb115840515112d4fbca51a0ba6a1880276a6bb5588d6a8ca546d505442",
+    "bytes": 17821
+  },
+  {
+    "privateEvidencePath": "/home/sz/.smpp-debug/zmq-preview-adopt-20261113/task-after.json",
+    "sha256": "51d59d0652ac351cf36c30a2df24629e26e2481c886c15fc7b8198f32c590094",
+    "bytes": 28921
+  },
+  {
+    "privateEvidencePath": "/home/sz/.smpp-debug/zmq-preview-adopt-20261113/socket-filters.json",
+    "sha256": "481add35903eee77374b66f54deb99016db453bc3dd1d5c728c8a8ea094d5abf",
+    "bytes": 667
+  },
+  {
+    "privateEvidencePath": "/home/sz/.smpp-debug/zmq-preview-adopt-20261113/source-chassis.json",
+    "sha256": "f8d10208d39f8032155a109c08bd07c5a3117fd91008b99c663170c0af5174cb",
+    "bytes": 1087
+  },
+  {
+    "privateEvidencePath": "/home/sz/.smpp-debug/zmq-preview-adopt-20261113/source-chassis-after.json",
+    "sha256": "2a2a477f4683facf7d008362089906d897002b26be69d7d6c665f719c455a688",
+    "bytes": 1075
+  },
+  {
+    "privateEvidencePath": "/home/sz/.smpp-debug/zmq-preview-adopt-20261113/source-watchdog.json",
+    "sha256": "ef50e13cef610d02dffff144f942f5a4c397a150959a8cc7362eb0b8c50e4b4d",
+    "bytes": 2305
+  },
+  {
+    "privateEvidencePath": "/home/sz/.smpp-debug/zmq-preview-adopt-20261113/source-watchdog-after.json",
+    "sha256": "7e9017113bc025afafe1af4d5dc224db514ff74d5b119e53850b1c4457d31c5b",
+    "bytes": 2164
+  },
+  {
+    "privateEvidencePath": "/home/sz/.smpp-debug/zmq-preview-adopt-20261113/mode.hex",
+    "sha256": "da3a6a8480e554f9bdd5105a80378417db7be3ae5cf4de7d56ea18effcd88b84",
+    "bytes": 101
+  },
+  {
+    "privateEvidencePath": "/home/sz/.smpp-debug/zmq-preview-adopt-20261113/check-reference.cpp",
+    "sha256": "b3157e234d147c23f1949e779e8ec3cfd8894dc79eaf7d1e647fc4d15f99fd73",
+    "bytes": 606
+  },
+  {
+    "privateEvidencePath": "/home/sz/.smpp-debug/zmq-preview-adopt-20261113/check-reference",
+    "sha256": "1076647990b888ee7db44d5503446d267aa3a2ef8c0b06a669d6aaef7e7b46a7",
+    "bytes": 566928
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "at": "2026-11-13T07:51:03.325Z",
+  "taskId": "2c9d0e50-b9d2-408f-aa95-d5af2532cc02",
+  "sameExecutionRevision": true,
+  "sameCommandLedger": true,
+  "nativeCommandCount": 3,
+  "actions": [
+    "mode",
+    "mode",
+    "mode"
+  ],
+  "taskStatus": "completed",
+  "outcome": "business_failure",
+  "reasonCode": "ZMQ_MODE_ECHO_TIMEOUT",
+  "noRouteOrStartDispatched": true,
+  "diagnosticMotionCommandsDispatched": 0
+}
