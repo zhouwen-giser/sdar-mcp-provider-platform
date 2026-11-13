@@ -1,0 +1,13 @@
+{
+  "source": "09cae489e4460a7f5834fe542887aa9bc18fb57d",
+  "command": [
+    "docker",
+    "buildx",
+    "bake",
+    "-f",
+    "/home/sz/.smpp-debug/zmq-navigation-evidence-20261113/console-bake.json",
+    "--progress",
+    "plain"
+  ],
+  "exitCode": 0
+}

@@ -1,0 +1,13 @@
+{
+  "at": "2026-11-13T10:45:37.988471+00:00",
+  "applicationSource": "09cae489e4460a7f5834fe542887aa9bc18fb57d",
+  "scope": "console_only",
+  "providerRuntimeRestarted": false,
+  "upstreamRevision": "a0be6a51e17fb9e85bc4ba0b62f7157a1b77c82e",
+  "upstreamModifiedByThisWork": false,
+  "upstreamRestartedByThisWork": false,
+  "sdarModifiedByThisWork": false,
+  "primaryModifiedByThisWork": false,
+  "nativeCommandFormat": "prefix_wire_length_crc",
+  "automaticProtocolFallback": false
+}

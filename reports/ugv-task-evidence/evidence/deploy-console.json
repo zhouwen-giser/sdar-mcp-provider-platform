@@ -1,0 +1,62 @@
+{
+  "at": "2026-11-13T10:43:25.835386+00:00",
+  "source": "09cae489e4460a7f5834fe542887aa9bc18fb57d",
+  "command": [
+    "docker",
+    "compose",
+    "--env-file",
+    "/home/sz/.smpp-debug/zmq-planner-scene-20261113/formal/site-images.env",
+    "-p",
+    "smpp-zmq-site-formal",
+    "-f",
+    "deploy/ugv-zmq/site-control/compose.formal.yaml",
+    "-f",
+    "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/pms-readonly-override.json",
+    "-f",
+    "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/resources.json",
+    "up",
+    "-d",
+    "--no-deps",
+    "--force-recreate",
+    "--no-build",
+    "--pull",
+    "never",
+    "console"
+  ],
+  "exitCode": 0,
+  "ready": true,
+  "providerRuntimeUnchanged": true,
+  "containers": [
+    {
+      "id": "1e7cd89010c540b5e5e3f2ce3fda8504bce1c0159d80acefb24b445bd50e60f4",
+      "name": "/smpp-zmq-site-formal-provider-1",
+      "imageId": "sha256:a33f44c2cdeb789a27c71578e9254426f631342bd6d4432cc6bdfb8a6ed185b2",
+      "startedAt": "2026-11-13T08:14:00.574440776Z",
+      "status": "running",
+      "oomKilled": false,
+      "restartCount": 0,
+      "revision": "1a014d46ed94f6dd6845dc28201678f22fc3c387"
+    },
+    {
+      "id": "e9fb53e98d3099f5335e5fe7d12ec1c831023057f7d36bbb53433677321591f2",
+      "name": "/smpp-zmq-site-formal-runtime-1",
+      "imageId": "sha256:35319451a9570ac9375f28b659599e7834ea177b6ab3165748cd6a403bd8ba4d",
+      "startedAt": "2026-11-13T08:14:06.965278981Z",
+      "status": "running",
+      "oomKilled": false,
+      "restartCount": 0,
+      "revision": "47770101e2950045bc8fb37a50c8c95d258dc4d3"
+    },
+    {
+      "id": "2c389f6eda04447b80f3e9319b5f3828da4c1e50ecb08e55162c0148aa8f4a3a",
+      "name": "/smpp-zmq-site-formal-console-1",
+      "imageId": "sha256:1ea6049b183c9a21aa18ed8b06d98c5709265d759411f7c0dcf50dd9400f2666",
+      "startedAt": "2026-11-13T10:43:24.500049935Z",
+      "status": "running",
+      "oomKilled": false,
+      "restartCount": 0,
+      "revision": "09cae489e4460a7f5834fe542887aa9bc18fb57d"
+    }
+  ],
+  "consoleImage": "sha256:1ea6049b183c9a21aa18ed8b06d98c5709265d759411f7c0dcf50dd9400f2666"
+}

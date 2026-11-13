@@ -1,0 +1,20 @@
+{
+  "method": "read_only_ssh",
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=3",
+    "-o",
+    "ConnectionAttempts=1",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "192.168.2.63",
+    "hostname"
+  ],
+  "exitCode": 255,
+  "result": "Permission denied (publickey,password).",
+  "receiverLogsRead": false,
+  "upstreamModified": false
+}

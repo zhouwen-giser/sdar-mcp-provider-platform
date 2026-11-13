@@ -1,0 +1,23 @@
+{
+  "at": "2026-11-13T10:43:34.043Z",
+  "url": "http://17.26.1.20:19101",
+  "source": "09cae48",
+  "taskId": "2f611987-f977-46c4-ba93-b6375b7cfc4b",
+  "executionReason": "ZMQ_MODE_ECHO_TIMEOUT",
+  "executionFailureSeparateFromEvidence": true,
+  "originalEvidenceCount": 4,
+  "rawCodesPreserved": true,
+  "allFourChineseExplanations": true,
+  "reloadOnlyQueries": true,
+  "mobileNoOverflow": true,
+  "mutations": [
+    {
+      "path": "/api/session/login",
+      "method": "POST"
+    }
+  ],
+  "blockedCommandPosts": 0,
+  "pageErrors": [],
+  "physicalControlActions": 0,
+  "exitCode": 0
+}

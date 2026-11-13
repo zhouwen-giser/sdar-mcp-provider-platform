@@ -1,0 +1,37 @@
+[
+  {
+    "command": [
+      "python3",
+      "/home/sz/.smpp-debug/zmq-navigation-evidence-20261113/deploy-console.py"
+    ],
+    "exitCode": 0,
+    "evidence": "deploy-console.json"
+  },
+  {
+    "command": [
+      "node",
+      "/home/sz/.smpp-debug/zmq-navigation-evidence-20261113/verify-live.mjs"
+    ],
+    "exitCode": 0,
+    "evidence": "live-browser.json"
+  },
+  {
+    "command": [
+      "pnpm",
+      "exec",
+      "tsx",
+      "/home/sz/.smpp-debug/zmq-navigation-evidence-20261113/inspect-tasks-after.mts"
+    ],
+    "exitCode": 0,
+    "evidence": "no-redispatch.json"
+  },
+  {
+    "command": [
+      "sha256sum",
+      "-c",
+      "SHA256SUMS"
+    ],
+    "exitCode": 0,
+    "scope": "public evidence files"
+  }
+]

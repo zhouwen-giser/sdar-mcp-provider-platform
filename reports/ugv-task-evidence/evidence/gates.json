@@ -1,0 +1,66 @@
+[
+  {
+    "command": [
+      "pnpm",
+      "exec",
+      "eslint",
+      "apps/ugv-control-console/web/main.tsx",
+      "apps/ugv-control-console/web/TaskEvidence.tsx",
+      "apps/ugv-control-console/test/task-evidence.test.ts",
+      "apps/ugv-control-console/e2e/preview-navigation.spec.ts"
+    ],
+    "exitCode": 0,
+    "log": "lint.log"
+  },
+  {
+    "command": [
+      "pnpm",
+      "--filter",
+      "@sdar/ugv-control-console",
+      "typecheck"
+    ],
+    "exitCode": 0,
+    "log": "typecheck.log"
+  },
+  {
+    "command": [
+      "pnpm",
+      "--filter",
+      "@sdar/ugv-control-console",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "test/task-evidence.test.ts",
+      "test/preview-navigation.test.ts",
+      "test/site-control-profiles.test.ts"
+    ],
+    "exitCode": 0,
+    "log": "unit.log"
+  },
+  {
+    "command": [
+      "pnpm",
+      "--filter",
+      "@sdar/ugv-control-console",
+      "build"
+    ],
+    "exitCode": 0,
+    "log": "build.log"
+  },
+  {
+    "command": [
+      "pnpm",
+      "--filter",
+      "@sdar/ugv-control-console",
+      "exec",
+      "playwright",
+      "test",
+      "--config",
+      "playwright.preview-navigation.config.ts"
+    ],
+    "exitCode": 0,
+    "log": "browser.log"
+  }
+]

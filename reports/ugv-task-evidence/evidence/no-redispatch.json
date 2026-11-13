@@ -1,0 +1,63 @@
+{
+  "beforeAt": "2026-11-13T10:26:32.119Z",
+  "afterAt": "2026-11-13T10:44:09.483Z",
+  "allComparedRecordsUnchanged": true,
+  "comparisons": [
+    {
+      "collection": "tasks",
+      "taskId": "2f611987-f977-46c4-ba93-b6375b7cfc4b",
+      "unchanged": true,
+      "beforeSha256": "12e339559b4595314a371ccb5ee932388d4cd330cc934913c7570f7595a33f74",
+      "afterSha256": "12e339559b4595314a371ccb5ee932388d4cd330cc934913c7570f7595a33f74"
+    },
+    {
+      "collection": "tasks",
+      "taskId": "a75368a7-945d-44eb-8f79-e4184c72b120",
+      "unchanged": true,
+      "beforeSha256": "28deeff84deec1b9f8f89793d6bb9899bd8a5e66d8683914e2c9a5a977ba3c3d",
+      "afterSha256": "28deeff84deec1b9f8f89793d6bb9899bd8a5e66d8683914e2c9a5a977ba3c3d"
+    },
+    {
+      "collection": "tasks",
+      "taskId": "044f7143-dd0a-45ec-ae31-56821f78bc51",
+      "unchanged": true,
+      "beforeSha256": "c617875ee3001921c885420e2e24fdaf0808da92a5dac68359b31252f6d1d10c",
+      "afterSha256": "c617875ee3001921c885420e2e24fdaf0808da92a5dac68359b31252f6d1d10c"
+    },
+    {
+      "collection": "executions",
+      "taskId": "a75368a7-945d-44eb-8f79-e4184c72b120",
+      "unchanged": true,
+      "beforeSha256": "5c98c956767c46549d96efde33a16cbcbdfb45608894360371c97bdaa356d134",
+      "afterSha256": "5c98c956767c46549d96efde33a16cbcbdfb45608894360371c97bdaa356d134"
+    },
+    {
+      "collection": "executions",
+      "taskId": "2f611987-f977-46c4-ba93-b6375b7cfc4b",
+      "unchanged": true,
+      "beforeSha256": "b50373f43cbd66b691ad434d52a9204cc02712c99f38ce790fd7a1a0fcb77a21",
+      "afterSha256": "b50373f43cbd66b691ad434d52a9204cc02712c99f38ce790fd7a1a0fcb77a21"
+    },
+    {
+      "collection": "executions",
+      "taskId": "044f7143-dd0a-45ec-ae31-56821f78bc51",
+      "unchanged": true,
+      "beforeSha256": "4341285a0b3b7e8610290880a8d992b9cc29e500c27af257408da1e54b0cf6b6",
+      "afterSha256": "4341285a0b3b7e8610290880a8d992b9cc29e500c27af257408da1e54b0cf6b6"
+    }
+  ],
+  "physicalControlActionsDuringInvestigation": 0,
+  "providerRuntimeUnchanged": true,
+  "archiveAfter": {
+    "status": "running",
+    "pendingRecords": 0,
+    "pendingBytes": 0,
+    "committedEvents": 267780,
+    "receivedMessages": 267773,
+    "committedReceptions": 267773,
+    "unconfirmedReceptions": 0,
+    "locallyDiscardedMessages": 0,
+    "failureCode": null,
+    "failureRecorded": null
+  }
+}

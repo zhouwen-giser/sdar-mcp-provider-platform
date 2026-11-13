@@ -1,0 +1,59 @@
+{
+  "taskId": "2f611987-f977-46c4-ba93-b6375b7cfc4b",
+  "reasonCode": "ZMQ_MODE_ECHO_TIMEOUT",
+  "checks": [
+    {
+      "action": "mode",
+      "dispatchAt": "2026-11-13T10:23:47.304Z",
+      "sender": 0,
+      "target": 1,
+      "mode": 1,
+      "crcValid": true,
+      "frameSha256": "9fd895c7f16ac006c5383817727a58f4868b0b65aaf117ea642ab7e6c92865da",
+      "referenceDecoder": {
+        "referenceDecoderAccepted": true,
+        "messageId": 1,
+        "sender": 0,
+        "target": 1,
+        "mode": 1,
+        "applicationFramesSent": 0
+      }
+    },
+    {
+      "action": "mode",
+      "dispatchAt": "2026-11-13T10:23:50.322Z",
+      "sender": 0,
+      "target": 1,
+      "mode": 1,
+      "crcValid": true,
+      "frameSha256": "9fd895c7f16ac006c5383817727a58f4868b0b65aaf117ea642ab7e6c92865da",
+      "referenceDecoder": {
+        "referenceDecoderAccepted": true,
+        "messageId": 1,
+        "sender": 0,
+        "target": 1,
+        "mode": 1,
+        "applicationFramesSent": 0
+      }
+    },
+    {
+      "action": "mode",
+      "dispatchAt": "2026-11-13T10:23:53.331Z",
+      "sender": 0,
+      "target": 1,
+      "mode": 1,
+      "crcValid": true,
+      "frameSha256": "9fd895c7f16ac006c5383817727a58f4868b0b65aaf117ea642ab7e6c92865da",
+      "referenceDecoder": {
+        "referenceDecoderAccepted": true,
+        "messageId": 1,
+        "sender": 0,
+        "target": 1,
+        "mode": 1,
+        "applicationFramesSent": 0
+      }
+    }
+  ],
+  "pathOrStartDispatched": false,
+  "readOnlyInvestigation": true
+}

@@ -36,3 +36,9 @@ docker compose --env-file /home/sz/.smpp-debug/zmq-planner-scene-20261113/formal
 此新增可选配置不能交给不支持它的旧镜像解析。回退只读时使用支持该配置的新镜像，先封存当前接收会话并按上述流程建立新的只读接收边界；不要覆盖运行会话或恢复旧 MQTT 写端。本轮软件验证、正式恢复和实际导航失败分别记账，见 [报告](../../../reports/ugv-zmq-source-recovery/evidence/REPORT.md)。
 
 只读回退配置已生成，尚未执行。临时只读候选与独立数据库的启动验证见验收报告。旧 1.5.1 部署包和合同按历史版本保留，本修复以固定源码、镜像及本记录为交付依据。
+
+## 2026-11-13 18:43 Console 证据说明
+
+当前 Console 源码为 `09cae489e4460a7f5834fe542887aa9bc18fb57d`，镜像 `sha256:1ea6049b183c9a21aa18ed8b06d98c5709265d759411f7c0dcf50dd9400f2666`。canonical 和当前部署 env 的 `SITE_CONSOLE_IMAGE` 已同步。Provider/Runtime 沿用 16:14 运行实例，没有重启。
+
+任务详情将执行失败原因和报告证据限制分开展示；模式回显超时时，路线及 START 尚未下发。不要按四项证据代码重派原任务。Console 展示回退可单独恢复上一镜像 `sha256:59f7de7585b01585a0afa9793e0af8425174896741e8a8d916c4a10244d15f91` 并仅重建 Console；无需重建写端或接收会话。原任务及审计保持不变。验证与未决接收端日志见 [报告](../../../reports/ugv-task-evidence/evidence/REPORT.md)。
