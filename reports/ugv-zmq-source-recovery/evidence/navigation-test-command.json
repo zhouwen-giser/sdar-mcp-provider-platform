@@ -1,0 +1,7 @@
+{
+  "command": [
+    "node",
+    "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/navigation-test.mjs"
+  ],
+  "exitCode": 0
+}

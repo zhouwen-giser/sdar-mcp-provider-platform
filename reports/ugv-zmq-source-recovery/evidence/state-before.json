@@ -1,0 +1,447 @@
+{
+  "at": "2026-11-13T08:01:45.161Z",
+  "scope": "readonly_no_device_commands",
+  "target": {
+    "longitude": 114.04791045,
+    "latitude": 22.50664785
+  },
+  "availability": {
+    "resultType": "complete",
+    "profileVersion": "1.0",
+    "results": [
+      {
+        "requestId": "navigation-stale-investigation",
+        "operationName": "vehicle_zmq_navigate",
+        "availability": "disabled",
+        "riskLevel": "medium",
+        "reasonCode": "ZMQ_STATE_STALE_OR_DISCONNECTED",
+        "description": "ZMQ_STATE_STALE_OR_DISCONNECTED",
+        "validUntil": "2026-11-13T08:01:45.896Z",
+        "nextAvailableWindows": [],
+        "estimatedDelayMs": 0,
+        "reservationMode": "none",
+        "possibleEffects": []
+      }
+    ]
+  },
+  "sessionId": "820fe511-bd30-4db2-9734-a763dc9d34eb",
+  "partitionHash": "9852168d7de308dd7c1baf121807742731ffe568158807ec605f55eb205d5b50",
+  "sourceProducerEpoch": null,
+  "archive": {
+    "status": "running",
+    "pendingRecords": 0,
+    "pendingBytes": 0,
+    "committedEvents": 107366,
+    "receivedMessages": 107332,
+    "committedReceptions": 107332,
+    "unconfirmedReceptions": 0,
+    "locallyDiscardedMessages": 0,
+    "failureCode": null,
+    "failureRecorded": null
+  },
+  "channels": {
+    "chassis": {
+      "state": "connected",
+      "lastReceptionAt": "2026-11-13T08:01:44.826Z",
+      "lastValidCommittedAt": "2026-11-13T08:01:44.082Z",
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+        "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+        "SOURCE_TIME_REGRESSED_OR_REPLAYED",
+        "SOURCE_TIMEBASE_UNCONFIRMED"
+      ]
+    },
+    "eo": {
+      "state": "connected",
+      "lastReceptionAt": "2026-11-13T08:01:44.680Z",
+      "lastValidCommittedAt": "2026-11-13T08:01:44.123Z",
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+        "IMAGE_DEDUPLICATION_BOUNDED_TO_RECEIVER_SESSION",
+        "ACQUISITION_TIME_UNKNOWN"
+      ]
+    },
+    "simulationEffect": {
+      "state": "connected",
+      "lastReceptionAt": "2026-11-13T08:01:44.319Z",
+      "lastValidCommittedAt": "2026-11-13T08:01:44.319Z",
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+      ]
+    }
+  },
+  "localization": [
+    {
+      "component": "chassis",
+      "receivedAt": "2026-11-13T07:34:53.037Z",
+      "ageMs": 1611841.326196,
+      "receiptFresh": false,
+      "sourceFreshness": "unverified",
+      "receptionId": "5e120b60-7c19-4c63-8138-8151c36caf8b",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+        "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+        "SOURCE_TIMEBASE_UNCONFIRMED"
+      ],
+      "observation": {
+        "key": "localization",
+        "protocolVersion": "2.1-site-rx/1",
+        "versionEvidence": "selected_contract_not_in_band",
+        "deviceId": "1",
+        "nativeTaskId": null,
+        "nativeRequestId": null,
+        "runtimeTaskId": null,
+        "sourceProducerEpoch": null,
+        "sourceTime": {
+          "unit": "unconfirmed_us",
+          "value": "19716530657"
+        },
+        "acquisitionUtcMs": null,
+        "reportedOrigin": "unattested",
+        "position": {
+          "longitude": 114.04821079498646,
+          "latitude": 22.505887009571627,
+          "altitude": 500.15233227144927,
+          "altitudeDatum": "unconfirmed",
+          "crs": "OGC:CRS84"
+        },
+        "data": {
+          "type": "localization",
+          "timeUs": "19716530657",
+          "systemTimeUs": "1794555292977666",
+          "utcTimeUs": "1794555292977666",
+          "timebase": "unconfirmed",
+          "ahrsStatus": 1,
+          "longitude": 114.04821079498646,
+          "latitude": 22.505887009571627,
+          "altitude": 500.15233227144927,
+          "velocityEnu": [
+            0,
+            0,
+            0
+          ],
+          "attitudeRaw": [
+            -0.00013741910472475475,
+            0.0005588531254805196,
+            -0.20111287003725536
+          ],
+          "accelerationRaw": [
+            0,
+            0,
+            0
+          ],
+          "angularVelocityRaw": [
+            0,
+            0,
+            0
+          ],
+          "quaternion": [
+            0.994948421171675,
+            -4.0311650956446896e-05,
+            0.0002849125735573388,
+            -0.10038703306596909
+          ],
+          "mercatorRaw": [
+            12695788.751581818,
+            2572372.3959921235,
+            500.15233227144927
+          ],
+          "curvature": 0,
+          "fixType": 1,
+          "fixQuality": 1,
+          "alignmentMode": 3
+        }
+      }
+    },
+    {
+      "component": "chassis",
+      "receivedAt": "2026-11-13T07:43:09.038Z",
+      "ageMs": 1115840.44688,
+      "receiptFresh": false,
+      "sourceFreshness": "unverified",
+      "receptionId": "b1fe4d44-8958-49df-a684-ab359bf9272e",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+        "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+        "REPEATED_WIRE_BYTES",
+        "SOURCE_TIME_NOT_SUPPLIED"
+      ],
+      "observation": {
+        "key": "missionState",
+        "protocolVersion": "2.1-site-rx/1",
+        "versionEvidence": "selected_contract_not_in_band",
+        "deviceId": "1",
+        "nativeTaskId": "204",
+        "nativeRequestId": null,
+        "runtimeTaskId": null,
+        "sourceProducerEpoch": null,
+        "sourceTime": {
+          "unit": "not_supplied",
+          "value": null
+        },
+        "acquisitionUtcMs": null,
+        "reportedOrigin": "unattested",
+        "position": null,
+        "data": {
+          "type": "missionState",
+          "missionId": 204,
+          "missionType": 2,
+          "state": 3,
+          "progress": 97
+        }
+      }
+    },
+    {
+      "component": "chassis",
+      "receivedAt": "2026-11-13T08:01:44.082Z",
+      "ageMs": 796.523078,
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "receptionId": "f06426ac-bf8c-4354-9a7f-0ab16d2fe416",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+        "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+        "REPEATED_WIRE_BYTES",
+        "SOURCE_TIME_NOT_SUPPLIED"
+      ],
+      "observation": {
+        "key": "systemState",
+        "protocolVersion": "2.1-site-rx/1",
+        "versionEvidence": "selected_contract_not_in_band",
+        "deviceId": "1",
+        "nativeTaskId": null,
+        "nativeRequestId": null,
+        "runtimeTaskId": null,
+        "sourceProducerEpoch": null,
+        "sourceTime": {
+          "unit": "not_supplied",
+          "value": null
+        },
+        "acquisitionUtcMs": null,
+        "reportedOrigin": "unattested",
+        "position": null,
+        "data": {
+          "type": "systemState",
+          "runState": 1,
+          "mode": 0,
+          "speedLimitMetresPerSecond": 8.333333015441895,
+          "videoConfig": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "errorCodes": []
+        }
+      }
+    }
+  ],
+  "independentRawLocalization": [
+    {
+      "receivedAt": "2026-11-13T08:01:45.039Z",
+      "body": {
+        "type": "localization",
+        "timeUs": "1591681897",
+        "systemTimeUs": "1794556904981171",
+        "utcTimeUs": "1794556904981171",
+        "timebase": "unconfirmed",
+        "ahrsStatus": 1,
+        "longitude": 114.04776722767852,
+        "latitude": 22.505954788642917,
+        "altitude": 500.1532380701974,
+        "velocityEnu": [
+          0,
+          0,
+          0
+        ],
+        "attitudeRaw": [
+          -7.616639004223792e-05,
+          -0.0006480216386725399,
+          -2.880880696118831e-06
+        ],
+        "accelerationRaw": [
+          0,
+          0,
+          0
+        ],
+        "angularVelocityRaw": [
+          0,
+          0,
+          0
+        ],
+        "quaternion": [
+          0.9999999467822749,
+          -3.808365973107857e-05,
+          -0.00032401075857513284,
+          -1.4527796384063153e-06
+        ],
+        "mercatorRaw": [
+          12695739.373894967,
+          2572380.5631334614,
+          500.1532380701974
+        ],
+        "curvature": 0,
+        "fixType": 1,
+        "fixQuality": 1,
+        "alignmentMode": 3
+      },
+      "sha256": "804ff64d4e12848c4b64200b51c9eaf8bda0a9da57bfb3863ce5cf1991a1b565"
+    },
+    {
+      "receivedAt": "2026-11-13T08:01:45.068Z",
+      "body": {
+        "type": "localization",
+        "timeUs": "1591730685",
+        "systemTimeUs": "1794556905007413",
+        "utcTimeUs": "1794556905007413",
+        "timebase": "unconfirmed",
+        "ahrsStatus": 1,
+        "longitude": 114.04776722767852,
+        "latitude": 22.505954788642917,
+        "altitude": 500.1532380701974,
+        "velocityEnu": [
+          0,
+          0,
+          0
+        ],
+        "attitudeRaw": [
+          -7.616639004223792e-05,
+          -0.0006480216386725399,
+          -2.880880696118831e-06
+        ],
+        "accelerationRaw": [
+          0,
+          0,
+          0
+        ],
+        "angularVelocityRaw": [
+          0,
+          0,
+          0
+        ],
+        "quaternion": [
+          0.9999999467822749,
+          -3.808365973107857e-05,
+          -0.00032401075857513284,
+          -1.4527796384063153e-06
+        ],
+        "mercatorRaw": [
+          12695739.373894967,
+          2572380.5631334614,
+          500.1532380701974
+        ],
+        "curvature": 0,
+        "fixType": 1,
+        "fixQuality": 1,
+        "alignmentMode": 3
+      },
+      "sha256": "060d68193eef0bf8bbc39fff1ea9625f50b12652317bb66557f9b2281c2f61c6"
+    },
+    {
+      "receivedAt": "2026-11-13T08:01:45.161Z",
+      "body": {
+        "type": "localization",
+        "timeUs": "1591775428",
+        "systemTimeUs": "1794556905102569",
+        "utcTimeUs": "1794556905102569",
+        "timebase": "unconfirmed",
+        "ahrsStatus": 1,
+        "longitude": 114.04776722767852,
+        "latitude": 22.505954788642917,
+        "altitude": 500.1532380701974,
+        "velocityEnu": [
+          0,
+          0,
+          0
+        ],
+        "attitudeRaw": [
+          -7.616639004223792e-05,
+          -0.0006480216386725399,
+          -2.880880696118831e-06
+        ],
+        "accelerationRaw": [
+          0,
+          0,
+          0
+        ],
+        "angularVelocityRaw": [
+          0,
+          0,
+          0
+        ],
+        "quaternion": [
+          0.9999999467822749,
+          -3.808365973107857e-05,
+          -0.00032401075857513284,
+          -1.4527796384063153e-06
+        ],
+        "mercatorRaw": [
+          12695739.373894967,
+          2572380.5631334614,
+          500.1532380701974
+        ],
+        "curvature": 0,
+        "fixType": 1,
+        "fixQuality": 1,
+        "alignmentMode": 3
+      },
+      "sha256": "d8bd51c101b84cf0adb78a9bbec88812dce195c0c198a0bfc57dcb2b41e12b67"
+    }
+  ],
+  "sourceChassis": {
+    "accepted_feedback_sent": false,
+    "action_request_id": "",
+    "available": true,
+    "avoid_obstacles": false,
+    "cancel_pending": false,
+    "controller_instance_id": "2251915442:1090047516",
+    "entity_id": "ugv",
+    "entity_type": "ugv",
+    "error": "",
+    "executing": false,
+    "fault_mask": 0,
+    "faults_fresh": true,
+    "feedback_pending": false,
+    "has_task": false,
+    "header": {
+      "frame_id": "map",
+      "stamp": {
+        "nanosec": 501747525,
+        "sec": 1591
+      }
+    },
+    "mission_state": 0,
+    "mission_type": 0,
+    "mode": 0,
+    "observation_fresh": true,
+    "planning": false,
+    "progress": 0,
+    "run_state": 1,
+    "sequence": "11038",
+    "settings_fresh": true,
+    "simulation_epoch": "1794555793256633993",
+    "speed_limit_mps": 8.333333015441895,
+    "starting": false,
+    "system_id": "1",
+    "task_current": false,
+    "task_id": 0,
+    "task_identity": "",
+    "task_message_id": 0,
+    "task_owner": "0",
+    "task_simulation_epoch": "0"
+  }
+}

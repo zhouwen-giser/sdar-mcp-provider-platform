@@ -1,0 +1,20 @@
+{
+  "at": "2026-11-13T08:06:25.210Z",
+  "action": "operator_reconcile_source_restart_new_receiver_session",
+  "target": {
+    "longitude": 114.04791045,
+    "latitude": 22.50664785
+  },
+  "predecessor": {
+    "partitionHash": "9852168d7de308dd7c1baf121807742731ffe568158807ec605f55eb205d5b50",
+    "sessionId": "820fe511-bd30-4db2-9734-a763dc9d34eb"
+  },
+  "sourceProducerEpoch": null,
+  "authenticatedSourceEpoch": false,
+  "dashboardEvidenceIsAdvisory": true,
+  "profileSha256": "70a6528a8bd721c0924a1e6aea90f199943c28e2162e99daa6f7b1cc7b758646",
+  "inspectionSha256": "adac0d279a95d0a57323eb25fb5dc5dcb5fb0368e24bbf8326160c5fc897dd50",
+  "noWatermarkClearing": true,
+  "preserveHistory": true,
+  "authorizationBasis": "user_reported_navigation_target_and_existing_local_recovery_authorization"
+}

@@ -1,0 +1,407 @@
+{
+  "at": "2026-11-13T08:21:36.578Z",
+  "scope": "readonly_no_device_commands",
+  "target": {
+    "longitude": 114.04791045,
+    "latitude": 22.50664785
+  },
+  "availability": {
+    "resultType": "complete",
+    "profileVersion": "1.0",
+    "results": [
+      {
+        "requestId": "navigation-stale-investigation",
+        "operationName": "vehicle_zmq_navigate",
+        "availability": "available",
+        "riskLevel": "medium",
+        "reasonCode": "ZMQ_SITE_OPERATION_READY",
+        "description": "ZMQ_SITE_OPERATION_READY",
+        "validUntil": "2026-11-13T08:21:37.400Z",
+        "nextAvailableWindows": [],
+        "estimatedDelayMs": 0,
+        "reservationMode": "none",
+        "possibleEffects": []
+      }
+    ]
+  },
+  "sessionId": "41ed7fbf-7618-4182-b17a-aa46368d8343",
+  "partitionHash": "ae9a6135bc73ebaa9d9c7edf899383c89bdd566a4710d507335c46ffe79a5df9",
+  "sourceProducerEpoch": null,
+  "archive": {
+    "status": "running",
+    "pendingRecords": 1,
+    "pendingBytes": 2284,
+    "committedEvents": 13502,
+    "receivedMessages": 13496,
+    "committedReceptions": 13495,
+    "unconfirmedReceptions": 0,
+    "locallyDiscardedMessages": 0,
+    "failureCode": null,
+    "failureRecorded": null
+  },
+  "channels": {
+    "chassis": {
+      "state": "connected",
+      "lastReceptionAt": "2026-11-13T08:21:36.310Z",
+      "lastValidCommittedAt": "2026-11-13T08:21:36.310Z",
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+        "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+        "SOURCE_TIMEBASE_UNCONFIRMED"
+      ]
+    },
+    "eo": {
+      "state": "connected",
+      "lastReceptionAt": "2026-11-13T08:21:36.301Z",
+      "lastValidCommittedAt": "2026-11-13T08:21:36.284Z",
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+        "IMAGE_DEDUPLICATION_BOUNDED_TO_RECEIVER_SESSION",
+        "ACQUISITION_TIME_UNKNOWN"
+      ]
+    },
+    "simulationEffect": {
+      "state": "connected",
+      "lastReceptionAt": "2026-11-13T08:21:35.699Z",
+      "lastValidCommittedAt": "2026-11-13T08:21:35.699Z",
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED"
+      ]
+    }
+  },
+  "localization": [
+    {
+      "component": "chassis",
+      "receivedAt": "2026-11-13T08:21:36.186Z",
+      "ageMs": 197.74324,
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "receptionId": "830326f9-b6df-4cfb-b13d-ebac1e724752",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+        "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+        "REPEATED_WIRE_BYTES",
+        "SOURCE_TIME_NOT_SUPPLIED"
+      ],
+      "observation": {
+        "key": "systemState",
+        "protocolVersion": "2.1-site-rx/1",
+        "versionEvidence": "selected_contract_not_in_band",
+        "deviceId": "1",
+        "nativeTaskId": null,
+        "nativeRequestId": null,
+        "runtimeTaskId": null,
+        "sourceProducerEpoch": null,
+        "sourceTime": {
+          "unit": "not_supplied",
+          "value": null
+        },
+        "acquisitionUtcMs": null,
+        "reportedOrigin": "unattested",
+        "position": null,
+        "data": {
+          "type": "systemState",
+          "runState": 1,
+          "mode": 0,
+          "speedLimitMetresPerSecond": 8.333333015441895,
+          "videoConfig": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "errorCodes": []
+        }
+      }
+    },
+    {
+      "component": "chassis",
+      "receivedAt": "2026-11-13T08:21:36.310Z",
+      "ageMs": 73.699267,
+      "receiptFresh": true,
+      "sourceFreshness": "unverified",
+      "receptionId": "a6ce97be-5fea-4ca8-9a07-0cd9f5111f26",
+      "diagnostics": [
+        "SOURCE_CONTINUITY_UNVERIFIED",
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+        "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+        "SOURCE_TIMEBASE_UNCONFIRMED"
+      ],
+      "observation": {
+        "key": "localization",
+        "protocolVersion": "2.1-site-rx/1",
+        "versionEvidence": "selected_contract_not_in_band",
+        "deviceId": "1",
+        "nativeTaskId": null,
+        "nativeRequestId": null,
+        "runtimeTaskId": null,
+        "sourceProducerEpoch": null,
+        "sourceTime": {
+          "unit": "unconfirmed_us",
+          "value": "2782890908"
+        },
+        "acquisitionUtcMs": null,
+        "reportedOrigin": "unattested",
+        "position": {
+          "longitude": 114.04776722767852,
+          "latitude": 22.505954788642917,
+          "altitude": 500.1532380701974,
+          "altitudeDatum": "unconfirmed",
+          "crs": "OGC:CRS84"
+        },
+        "data": {
+          "type": "localization",
+          "timeUs": "2782890908",
+          "systemTimeUs": "1794558096254462",
+          "utcTimeUs": "1794558096254462",
+          "timebase": "unconfirmed",
+          "ahrsStatus": 1,
+          "longitude": 114.04776722767852,
+          "latitude": 22.505954788642917,
+          "altitude": 500.1532380701974,
+          "velocityEnu": [
+            0,
+            0,
+            0
+          ],
+          "attitudeRaw": [
+            -7.616639004223792e-05,
+            -0.0006480216386725399,
+            -2.880880696118831e-06
+          ],
+          "accelerationRaw": [
+            0,
+            0,
+            0
+          ],
+          "angularVelocityRaw": [
+            0,
+            0,
+            0
+          ],
+          "quaternion": [
+            0.9999999467822749,
+            -3.808365973107857e-05,
+            -0.00032401075857513284,
+            -1.4527796384063153e-06
+          ],
+          "mercatorRaw": [
+            12695739.373894967,
+            2572380.5631334614,
+            500.1532380701974
+          ],
+          "curvature": 0,
+          "fixType": 1,
+          "fixQuality": 1,
+          "alignmentMode": 3
+        }
+      }
+    }
+  ],
+  "independentRawLocalization": [
+    {
+      "receivedAt": "2026-11-13T08:21:36.497Z",
+      "body": {
+        "type": "localization",
+        "timeUs": "2783025466",
+        "systemTimeUs": "1794558096437378",
+        "utcTimeUs": "1794558096437378",
+        "timebase": "unconfirmed",
+        "ahrsStatus": 1,
+        "longitude": 114.04776722767852,
+        "latitude": 22.505954788642917,
+        "altitude": 500.1532380701974,
+        "velocityEnu": [
+          0,
+          0,
+          0
+        ],
+        "attitudeRaw": [
+          -7.616639004223792e-05,
+          -0.0006480216386725399,
+          -2.880880696118831e-06
+        ],
+        "accelerationRaw": [
+          0,
+          0,
+          0
+        ],
+        "angularVelocityRaw": [
+          0,
+          0,
+          0
+        ],
+        "quaternion": [
+          0.9999999467822749,
+          -3.808365973107857e-05,
+          -0.00032401075857513284,
+          -1.4527796384063153e-06
+        ],
+        "mercatorRaw": [
+          12695739.373894967,
+          2572380.5631334614,
+          500.1532380701974
+        ],
+        "curvature": 0,
+        "fixType": 1,
+        "fixQuality": 1,
+        "alignmentMode": 3
+      },
+      "sha256": "1c4991424fa119907dd7c02e3661ce8db29f478be0a2a35cf5689ad09b4d5353"
+    },
+    {
+      "receivedAt": "2026-11-13T08:21:36.545Z",
+      "body": {
+        "type": "localization",
+        "timeUs": "2783087695",
+        "systemTimeUs": "1794558096489628",
+        "utcTimeUs": "1794558096489628",
+        "timebase": "unconfirmed",
+        "ahrsStatus": 1,
+        "longitude": 114.04776722767852,
+        "latitude": 22.505954788642917,
+        "altitude": 500.1532380701974,
+        "velocityEnu": [
+          0,
+          0,
+          0
+        ],
+        "attitudeRaw": [
+          -7.616639004223792e-05,
+          -0.0006480216386725399,
+          -2.880880696118831e-06
+        ],
+        "accelerationRaw": [
+          0,
+          0,
+          0
+        ],
+        "angularVelocityRaw": [
+          0,
+          0,
+          0
+        ],
+        "quaternion": [
+          0.9999999467822749,
+          -3.808365973107857e-05,
+          -0.00032401075857513284,
+          -1.4527796384063153e-06
+        ],
+        "mercatorRaw": [
+          12695739.373894967,
+          2572380.5631334614,
+          500.1532380701974
+        ],
+        "curvature": 0,
+        "fixType": 1,
+        "fixQuality": 1,
+        "alignmentMode": 3
+      },
+      "sha256": "7fcfbf7aefec99c189a071fd331159307f06b719b03262daf65a2e5898dfdaaa"
+    },
+    {
+      "receivedAt": "2026-11-13T08:21:36.578Z",
+      "body": {
+        "type": "localization",
+        "timeUs": "2783140751",
+        "systemTimeUs": "1794558096520532",
+        "utcTimeUs": "1794558096520532",
+        "timebase": "unconfirmed",
+        "ahrsStatus": 1,
+        "longitude": 114.04776722767852,
+        "latitude": 22.505954788642917,
+        "altitude": 500.1532380701974,
+        "velocityEnu": [
+          0,
+          0,
+          0
+        ],
+        "attitudeRaw": [
+          -7.616639004223792e-05,
+          -0.0006480216386725399,
+          -2.880880696118831e-06
+        ],
+        "accelerationRaw": [
+          0,
+          0,
+          0
+        ],
+        "angularVelocityRaw": [
+          0,
+          0,
+          0
+        ],
+        "quaternion": [
+          0.9999999467822749,
+          -3.808365973107857e-05,
+          -0.00032401075857513284,
+          -1.4527796384063153e-06
+        ],
+        "mercatorRaw": [
+          12695739.373894967,
+          2572380.5631334614,
+          500.1532380701974
+        ],
+        "curvature": 0,
+        "fixType": 1,
+        "fixQuality": 1,
+        "alignmentMode": 3
+      },
+      "sha256": "24c5738950f210bfeebbfcf0326fc468965e76a3ca4ca9da364d6814784d970c"
+    }
+  ],
+  "sourceChassis": {
+    "accepted_feedback_sent": false,
+    "action_request_id": "",
+    "available": true,
+    "avoid_obstacles": false,
+    "cancel_pending": false,
+    "controller_instance_id": "2251915442:1090047516",
+    "entity_id": "ugv",
+    "entity_type": "ugv",
+    "error": "",
+    "executing": false,
+    "fault_mask": 0,
+    "faults_fresh": true,
+    "feedback_pending": false,
+    "has_task": false,
+    "header": {
+      "frame_id": "map",
+      "stamp": {
+        "nanosec": 926172328,
+        "sec": 2782
+      }
+    },
+    "mission_state": 0,
+    "mission_type": 0,
+    "mode": 0,
+    "observation_fresh": true,
+    "planning": false,
+    "progress": 0,
+    "run_state": 1,
+    "sequence": "22952",
+    "settings_fresh": true,
+    "simulation_epoch": "1794555793256633993",
+    "speed_limit_mps": 8.333333015441895,
+    "starting": false,
+    "system_id": "1",
+    "task_current": false,
+    "task_id": 0,
+    "task_identity": "",
+    "task_message_id": 0,
+    "task_owner": "0",
+    "task_simulation_epoch": "0"
+  }
+}

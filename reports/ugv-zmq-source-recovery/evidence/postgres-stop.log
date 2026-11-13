@@ -1,0 +1,2 @@
+Flag --time has been deprecated, use --timeout instead
+smpp-v152-planner-test-20261113

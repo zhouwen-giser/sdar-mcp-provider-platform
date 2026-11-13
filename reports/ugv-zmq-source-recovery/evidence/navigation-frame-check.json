@@ -1,0 +1,123 @@
+{
+  "at": "2026-11-13T08:21:35.971984+00:00",
+  "taskId": "df36da29-11b0-4d89-9a99-44658d19f958",
+  "state": "BUSINESS_FAILED",
+  "reasonCode": "ZMQ_MODE_ECHO_TIMEOUT",
+  "occupancy": "released",
+  "nativeCommandCount": 3,
+  "checks": [
+    {
+      "stepId": "zmq-mode-761eaf59-3219-4cda-953d-0aae03215cfe",
+      "dispatchAt": "2026-11-13T08:18:11.956Z",
+      "method": "chassis.mode",
+      "status": "sent_unconfirmed",
+      "frameSha256": "ba88478db8b779edbd1fbf811ade423b916fca4e1cd9932f1deb34338c5595c8",
+      "messageId": 1,
+      "sender": 0,
+      "target": 1,
+      "length": 8,
+      "prefix": 4,
+      "requestedMode": 3,
+      "crcValid": true,
+      "referenceDecoder": {
+        "referenceDecoderAccepted": true,
+        "messageId": 1,
+        "sender": 0,
+        "target": 1,
+        "mode": 3,
+        "applicationFramesSent": 0
+      },
+      "diagnostic": {
+        "code": "ZMQ_PUBLISH_QUEUED_UNCONFIRMED",
+        "stage": "complete",
+        "response": null,
+        "elapsedMs": 0.294,
+        "schemaVersion": "ugv.zmq-command-diagnostic/1",
+        "sendAttempted": true,
+        "sendCompleted": true,
+        "sendTimeoutMs": 1000,
+        "validationCode": null,
+        "nativeErrorCode": null,
+        "receiveTimeoutMs": 2000,
+        "sendCompletedAfterMs": 0.25,
+        "receiveCompletedAfterMs": null
+      }
+    },
+    {
+      "stepId": "zmq-mode-6de720cb-e29a-4bf0-96cb-60da05c1166a",
+      "dispatchAt": "2026-11-13T08:18:14.980Z",
+      "method": "chassis.mode",
+      "status": "sent_unconfirmed",
+      "frameSha256": "ba88478db8b779edbd1fbf811ade423b916fca4e1cd9932f1deb34338c5595c8",
+      "messageId": 1,
+      "sender": 0,
+      "target": 1,
+      "length": 8,
+      "prefix": 4,
+      "requestedMode": 3,
+      "crcValid": true,
+      "referenceDecoder": {
+        "referenceDecoderAccepted": true,
+        "messageId": 1,
+        "sender": 0,
+        "target": 1,
+        "mode": 3,
+        "applicationFramesSent": 0
+      },
+      "diagnostic": {
+        "code": "ZMQ_PUBLISH_QUEUED_UNCONFIRMED",
+        "stage": "complete",
+        "response": null,
+        "elapsedMs": 0.147,
+        "schemaVersion": "ugv.zmq-command-diagnostic/1",
+        "sendAttempted": true,
+        "sendCompleted": true,
+        "sendTimeoutMs": 1000,
+        "validationCode": null,
+        "nativeErrorCode": null,
+        "receiveTimeoutMs": 2000,
+        "sendCompletedAfterMs": 0.122,
+        "receiveCompletedAfterMs": null
+      }
+    },
+    {
+      "stepId": "zmq-mode-f9310e4d-9b7b-4e6d-a90b-ccb11218df60",
+      "dispatchAt": "2026-11-13T08:18:17.989Z",
+      "method": "chassis.mode",
+      "status": "sent_unconfirmed",
+      "frameSha256": "ba88478db8b779edbd1fbf811ade423b916fca4e1cd9932f1deb34338c5595c8",
+      "messageId": 1,
+      "sender": 0,
+      "target": 1,
+      "length": 8,
+      "prefix": 4,
+      "requestedMode": 3,
+      "crcValid": true,
+      "referenceDecoder": {
+        "referenceDecoderAccepted": true,
+        "messageId": 1,
+        "sender": 0,
+        "target": 1,
+        "mode": 3,
+        "applicationFramesSent": 0
+      },
+      "diagnostic": {
+        "code": "ZMQ_PUBLISH_QUEUED_UNCONFIRMED",
+        "stage": "complete",
+        "response": null,
+        "elapsedMs": 0.153,
+        "schemaVersion": "ugv.zmq-command-diagnostic/1",
+        "sendAttempted": true,
+        "sendCompleted": true,
+        "sendTimeoutMs": 1000,
+        "validationCode": null,
+        "nativeErrorCode": null,
+        "receiveTimeoutMs": 2000,
+        "sendCompletedAfterMs": 0.144,
+        "receiveCompletedAfterMs": null
+      }
+    }
+  ],
+  "routeAndStartDispatched": false,
+  "additionalControlTasksCreated": 0
+}

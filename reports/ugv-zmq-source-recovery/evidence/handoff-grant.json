@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "ugv.zmq-site-handoff-grant/1",
+  "commandId": "0152f31b-6c3f-4e5b-a71f-e41810803e45",
+  "planHash": "c0e60b565031f52c329dae49701d74a32846791434f8e1964e2578bc21f185de",
+  "profileHash": "70a6528a8bd721c0924a1e6aea90f199943c28e2162e99daa6f7b1cc7b758646",
+  "providerId": "isr.vehicle.ugv.ugv",
+  "resourceId": "vehicle:ugv",
+  "actor": "operator-authorized-maintenance",
+  "reason": "Explicit source restart receiver reconciliation for user navigation target; preserve prior archive and unknown task results",
+  "createdAt": "2026-11-13T08:13:58.023Z",
+  "oldWriters": [
+    {
+      "id": "996bf5e84827ec1e2bf589e0d413a3a92afcb14193a7d1e8a2c432465dff24d5",
+      "image": "sha256:35319451a9570ac9375f28b659599e7834ea177b6ab3165748cd6a403bd8ba4d",
+      "restartPolicy": "no",
+      "running": false
+    },
+    {
+      "id": "7c4f2e91611d057cd208b1ca1b40101aba0f1a8872249de7a26e9f69b7d35d5d",
+      "image": "sha256:36d18a47a08c29da489aca627853a7e86d79f65250fcc48642e5fb90ee3cb5c4",
+      "restartPolicy": "no",
+      "running": false
+    }
+  ],
+  "retiredTasks": [],
+  "outcome": "legacy_outcome_unknown_writers_stopped"
+}

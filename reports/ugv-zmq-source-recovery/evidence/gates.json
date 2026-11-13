@@ -1,0 +1,70 @@
+[
+  {
+    "command": [
+      "docker",
+      "start",
+      "smpp-v152-planner-test-20261113"
+    ],
+    "exitCode": 0,
+    "log": "postgres-start.log"
+  },
+  {
+    "command": [
+      "pnpm",
+      "exec",
+      "eslint",
+      "packages/vehicle-zmq-observer/src/config.ts",
+      "packages/vehicle-zmq-observer/src/postgres.ts",
+      "tests/ugv-zmq-observer-postgres/archive.test.ts"
+    ],
+    "exitCode": 0,
+    "log": "eslint.log"
+  },
+  {
+    "command": [
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "tests/ugv-zmq-observer/",
+      "tests/ugv-zmq-observer-postgres/archive.test.ts"
+    ],
+    "exitCode": 0,
+    "log": "observer-tests.log"
+  },
+  {
+    "command": [
+      "pnpm",
+      "typecheck"
+    ],
+    "exitCode": 0,
+    "log": "typecheck.log"
+  },
+  {
+    "command": [
+      "pnpm",
+      "build"
+    ],
+    "exitCode": 0,
+    "log": "build.log"
+  },
+  {
+    "command": [
+      "pnpm",
+      "verify:frozen-protocol"
+    ],
+    "exitCode": 0,
+    "log": "frozen-protocol.log"
+  },
+  {
+    "command": [
+      "docker",
+      "stop",
+      "--time",
+      "10",
+      "smpp-v152-planner-test-20261113"
+    ],
+    "exitCode": 0,
+    "log": "postgres-stop.log"
+  }
+]

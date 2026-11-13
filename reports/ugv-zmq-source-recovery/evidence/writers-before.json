@@ -1,0 +1,18 @@
+[
+  {
+    "id": "996bf5e84827ec1e2bf589e0d413a3a92afcb14193a7d1e8a2c432465dff24d5",
+    "name": "/smpp-zmq-site-formal-runtime-1",
+    "image": "sha256:35319451a9570ac9375f28b659599e7834ea177b6ab3165748cd6a403bd8ba4d",
+    "startedAt": "2026-11-13T07:09:57.649253919Z",
+    "running": true,
+    "restart": "unless-stopped"
+  },
+  {
+    "id": "7c4f2e91611d057cd208b1ca1b40101aba0f1a8872249de7a26e9f69b7d35d5d",
+    "name": "/smpp-zmq-site-formal-provider-1",
+    "image": "sha256:36d18a47a08c29da489aca627853a7e86d79f65250fcc48642e5fb90ee3cb5c4",
+    "startedAt": "2026-11-13T07:09:54.249192218Z",
+    "running": true,
+    "restart": "unless-stopped"
+  }
+]

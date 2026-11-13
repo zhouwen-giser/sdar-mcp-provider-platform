@@ -1,0 +1,434 @@
+{
+  "at": "2026-11-13T08:18:10.660Z",
+  "target": {
+    "longitude": 114.04791045,
+    "latitude": 22.50664785
+  },
+  "speedLimitKmh": 60,
+  "obstacleAvoidance": true,
+  "timing": {
+    "start": {
+      "mode": "immediate",
+      "startToleranceMs": 60000
+    },
+    "maxElapsedMs": 300000
+  },
+  "commands": [
+    {
+      "request": {
+        "kind": "tool",
+        "tool": "vehicle_zmq_navigate",
+        "arguments": {
+          "resourceId": "vehicle:ugv",
+          "operation": {
+            "name": "navigation.point",
+            "params": {
+              "speedLimitMps": 16.666666666666668,
+              "obstacleAvoidance": true,
+              "destination": {
+                "longitude": 114.04791045,
+                "latitude": 22.50664785
+              }
+            }
+          }
+        },
+        "timing": {
+          "start": {
+            "mode": "immediate",
+            "startToleranceMs": 60000
+          },
+          "maxElapsedMs": 300000
+        },
+        "commandId": "da5bfdf9-86ee-4e06-8326-2dce6bbd8820",
+        "catalogHash": "f2908c6721cb95277feeda0b57986db6d2d35607a1d07fd3c97d6713eff2c303"
+      },
+      "observedAt": "2026-11-13T08:18:11.792Z"
+    }
+  ],
+  "taskSnapshots": [
+    {
+      "at": "2026-11-13T08:18:12.234Z",
+      "task": {
+        "resultType": "complete",
+        "taskId": "df36da29-11b0-4d89-9a99-44658d19f958",
+        "status": "working",
+        "statusMessage": "ZMQ_SCHEDULED",
+        "createdAt": "2026-11-13T08:18:11.947Z",
+        "lastUpdatedAt": "2026-11-13T08:18:11.947Z",
+        "ttlMs": 259200000,
+        "pollIntervalMs": 2000,
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "runtimeRevision": "1",
+            "substate": "accepted"
+          }
+        }
+      }
+    },
+    {
+      "at": "2026-11-13T08:18:13.249Z",
+      "task": {
+        "resultType": "complete",
+        "taskId": "df36da29-11b0-4d89-9a99-44658d19f958",
+        "status": "working",
+        "statusMessage": "ZMQ_PREPARING",
+        "createdAt": "2026-11-13T08:18:11.947Z",
+        "lastUpdatedAt": "2026-11-13T08:18:13.121Z",
+        "ttlMs": 259201174,
+        "pollIntervalMs": 2000,
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "runtimeRevision": "5",
+            "providerRevision": "4",
+            "substate": "accepted"
+          }
+        }
+      }
+    },
+    {
+      "at": "2026-11-13T08:18:14.473Z",
+      "task": {
+        "resultType": "complete",
+        "taskId": "df36da29-11b0-4d89-9a99-44658d19f958",
+        "status": "working",
+        "statusMessage": "ZMQ_PREPARING",
+        "createdAt": "2026-11-13T08:18:11.947Z",
+        "lastUpdatedAt": "2026-11-13T08:18:13.598Z",
+        "ttlMs": 259201651,
+        "pollIntervalMs": 2000,
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "runtimeRevision": "6",
+            "providerRevision": "4",
+            "substate": "accepted"
+          }
+        }
+      }
+    },
+    {
+      "at": "2026-11-13T08:18:15.484Z",
+      "task": {
+        "resultType": "complete",
+        "taskId": "df36da29-11b0-4d89-9a99-44658d19f958",
+        "status": "working",
+        "statusMessage": "ZMQ_PREPARING",
+        "createdAt": "2026-11-13T08:18:11.947Z",
+        "lastUpdatedAt": "2026-11-13T08:18:15.458Z",
+        "ttlMs": 259203511,
+        "pollIntervalMs": 2000,
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "runtimeRevision": "10",
+            "providerRevision": "7",
+            "substate": "accepted"
+          }
+        }
+      }
+    },
+    {
+      "at": "2026-11-13T08:18:16.503Z",
+      "task": {
+        "resultType": "complete",
+        "taskId": "df36da29-11b0-4d89-9a99-44658d19f958",
+        "status": "working",
+        "statusMessage": "ZMQ_PREPARING",
+        "createdAt": "2026-11-13T08:18:11.947Z",
+        "lastUpdatedAt": "2026-11-13T08:18:15.950Z",
+        "ttlMs": 259204003,
+        "pollIntervalMs": 2000,
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "runtimeRevision": "11",
+            "providerRevision": "7",
+            "substate": "accepted"
+          }
+        }
+      }
+    },
+    {
+      "at": "2026-11-13T08:18:17.514Z",
+      "task": {
+        "resultType": "complete",
+        "taskId": "df36da29-11b0-4d89-9a99-44658d19f958",
+        "status": "working",
+        "statusMessage": "ZMQ_PREPARING",
+        "createdAt": "2026-11-13T08:18:11.947Z",
+        "lastUpdatedAt": "2026-11-13T08:18:17.437Z",
+        "ttlMs": 259205490,
+        "pollIntervalMs": 2000,
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "runtimeRevision": "14",
+            "providerRevision": "7",
+            "substate": "accepted"
+          }
+        }
+      }
+    },
+    {
+      "at": "2026-11-13T08:18:18.539Z",
+      "task": {
+        "resultType": "complete",
+        "taskId": "df36da29-11b0-4d89-9a99-44658d19f958",
+        "status": "working",
+        "statusMessage": "ZMQ_PREPARING",
+        "createdAt": "2026-11-13T08:18:11.947Z",
+        "lastUpdatedAt": "2026-11-13T08:18:18.461Z",
+        "ttlMs": 259206514,
+        "pollIntervalMs": 2000,
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "runtimeRevision": "17",
+            "providerRevision": "10",
+            "substate": "accepted"
+          }
+        }
+      }
+    },
+    {
+      "at": "2026-11-13T08:18:19.558Z",
+      "task": {
+        "resultType": "complete",
+        "taskId": "df36da29-11b0-4d89-9a99-44658d19f958",
+        "status": "working",
+        "statusMessage": "ZMQ_PREPARING",
+        "createdAt": "2026-11-13T08:18:11.947Z",
+        "lastUpdatedAt": "2026-11-13T08:18:19.435Z",
+        "ttlMs": 259207488,
+        "pollIntervalMs": 2000,
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "runtimeRevision": "19",
+            "providerRevision": "10",
+            "substate": "accepted"
+          }
+        }
+      }
+    },
+    {
+      "at": "2026-11-13T08:18:20.586Z",
+      "task": {
+        "resultType": "complete",
+        "taskId": "df36da29-11b0-4d89-9a99-44658d19f958",
+        "status": "working",
+        "statusMessage": "ZMQ_PREPARING",
+        "createdAt": "2026-11-13T08:18:11.947Z",
+        "lastUpdatedAt": "2026-11-13T08:18:20.473Z",
+        "ttlMs": 259208526,
+        "pollIntervalMs": 2000,
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "runtimeRevision": "21",
+            "providerRevision": "10",
+            "substate": "accepted"
+          }
+        }
+      }
+    },
+    {
+      "at": "2026-11-13T08:18:21.604Z",
+      "task": {
+        "resultType": "complete",
+        "taskId": "df36da29-11b0-4d89-9a99-44658d19f958",
+        "status": "completed",
+        "statusMessage": "ZMQ_MODE_ECHO_TIMEOUT",
+        "createdAt": "2026-11-13T08:18:11.947Z",
+        "lastUpdatedAt": "2026-11-13T08:18:21.477Z",
+        "ttlMs": 259209530,
+        "_meta": {
+          "io.sdar/taskExecution": {
+            "profileVersion": "1.0",
+            "runtimeRevision": "23",
+            "providerRevision": "11"
+          }
+        },
+        "result": {
+          "resultType": "complete",
+          "_meta": {
+            "io.sdar/evidence": {
+              "items": [
+                {
+                  "producer": [
+                    "isr.vehicle.ugv.ugv",
+                    "ugv-zmq-provider-adapter"
+                  ],
+                  "evidenceId": "be6a9f2ec2105feeccb24edac017d698bf7babfbc197561d9c32525e15348151",
+                  "observedAt": "2026-11-13T08:18:20.976Z",
+                  "payloadRef": {
+                    "kind": "structured_content",
+                    "jsonPointer": ""
+                  },
+                  "subjectRef": "vehicle:ugv",
+                  "evidenceType": "ugv.zmq.retained_report"
+                }
+              ],
+              "profileVersion": "1.0"
+            }
+          },
+          "content": [
+            {
+              "text": "ZMQ_MODE_ECHO_TIMEOUT",
+              "type": "text"
+            }
+          ],
+          "isError": true,
+          "structuredContent": {
+            "outcome": "business_failure",
+            "occupancy": "released",
+            "retryable": false,
+            "reasonCode": "ZMQ_MODE_ECHO_TIMEOUT",
+            "sourceRefs": [],
+            "completedAt": "2026-11-13T08:18:21.476Z",
+            "nativeReason": null,
+            "nativeTaskId": "2201352421",
+            "nativeOutcome": null,
+            "qualification": "site_control",
+            "schemaVersion": "ugv.zmq-control-result/2",
+            "stopConfirmed": false,
+            "missingEvidence": [
+              "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+              "CHASSIS_INITIAL_MISSION_STATE_NOT_OBSERVED",
+              "CHASSIS_FEEDBACK_UNCORRELATED",
+              "MODE_PUBLICATION_ORDER_UNVERIFIED"
+            ],
+            "runtimeAdmission": "site_runtime"
+          }
+        }
+      }
+    }
+  ],
+  "pageErrors": [],
+  "browserAvailabilityPassed": true,
+  "acceptedCommand": {
+    "commandId": "da5bfdf9-86ee-4e06-8326-2dce6bbd8820",
+    "status": "accepted",
+    "request": {
+      "kind": "tool",
+      "tool": "vehicle_zmq_navigate",
+      "timing": {
+        "start": {
+          "mode": "immediate",
+          "startToleranceMs": 60000
+        },
+        "maxElapsedMs": 300000
+      },
+      "arguments": {
+        "operation": {
+          "name": "navigation.point",
+          "params": {
+            "destination": {
+              "latitude": 22.50664785,
+              "longitude": 114.04791045
+            },
+            "speedLimitMps": 16.666666666666668,
+            "obstacleAvoidance": true
+          }
+        },
+        "resourceId": "vehicle:ugv"
+      },
+      "commandId": "da5bfdf9-86ee-4e06-8326-2dce6bbd8820",
+      "catalogHash": "f2908c6721cb95277feeda0b57986db6d2d35607a1d07fd3c97d6713eff2c303"
+    },
+    "taskId": "df36da29-11b0-4d89-9a99-44658d19f958",
+    "response": {
+      "_meta": {
+        "io.sdar/taskExecution": {
+          "substate": "accepted",
+          "profileVersion": "1.0",
+          "runtimeRevision": "1"
+        }
+      },
+      "ttlMs": 259200000,
+      "status": "working",
+      "taskId": "df36da29-11b0-4d89-9a99-44658d19f958",
+      "createdAt": "2026-11-13T08:18:11.947Z",
+      "resultType": "task",
+      "lastUpdatedAt": "2026-11-13T08:18:11.947Z",
+      "statusMessage": "ZMQ_SCHEDULED",
+      "pollIntervalMs": 2000
+    },
+    "createdAt": "2026-11-13T08:18:11.821Z",
+    "updatedAt": "2026-11-13T08:18:12.185Z"
+  },
+  "final": {
+    "resultType": "complete",
+    "taskId": "df36da29-11b0-4d89-9a99-44658d19f958",
+    "status": "completed",
+    "statusMessage": "ZMQ_MODE_ECHO_TIMEOUT",
+    "createdAt": "2026-11-13T08:18:11.947Z",
+    "lastUpdatedAt": "2026-11-13T08:18:21.477Z",
+    "ttlMs": 259209530,
+    "_meta": {
+      "io.sdar/taskExecution": {
+        "profileVersion": "1.0",
+        "runtimeRevision": "23",
+        "providerRevision": "11"
+      }
+    },
+    "result": {
+      "resultType": "complete",
+      "_meta": {
+        "io.sdar/evidence": {
+          "items": [
+            {
+              "producer": [
+                "isr.vehicle.ugv.ugv",
+                "ugv-zmq-provider-adapter"
+              ],
+              "evidenceId": "be6a9f2ec2105feeccb24edac017d698bf7babfbc197561d9c32525e15348151",
+              "observedAt": "2026-11-13T08:18:20.976Z",
+              "payloadRef": {
+                "kind": "structured_content",
+                "jsonPointer": ""
+              },
+              "subjectRef": "vehicle:ugv",
+              "evidenceType": "ugv.zmq.retained_report"
+            }
+          ],
+          "profileVersion": "1.0"
+        }
+      },
+      "content": [
+        {
+          "text": "ZMQ_MODE_ECHO_TIMEOUT",
+          "type": "text"
+        }
+      ],
+      "isError": true,
+      "structuredContent": {
+        "outcome": "business_failure",
+        "occupancy": "released",
+        "retryable": false,
+        "reasonCode": "ZMQ_MODE_ECHO_TIMEOUT",
+        "sourceRefs": [],
+        "completedAt": "2026-11-13T08:18:21.476Z",
+        "nativeReason": null,
+        "nativeTaskId": "2201352421",
+        "nativeOutcome": null,
+        "qualification": "site_control",
+        "schemaVersion": "ugv.zmq-control-result/2",
+        "stopConfirmed": false,
+        "missingEvidence": [
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_INITIAL_MISSION_STATE_NOT_OBSERVED",
+          "CHASSIS_FEEDBACK_UNCORRELATED",
+          "MODE_PUBLICATION_ORDER_UNVERIFIED"
+        ],
+        "runtimeAdmission": "site_runtime"
+      }
+    }
+  },
+  "commandPosts": 1,
+  "status": "terminal_result_recorded",
+  "endedAt": "2026-11-13T08:18:21.605Z",
+  "authorizationBasis": "user_requested_current_target_navigation_test"
+}

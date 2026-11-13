@@ -1,0 +1,14 @@
+{
+  "at": "2026-11-13T08:13:59.317Z",
+  "previous": {
+    "session_id": "820fe511-bd30-4db2-9734-a763dc9d34eb",
+    "partition_hash": "9852168d7de308dd7c1baf121807742731ffe568158807ec605f55eb205d5b50",
+    "status": "closed",
+    "started_at": "2026-11-13T07:09:55.528Z",
+    "ended_at": "2026-11-13T08:13:57.800Z",
+    "last_ordinal": "129188",
+    "head_hash": "c72b1cbe71427ee70ed459375f6a4dd243671d52ac13906b991d1f83481edc96"
+  },
+  "sourceProducerEpochAttested": false,
+  "action": "source_restart_operator_reconciliation_preserve_raw_archive"
+}

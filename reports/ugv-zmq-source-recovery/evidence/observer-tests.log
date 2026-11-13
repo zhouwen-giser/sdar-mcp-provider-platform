@@ -1,0 +1,9 @@
+
+ RUN  v4.1.10 /home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform
+
+
+ Test Files  3 passed (3)
+      Tests  38 passed (38)
+   Start at  16:05:58
+   Duration  11.10s (transform 1.39s, setup 0ms, import 2.19s, tests 8.35s, environment 0ms)
+

@@ -1,0 +1,37 @@
+[
+  {
+    "privateEvidencePath": "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/inspection-before.json",
+    "bytes": 39097,
+    "sha256": "adac0d279a95d0a57323eb25fb5dc5dcb5fb0368e24bbf8326160c5fc897dd50"
+  },
+  {
+    "privateEvidencePath": "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/inspection-precutover.json",
+    "bytes": 39099,
+    "sha256": "9e6b93c5cc1a146a8c586aea1fa5a3f539610fab34eefd78380003d76f72afd8"
+  },
+  {
+    "privateEvidencePath": "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/inspection-after.json",
+    "bytes": 28744,
+    "sha256": "91c4e89ab567791fe9d944e3b63bf582be888d898c9734165421bc8a036f8f43"
+  },
+  {
+    "privateEvidencePath": "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/inspection-post-test.json",
+    "bytes": 28746,
+    "sha256": "a8ecc5fad4e57b9b6626e216cef4f66c958fba4d9626526f43d044a652b9a6ae"
+  },
+  {
+    "privateEvidencePath": "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/navigation-execution.json",
+    "bytes": 8042,
+    "sha256": "7a4b97984fdb4916ed95aac6cbd4c215b94b8e0c693f76551ad710fd2316d395"
+  },
+  {
+    "privateEvidencePath": "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/navigation-test.json",
+    "bytes": 13044,
+    "sha256": "44898ecac28142a129a32232927abb9e0dd97fc9a59421e32a6a863898d347ff"
+  },
+  {
+    "privateEvidencePath": "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/boundary-plan.json",
+    "bytes": 794,
+    "sha256": "266e19818b1ba9ec9221670d2bb1bcb54b37f907bf21e4e392fffd90dc2153a6"
+  }
+]

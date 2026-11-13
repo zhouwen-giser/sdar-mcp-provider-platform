@@ -1,0 +1,27 @@
+{
+  "at": "2026-11-13T08:27:04.008Z",
+  "commands": [
+    {
+      "command_id": "da5bfdf9-86ee-4e06-8326-2dce6bbd8820",
+      "status": "accepted",
+      "task_id": "df36da29-11b0-4d89-9a99-44658d19f958",
+      "request_hash": "d74e084733157892fa2761a47119eb85fb4fddbbd7e3a495f7a31bb1f3055a61"
+    }
+  ],
+  "audit": [
+    {
+      "actor": "operator",
+      "action": "command.created",
+      "command_id": "da5bfdf9-86ee-4e06-8326-2dce6bbd8820",
+      "reason": null,
+      "occurred_at": "2026-11-13T08:18:11.822Z"
+    },
+    {
+      "actor": "operator",
+      "action": "command.accepted",
+      "command_id": "da5bfdf9-86ee-4e06-8326-2dce6bbd8820",
+      "reason": null,
+      "occurred_at": "2026-11-13T08:18:12.191Z"
+    }
+  ]
+}

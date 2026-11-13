@@ -1,0 +1,187 @@
+{
+  "at": "2026-11-13T08:16:44.916Z",
+  "tools": 15,
+  "catalogProfile": "zmq_v1_5_2_site_control_15",
+  "anonymous": true,
+  "partitionHash": "ae9a6135bc73ebaa9d9c7edf899383c89bdd566a4710d507335c46ffe79a5df9",
+  "sessionId": "41ed7fbf-7618-4182-b17a-aa46368d8343",
+  "archive": {
+    "status": "running",
+    "pendingRecords": 3,
+    "pendingBytes": 4056,
+    "committedEvents": 4751,
+    "receivedMessages": 4747,
+    "committedReceptions": 4744,
+    "unconfirmedReceptions": 0,
+    "locallyDiscardedMessages": 0,
+    "failureCode": null,
+    "failureRecorded": null
+  },
+  "recoveryGap": {
+    "schemaVersion": "ugv.zmq-observation-event/2.0",
+    "eventId": "6684620d-1c83-4a2e-ac1d-bbb8e04a7b4f",
+    "receivedAt": "2026-11-13T08:14:04.589Z",
+    "monotonicNs": "12459254361625535",
+    "clockId": "recovery:41ed7fbf-7618-4182-b17a-aa46368d8343",
+    "type": "gap",
+    "component": null,
+    "code": "RECEIVER_SESSION_STARTED_AFTER_SOURCE_RESTART_RECONCILIATION",
+    "locallyDiscardedMessages": null,
+    "sourceLossCount": null,
+    "recovery": {
+      "predecessorSessionId": "820fe511-bd30-4db2-9734-a763dc9d34eb",
+      "durableLastOrdinal": "129188",
+      "durableHeadHash": "c72b1cbe71427ee70ed459375f6a4dd243671d52ac13906b991d1f83481edc96",
+      "predecessorStatus": "closed",
+      "predecessorPartitionHash": "9852168d7de308dd7c1baf121807742731ffe568158807ec605f55eb205d5b50",
+      "failureCode": null,
+      "persistenceBoundary": "database_tail_verified_no_batch_replay"
+    }
+  },
+  "sealedPredecessor": {
+    "session_id": "820fe511-bd30-4db2-9734-a763dc9d34eb",
+    "status": "closed",
+    "last_ordinal": "129188",
+    "head_hash": "c72b1cbe71427ee70ed459375f6a4dd243671d52ac13906b991d1f83481edc96"
+  },
+  "sourceProducerEpoch": null,
+  "writerLocks": [
+    {
+      "key": "0b8d1b35779b68ec9e1e391d5157d16156aab1968492b50e6c8bac85fbfbf5db",
+      "heldByCurrentWriter": true
+    },
+    {
+      "key": "a8392844c25b934254b7ff763078d9ac3da1584e9318f2409ea3ae9417b2f578",
+      "heldByCurrentWriter": true
+    },
+    {
+      "key": "c224c4538a5d1d06430f3960fbe8454312ad41525fa2c1079bea7980ba05ee1b",
+      "heldByCurrentWriter": true
+    }
+  ],
+  "originalTaskReadableUnchanged": true,
+  "originalTaskId": "2c9d0e50-b9d2-408f-aa95-d5af2532cc02",
+  "localization": {
+    "receivedAt": "2026-11-13T08:16:44.115Z",
+    "receiptFresh": true,
+    "timeUs": "2490713923",
+    "position": {
+      "longitude": 114.04776722767852,
+      "latitude": 22.505954788642917,
+      "altitude": 500.1532380701974,
+      "altitudeDatum": "unconfirmed",
+      "crs": "OGC:CRS84"
+    }
+  },
+  "preview": {
+    "schemaVersion": "ugv.zmq-route-preview/3",
+    "previewId": "0852c575-29ec-4bc0-b191-2c9c007b814f",
+    "resourceId": "vehicle:ugv",
+    "adoption": "preview_only",
+    "correlation": "request_id_epoch_context_and_geometry",
+    "createdAt": "2026-11-13T08:16:44.904Z",
+    "requestHash": "9d5646fb17725bc96f57e364f8f6c9cc9b40343e2f07a37228ccf9c41d8ed71f",
+    "routeSource": "isr.dashboard.road-planner/v2",
+    "sourceRecordId": "513b19cc2edc5f544d679076e129b1fec38e96e3b010cab7938ebb4fe94d2f11",
+    "sourceMessageSha256": "383a6e3fbe823e750aad192f7ea2e404e965b4924b5b98a1a02e1a6322a55970",
+    "sourceMessage": "42[\"route_candidates\",{\"ok\":true,\"candidates\":[{\"id\":\"straight\",\"label\":\"\\u4e3b\\u7ebf\\u76f4\\u7ebf\",\"color\":\"#00e5ff\",\"frame_id\":\"map\",\"points\":[[-46.828887702629686,-97.0922888514151],[-35.996882327997405,-96.43191619747914],[-33.41013017230802,-94.27327262873928],[-31.644545210841592,-90.11435301546032],[-31.920611216566794,-60.89627449551591],[-32.196677222291996,-31.6781959755715],[-33.94757114421193,-26.364587526064664],[-32.0812541959517,-23.303581954841466]],\"length_m\":86.7,\"num_points\":8},{\"id\":\"undirected\",\"label\":\"\\u53ef\\u9006\\u5411\\u6700\\u77ed\",\"color\":\"#ff5da2\",\"frame_id\":\"map\",\"points\":[[-46.828887702629686,-97.0922888514151],[-35.996882327997405,-96.43191619747914],[-33.41013017230802,-94.27327262873928],[-31.644545210841592,-90.11435301546032],[-31.92061121656679,-60.89627449551591],[-32.19667722229199,-31.6781959755715],[-33.83104381685746,-26.53030462617465],[-33.801509667420696,-23.324977923440382],[-32.0812541959517,-23.303581954841466]],\"length_m\":87.7,\"num_points\":9}],\"error\":null,\"target\":\"ugv\",\"simulation_epoch\":\"1794555793256633993\",\"planning_request_id\":\"daad7ede-119e-43f0-a2e1-55cb9101ee7e\"}]",
+    "transform": {
+      "policy": "scene_enu_wgs84_v1",
+      "sha256": "88f00905d6dd0e697b102e8e9d086d4ae6d52c7f651641bb51d8f301b3df8496",
+      "reference": {
+        "sceneId": "yuan_qu",
+        "mapId": "yuan_qu",
+        "sceneSha256": "0cec5045348e5863475c24a215a2d54933cdff99161f8baaa3eba86cc97cca51",
+        "latitude": 22.506858333333,
+        "longitude": 114.048222222222,
+        "altitude": 500
+      },
+      "heightPolicy": "scene_reference_plane_not_measured"
+    },
+    "start": {
+      "longitude": 114.04776722767852,
+      "latitude": 22.505954788642917
+    },
+    "waypoints": [
+      {
+        "longitude": 114.04776713049081,
+        "latitude": 22.50598162039016
+      },
+      {
+        "longitude": 114.04787239789341,
+        "latitude": 22.50598758360722
+      },
+      {
+        "longitude": 114.04789753638153,
+        "latitude": 22.506007075521552
+      },
+      {
+        "longitude": 114.04791469458054,
+        "latitude": 22.50604462927036
+      },
+      {
+        "longitude": 114.04791201113069,
+        "latitude": 22.506308459172782
+      },
+      {
+        "longitude": 114.04790932767065,
+        "latitude": 22.506572289066547
+      },
+      {
+        "longitude": 114.04789231197587,
+        "latitude": 22.506620269215567
+      },
+      {
+        "longitude": 114.04791044920806,
+        "latitude": 22.506647909151784
+      }
+    ],
+    "requestedWaypoints": [
+      {
+        "longitude": 114.04791045,
+        "latitude": 22.50664785
+      }
+    ],
+    "sourceFreshness": "context_and_scene_verified",
+    "completeSpatialEvidence": false,
+    "planningRequestId": "daad7ede-119e-43f0-a2e1-55cb9101ee7e",
+    "context": {
+      "entity_id": "ugv",
+      "simulation_epoch": "1794555793256633993",
+      "controller_instance_id": "2251915442:1090047516",
+      "mission_id": -1,
+      "mission_request_id": ""
+    },
+    "contextReceivedAt": "2026-11-13T08:16:44.692Z",
+    "contextMessageSha256": "b3b12cbedfb44d47897d106d71e91e755d4a07d124f9125fa7e941cab83b1555",
+    "sceneVerificationSha256": "66d343972281c94222d74e81e8960ef53d68bee86aed1c6ba43c027f3851ecdf",
+    "plannerAdmission": {
+      "policy": "runtime_scene_and_entity_v1",
+      "observedAt": "2026-11-13T08:16:44.462Z",
+      "scenePhase": "ready",
+      "runtimePhase": "RUNNING",
+      "ownerId": "30057507135c4609903027778eccdc67",
+      "profileRunId": "655c5c7898ef452aae410a13d5509cde",
+      "simulationEpoch": "1794555793256633993",
+      "revision": "6",
+      "readyControlGroups": [
+        "adjudication",
+        "eo:ugv",
+        "motion:ugv",
+        "scene"
+      ],
+      "requiredControlGroups": [
+        "scene",
+        "motion:ugv"
+      ],
+      "acceptingCommands": true,
+      "degraded": false,
+      "faultComponent": "",
+      "reason": "",
+      "sceneError": "",
+      "sourceSha256": "583dd15808c57ee501e365175e8216920f5dd87f9b76c86abbbdfaa87efbd306"
+    }
+  },
+  "physicalControlActions": 0,
+  "exitCode": 0
+}

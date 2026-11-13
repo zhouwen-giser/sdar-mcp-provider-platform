@@ -15,3 +15,7 @@
 ## 15:50 面板结果关联修复
 
 用户 15:27 的 8 点预览已成功采用为独立导航 Task，但任务在模式回显阶段以 `ZMQ_MODE_ECHO_TIMEOUT` 失败，未下发路线或 START。Console 已单独更新至 `cf5b0ae`，展示关联任务的真实结果并防止重复提交；Provider/Runtime 未重启，原任务与账本未变。15:52 另发现上游运行纪元改变后的定位时间回退，保持隔离。模式接收端原因、定位恢复及现场导航仍未通过，详见 [排障证据](../ugv-preview-navigation/evidence/REPORT.md)。
+
+## 16:14 接收会话处置与复测
+
+按受审计写端交接建立源重启接收边界，Provider 更新为 `1a014d4`，Runtime/Console 沿用原镜像重建，15 项目录保持不变。旧接收会话 clean-close 并保留持久尾部，新定位已新鲜，目标坐标准入及 8 点预览通过，旧 Task 与三端点锁复核通过。16:18 按本次用户目标仅创建一个单点导航 Task，仍因 `ZMQ_MODE_ECHO_TIMEOUT` 失败，未发送路径或 START；现场导航尚未通过。接收端日志待提供，详见 [本轮报告](../ugv-zmq-source-recovery/evidence/REPORT.md)。

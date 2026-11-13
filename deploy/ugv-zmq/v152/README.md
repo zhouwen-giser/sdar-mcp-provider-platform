@@ -27,4 +27,12 @@ docker compose --env-file /home/sz/.smpp-debug/zmq-planner-scene-20261113/formal
 
 实施回退前先关闭新任务准入并核实空闲，停止当前 Runtime/Provider；记录当前已关闭接收会话的持久边界，并更新只读配置的 `recoveryPredecessor`。再使用同一 Compose、只读 env 文件启动三个服务。保留原账号、卷、绑定、审计及轨迹目录，不恢复旧 MQTT 写端。
 
+## 2026-11-13 16:14 源重启处置
+
+当前 Provider 为源码 `1a014d46ed94f6dd6845dc28201678f22fc3c387`、镜像 `sha256:a33f44c2cdeb789a27c71578e9254426f631342bd6d4432cc6bdfb8a6ed185b2`。Runtime 镜像未变，Console 采用此前 `cf5b0ae` 镜像。实际私有配置位于 `/home/sz/.smpp-debug/zmq-navigation-stale-20261113/formal/site-images.env`；原 canonical env 已同步指向新配置和交接凭据，不应重新运行旧切换脚本。
+
+底盘源时间回退不会自动放行。维护时先核实空闲、未确认命令、车辆静止及已确认的源变化，经既有 plan/apply/verify 停止旧写端并取得已关闭前驱尾部。在新的唯一诊断分区配置 `recoveryPredecessor.partitionHash/sessionId` 及 `boundaryReason=source_restart_operator_reconciliation`，以新镜像启动；该分支严格要求相同 profile、合同及完整组件配置。保留旧归档、断档记录和来源未认证标记。
+
+此新增可选配置不能交给不支持它的旧镜像解析。回退只读时使用支持该配置的新镜像，先封存当前接收会话并按上述流程建立新的只读接收边界；不要覆盖运行会话或恢复旧 MQTT 写端。本轮软件验证、正式恢复和实际导航失败分别记账，见 [报告](../../../reports/ugv-zmq-source-recovery/evidence/REPORT.md)。
+
 只读回退配置已生成，尚未执行。临时只读候选与独立数据库的启动验证见验收报告。旧 1.5.1 部署包和合同按历史版本保留，本修复以固定源码、镜像及本记录为交付依据。

@@ -1,0 +1,259 @@
+{
+  "schemaVersion": "ugv.zmq-source-restart-reconciliation/1",
+  "startedAt": "2026-11-13T08:13:52.040642+00:00",
+  "steps": [
+    {
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/inspect-precutover.mts"
+      ],
+      "exitCode": 0,
+      "log": "precutover-inspection.log",
+      "sha256": "a55dddc9c015786bea9674c895ece133089379a7fa099fa195c7b3ecea039830"
+    },
+    {
+      "command": [
+        "node",
+        "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/console-preflight.mjs"
+      ],
+      "exitCode": 0,
+      "log": "console-inflight-check.log",
+      "sha256": "1cbb6d680a650c85278f1d98eca338d5f2c7c15b6989930b9c176bc3215f5522"
+    },
+    {
+      "command": [
+        "docker",
+        "update",
+        "--restart=no",
+        "5ef567b750bbb5d6d26ba21a5e2f1fb0eff9635aa5b35273b4e6ff85f8e7db83"
+      ],
+      "exitCode": 0,
+      "log": "console-fence.log",
+      "sha256": "409cdb01e5c75cc00cb45b7858d5c22a85107bbc0fe3eddee3b3d180ec687dfe"
+    },
+    {
+      "command": [
+        "docker",
+        "stop",
+        "--time",
+        "20",
+        "5ef567b750bbb5d6d26ba21a5e2f1fb0eff9635aa5b35273b4e6ff85f8e7db83"
+      ],
+      "exitCode": 0,
+      "log": "console-stop.log",
+      "sha256": "fb2c662474ab329f8b780cffec945e2ed6fe76726f6381ccb10ee6d74a9a5649"
+    },
+    {
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/ugv-zmq/site-control-handoff.ts",
+        "plan",
+        "--config",
+        "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/handoff-config.json",
+        "--plan",
+        "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/handoff-plan-final.json"
+      ],
+      "exitCode": 0,
+      "log": "handoff-plan.log",
+      "sha256": "842cb26012fa4b609ef0e8b386c08e240944ee47e359c3892a80a174105f8deb"
+    },
+    {
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/ugv-zmq/site-control-handoff.ts",
+        "apply",
+        "--config",
+        "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/handoff-config.json",
+        "--plan",
+        "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/handoff-plan-final.json",
+        "--grant",
+        "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/handoff-grant.json",
+        "--command-id",
+        "0152f31b-6c3f-4e5b-a71f-e41810803e45",
+        "--actor",
+        "operator-authorized-maintenance",
+        "--reason",
+        "Explicit source restart receiver reconciliation for user navigation target; preserve prior archive and unknown task results",
+        "--plan-hash",
+        "c0e60b565031f52c329dae49701d74a32846791434f8e1964e2578bc21f185de"
+      ],
+      "exitCode": 0,
+      "log": "handoff-apply.log",
+      "sha256": "9082a45418ebf3efc35888fd871ebfc961ed639a07fdd777370b3b217bfb97a8"
+    },
+    {
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/ugv-zmq/site-control-handoff.ts",
+        "verify",
+        "--config",
+        "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/handoff-config.json",
+        "--grant",
+        "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/handoff-grant.json"
+      ],
+      "exitCode": 0,
+      "log": "handoff-verify.log",
+      "sha256": "b707475f76bfac80b3bd3520caf3fa85d795205d4407bc00e6846c22e6d0feaf"
+    },
+    {
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/receiver-tail.mts"
+      ],
+      "exitCode": 0,
+      "log": "receiver-tail.log",
+      "sha256": "db80ebc57a934ad7a30ff8b32daff53ea4cfb08c126d440a35a3ffd85fa07e3c"
+    },
+    {
+      "command": [
+        "docker",
+        "compose",
+        "--env-file",
+        "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/formal/site-images.env",
+        "-p",
+        "smpp-zmq-site-formal",
+        "-f",
+        "deploy/ugv-zmq/site-control/compose.formal.yaml",
+        "-f",
+        "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/pms-readonly-override.json",
+        "-f",
+        "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/resources.json",
+        "config",
+        "--quiet"
+      ],
+      "exitCode": 0,
+      "log": "compose-check.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "docker",
+        "compose",
+        "--env-file",
+        "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/formal/site-images.env",
+        "-p",
+        "smpp-zmq-site-formal",
+        "-f",
+        "deploy/ugv-zmq/site-control/compose.formal.yaml",
+        "-f",
+        "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/pms-readonly-override.json",
+        "-f",
+        "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/resources.json",
+        "up",
+        "-d",
+        "--no-deps",
+        "--force-recreate",
+        "--no-build",
+        "--pull",
+        "never",
+        "provider"
+      ],
+      "exitCode": 0,
+      "log": "provider-start.log",
+      "sha256": "0874ad26c5a48cc6d5ed67483079e9d0ee0b6a2e451878670f5bc0ca9e5ef23e"
+    },
+    {
+      "command": [
+        "docker",
+        "compose",
+        "--env-file",
+        "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/formal/site-images.env",
+        "-p",
+        "smpp-zmq-site-formal",
+        "-f",
+        "deploy/ugv-zmq/site-control/compose.formal.yaml",
+        "-f",
+        "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/pms-readonly-override.json",
+        "-f",
+        "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/resources.json",
+        "up",
+        "-d",
+        "--no-deps",
+        "--force-recreate",
+        "--no-build",
+        "--pull",
+        "never",
+        "runtime"
+      ],
+      "exitCode": 0,
+      "log": "runtime-start.log",
+      "sha256": "e6213a8db3feb2da34bd1db919f4fab88ebbe8a3a390abc8a54bdb83a81b8a50"
+    },
+    {
+      "command": [
+        "docker",
+        "compose",
+        "--env-file",
+        "/home/sz/.smpp-debug/zmq-navigation-stale-20261113/formal/site-images.env",
+        "-p",
+        "smpp-zmq-site-formal",
+        "-f",
+        "deploy/ugv-zmq/site-control/compose.formal.yaml",
+        "-f",
+        "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/pms-readonly-override.json",
+        "-f",
+        "/home/sz/.smpp-debug/zmq-v151-formal-20261113/formal/resources.json",
+        "up",
+        "-d",
+        "--no-deps",
+        "--force-recreate",
+        "--no-build",
+        "--pull",
+        "never",
+        "console"
+      ],
+      "exitCode": 0,
+      "log": "console-start.log",
+      "sha256": "2fefbdc8ad52e8ed17314035206d8d2d1f3279493ba434b646d44514a757a0ee"
+    }
+  ],
+  "deviceCommands": 0,
+  "sourceProducerEpochAttested": false,
+  "historyDeleted": false,
+  "source": "1a014d46ed94f6dd6845dc28201678f22fc3c387",
+  "providerImage": "sha256:a33f44c2cdeb789a27c71578e9254426f631342bd6d4432cc6bdfb8a6ed185b2",
+  "consoleBefore": {
+    "id": "5ef567b750bbb5d6d26ba21a5e2f1fb0eff9635aa5b35273b4e6ff85f8e7db83",
+    "image": "sha256:59f7de7585b01585a0afa9793e0af8425174896741e8a8d916c4a10244d15f91"
+  },
+  "handoffCommandId": "0152f31b-6c3f-4e5b-a71f-e41810803e45",
+  "containersAfter": [
+    {
+      "id": "1e7cd89010c540b5e5e3f2ce3fda8504bce1c0159d80acefb24b445bd50e60f4",
+      "name": "/smpp-zmq-site-formal-provider-1",
+      "image": "sha256:a33f44c2cdeb789a27c71578e9254426f631342bd6d4432cc6bdfb8a6ed185b2",
+      "startedAt": "2026-11-13T08:14:00.574440776Z",
+      "oomKilled": false,
+      "restarts": 0
+    },
+    {
+      "id": "e9fb53e98d3099f5335e5fe7d12ec1c831023057f7d36bbb53433677321591f2",
+      "name": "/smpp-zmq-site-formal-runtime-1",
+      "image": "sha256:35319451a9570ac9375f28b659599e7834ea177b6ab3165748cd6a403bd8ba4d",
+      "startedAt": "2026-11-13T08:14:06.965278981Z",
+      "oomKilled": false,
+      "restarts": 0
+    },
+    {
+      "id": "e4c4112d4178a7e7bccca4950e11ed916bb9516a43bd30323f7680deb9e71df7",
+      "name": "/smpp-zmq-site-formal-console-1",
+      "image": "sha256:59f7de7585b01585a0afa9793e0af8425174896741e8a8d916c4a10244d15f91",
+      "startedAt": "2026-11-13T08:14:13.030139954Z",
+      "oomKilled": false,
+      "restarts": 0
+    }
+  ],
+  "status": "recovered_pending_freshness_acceptance",
+  "endedAt": "2026-11-13T08:14:13.795666+00:00",
+  "retiredTasks": []
+}
