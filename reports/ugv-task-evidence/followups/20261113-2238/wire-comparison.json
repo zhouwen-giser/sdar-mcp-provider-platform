@@ -1,0 +1,77 @@
+{
+  "at": "2026-11-13T14:42:06.621Z",
+  "taskId": "1da1cf4f-ecae-493d-a97b-ce4673ac71e6",
+  "commands": [
+    {
+      "sha256": "9fd895c7f16ac006c5383817727a58f4868b0b65aaf117ea642ab7e6c92865da",
+      "topic": "ad_remote_command",
+      "messageId": 1,
+      "sender": "0",
+      "target": "1",
+      "headerLength": 8,
+      "wirePayloadBytes": 8,
+      "businessPayloadBytes": 4,
+      "prefixLength": 4,
+      "wireCrcValid": true,
+      "businessCrcValid": false,
+      "dispatchAt": "2026-11-13T14:38:38.361Z",
+      "frameCount": 1,
+      "sameBytesAsPreviouslyReferenceDecoded": true
+    },
+    {
+      "sha256": "9fd895c7f16ac006c5383817727a58f4868b0b65aaf117ea642ab7e6c92865da",
+      "topic": "ad_remote_command",
+      "messageId": 1,
+      "sender": "0",
+      "target": "1",
+      "headerLength": 8,
+      "wirePayloadBytes": 8,
+      "businessPayloadBytes": 4,
+      "prefixLength": 4,
+      "wireCrcValid": true,
+      "businessCrcValid": false,
+      "dispatchAt": "2026-11-13T14:38:41.387Z",
+      "frameCount": 1,
+      "sameBytesAsPreviouslyReferenceDecoded": true
+    },
+    {
+      "sha256": "9fd895c7f16ac006c5383817727a58f4868b0b65aaf117ea642ab7e6c92865da",
+      "topic": "ad_remote_command",
+      "messageId": 1,
+      "sender": "0",
+      "target": "1",
+      "headerLength": 8,
+      "wirePayloadBytes": 8,
+      "businessPayloadBytes": 4,
+      "prefixLength": 4,
+      "wireCrcValid": true,
+      "businessCrcValid": false,
+      "dispatchAt": "2026-11-13T14:38:44.395Z",
+      "frameCount": 1,
+      "sameBytesAsPreviouslyReferenceDecoded": true
+    }
+  ],
+  "sampleReceivedSystemState": {
+    "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7",
+    "topic": "ipc_message",
+    "messageId": 268435457,
+    "sender": "1",
+    "target": "0",
+    "headerLength": 16,
+    "wirePayloadBytes": 20,
+    "businessPayloadBytes": 16,
+    "prefixLength": 16,
+    "wireCrcValid": false,
+    "businessCrcValid": true,
+    "archiveOrdinal": "684592",
+    "observedMode": 0
+  },
+  "receivedStates": 30,
+  "receivedModes": [
+    0
+  ],
+  "allStatesValidAndProjectable": true,
+  "commandReceiverFormatAttested": false,
+  "protocolFallbackPerformed": false,
+  "physicalControlActionsDuringInvestigation": 0
+}

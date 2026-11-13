@@ -1,0 +1,21 @@
+{
+  "at": "2026-11-13T14:45:35.008Z",
+  "endpoint": "tcp://192.168.2.63:10001",
+  "subscriptions": [
+    [
+      {
+        "bytes": 19,
+        "subscribe": true,
+        "filter": "ad_remote_command:"
+      }
+    ],
+    [
+      {
+        "bytes": 11,
+        "subscribe": true,
+        "filter": "call_task:"
+      }
+    ]
+  ],
+  "applicationFramesSent": 0
+}

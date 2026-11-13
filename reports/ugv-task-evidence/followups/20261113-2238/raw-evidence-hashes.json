@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "path": "/home/sz/.smpp-debug/zmq-mode-gate-20261113/archive-window.json",
+      "bytes": 193773,
+      "sha256": "8d4fc18c5525a194bd2dbe840d25faa6ede6baa853783f6a27c8c70a28ca28e1"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-mode-gate-20261113/archive-window.mts",
+      "bytes": 2215,
+      "sha256": "6d746f8a68be0d72d14b401225d6a27a2e788bd4cc03eaa06a1489c547e9ebad"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-mode-gate-20261113/command-tcp.txt",
+      "bytes": 526,
+      "sha256": "5b9f464016759de942697c2a71dcaa607a653cfd479c30a27a65aeb54fe3bdeb"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-mode-gate-20261113/inspect-tasks.mts",
+      "bytes": 2714,
+      "sha256": "fe0ecb2383e3a4b4f1e5ef350e90e140f78943bad3f8a54b26c7fd7b01298498"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-mode-gate-20261113/read-records.mjs",
+      "bytes": 2030,
+      "sha256": "7898973df73692229b85b74b6947e32e38c2484cabd44fe8c9b934b3b2248605"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-mode-gate-20261113/records.json",
+      "bytes": 10762,
+      "sha256": "398c80c1ffce9c81ee35d26b2e98c4e8e9cc553fd437d14842feb9c916b87ffa"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-mode-gate-20261113/records.log",
+      "bytes": 2138,
+      "sha256": "9d34495bae480a02d7f1ce3842d1d95db569f4b6e6aff55fd8c7cc39812d3e22"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-mode-gate-20261113/subscription-probe.json",
+      "bytes": 360,
+      "sha256": "7aa11dd896f3640e54ef1e9e30bad56397901bd66cc2c037ccd1c447d3f792d1"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-mode-gate-20261113/subscription-probe.mjs",
+      "bytes": 895,
+      "sha256": "f6154158373491ec9bc32613f9146d9ca2eb88a7a492c4bdbaca6927f6370b94"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-mode-gate-20261113/tasks.json",
+      "bytes": 31055,
+      "sha256": "5a3cb74833a0911716e019b2644c179245f2a4614092663797f6a691b3fff7e2"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-mode-gate-20261113/tasks.log",
+      "bytes": 3365,
+      "sha256": "d42f3c065827d0404b086b730253ba0bdd3be84292605effa705090be4c28848"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-mode-gate-20261113/wire-comparison.json",
+      "bytes": 2249,
+      "sha256": "cff6bdd0fc9f715fb9759d31ee72d4bafffe4888ad86d8e26e4f050e2bc56b77"
+    }
+  ]
+}

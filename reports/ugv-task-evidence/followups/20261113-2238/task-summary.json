@@ -1,0 +1,155 @@
+{
+  "observedAt": "2026-11-13T14:42:06.621Z",
+  "preview": {
+    "commandId": "4cac64bb-df57-4f55-bddf-8913332b8abf",
+    "createdAt": "2026-11-13T14:38:35.248Z",
+    "sourceRecordId": "62010ff5d271f08efa21e1a994f098d196473af3a48f90e7228bfe4e941a9ece",
+    "mapId": "yuan_qu",
+    "waypointCount": 8,
+    "adoption": "preview_only"
+  },
+  "navigation": {
+    "commandId": "cad799e2-889c-4072-9b3b-328d9a3a5e50",
+    "taskId": "1da1cf4f-ecae-493d-a97b-ce4673ac71e6",
+    "arguments": {
+      "operation": {
+        "name": "navigation.route",
+        "params": {
+          "waypoints": [
+            {
+              "latitude": 22.50598162039016,
+              "longitude": 114.04776713049081
+            },
+            {
+              "latitude": 22.50598758360722,
+              "longitude": 114.04787239789341
+            },
+            {
+              "latitude": 22.506007075521552,
+              "longitude": 114.04789753638153
+            },
+            {
+              "latitude": 22.50604462927036,
+              "longitude": 114.04791469458054
+            },
+            {
+              "latitude": 22.506308459172782,
+              "longitude": 114.04791201113069
+            },
+            {
+              "latitude": 22.506572289066547,
+              "longitude": 114.04790932767065
+            },
+            {
+              "latitude": 22.506620269215567,
+              "longitude": 114.04789231197587
+            },
+            {
+              "latitude": 22.506647909151784,
+              "longitude": 114.04791044920806
+            }
+          ],
+          "speedLimitMps": 16.666666666666668,
+          "obstacleAvoidance": true
+        }
+      },
+      "resourceId": "vehicle:ugv"
+    },
+    "createdAt": "2026-11-13T14:38:38.354Z",
+    "completedAt": "2026-11-13T14:38:47.814Z",
+    "state": "completed",
+    "isError": true,
+    "result": {
+      "outcome": "business_failure",
+      "occupancy": "released",
+      "retryable": false,
+      "reasonCode": "ZMQ_MODE_ECHO_TIMEOUT",
+      "sourceRefs": [],
+      "completedAt": "2026-11-13T14:38:47.813Z",
+      "nativeReason": null,
+      "nativeTaskId": "3652084443",
+      "nativeOutcome": null,
+      "qualification": "site_control",
+      "schemaVersion": "ugv.zmq-control-result/2",
+      "stopConfirmed": false,
+      "missingEvidence": [
+        "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+        "CHASSIS_INITIAL_MISSION_STATE_NOT_OBSERVED",
+        "CHASSIS_FEEDBACK_UNCORRELATED",
+        "MODE_PUBLICATION_ORDER_UNVERIFIED"
+      ],
+      "runtimeAdmission": "site_runtime"
+    },
+    "executionRevision": 11,
+    "stage": "terminal",
+    "commands": [
+      {
+        "action": "mode",
+        "createdAt": "2026-11-13T14:38:38.353Z",
+        "dispatchAt": "2026-11-13T14:38:38.361Z",
+        "completedAt": "2026-11-13T14:38:38.369Z",
+        "status": "sent_unconfirmed",
+        "diagnostic": {
+          "code": "ZMQ_PUBLISH_QUEUED_UNCONFIRMED",
+          "stage": "complete",
+          "response": null,
+          "elapsedMs": 0.181,
+          "schemaVersion": "ugv.zmq-command-diagnostic/1",
+          "sendAttempted": true,
+          "sendCompleted": true,
+          "sendTimeoutMs": 1000,
+          "validationCode": null,
+          "nativeErrorCode": null,
+          "receiveTimeoutMs": 2000,
+          "sendCompletedAfterMs": 0.163,
+          "receiveCompletedAfterMs": null
+        }
+      },
+      {
+        "action": "mode",
+        "createdAt": "2026-11-13T14:38:41.377Z",
+        "dispatchAt": "2026-11-13T14:38:41.387Z",
+        "completedAt": "2026-11-13T14:38:41.397Z",
+        "status": "sent_unconfirmed",
+        "diagnostic": {
+          "code": "ZMQ_PUBLISH_QUEUED_UNCONFIRMED",
+          "stage": "complete",
+          "response": null,
+          "elapsedMs": 0.124,
+          "schemaVersion": "ugv.zmq-command-diagnostic/1",
+          "sendAttempted": true,
+          "sendCompleted": true,
+          "sendTimeoutMs": 1000,
+          "validationCode": null,
+          "nativeErrorCode": null,
+          "receiveTimeoutMs": 2000,
+          "sendCompletedAfterMs": 0.106,
+          "receiveCompletedAfterMs": null
+        }
+      },
+      {
+        "action": "mode",
+        "createdAt": "2026-11-13T14:38:44.387Z",
+        "dispatchAt": "2026-11-13T14:38:44.395Z",
+        "completedAt": "2026-11-13T14:38:44.403Z",
+        "status": "sent_unconfirmed",
+        "diagnostic": {
+          "code": "ZMQ_PUBLISH_QUEUED_UNCONFIRMED",
+          "stage": "complete",
+          "response": null,
+          "elapsedMs": 0.09,
+          "schemaVersion": "ugv.zmq-command-diagnostic/1",
+          "sendAttempted": true,
+          "sendCompleted": true,
+          "sendTimeoutMs": 1000,
+          "validationCode": null,
+          "nativeErrorCode": null,
+          "receiveTimeoutMs": 2000,
+          "sendCompletedAfterMs": 0.086,
+          "receiveCompletedAfterMs": null
+        }
+      }
+    ]
+  },
+  "physicalControlActionsDuringInvestigation": 0
+}

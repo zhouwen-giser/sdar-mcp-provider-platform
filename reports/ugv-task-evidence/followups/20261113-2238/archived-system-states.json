@@ -1,0 +1,2078 @@
+{
+  "observedAt": "2026-11-13T14:42:06.621Z",
+  "sessionId": "41ed7fbf-7618-4182-b17a-aa46368d8343",
+  "window": [
+    "2026-11-13T14:38:30.000Z",
+    "2026-11-13T14:39:00.000Z"
+  ],
+  "grouped": {
+    "localization": {
+      "count": 480,
+      "invalid": 0,
+      "nonprojectable": 0,
+      "modes": {}
+    },
+    "failsafe": {
+      "count": 30,
+      "invalid": 0,
+      "nonprojectable": 0,
+      "modes": {}
+    },
+    "systemState": {
+      "count": 30,
+      "invalid": 0,
+      "nonprojectable": 0,
+      "modes": {
+        "0": 30
+      }
+    },
+    "performance": {
+      "count": 30,
+      "invalid": 0,
+      "nonprojectable": 0,
+      "modes": {}
+    }
+  },
+  "states": [
+    {
+      "ordinal": "684592",
+      "entry_hash": "6724bacf64e27eb5d3707a642d76150f97cae6634e253adcaa3d94fa83f8b4ac",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "34bbdd03-a5f0-490a-ada5-360d018c43c2",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:30.162Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482319935037192",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "684585"
+      }
+    },
+    {
+      "ordinal": "684624",
+      "entry_hash": "7fe21d69b01567d6320ef6410284469feaaba85f831b94b3cbc613e20a1f82b2",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "05d79f9f-d036-4aa0-974b-f7d38210e9b4",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:31.137Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482320909974217",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "684617"
+      }
+    },
+    {
+      "ordinal": "684651",
+      "entry_hash": "8182c19c7ba53745a13e52f6e1a0ea52673daaae4acb3ccefcfd7f190fd28d49",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "947003b0-be22-43f9-afb9-0e7760469307",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:32.137Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482321909829364",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "684644"
+      }
+    },
+    {
+      "ordinal": "684682",
+      "entry_hash": "e2271191ec2eba8cec3b0648ef33e29b9e6522778b4d816cd54a93bb966fc8c2",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "75f2d191-2bb9-4b46-b906-ef1c0fd0b826",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:33.136Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482322908773550",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "684675"
+      }
+    },
+    {
+      "ordinal": "684708",
+      "entry_hash": "0a3a934185b6db3231483bd814ec826a51eea9118d7af2c57591064a8eb757a2",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "48935320-cab3-4dde-b91e-0b1e00cbd6c8",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:34.136Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482323909274376",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "684701"
+      }
+    },
+    {
+      "ordinal": "684737",
+      "entry_hash": "86a7ee89a500bf8794c92c13eeed1aca3a1ae37a0b32e0f0c1d9afb0dd66406a",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "29fdb93c-0b83-4f95-8711-ce3f747f1582",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:35.158Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482324930525543",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "684730"
+      }
+    },
+    {
+      "ordinal": "684768",
+      "entry_hash": "5f46ed6e802e4b60fdf66ae289e32e93a6427099480bafb576c14cc24ceb7261",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "174225f3-a007-4669-8ae3-9335e15ff08d",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:36.135Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482325908379472",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "684761"
+      }
+    },
+    {
+      "ordinal": "684795",
+      "entry_hash": "ad0bb5624093eaad5934747ca3c0fcc9c979399827b3a1ae33a2e46c67021f90",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "5b749606-7f66-44f8-9db6-4ffe8665f0f6",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:37.135Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482326907683121",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "684788"
+      }
+    },
+    {
+      "ordinal": "684825",
+      "entry_hash": "b2c538640341ddd86d8d474b2b1e5bf428d60e4218330ffd1ef6a0a7a329db5e",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "b9b50f53-0887-4c66-acd0-a796a41b72ab",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:38.135Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482327907717839",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "684818"
+      }
+    },
+    {
+      "ordinal": "684853",
+      "entry_hash": "7994aa5532858facce0d66d5878e9995b3a95f39606d574a0871d93c66a34cdb",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "4e1d87bf-3f3f-4fb3-bf6d-1252dbdc5a90",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:39.134Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482328906989916",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "684846"
+      }
+    },
+    {
+      "ordinal": "684882",
+      "entry_hash": "3ece4641bdd29196214fe415ab280f5effc4a5102f18f24ea53fa3b1cda6b4b0",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "8101f82e-7af4-45a7-886f-eabfc852d0f5",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:40.148Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482329920795338",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "684875"
+      }
+    },
+    {
+      "ordinal": "684911",
+      "entry_hash": "298147ccb6fef22a18720537ddbaeff56f0dba5b9972a6802b87cc9714c02bd4",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "ccc29002-9bfb-44e8-a437-787d271e490b",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:41.134Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482330906657956",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "684904"
+      }
+    },
+    {
+      "ordinal": "684941",
+      "entry_hash": "e4d98dd65d0ca8a192cdae17df83a066b924c833396bd25bd0b9da836dffd9fb",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "c019d204-8f40-40d4-a3ff-19a70ca97571",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:42.133Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482331906090968",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "684934"
+      }
+    },
+    {
+      "ordinal": "684970",
+      "entry_hash": "652dbb06e027d6d2f9c172bd199be70665eeb350541e208b96a04238756ea101",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "1edd6522-613a-4bbe-9bfd-596ac937580a",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:43.133Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482332905795918",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "684963"
+      }
+    },
+    {
+      "ordinal": "684998",
+      "entry_hash": "354b1af7fc773b2e977437039393c82a3308b096c5765110d1b2d05de10602ab",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "b06bcc9e-575e-4c57-8f76-21792f943c5d",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:44.133Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482333905901019",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "684991"
+      }
+    },
+    {
+      "ordinal": "685028",
+      "entry_hash": "a6c48cb2e6a5d3550d9df996884c34b00719e3e23a6ad9a3761389d38a994572",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "2460599c-cd95-4883-8690-95cfde78d7de",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:45.150Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482334922971298",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "685021"
+      }
+    },
+    {
+      "ordinal": "685057",
+      "entry_hash": "ad2cd90dff4db4d387ffe2d17929acbabb7c1801a447e68f3b091c97188beb81",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "950a8d81-eaa6-48da-af01-4d20c13a3f1f",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:46.133Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482335905584323",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "685050"
+      }
+    },
+    {
+      "ordinal": "685084",
+      "entry_hash": "930dc9a57589fda8fe528bf1b9f35c2e43ca113c9063c7e0adcfe4f413906738",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "e729b630-c74f-4167-b337-78c656040d67",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:47.132Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482336904699728",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "685077"
+      }
+    },
+    {
+      "ordinal": "685116",
+      "entry_hash": "d7783e09c2d41cdac849f921196f8b12efdbc553e5e42f2ee1b89d2b78fb42a2",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "384a2b44-0841-43b0-a28d-27987907eb18",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:48.132Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482337904883728",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "685109"
+      }
+    },
+    {
+      "ordinal": "685145",
+      "entry_hash": "26804584b4432bc64635a7a7566d8108fc3c1a33205338ce9b70fd37d5ea6db8",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "2befdb9e-b5d9-4798-afb0-9f0d3d7ba03b",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:49.132Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482338905129645",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "685138"
+      }
+    },
+    {
+      "ordinal": "685174",
+      "entry_hash": "7048ebee4fdf0ff92bf7ca18d8f811dcf4584c1c08a6e642f009887a69c1625b",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "25483120-0791-4a0c-a65d-fea7d7662d68",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:50.162Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482339935150403",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "685167"
+      }
+    },
+    {
+      "ordinal": "685203",
+      "entry_hash": "aea62b7b66f52d1c812505dd69565a5ccb197320e579c9c3b5bc31def42fd0b7",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "e91e9ec9-2031-4b98-a521-c85dddc20217",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:51.131Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482340904258195",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "685196"
+      }
+    },
+    {
+      "ordinal": "685231",
+      "entry_hash": "e4fa830937bb386ae035f478068aae3d82ce5069fe0cf1e34d14f73e522cceb8",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "b32a88c6-68e6-4a55-ab3f-b04c98625ac1",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:52.130Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482341903261474",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "685224"
+      }
+    },
+    {
+      "ordinal": "685262",
+      "entry_hash": "63bc7c79f43c731e7249d2e9df43686145257bcc9768a12de25730c8806e987c",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "fd4c99b2-f1c4-46f9-93b8-7ab2d7adf371",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:53.130Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482342903238460",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "685255"
+      }
+    },
+    {
+      "ordinal": "685291",
+      "entry_hash": "a468d9144850525838876ae2cf360ac0f47743be2e33afc528ce139189b89c44",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "81dffcbd-b806-47bc-90bf-80e0e2595d28",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:54.130Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482343902744394",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "685284"
+      }
+    },
+    {
+      "ordinal": "685320",
+      "entry_hash": "7c9628d4b521f4bf689f1266b6d659867ae186f2364e394de1d9e7db42627583",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "20541783-e176-4fb8-b97d-188c8e0e0fda",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:55.149Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482344921652384",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "685313"
+      }
+    },
+    {
+      "ordinal": "685349",
+      "entry_hash": "148630acaf4d50d98418d7c66b4ee4c4349d93bbceba0d8a2a8fae486a6aac1e",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "ec88445c-3ffa-4656-b872-841ba89d9693",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:56.129Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482345901906562",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "685342"
+      }
+    },
+    {
+      "ordinal": "685377",
+      "entry_hash": "b734ba862335433e2b845da331897d6aeac4741750b26e430cad8d7d3dae1c01",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "3d481999-0d1c-4f43-85ad-e065a2c55898",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:57.129Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482346901882152",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "685370"
+      }
+    },
+    {
+      "ordinal": "685404",
+      "entry_hash": "cd9e7bb550542e1449c108979a1a72cc60bc6d1ecb96b30518dfa202b64eca71",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "dd07024c-7c3b-4ce2-a925-59bb25d40bb4",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:58.130Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482347903011366",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "685397"
+      }
+    },
+    {
+      "ordinal": "685432",
+      "entry_hash": "a5546649242cd8c4a88160b518b9edb46f0f9d6383ded89d41ed67cdc05bd1d8",
+      "payload": {
+        "type": "reception",
+        "valid": true,
+        "frames": [
+          {
+            "bytes": 56,
+            "base64": "aXBjX21lc3NhZ2U6AQAAEAEAAAAAAAAAAAAAAAAAAAAQADU3EAAAAAEAVVUFQQAAAAAAAAAAAAA=",
+            "sha256": "561222cade8d3fc9108e251b7409554ce190395c6b94711f809f556357c296d7"
+          }
+        ],
+        "clockId": "zmq-receiver:9962a118-a84b-4374-93e0-baeff69d16d1",
+        "eventId": "5c9ae61b-7376-4090-a2cf-98a4afe11374",
+        "endpoint": "tcp://192.168.2.63:11001",
+        "component": "chassis",
+        "wireBytes": 56,
+        "frameCount": 1,
+        "receivedAt": "2026-11-13T14:38:59.128Z",
+        "diagnostics": [
+          "SOURCE_CONTINUITY_UNVERIFIED",
+          "SOURCE_PRODUCER_EPOCH_UNATTESTED",
+          "CHASSIS_PREFIX_BUSINESS_LENGTH_CRC_COMPATIBILITY",
+          "REPEATED_WIRE_BYTES",
+          "SOURCE_TIME_NOT_SUPPLIED"
+        ],
+        "monotonicNs": "12482348901373208",
+        "observation": {
+          "key": "systemState",
+          "data": {
+            "mode": 0,
+            "type": "systemState",
+            "runState": 1,
+            "errorCodes": [],
+            "videoConfig": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "speedLimitMetresPerSecond": 8.333333015441895
+          },
+          "deviceId": "1",
+          "position": null,
+          "sourceTime": {
+            "unit": "not_supplied",
+            "value": null
+          },
+          "nativeTaskId": null,
+          "runtimeTaskId": null,
+          "reportedOrigin": "unattested",
+          "nativeRequestId": null,
+          "protocolVersion": "2.1-site-rx/1",
+          "versionEvidence": "selected_contract_not_in_band",
+          "acquisitionUtcMs": null,
+          "sourceProducerEpoch": null
+        },
+        "projectable": true,
+        "rawComplete": true,
+        "schemaVersion": "ugv.zmq-observation-event/2.0",
+        "validationCode": null,
+        "multipartSha256": "486b0056a145b99e81aa3b91470e9a4fa1fdb8489c886c6b87d427b16983a523",
+        "receiveSequence": "685425"
+      }
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+[
+  {
+    "command": [
+      "pnpm",
+      "exec",
+      "tsx",
+      "/home/sz/.smpp-debug/zmq-mode-gate-20261113/inspect-tasks.mts"
+    ],
+    "exitCode": 0,
+    "purpose": "Existing task/state/ledger query; no dispatch"
+  },
+  {
+    "command": [
+      "node",
+      "/home/sz/.smpp-debug/zmq-mode-gate-20261113/read-records.mjs"
+    ],
+    "exitCode": 0,
+    "purpose": "READ ONLY command/audit query"
+  },
+  {
+    "command": [
+      "pnpm",
+      "exec",
+      "tsx",
+      "/home/sz/.smpp-debug/zmq-mode-gate-20261113/archive-window.mts"
+    ],
+    "exitCode": 0,
+    "purpose": "Bounded READ ONLY archive window"
+  },
+  {
+    "command": [
+      "node",
+      "/home/sz/.smpp-debug/zmq-mode-gate-20261113/subscription-probe.mjs"
+    ],
+    "exitCode": 0,
+    "applicationFramesSent": 0
+  },
+  {
+    "command": [
+      "ss",
+      "-tin",
+      "dst",
+      "192.168.2.63:10001"
+    ],
+    "exitCode": 0,
+    "output": "command-tcp.txt"
+  }
+]

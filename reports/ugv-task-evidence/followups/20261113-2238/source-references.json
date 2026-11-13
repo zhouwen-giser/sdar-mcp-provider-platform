@@ -1,0 +1,49 @@
+{
+  "at": "2026-11-13T14:52:35.307034+00:00",
+  "files": [
+    {
+      "path": "/home/sz/.codex/worktrees/trajectory-history-authority/sdar-mcp-provider-platform/packages/vehicle-zmq-control/src/engine.ts",
+      "sha256": "f4de1ca035169cd8f885e3d0d1f5e6bf3e4331ee1702e46559562c86ef9ee35a",
+      "lines": [
+        1446,
+        1454
+      ],
+      "repositoryRevision": "e08c56df19d2f1640c18c78d87fc96b04691fad1"
+    },
+    {
+      "path": "/home/sz/code/isr-simulation/doc/zmq/自驾ZMQ对接协议.md",
+      "sha256": "802612d4697e234ee4644248ea781ff8453a9691c3a4375d04ca783c8f47b953",
+      "lines": [
+        105,
+        116,
+        215,
+        217
+      ],
+      "repositoryRevision": "a0be6a51e17fb9e85bc4ba0b62f7157a1b77c82e"
+    },
+    {
+      "path": "/home/sz/code/isr-simulation/ros_ws/src/ros2_zmq_server_sl/src/chassis/controller.cpp",
+      "sha256": "6cfe4965a0ff4137ef50dd41a1f3731f0c42508cce28dc141406772ed3144ab4",
+      "lines": [
+        150,
+        162,
+        234,
+        239
+      ],
+      "repositoryRevision": "a0be6a51e17fb9e85bc4ba0b62f7157a1b77c82e"
+    },
+    {
+      "path": "/home/sz/code/isr-simulation/ros_ws/src/ros2_zmq_server_sl/src/protocol.cpp",
+      "sha256": "5cfd3429cec2977bbfc897a08b5c29a0b9c53c2efca2565f9eb14520580021b7",
+      "lines": [
+        305,
+        351
+      ],
+      "repositoryRevision": "a0be6a51e17fb9e85bc4ba0b62f7157a1b77c82e"
+    }
+  ],
+  "applicationCodeChanged": false,
+  "servicesRecreated": false,
+  "upstreamModified": false,
+  "automaticProtocolFallback": false
+}
