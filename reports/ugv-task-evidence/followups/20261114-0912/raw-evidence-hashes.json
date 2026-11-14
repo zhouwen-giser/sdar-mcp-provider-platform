@@ -1,0 +1,80 @@
+{
+  "at": "2026-11-14T01:15:27.509730+00:00",
+  "files": [
+    {
+      "path": "/home/sz/.smpp-debug/zmq-navigation-test-20261114/audit-attempt1.log",
+      "bytes": 738,
+      "sha256": "9f48186ff9d5480c7e66ad7b84cd330973b35f9172ff1c2b6a0962cc3a14f513"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-navigation-test-20261114/audit.log",
+      "bytes": 573,
+      "sha256": "2f7979eef99d793da63f6c22f85c06c98cb8c6cb251cacd2ec2dd11872949b3a"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-navigation-test-20261114/before-adoption.png",
+      "bytes": 568215,
+      "sha256": "5d616f03fbff342329dd0dbccf78c035bf0d739f22492e52aaf517f83439bfad"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-navigation-test-20261114/inspect-after.mts",
+      "bytes": 2780,
+      "sha256": "28614012cfe948b2db55dd9125ad8ff4d2918621ab8ca82aa685f4886e65faab"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-navigation-test-20261114/inspection-after.log",
+      "bytes": 3365,
+      "sha256": "ee527e71dcc934a673b81787fb06163ba1f6c96ab3420a13e5ed87989a8b3f5d"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-navigation-test-20261114/inspection-before.json",
+      "bytes": 28919,
+      "sha256": "35d16b66dabdabdd1debb264a85c9c6bb110f3065953fca2f9187ad3f810b930"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-navigation-test-20261114/navigation-audit.json",
+      "bytes": 734,
+      "sha256": "70d6b60b327713c97add8aeb091ade3ce0ef982b380bcdd9624de38bd31b8e36"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-navigation-test-20261114/navigation-result.png",
+      "bytes": 162563,
+      "sha256": "c4ecf785336277b24e69834d9b245b3482d07a53820f569fe6b11d76de9fe409"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-navigation-test-20261114/navigation-test.json",
+      "bytes": 822660,
+      "sha256": "c7904ebff68e852a625ddb169ac7ed0942ed4fbcc6b4e6e169e0b504305a6b0a"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-navigation-test-20261114/navigation-test.log",
+      "bytes": 2829,
+      "sha256": "bc3058701d8a0a28fefcfb605d204417675b76796a1438be61db8e53e5c26605"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-navigation-test-20261114/navigation-test.mjs",
+      "bytes": 7321,
+      "sha256": "1b3ceb2d1934f4f59643bd02b1e545a9dddb9e0da12138b32ce88323601f06c8"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-navigation-test-20261114/preflight.log",
+      "bytes": 2678,
+      "sha256": "6bdf9088f8c71bf336232a4b1007fdfb25efce00feef273afbfab2a75497963c"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-navigation-test-20261114/preflight.mts",
+      "bytes": 3614,
+      "sha256": "5c4308d80e07a9c3ddf7b0543ffd9a553ea910e92303b4cbd66dfaf4dd76521c"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-navigation-test-20261114/read-audit.mjs",
+      "bytes": 1462,
+      "sha256": "bd173e445ab8fd41fda63297252d3f02ff3a891fd2c11771bea0e4cd6f88df67"
+    },
+    {
+      "path": "/home/sz/.smpp-debug/zmq-navigation-test-20261114/tasks.json",
+      "bytes": 31056,
+      "sha256": "b8ae0480a44e111e399f395226beacf5451d79df2cd11e1da932b6b5d16a8d33"
+    }
+  ]
+}

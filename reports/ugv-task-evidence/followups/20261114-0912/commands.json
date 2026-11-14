@@ -1,0 +1,41 @@
+[
+  {
+    "command": [
+      "pnpm",
+      "exec",
+      "tsx",
+      "/home/sz/.smpp-debug/zmq-navigation-test-20261114/preflight.mts"
+    ],
+    "exitCode": 0,
+    "actions": "read only"
+  },
+  {
+    "command": [
+      "node",
+      "/home/sz/.smpp-debug/zmq-navigation-test-20261114/navigation-test.mjs"
+    ],
+    "exitCode": 0,
+    "actions": "one preview and one new adopted navigation task",
+    "businessOutcome": "business_failure",
+    "reasonCode": "ZMQ_MODE_ECHO_TIMEOUT"
+  },
+  {
+    "command": [
+      "pnpm",
+      "exec",
+      "tsx",
+      "/home/sz/.smpp-debug/zmq-navigation-test-20261114/inspect-after.mts"
+    ],
+    "exitCode": 0,
+    "actions": "read only"
+  },
+  {
+    "command": [
+      "node",
+      "/home/sz/.smpp-debug/zmq-navigation-test-20261114/read-audit.mjs"
+    ],
+    "exitCode": 0,
+    "actions": "read only",
+    "initialAttempt": "failed before DB access because copied script referenced absent local env; corrected to canonical env and rerun read only"
+  }
+]

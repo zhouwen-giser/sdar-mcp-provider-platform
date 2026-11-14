@@ -1,0 +1,79 @@
+{
+  "samples": [
+    {
+      "at": "2026-11-14T01:12:34.322Z",
+      "receivedAt": "2026-11-14T01:12:34.063Z",
+      "receiptFresh": true,
+      "position": {
+        "longitude": 114.04776722767852,
+        "latitude": 22.505954788642917,
+        "altitude": 500.1532380701974,
+        "altitudeDatum": "unconfirmed",
+        "crs": "OGC:CRS84"
+      },
+      "velocityEnu": [
+        0,
+        0,
+        0
+      ],
+      "archive": "running"
+    },
+    {
+      "at": "2026-11-14T01:12:36.161Z",
+      "receivedAt": "2026-11-14T01:12:35.322Z",
+      "receiptFresh": true,
+      "position": {
+        "longitude": 114.04776722767852,
+        "latitude": 22.505954788642917,
+        "altitude": 500.1532380701974,
+        "altitudeDatum": "unconfirmed",
+        "crs": "OGC:CRS84"
+      },
+      "velocityEnu": [
+        0,
+        0,
+        0
+      ],
+      "archive": "running"
+    },
+    {
+      "at": "2026-11-14T01:12:41.341Z",
+      "receivedAt": "2026-11-14T01:12:41.214Z",
+      "receiptFresh": true,
+      "position": {
+        "longitude": 114.04776722767852,
+        "latitude": 22.505954788642917,
+        "altitude": 500.1532380701974,
+        "altitudeDatum": "unconfirmed",
+        "crs": "OGC:CRS84"
+      },
+      "velocityEnu": [
+        0,
+        0,
+        0
+      ],
+      "archive": "running"
+    },
+    {
+      "at": "2026-11-14T01:12:46.695Z",
+      "receivedAt": "2026-11-14T01:12:46.637Z",
+      "receiptFresh": true,
+      "position": {
+        "longitude": 114.04776722767852,
+        "latitude": 22.505954788642917,
+        "altitude": 500.1532380701974,
+        "altitudeDatum": "unconfirmed",
+        "crs": "OGC:CRS84"
+      },
+      "velocityEnu": [
+        0,
+        0,
+        0
+      ],
+      "archive": "running"
+    }
+  ],
+  "allSampledPositionsUnchanged": true,
+  "allSampledVelocitiesZero": true,
+  "observedDisplacementMetres": 0
+}

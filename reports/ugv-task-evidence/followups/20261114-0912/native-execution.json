@@ -1,0 +1,158 @@
+{
+  "taskId": "d1204c9e-90b6-4ac4-bc84-2d31ce62830c",
+  "state": "BUSINESS_FAILED",
+  "reasonCode": "ZMQ_MODE_ECHO_TIMEOUT",
+  "revision": 11,
+  "stage": "terminal",
+  "occupancy": "released",
+  "commands": [
+    {
+      "action": "mode",
+      "frames": [
+        "YWRfcmVtb3RlX2NvbW1hbmQ6AQAAAAAAAAAAAAAAAQAAAAAAAAAIAOdIBAAAAAEAAAA="
+      ],
+      "method": "chassis.mode",
+      "status": "sent_unconfirmed",
+      "stepId": "zmq-mode-ff1af5f4-db4c-418e-b443-fb3126747511",
+      "response": null,
+      "component": "chassis",
+      "createdAt": "2026-11-14T01:12:36.040Z",
+      "requestId": null,
+      "diagnostic": {
+        "code": "ZMQ_PUBLISH_QUEUED_UNCONFIRMED",
+        "stage": "complete",
+        "response": null,
+        "elapsedMs": 0.127,
+        "schemaVersion": "ugv.zmq-command-diagnostic/1",
+        "sendAttempted": true,
+        "sendCompleted": true,
+        "sendTimeoutMs": 1000,
+        "validationCode": null,
+        "nativeErrorCode": null,
+        "receiveTimeoutMs": 2000,
+        "sendCompletedAfterMs": 0.119,
+        "receiveCompletedAfterMs": null
+      },
+      "dispatchAt": "2026-11-14T01:12:36.050Z",
+      "generation": 0,
+      "completedAt": "2026-11-14T01:12:36.058Z"
+    },
+    {
+      "action": "mode",
+      "frames": [
+        "YWRfcmVtb3RlX2NvbW1hbmQ6AQAAAAAAAAAAAAAAAQAAAAAAAAAIAOdIBAAAAAEAAAA="
+      ],
+      "method": "chassis.mode",
+      "status": "sent_unconfirmed",
+      "stepId": "zmq-mode-548efa69-ae47-4488-a375-a974c2d7b9aa",
+      "response": null,
+      "component": "chassis",
+      "createdAt": "2026-11-14T01:12:39.048Z",
+      "requestId": null,
+      "diagnostic": {
+        "code": "ZMQ_PUBLISH_QUEUED_UNCONFIRMED",
+        "stage": "complete",
+        "response": null,
+        "elapsedMs": 0.107,
+        "schemaVersion": "ugv.zmq-command-diagnostic/1",
+        "sendAttempted": true,
+        "sendCompleted": true,
+        "sendTimeoutMs": 1000,
+        "validationCode": null,
+        "nativeErrorCode": null,
+        "receiveTimeoutMs": 2000,
+        "sendCompletedAfterMs": 0.095,
+        "receiveCompletedAfterMs": null
+      },
+      "dispatchAt": "2026-11-14T01:12:39.073Z",
+      "generation": 0,
+      "completedAt": "2026-11-14T01:12:39.080Z"
+    },
+    {
+      "action": "mode",
+      "frames": [
+        "YWRfcmVtb3RlX2NvbW1hbmQ6AQAAAAAAAAAAAAAAAQAAAAAAAAAIAOdIBAAAAAEAAAA="
+      ],
+      "method": "chassis.mode",
+      "status": "sent_unconfirmed",
+      "stepId": "zmq-mode-b02645b3-bd74-42a3-bc7c-3c9b48f2cc0d",
+      "response": null,
+      "component": "chassis",
+      "createdAt": "2026-11-14T01:12:42.063Z",
+      "requestId": null,
+      "diagnostic": {
+        "code": "ZMQ_PUBLISH_QUEUED_UNCONFIRMED",
+        "stage": "complete",
+        "response": null,
+        "elapsedMs": 0.098,
+        "schemaVersion": "ugv.zmq-command-diagnostic/1",
+        "sendAttempted": true,
+        "sendCompleted": true,
+        "sendTimeoutMs": 1000,
+        "validationCode": null,
+        "nativeErrorCode": null,
+        "receiveTimeoutMs": 2000,
+        "sendCompletedAfterMs": 0.093,
+        "receiveCompletedAfterMs": null
+      },
+      "dispatchAt": "2026-11-14T01:12:42.072Z",
+      "generation": 0,
+      "completedAt": "2026-11-14T01:12:42.080Z"
+    }
+  ],
+  "pathOrStartDispatched": false,
+  "postTestChassis": {
+    "accepted_feedback_sent": false,
+    "action_request_id": "",
+    "available": true,
+    "avoid_obstacles": false,
+    "cancel_pending": false,
+    "controller_instance_id": "2251915442:1090047516",
+    "entity_id": "ugv",
+    "entity_type": "ugv",
+    "error": "",
+    "executing": false,
+    "fault_mask": 0,
+    "faults_fresh": true,
+    "feedback_pending": false,
+    "has_task": false,
+    "header": {
+      "frame_id": "map",
+      "stamp": {
+        "nanosec": 358781018,
+        "sec": 63481
+      }
+    },
+    "mission_state": 0,
+    "mission_type": 0,
+    "mode": 0,
+    "observation_fresh": true,
+    "planning": false,
+    "progress": 0,
+    "run_state": 1,
+    "sequence": "629936",
+    "settings_fresh": true,
+    "simulation_epoch": "1794555793256633993",
+    "speed_limit_mps": 8.333333015441895,
+    "starting": false,
+    "system_id": "1",
+    "task_current": false,
+    "task_id": 0,
+    "task_identity": "",
+    "task_message_id": 0,
+    "task_owner": "0",
+    "task_simulation_epoch": "0"
+  },
+  "archive": {
+    "status": "running",
+    "pendingRecords": 0,
+    "pendingBytes": 0,
+    "committedEvents": 1814429,
+    "receivedMessages": 1814422,
+    "committedReceptions": 1814422,
+    "unconfirmedReceptions": 0,
+    "locallyDiscardedMessages": 0,
+    "failureCode": null,
+    "failureRecorded": null
+  }
+}

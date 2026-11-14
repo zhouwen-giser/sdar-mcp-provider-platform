@@ -1,0 +1,111 @@
+{
+  "at": "2026-11-14T01:10:34.777Z",
+  "availability": {
+    "resultType": "complete",
+    "profileVersion": "1.0",
+    "results": [
+      {
+        "requestId": "navigation-stale-investigation",
+        "operationName": "vehicle_zmq_navigate",
+        "availability": "available",
+        "riskLevel": "medium",
+        "reasonCode": "ZMQ_SITE_OPERATION_READY",
+        "description": "ZMQ_SITE_OPERATION_READY",
+        "validUntil": "2026-11-14T01:10:35.587Z",
+        "nextAvailableWindows": [],
+        "estimatedDelayMs": 0,
+        "reservationMode": "none",
+        "possibleEffects": []
+      }
+    ]
+  },
+  "archive": {
+    "status": "running",
+    "pendingRecords": 0,
+    "pendingBytes": 0,
+    "committedEvents": 1809548,
+    "receivedMessages": 1809541,
+    "committedReceptions": 1809541,
+    "unconfirmedReceptions": 0,
+    "locallyDiscardedMessages": 0,
+    "failureCode": null,
+    "failureRecorded": null
+  },
+  "chassis": {
+    "accepted_feedback_sent": false,
+    "action_request_id": "",
+    "available": true,
+    "avoid_obstacles": false,
+    "cancel_pending": false,
+    "controller_instance_id": "2251915442:1090047516",
+    "entity_id": "ugv",
+    "entity_type": "ugv",
+    "error": "",
+    "executing": false,
+    "fault_mask": 0,
+    "faults_fresh": true,
+    "feedback_pending": false,
+    "has_task": false,
+    "header": {
+      "frame_id": "map",
+      "stamp": {
+        "nanosec": 892252736,
+        "sec": 63315
+      }
+    },
+    "mission_state": 0,
+    "mission_type": 0,
+    "mode": 0,
+    "observation_fresh": true,
+    "planning": false,
+    "progress": 0,
+    "run_state": 1,
+    "sequence": "628282",
+    "settings_fresh": true,
+    "simulation_epoch": "1794555793256633993",
+    "speed_limit_mps": 8.333333015441895,
+    "starting": false,
+    "system_id": "1",
+    "task_current": false,
+    "task_id": 0,
+    "task_identity": "",
+    "task_message_id": 0,
+    "task_owner": "0",
+    "task_simulation_epoch": "0"
+  },
+  "independentLocalization": [
+    {
+      "receivedAt": "2026-11-14T01:10:34.694Z",
+      "timeUs": "63316030500",
+      "longitude": 114.04776722767852,
+      "latitude": 22.505954788642917,
+      "velocityEnu": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "receivedAt": "2026-11-14T01:10:34.716Z",
+      "timeUs": "63316089994",
+      "longitude": 114.04776722767852,
+      "latitude": 22.505954788642917,
+      "velocityEnu": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "receivedAt": "2026-11-14T01:10:34.777Z",
+      "timeUs": "63316129344",
+      "longitude": 114.04776722767852,
+      "latitude": 22.505954788642917,
+      "velocityEnu": [
+        0,
+        0,
+        0
+      ]
+    }
+  ]
+}
